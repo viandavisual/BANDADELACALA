@@ -7,6 +7,7 @@
     'banda-de-la-cala-content-v1'
   ];
   const CHANNEL = 'banda-de-la-cala-content';
+  const REMOTE_CACHE_KEY = 'banda-de-la-cala-remote-cache-v1';
   const clone = value => JSON.parse(JSON.stringify(value));
   const uid = prefix => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
   const defaults = () => clone(window.BANDA_PUBLISHED_CONTENT || {version:4,events:[],tracks:[],dresscodes:[],historicItems:[],settings:{}});
@@ -84,7 +85,15 @@
 
   function load(){ return readLocal() || normalize(defaults()); }
   function loadPublished(){ return normalize(defaults()); }
-  function loadApp(){ return isLocalPreview() ? load() : loadPublished(); }
+  function loadRemoteCache(){
+    try{ const raw=localStorage.getItem(REMOTE_CACHE_KEY); return raw ? normalize(JSON.parse(raw)) : null; }catch(error){ return null; }
+  }
+  function cacheRemote(content){
+    const clean=normalize(content);
+    try{ localStorage.setItem(REMOTE_CACHE_KEY,JSON.stringify(clean)); }catch(error){}
+    return clean;
+  }
+  function loadApp(){ return isLocalPreview() ? load() : (loadRemoteCache() || loadPublished()); }
 
   async function fetchPublished(){
     if(isLocalPreview()) return loadApp();
@@ -148,6 +157,8 @@
     key: KEY,
     load,
     loadPublished,
+    loadRemoteCache,
+    cacheRemote,
     loadApp,
     fetchPublished,
     isLocalPreview,

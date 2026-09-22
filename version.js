@@ -1,1 +1,1 @@
-globalThis.BANDA_VERSION = 'v0.14';
+globalThis.BANDA_VERSION = 'v0.15';

@@ -1,0 +1,19 @@
+BANDA DE LA CALA · v0.15 · PRIMERA CONFIGURACIÓ SUPABASE
+
+1) Supabase > SQL Editor > New query.
+2) Copia tot el contingut de SUPABASE_SETUP.sql i prem RUN.
+3) Supabase > Authentication > Users > Add user.
+   Crea o convida el teu email i defineix una contrasenya.
+4) Publica el PATCH v0.14 -> v0.15 a GitHub Pages.
+5) Obre editor.html i inicia sessió.
+6) Si ja tens dades configurades en aquest navegador, entra a SISTEMA i prem
+   "MIGRAR DADES LOCALS A SUPABASE". Les imatges locals incrustades es pujaran
+   automàticament a Storage abans de publicar les dades.
+7) A partir d'aquí, DESAR al EDITOR escriu directament a Supabase i la resta de
+   dispositius rep el mateix contingut. GitHub només s'ha de tocar quan canviï
+   el software de la APP/EDITOR.
+
+IMPORTANT:
+- No posis mai cap Secret Key / sb_secret_... dins dels fitxers web.
+- La Publishable Key inclosa a config.js és la clau pública de client i queda
+  protegida funcionalment per les polítiques RLS del projecte.

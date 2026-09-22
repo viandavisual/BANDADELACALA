@@ -3,7 +3,12 @@ const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
 const esc = value => String(value ?? '').replace(/[&<>'"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':'&quot;'}[char]));
 
-let content = BandaStore.load();
+const legacyLocalContent = BandaStore.load();
+let content = BandaStore.loadRemoteCache?.() || BandaStore.loadPublished();
+let supabaseActive = false;
+let migrationPending = false;
+let currentSession = null;
+let remoteSaveChain = Promise.resolve();
 let draggedTrackId = null;
 let toastTimer = null;
 let audioLibrary = [];
@@ -51,9 +56,40 @@ function showToast(message){
   const toast=$('#toast'); toast.textContent=message; toast.classList.add('show');
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove('show'),2800);
 }
-function markSaved(){ $('#saveState').textContent='PENDENT DE PUBLICAR'; clearTimeout(markSaved.timer); }
-function save(next=content,message='Canvis desats'){ try{ content=BandaStore.save(next); renderAll(); markSaved(); if(message) showToast(message); return true; }catch(error){ if(error?.message==='STORAGE_QUOTA') showToast('No hi ha prou espai local. Redueix el nombre/mida de fotos o publica i connecta Supabase.'); else showToast('No s’han pogut desar els canvis'); return false; } }
-function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.11'); }
+function markSaved(text='DESAT A SUPABASE'){ $('#saveState').textContent=text; clearTimeout(markSaved.timer); }
+function save(next=content,message='Canvis desats'){
+  try{
+    content=BandaStore.normalize(next);
+    renderAll();
+    if(supabaseActive && currentSession){
+      const snapshot=BandaStore.normalize(content);
+      BandaStore.cacheRemote?.(snapshot);
+      markSaved('DESANT A SUPABASE…');
+      remoteSaveChain=remoteSaveChain.then(()=>BandaSupabase.saveContent(snapshot)).then(clean=>{
+        content=BandaStore.normalize(clean);
+        BandaStore.cacheRemote?.(content);
+        renderAll();
+        markSaved('DESAT A SUPABASE');
+        if(message) showToast(message);
+      }).catch(error=>{
+        console.error(error);
+        markSaved('ERROR DE SINCRONITZACIÓ');
+        showToast('No s’ha pogut desar a Supabase');
+      });
+      return true;
+    }
+    content=BandaStore.save(content);
+    migrationPending=true;
+    markSaved('CAL MIGRAR A SUPABASE');
+    if(message) showToast(`${message} · pendent de migrar`);
+    return true;
+  }catch(error){
+    if(error?.message==='STORAGE_QUOTA') showToast('No hi ha prou espai local. Migra les dades a Supabase.');
+    else showToast('No s’han pogut desar els canvis');
+    return false;
+  }
+}
+function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.15'); }
 function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
@@ -77,7 +113,20 @@ async function compressImage(file){
   canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height); return canvas.toDataURL('image/jpeg',0.84);
 }
 function bindHomeEditor(){
-  $('#homeHeroFile').addEventListener('change',async event=>{ const file=event.target.files?.[0]; if(!file) return; try{ const compressed=await compressImage(file); content.settings=content.settings||{}; content.settings.homeHeroImage=compressed; save(content,'Imatge de HOME actualitzada'); }catch(error){showToast('No s’ha pogut processar la imatge');} event.target.value=''; });
+  $('#homeHeroFile').addEventListener('change',async event=>{
+    const file=event.target.files?.[0]; if(!file) return;
+    try{
+      const compressed=await compressImage(file);
+      let imageSrc=compressed;
+      if(supabaseActive && currentSession){
+        showToast('Pujant imatge de HOME…');
+        imageSrc=(await BandaSupabase.uploadDataUrl('app-images',compressed,'home','home-hero')).url;
+      }
+      content.settings=content.settings||{}; content.settings.homeHeroImage=imageSrc;
+      save(content,'Imatge de HOME actualitzada');
+    }catch(error){ console.error(error); showToast('No s’ha pogut processar o pujar la imatge'); }
+    event.target.value='';
+  });
   $('#clearHomeHero').onclick=()=>{ content.settings=content.settings||{}; content.settings.homeHeroImage=''; save(content,'Imatge per defecte restaurada'); };
 }
 
@@ -184,12 +233,14 @@ function renderTracks(){ const list=content.tracks||[]; $('#trackCountEditor').t
 function bindTrackForm(){ $('#trackForm').addEventListener('submit',event=>{event.preventDefault();const id=$('#trackId').value||BandaStore.uid('trk');const item={id,title:$('#trackTitle').value.trim(),meta:$('#trackMeta').value.trim(),src:$('#trackSrc').value.trim(),visible:$('#trackVisible').checked};if(!item.title||!item.src){showToast('Cal indicar títol i ruta/URL');return;}const index=content.tracks.findIndex(t=>t.id===id);if(index>=0)content.tracks[index]=item;else content.tracks.push(item);save(content,index>=0?'Pista actualitzada':'Pista afegida');resetTrackForm();}); $('#newTrackBtn').onclick=resetTrackForm; $('#cancelTrackEdit').onclick=resetTrackForm; $('#trackSrc').addEventListener('change',updateTrackPreview); }
 
 function renderAudioLibrary(files=audioLibrary){
-  audioLibrary=[...new Set(files)].filter(name=>/\.(mp3|wav|m4a|ogg)$/i.test(name)).sort((a,b)=>a.localeCompare(b,'ca',{numeric:true}));
+  audioLibrary=(files||[]).map(item=>typeof item==='string'?{name:item,url:`assets/AUDIO/${item}`,source:'GITHUB'}:item)
+    .filter(item=>item?.name && /\.(mp3|wav|m4a|ogg)$/i.test(item.name))
+    .sort((a,b)=>a.name.localeCompare(b.name,'ca',{numeric:true}));
   const select=$('#audioLibrarySelect');
   const current=select.value;
-  select.innerHTML='<option value="">— Selecciona un àudio de assets/AUDIO —</option>'+audioLibrary.map(name=>`<option value="assets/AUDIO/${esc(name)}">${esc(name)}</option>`).join('');
+  select.innerHTML='<option value="">— Selecciona un àudio disponible —</option>'+audioLibrary.map(item=>`<option value="${esc(item.url)}">${esc(item.name)} · ${esc(item.source||'')}</option>`).join('');
   if([...select.options].some(o=>o.value===current)) select.value=current;
-  $('#audioFolderStatus').textContent=`${audioLibrary.length} fitxer${audioLibrary.length===1?'':'s'} publicat${audioLibrary.length===1?'':'s'}`;
+  $('#audioFolderStatus').textContent=`${audioLibrary.length} fitxer${audioLibrary.length===1?'':'s'} disponible${audioLibrary.length===1?'':'s'}`;
 }
 
 function resolveGitHubRepository(){
@@ -205,14 +256,15 @@ function resolveGitHubRepository(){
 
 async function fetchGitHubAudioFiles(){
   const gh=resolveGitHubRepository();
-  if(!gh) throw new Error('NOT_GITHUB_PAGES');
+  if(!gh) return [];
   const branch=gh.branch?`?ref=${encodeURIComponent(gh.branch)}`:'';
   const url=`https://api.github.com/repos/${encodeURIComponent(gh.owner)}/${encodeURIComponent(gh.repo)}/contents/assets/AUDIO${branch}`;
   const response=await fetch(url,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
-  if(!response.ok) throw new Error(`GITHUB_${response.status}`);
+  if(!response.ok) return [];
   const entries=await response.json();
-  if(!Array.isArray(entries)) throw new Error('INVALID_GITHUB_RESPONSE');
-  return entries.filter(item=>item&&item.type==='file'&&/\.(mp3|wav|m4a|ogg)$/i.test(item.name||'')).map(item=>item.name);
+  if(!Array.isArray(entries)) return [];
+  return entries.filter(item=>item&&item.type==='file'&&/\.(mp3|wav|m4a|ogg)$/i.test(item.name||''))
+    .map(item=>({name:item.name,url:`assets/AUDIO/${item.name}`,source:'GITHUB'}));
 }
 
 async function refreshAudioDirectory(){
@@ -220,24 +272,18 @@ async function refreshAudioDirectory(){
   status.textContent='Actualitzant…';
   $('#refreshAudioFolder').disabled=true;
   try{
-    const names=await fetchGitHubAudioFiles();
-    renderAudioLibrary(names);
-    showToast(`${names.length} àudio${names.length===1?'':'s'} detectat${names.length===1?'':'s'} a assets/AUDIO`);
+    const [remote,github]=await Promise.all([
+      window.BandaSupabase?.enabled ? BandaSupabase.listPublicFiles('player-audio').catch(()=>[]) : Promise.resolve([]),
+      fetchGitHubAudioFiles().catch(()=>[])
+    ]);
+    const remoteItems=remote.map(item=>({name:item.name,url:item.url,source:'SUPABASE'}));
+    renderAudioLibrary([...remoteItems,...github]);
+    showToast(`${remoteItems.length} àudios a Supabase · ${github.length} a GitHub`);
   }catch(error){
+    console.error(error);
     renderAudioLibrary([]);
-    if(error.message==='NOT_GITHUB_PAGES'){
-      status.textContent='Disponible des de GitHub Pages';
-      showToast('La lectura automàtica de assets/AUDIO funciona des de la versió publicada a GitHub Pages');
-    }else if(error.message==='GITHUB_404'){
-      status.textContent='Carpeta no trobada';
-      showToast('No s’ha trobat assets/AUDIO al repositori publicat');
-    }else if(error.message==='GITHUB_403'){
-      status.textContent='Límit temporal de GitHub';
-      showToast('GitHub ha limitat temporalment les consultes. Torna-ho a provar més tard');
-    }else{
-      status.textContent='No s’ha pogut actualitzar';
-      showToast('No s’ha pogut llegir assets/AUDIO de GitHub');
-    }
+    status.textContent='No s’ha pogut actualitzar';
+    showToast('No s’ha pogut actualitzar la biblioteca d’àudio');
   }finally{
     $('#refreshAudioFolder').disabled=false;
   }
@@ -250,19 +296,30 @@ function bindAudioLibrary(){
     const src=event.target.value;
     if(!src)return;
     $('#trackSrc').value=src;
-    if(!$('#trackTitle').value.trim()) $('#trackTitle').value=src.split('/').pop().replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');
+    const found=audioLibrary.find(item=>item.url===src);
+    const name=found?.name || src.split('/').pop();
+    if(!$('#trackTitle').value.trim()) $('#trackTitle').value=name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');
     updateTrackPreview();
   });
   $('#uploadMp3Btn').onclick=()=>$('#trackUploadInput').click();
-  $('#trackUploadInput').addEventListener('change',event=>{
+  $('#trackUploadInput').addEventListener('change',async event=>{
     const file=event.target.files?.[0];
     if(!file)return;
-    const filename=file.name;
-    $('#trackSrc').value=`assets/AUDIO/${filename}`;
-    if(!$('#trackTitle').value.trim()) $('#trackTitle').value=filename.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');
-    updateTrackPreview();
-    showToast(`Ruta preparada. Puja “${filename}” a assets/AUDIO de GitHub abans de publicar la pista`);
-    event.target.value='';
+    try{
+      if(!(supabaseActive && currentSession)){
+        showToast('Inicia sessió i migra les dades abans de pujar àudio a Supabase');
+        return;
+      }
+      $('#uploadMp3Btn').disabled=true;
+      showToast(`Pujant ${file.name}…`);
+      const uploaded=await BandaSupabase.uploadFile('player-audio',file,'tracks',file.name.replace(/\.[^.]+$/,''));
+      $('#trackSrc').value=uploaded.url;
+      if(!$('#trackTitle').value.trim()) $('#trackTitle').value=file.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');
+      updateTrackPreview();
+      await refreshAudioDirectory();
+      showToast('MP3 pujat a Supabase');
+    }catch(error){ console.error(error); showToast('No s’ha pogut pujar l’àudio'); }
+    finally{ $('#uploadMp3Btn').disabled=false; event.target.value=''; }
   });
 }
 
@@ -417,8 +474,15 @@ function bindHistoric(){
     let imageSrc=existing?.imageSrc||'';
     const file=$('#historicImageFile').files?.[0];
     if(file){
-      try{ imageSrc=await compressHistoricImage(file); }
-      catch(error){ showToast('No s’ha pogut processar la fotografia'); return; }
+      try{
+        const compressed=await compressHistoricImage(file);
+        imageSrc=compressed;
+        if(supabaseActive && currentSession){
+          showToast('Pujant fotografia a Supabase…');
+          imageSrc=(await BandaSupabase.uploadDataUrl('historic-media',compressed,String(year),`historic-${year}`)).url;
+        }
+      }
+      catch(error){ console.error(error); showToast('No s’ha pogut processar o pujar la fotografia'); return; }
     }
     if(!imageSrc){ showToast('Cal seleccionar una fotografia'); return; }
     const item={id,year,periodId,title:$('#historicTitle').value.trim(),description:$('#historicDescription').value.trim(),imageSrc,createdAt:existing?.createdAt||new Date().toISOString()};
@@ -431,16 +495,197 @@ function bindHistoric(){
   $('#cancelHistoricEdit').onclick=resetHistoricForm;
 }
 
-function renderSystem(){ const date=content.updatedAt?new Date(content.updatedAt):null; $('#lastUpdated').textContent=date&&!Number.isNaN(date.valueOf())?new Intl.DateTimeFormat('ca-ES',{dateStyle:'medium',timeStyle:'short'}).format(date):'—'; $('#systemEvents').textContent=(content.events||[]).length; $('#systemDresscodes').textContent=(content.dresscodes||[]).length; $('#systemTracks').textContent=(content.tracks||[]).length; $('#systemHistoric').textContent=(content.historicItems||[]).length; $('#systemProtocol').textContent=location.protocol==='file:'?'Fitxer local':location.host||location.protocol; $('#storageBadge').textContent=location.protocol==='file:'?'MODE LOCAL':'MATEIX ORIGEN'; }
-async function savePublishedFile(){ const text=BandaStore.makePublishedJs(content); if('showSaveFilePicker' in window){try{const handle=await window.showSaveFilePicker({suggestedName:'content-published.js',types:[{description:'JavaScript',accept:{'text/javascript':['.js']}}]});const writable=await handle.createWritable();await writable.write(text);await writable.close();$('#saveState').textContent='PENDENT DE PUJAR A GITHUB';showToast('Fitxer preparat · puja’l a GitHub per sincronitzar tots els dispositius');return;}catch(error){if(error?.name==='AbortError')return;}} BandaStore.exportPublishedJs(content);$('#saveState').textContent='PENDENT DE PUJAR A GITHUB';showToast('Fitxer preparat · puja’l a GitHub per sincronitzar tots els dispositius'); }
-function bindSystem(){ $('#exportJsonBtn').onclick=()=>{BandaStore.exportJson(content);showToast('Còpia JSON creada');}; $('#importJsonBtn').onclick=()=>$('#importJsonInput').click(); $('#importJsonInput').addEventListener('change',event=>{const file=event.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{content=BandaStore.importObject(JSON.parse(reader.result));renderAll();showToast('Dades importades correctament');resetEventForm();resetTrackForm();resetDresscodeForm();resetHistoricForm();}catch(error){showToast('El fitxer JSON no és vàlid');}event.target.value='';};reader.readAsText(file);}); $('#downloadPublishedBtn').onclick=()=>{BandaStore.exportPublishedJs(content);$('#saveState').textContent='PENDENT DE PUJAR A GITHUB';showToast('content-published.js preparat · ara puja’l a GitHub');}; $('#savePublishedBtn').onclick=savePublishedFile; $('#resetLocalBtn').onclick=()=>{if(!confirm('Vols descartar tots els canvis locals i tornar al contingut publicat?'))return;content=BandaStore.clearLocal();renderAll();resetEventForm();resetTrackForm();resetDresscodeForm();resetHistoricForm();showToast('Contingut local restaurat');}; }
+function contentHasUsefulData(value){
+  if(!value) return false;
+  if(value.settings?.supabaseInitialized) return true;
+  return ['events','tracks','dresscodes','historicItems'].some(key=>Array.isArray(value[key]) && value[key].length>0) || !!value.settings?.homeHeroImage;
+}
+
+function renderSystem(){
+  const date=content.updatedAt?new Date(content.updatedAt):null;
+  $('#lastUpdated').textContent=date&&!Number.isNaN(date.valueOf())?new Intl.DateTimeFormat('ca-ES',{dateStyle:'medium',timeStyle:'short'}).format(date):'—';
+  $('#systemEvents').textContent=(content.events||[]).length;
+  $('#systemDresscodes').textContent=(content.dresscodes||[]).length;
+  $('#systemTracks').textContent=(content.tracks||[]).length;
+  $('#systemHistoric').textContent=(content.historicItems||[]).length;
+  $('#systemProtocol').textContent=supabaseActive?'SUPABASE · sincronització central':(migrationPending?'DADES LOCALS · pendent de migrar':'CONNECTANT…');
+  $('#storageBadge').textContent=supabaseActive?'SUPABASE ACTIU':(migrationPending?'MIGRACIÓ PENDENT':'SUPABASE');
+  const migrationBtn=$('#migrateToSupabaseBtn');
+  if(migrationBtn) migrationBtn.disabled=supabaseActive && !migrationPending;
+  const text=$('#supabaseMigrationText');
+  if(text) text.textContent=supabaseActive && !migrationPending
+    ? 'Sincronització activa. Els canvis que desis aquí es publiquen a Supabase i arriben a la resta de dispositius.'
+    : 'Aquest navegador conserva dades locals de versions anteriors. Migra-les una sola vegada a Supabase per convertir-les en el contingut compartit oficial.';
+}
+
+async function savePublishedFile(){
+  const text=BandaStore.makePublishedJs(content);
+  if('showSaveFilePicker' in window){
+    try{
+      const handle=await window.showSaveFilePicker({suggestedName:'content-published.js',types:[{description:'JavaScript',accept:{'text/javascript':['.js']}}]});
+      const writable=await handle.createWritable(); await writable.write(text); await writable.close();
+      showToast('Còpia legacy creada'); return;
+    }catch(error){ if(error?.name==='AbortError')return; }
+  }
+  BandaStore.exportPublishedJs(content); showToast('Còpia legacy creada');
+}
+
+async function migrateCurrentContentToSupabase(){
+  if(!currentSession){ showToast('Cal iniciar sessió'); return; }
+  const btn=$('#migrateToSupabaseBtn');
+  if(btn) btn.disabled=true;
+  try{
+    const migrating=BandaStore.normalize(content);
+    migrating.settings=migrating.settings||{};
+    if(/^data:image\//i.test(migrating.settings.homeHeroImage||'')){
+      showToast('Migrant imatge de HOME…');
+      migrating.settings.homeHeroImage=(await BandaSupabase.uploadDataUrl('app-images',migrating.settings.homeHeroImage,'home','home-hero')).url;
+    }
+    const items=migrating.historicItems||[];
+    for(let i=0;i<items.length;i++){
+      if(/^data:image\//i.test(items[i].imageSrc||'')){
+        showToast(`Migrant fotografia ${i+1}/${items.length}…`);
+        items[i].imageSrc=(await BandaSupabase.uploadDataUrl('historic-media',items[i].imageSrc,String(items[i].year||'sense-any'),`historic-${items[i].year||i+1}`)).url;
+      }
+    }
+    migrating.settings.supabaseInitialized=true;
+    content=await BandaSupabase.saveContent(migrating);
+    BandaStore.cacheRemote?.(content);
+    supabaseActive=true;
+    migrationPending=false;
+    renderAll();
+    markSaved('DESAT A SUPABASE');
+    showToast('Migració completada · Supabase ja és la font oficial');
+  }catch(error){
+    console.error(error);
+    showToast(`Error de migració: ${error?.message||'desconegut'}`);
+  }finally{ if(btn) btn.disabled=false; }
+}
+
+async function reloadSupabaseContent(){
+  if(!currentSession) return;
+  try{
+    const remote=await BandaSupabase.loadContent();
+    if(remote && contentHasUsefulData(remote)){
+      content=BandaStore.normalize(remote);
+      BandaStore.cacheRemote?.(content);
+      supabaseActive=true; migrationPending=false;
+      renderAll(); markSaved('DESAT A SUPABASE'); showToast('Dades recarregades de Supabase');
+    }else showToast('Supabase encara no conté dades. Utilitza MIGRAR DADES LOCALS.');
+  }catch(error){ console.error(error); showToast('No s’han pogut carregar les dades de Supabase'); }
+}
+
+function bindSystem(){
+  $('#exportJsonBtn').onclick=()=>{BandaStore.exportJson(content);showToast('Còpia JSON creada');};
+  $('#importJsonBtn').onclick=()=>$('#importJsonInput').click();
+  $('#importJsonInput').addEventListener('change',event=>{
+    const file=event.target.files?.[0]; if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{try{content=BandaStore.normalize(JSON.parse(reader.result));save(content,'Dades importades');resetEventForm();resetTrackForm();resetDresscodeForm();resetHistoricForm();}catch(error){showToast('El fitxer JSON no és vàlid');}event.target.value='';};
+    reader.readAsText(file);
+  });
+  $('#downloadPublishedBtn').onclick=()=>{BandaStore.exportPublishedJs(content);showToast('Còpia content-published.js creada');};
+  $('#savePublishedBtn').onclick=savePublishedFile;
+  $('#migrateToSupabaseBtn').onclick=migrateCurrentContentToSupabase;
+  $('#reloadSupabaseBtn').onclick=reloadSupabaseContent;
+  $('#resetLocalBtn').onclick=()=>{
+    if(!confirm('Vols netejar l’antic esborrany local d’aquest navegador? Les dades de Supabase no es tocaran.'))return;
+    BandaStore.clearLocal();
+    showToast('Memòria local netejada');
+  };
+}
 function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderDresscodeEventOptions(); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderSystem(); }
-function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{content=BandaStore.normalize(event.detail);renderAll();}); }
+function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{ if(supabaseActive) return; content=BandaStore.normalize(event.detail);renderAll();}); }
+
+function setEditorAuthenticated(session){
+  currentSession=session||null;
+  const gate=$('#editorLoginGate'), shell=$('#editorShell');
+  if(currentSession){
+    gate?.classList.add('is-hidden');
+    if(shell){shell.setAttribute('aria-hidden','false');shell.classList.add('is-ready');}
+    $('#editorUserEmail').textContent=currentSession.user?.email||'Usuari autenticat';
+  }else{
+    gate?.classList.remove('is-hidden');
+    if(shell){shell.setAttribute('aria-hidden','true');shell.classList.remove('is-ready');}
+    $('#editorUserEmail').textContent='Sense sessió';
+  }
+}
+
+async function activateSupabaseEditor(session){
+  setEditorAuthenticated(session);
+  if(!session) return;
+  try{
+    const remote=await BandaSupabase.loadContent();
+    if(remote && contentHasUsefulData(remote)){
+      content=BandaStore.normalize(remote);
+      BandaStore.cacheRemote?.(content);
+      supabaseActive=true; migrationPending=false;
+      markSaved('DESAT A SUPABASE');
+    }else if(contentHasUsefulData(legacyLocalContent)){
+      content=BandaStore.normalize(legacyLocalContent);
+      supabaseActive=false; migrationPending=true;
+      markSaved('CAL MIGRAR A SUPABASE');
+      showToast('Supabase està buit · migra les dades actuals des de SISTEMA');
+    }else{
+      content=BandaStore.normalize(remote||BandaStore.defaults());
+      content.settings=content.settings||{};
+      content.settings.supabaseInitialized=true;
+      content=await BandaSupabase.saveContent(content);
+      BandaStore.cacheRemote?.(content);
+      supabaseActive=true; migrationPending=false;
+      markSaved('DESAT A SUPABASE');
+    }
+    renderAll();
+    BandaSupabase.subscribeContent(next=>{
+      if(!supabaseActive || !contentHasUsefulData(next)) return;
+      content=BandaStore.normalize(next); BandaStore.cacheRemote?.(content); renderAll(); markSaved('ACTUALITZAT DES DE SUPABASE');
+    });
+  }catch(error){
+    console.error(error);
+    $('#loginStatus').textContent='Error de connexió. Has executat SUPABASE_SETUP.sql?';
+    showToast('No s’ha pogut inicialitzar Supabase');
+  }
+}
+
+function bindEditorAuth(){
+  const form=$('#editorLoginForm');
+  form?.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const email=$('#loginEmail').value.trim(), password=$('#loginPassword').value;
+    $('#loginStatus').textContent='Entrant…';
+    try{
+      const session=await BandaSupabase.signIn(email,password);
+      $('#loginPassword').value=''; $('#loginStatus').textContent='Sessió iniciada';
+      await activateSupabaseEditor(session);
+    }catch(error){ console.error(error); $('#loginStatus').textContent='Email o contrasenya incorrectes, o Supabase encara no està configurat.'; }
+  });
+  $('#editorLogoutBtn')?.addEventListener('click',async()=>{ try{await BandaSupabase.signOut();}catch(error){} supabaseActive=false;currentSession=null;setEditorAuthenticated(null); });
+}
+
+async function initEditorBackend(){
+  if(!window.BandaSupabase?.enabled){ $('#loginStatus').textContent='Supabase no està configurat.'; return; }
+  try{
+    const session=await BandaSupabase.session();
+    if(session) await activateSupabaseEditor(session);
+    else { setEditorAuthenticated(null); $('#loginStatus').textContent='Introdueix el teu email i contrasenya.'; }
+  }catch(error){ console.error(error); $('#loginStatus').textContent='No s’ha pogut connectar amb Supabase.'; }
+}
 
 let editorDeferredPrompt = null;
 
 function editorIsStandalone(){
   return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function showEditorInstallHelp(){
+  const modal=$('#editorInstallHelp'), text=$('#editorInstallHelpText');
+  if(!modal||!text) return;
+  const ua=navigator.userAgent;
+  if(/iPad|iPhone|iPod/.test(ua)) text.innerHTML='A Safari: prem <strong>Compartir</strong> → <strong>Afegir a la pantalla d’inici</strong>.';
+  else if(/Edg\//.test(ua)) text.innerHTML='A Edge: prem el menú <strong>⋯</strong> → <strong>Aplicacions</strong> → <strong>Instal·lar BANDA DE LA CALA · EDITOR</strong>.';
+  else if(/Chrome\//.test(ua)) text.innerHTML='A Chrome: busca la icona <strong>Instal·lar</strong> a la dreta de la barra d’adreces, o menú <strong>⋮</strong> → <strong>Instal·lar pàgina com a aplicació</strong>.';
+  else text.innerHTML='Obre el menú del navegador i tria <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.';
+  modal.hidden=false;
 }
 
 function bindEditorPwaInstall(){
@@ -459,9 +704,10 @@ function bindEditorPwaInstall(){
       editorDeferredPrompt=null;
       return;
     }
-    const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
-    showToast(ios ? 'Safari: Compartir → Afegir a la pantalla d’inici' : 'Utilitza l’opció Instal·lar del navegador si no apareix automàticament');
+    showEditorInstallHelp();
   });
+  $('#closeEditorInstallHelp')?.addEventListener('click',()=>{$('#editorInstallHelp').hidden=true;});
+  $('#editorInstallHelp')?.addEventListener('click',event=>{if(event.target.id==='editorInstallHelp') event.currentTarget.hidden=true;});
   window.addEventListener('appinstalled',()=>{ btn.hidden=true; showToast('EDITOR instal·lat'); });
 }
 
@@ -472,5 +718,5 @@ function registerEditorSW(){
   }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindSystem(); bindExternalUpdates(); bindEditorPwaInstall(); registerEditorSW(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindSystem(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); initEditorBackend(); }
 init();

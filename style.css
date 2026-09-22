@@ -415,3 +415,10 @@ button,a,input{touch-action:manipulation}
   .playlist-layout>.panel:first-child,.player-card{padding:14px!important}
   .record-art{width:128px!important}
 }
+
+/* v0.15 · barra inferior MOBILE fins al límit físic de la pantalla */
+@media(max-width:780px){
+  .main-content{padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+  .mobile-nav{left:0!important;right:0!important;bottom:0!important;height:calc(72px + env(safe-area-inset-bottom))!important;border-radius:20px 20px 0 0!important;padding:6px 10px calc(6px + env(safe-area-inset-bottom))!important;border-left:0!important;border-right:0!important;border-bottom:0!important}
+  .mini-player{bottom:calc(80px + env(safe-area-inset-bottom))!important}
+}

@@ -1,4 +1,4 @@
-// BANDA DE LA CALA v0.14
+// BANDA DE LA CALA v0.15
 importScripts('./version.js');
 const CACHE = `banda-de-la-cala-${globalThis.BANDA_VERSION || 'dev'}`;
 const CORE = [
@@ -13,8 +13,10 @@ const CORE = [
   './app.js',
   './config.js',
   './content-store.js',
+  './supabase-client.js',
   './data/content-published.js',
   './manifest.webmanifest',
+  './SUPABASE_PRIMEROS_PASOS.txt',
   './assets/brand/logo-banda-de-la-cala.png',
   './assets/brand/app-icon.png',
   './assets/brand/editor-icon.png',

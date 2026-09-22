@@ -72,7 +72,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.12');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.15');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
@@ -447,6 +447,37 @@ function bindContentUpdates(){
   }
 }
 
+
+function remoteContentReady(content){
+  if(!content) return false;
+  if(content.settings?.supabaseInitialized) return true;
+  return ['events','tracks','dresscodes','historicItems'].some(key=>Array.isArray(content[key]) && content[key].length>0) || !!content.settings?.homeHeroImage;
+}
+
+async function initSupabaseContent(){
+  if(!window.BandaSupabase?.enabled){
+    await refreshPublishedFromNetwork();
+    return;
+  }
+  try{
+    const remote=await BandaSupabase.loadContent();
+    if(remoteContentReady(remote)){
+      BandaStore.cacheRemote?.(remote);
+      refreshContent(remote);
+    }else{
+      await refreshPublishedFromNetwork();
+    }
+    BandaSupabase.subscribeContent(next=>{
+      if(!remoteContentReady(next)) return;
+      BandaStore.cacheRemote?.(next);
+      refreshContent(next);
+    });
+  }catch(error){
+    console.warn('Supabase no disponible; utilitzant caché/publicat.',error);
+    await refreshPublishedFromNetwork();
+  }
+}
+
 function bindPwaInstall(){
   const btn = $('#installBtn');
   window.addEventListener('beforeinstallprompt', event => {
@@ -498,7 +529,7 @@ function init(){
   const muteBtn = $('#muteBtn');
   if(muteBtn) muteBtn.onclick = toggleGlobalMute;
   bindContentUpdates();
-  refreshPublishedFromNetwork();
+  initSupabaseContent();
   bindPwaInstall();
   registerSW();
   const backBtn = $('#backBtn');

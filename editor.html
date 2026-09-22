@@ -16,7 +16,21 @@
   <link rel="stylesheet" href="editor.css" />
 </head>
 <body>
-  <div class="editor-shell">
+  <section id="editorLoginGate" class="editor-login-gate" aria-label="Accés a l'Editor">
+    <div class="editor-login-card">
+      <img src="assets/brand/editor-icon.png" alt="Icona de l’Editor de Banda de la Cala" />
+      <span class="eyebrow">ACCÉS PRIVAT</span>
+      <h1>BANDA DE LA CALA · EDITOR</h1>
+      <p>Inicia sessió per gestionar el contingut compartit de l’APP.</p>
+      <form id="editorLoginForm">
+        <label>Email<input id="loginEmail" type="email" autocomplete="username" required /></label>
+        <label>Contrasenya<input id="loginPassword" type="password" autocomplete="current-password" required /></label>
+        <button class="primary-btn" type="submit">ENTRAR</button>
+      </form>
+      <small id="loginStatus">Connectant amb Supabase…</small>
+    </div>
+  </section>
+  <div class="editor-shell" id="editorShell" aria-hidden="true">
     <aside class="editor-sidebar">
       <div class="editor-brand">
         <img src="assets/brand/editor-icon.png" alt="Icona de l’Editor de Banda de la Cala" />
@@ -33,7 +47,9 @@
         <button class="editor-nav-btn" data-editor-nav="system"><span>⚙</span>SISTEMA</button>
       </nav>
       <div class="editor-sidebar-foot">
-        <span id="storageBadge" class="storage-badge">MODE LOCAL</span>
+        <span id="storageBadge" class="storage-badge">SUPABASE</span>
+        <small id="editorUserEmail">Sense sessió</small>
+        <button id="editorLogoutBtn" class="editor-logout-btn" type="button">TANCAR SESSIÓ</button>
         <small><span data-app-version></span> · Gestió de continguts</small>
       </div>
     </aside>
@@ -144,14 +160,14 @@
             <label>Descripció / subtítol<input id="trackMeta" maxlength="160" placeholder="Concert, obra, any..." /></label>
 
             <div class="audio-library-box">
-              <div class="audio-library-head"><strong>CARPETA assets/AUDIO</strong><span id="audioFolderStatus">Sense escanejar</span></div>
+              <div class="audio-library-head"><strong>BIBLIOTECA D’ÀUDIO</strong><span id="audioFolderStatus">Supabase + GitHub</span></div>
               <div class="audio-library-actions">
                 <button type="button" id="refreshAudioFolder" class="ghost-btn">ACTUALITZAR</button>
-                <button type="button" id="uploadMp3Btn" class="primary-btn">PREPARAR MP3 NOU</button>
+                <button type="button" id="uploadMp3Btn" class="primary-btn">PUJAR MP3 A SUPABASE</button>
               </div>
               <select id="audioLibrarySelect"><option value="">— Prem ACTUALITZAR per llegir assets/AUDIO —</option></select>
               <input id="trackUploadInput" type="file" accept="audio/mpeg,.mp3,audio/wav,.wav,audio/mp4,.m4a,audio/ogg,.ogg" hidden />
-              <small><strong>ACTUALITZAR</strong> llegeix directament els fitxers publicats a <code>assets/AUDIO</code> del repositori de GitHub. Per afegir un àudio nou a la demo, puja el fitxer a aquesta carpeta de GitHub i torna a prémer <strong>ACTUALITZAR</strong>. «PREPARAR MP3 NOU» només prepara automàticament el títol i la ruta abans de pujar-lo al repositori.</small>
+              <small><strong>ACTUALITZAR</strong> mostra els àudios disponibles a Supabase Storage i manté compatibilitat amb les pistes antigues de GitHub. <strong>PUJAR MP3 A SUPABASE</strong> permet afegir una pista des de qualsevol PC o mòbil.</small>
             </div>
 
             <label>Ruta o URL de l’àudio<input id="trackSrc" required maxlength="600" placeholder="assets/AUDIO/pista.mp3" /></label>
@@ -172,7 +188,7 @@
           <form id="historicForm" class="editor-card form-card history-form-card">
             <div class="card-head"><div><span class="eyebrow">HISTÒRIC</span><h2 id="historicFormTitle">Nova fotografia</h2></div><button type="button" id="newHistoricBtn" class="ghost-btn">NOVA</button></div>
             <input type="hidden" id="historicId" />
-            <p class="helper-copy">Afegeix una fotografia a la cronologia. L’ANY i el PERÍODE són obligatoris; el nom i la descripció són opcionals. En aquesta v0.12 la foto es comprimeix i es guarda dins del contingut local per poder provar el sistema abans de connectar Supabase.</p>
+            <p class="helper-copy">Afegeix una fotografia a la cronologia. L’ANY i el PERÍODE són obligatoris; el nom i la descripció són opcionals. La foto es comprimeix automàticament i es puja a Supabase Storage perquè sigui visible a tots els dispositius.</p>
             <div class="form-row">
               <label>Any *<input id="historicYear" type="number" min="1980" step="1" required placeholder="Ex.: 1987" /></label>
               <label>Període *<select id="historicPeriod" required><option value="">— Selecciona període —</option></select></label>
@@ -199,13 +215,23 @@
 
       <section class="editor-view" data-editor-view="system">
         <div class="system-grid">
+          <div class="editor-card system-card featured" id="supabaseMigrationCard"><span class="eyebrow">SUPABASE</span><h2>Sincronització central</h2><p id="supabaseMigrationText">L’EDITOR desa directament a Supabase. Si aquest navegador conserva dades de versions anteriors, pots migrar-les una sola vegada, incloses les imatges locals.</p><div class="stack-actions"><button id="migrateToSupabaseBtn" class="primary-btn">MIGRAR DADES LOCALS A SUPABASE</button><button id="reloadSupabaseBtn" class="secondary-btn">TORNAR A CARREGAR SUPABASE</button></div></div>
           <div class="editor-card system-card"><span class="eyebrow">CÒPIA DE SEGURETAT</span><h2>Exportar / importar</h2><p>Guarda una còpia JSON de totes les dades gestionades o recupera’n una d’anterior.</p><div class="stack-actions"><button id="exportJsonBtn" class="primary-btn">EXPORTAR JSON</button><button id="importJsonBtn" class="secondary-btn">IMPORTAR JSON</button><input id="importJsonInput" type="file" accept="application/json,.json" hidden /></div></div>
-          <div class="editor-card system-card featured"><span class="eyebrow">PROJECTE / GITHUB</span><h2>Publicar contingut base</h2><p>Genera <code>data/content-published.js</code> amb l’estat actual. Fins que connectem Supabase, cal substituir aquest únic fitxer a GitHub perquè els canvis apareguin també als altres mòbils i ordinadors.</p><div class="stack-actions"><button id="savePublishedBtn" class="primary-btn">DESAR content-published.js</button><button id="downloadPublishedBtn" class="secondary-btn">DESCARREGAR FITXER</button></div></div>
+          <div class="editor-card system-card"><span class="eyebrow">CÒPIA LEGACY</span><h2>Exportar contingut publicat</h2><p>Opcionalment pots continuar generant <code>content-published.js</code> com a còpia de seguretat. Ja no és necessari per sincronitzar els dispositius.</p><div class="stack-actions"><button id="savePublishedBtn" class="secondary-btn">DESAR content-published.js</button><button id="downloadPublishedBtn" class="secondary-btn">DESCARREGAR FITXER</button></div></div>
           <div class="editor-card system-card"><span class="eyebrow">ESTAT</span><h2>Dades locals</h2><dl class="system-data"><div><dt>Última modificació</dt><dd id="lastUpdated">—</dd></div><div><dt>Esdeveniments</dt><dd id="systemEvents">0</dd></div><div><dt>Dresscodes</dt><dd id="systemDresscodes">0</dd></div><div><dt>Pistes</dt><dd id="systemTracks">0</dd></div><div><dt>Fotos històric</dt><dd id="systemHistoric">0</dd></div><div><dt>Entorn</dt><dd id="systemProtocol">—</dd></div></dl></div>
-          <div class="editor-card system-card danger-card"><span class="eyebrow">RESTAURAR</span><h2>Descartar canvis locals</h2><p>Elimina les modificacions guardades al navegador i torna al contingut de <code>content-published.js</code>.</p><button id="resetLocalBtn" class="danger-btn">RESTAURAR CONTINGUT PUBLICAT</button></div>
+          <div class="editor-card system-card danger-card"><span class="eyebrow">RESTAURAR</span><h2>Netejar memòria local</h2><p>Elimina únicament l’antic esborrany local del navegador. Les dades de Supabase no s’esborren.</p><button id="resetLocalBtn" class="danger-btn">NETEJAR DADES LOCALS</button></div>
         </div>
       </section>
     </main>
+  </div>
+  <div id="editorInstallHelp" class="editor-install-help" hidden>
+    <div class="editor-install-help-card">
+      <button id="closeEditorInstallHelp" class="modal-close" type="button" aria-label="Tancar">×</button>
+      <img src="assets/brand/editor-icon.png" alt="" />
+      <span class="eyebrow">INSTAL·LAR EDITOR</span>
+      <h2>Instal·lació al dispositiu</h2>
+      <p id="editorInstallHelpText">Utilitza l’opció d’instal·lació del navegador.</p>
+    </div>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -213,6 +239,8 @@
   <script src="config.js"></script>
   <script src="data/content-published.js"></script>
   <script src="content-store.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
   <script src="editor.js"></script>
 </body>
 </html>

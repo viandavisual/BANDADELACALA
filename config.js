@@ -1,5 +1,5 @@
 window.BANDA_CONFIG = {
-  version: globalThis.BANDA_VERSION || 'v0.14',
+  version: globalThis.BANDA_VERSION || 'v0.15',
   appName: 'BANDA DE LA CALA',
   shortName: 'LA CALA',
   subtitle: "L’Ametlla de Mar",
@@ -8,6 +8,11 @@ window.BANDA_CONFIG = {
   introVideo: 'assets/intro.webm',
   introAudio: 'assets/AUDIO/introhimne.mp3',
   introFallbackMs: 6000,
+  supabase: {
+    url: 'https://ighgvbnsratlektiwrjf.supabase.co',
+    publishableKey: 'sb_publishable_tQRAe9SgRhJqj__e3we0uA_qpEE4L13',
+    enabled: true
+  },
   historicPeriods: [
     { id:'1980-1982-arques', start:1980, end:1982, years:'1980 - 1982', director:'Joaquim Arqués', color:'#5b4a73', textColor:'#ffffff' },
     { id:'1982-1986-cloquell', start:1982, end:1986, years:'1982 - 1986', director:'Adolfo Cloquell', color:'#2f6f78', textColor:'#ffffff' },

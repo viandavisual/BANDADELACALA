@@ -1,20 +1,16 @@
-BANDA DE LA CALA · v0.11 · CHECKLIST DE PUBLICACIÓ
-==================================================
+BANDA DE LA CALA · v0.15 · CHECKLIST GITHUB + SUPABASE
 
-[ ] 1. Copiar assets/intro.webm
-[ ] 2. Copiar assets/AUDIO/introhimne.mp3
-[ ] 3. Copiar tots els MP3 que utilitza el PLAYER a assets/AUDIO/
-[ ] 4. Comprovar que les rutes dels MP3 de data/content-published.js coincideixen EXACTAMENT amb els noms reals
-[ ] 5. Pujar tot el CONTINGUT de banda-pwa-v0.11/ a l'arrel del repositori GitHub
-[ ] 6. Settings > Pages > publicar des de la branca principal / root
-[ ] 7. Obrir la URL HTTPS de GitHub Pages
-[ ] 8. Provar START > INTRO > HOME
-[ ] 9. Provar que introhimne.mp3 continua després d'entrar a HOME
-[ ] 10. Provar CALENDARI + DRESSCODE
-[ ] 11. Provar PLAYER, següent pista, repetir 1, repetir tot i random
-[ ] 12. Provar Facebook / Instagram / YouTube
-[ ] 13. Provar en MOBILE vertical
-[ ] 14. Afegir la PWA a la pantalla d'inici i tornar-la a obrir
-[ ] 15. Fer una recàrrega final amb connexió abans de la demostració
+[ ] Ejecutar SUPABASE_SETUP.sql en Supabase antes de usar el Editor.
+[ ] Crear/invitar al menos un usuario en Authentication > Users.
+[ ] Subir todos los archivos del PATCH v0.14 -> v0.15 respetando rutas.
+[ ] Comprobar que index.html abre por HTTPS desde GitHub Pages.
+[ ] Comprobar que editor.html muestra LOGIN.
+[ ] Iniciar sesión y migrar los datos locales existentes desde SISTEMA.
+[ ] Abrir la APP desde otro móvil y comprobar que HOME / CALENDARI / PLAYER / HISTÒRIC coinciden.
+[ ] Añadir una prueba desde el Editor y comprobar que aparece en el otro dispositivo sin tocar GitHub.
+[ ] Probar PUJAR MP3 A SUPABASE desde desktop o móvil.
+[ ] Probar una fotografía HISTÒRIC desde móvil.
+[ ] Probar instalación de APP y EDITOR como dos PWAs distintas.
+[ ] En móvil, verificar que el menú inferior toca el borde físico de pantalla.
 
-Si ja hi havia una versió anterior instal·lada, obre primer la URL al navegador amb connexió i recarrega-la perquè el Service Worker v0.11 s'actualitzi abans d'obrir la PWA instal·lada.
+NO SUBIR NUNCA a GitHub ninguna sb_secret_... ni service_role key.
