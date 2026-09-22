@@ -1,0 +1,20 @@
+BANDA DE LA CALA · v0.9 · CHECKLIST DE PUBLICACIÓ
+==================================================
+
+[ ] 1. Copiar assets/intro.webm
+[ ] 2. Copiar assets/AUDIO/introhimne.mp3
+[ ] 3. Copiar tots els MP3 que utilitza el PLAYER a assets/AUDIO/
+[ ] 4. Comprovar que les rutes dels MP3 de data/content-published.js coincideixen EXACTAMENT amb els noms reals
+[ ] 5. Pujar tot el CONTINGUT de banda-pwa-v0.9/ a l'arrel del repositori GitHub
+[ ] 6. Settings > Pages > publicar des de la branca principal / root
+[ ] 7. Obrir la URL HTTPS de GitHub Pages
+[ ] 8. Provar START > INTRO > HOME
+[ ] 9. Provar que introhimne.mp3 continua després d'entrar a HOME
+[ ] 10. Provar CALENDARI + DRESSCODE
+[ ] 11. Provar PLAYER, següent pista, repetir 1, repetir tot i random
+[ ] 12. Provar Facebook / Instagram / YouTube
+[ ] 13. Provar en MOBILE vertical
+[ ] 14. Afegir la PWA a la pantalla d'inici i tornar-la a obrir
+[ ] 15. Fer una recàrrega final amb connexió abans de la demostració
+
+Si ja hi havia una versió anterior instal·lada, obre primer la URL al navegador amb connexió i recarrega-la perquè el Service Worker v0.9 s'actualitzi abans d'obrir la PWA instal·lada.
