@@ -1,7 +1,9 @@
-const CACHE = 'banda-de-la-cala-v0.9';
+importScripts('./version.js');
+const CACHE = `banda-de-la-cala-${globalThis.BANDA_VERSION || 'dev'}`;
 const CORE = [
   './',
   './index.html',
+  './version.js',
   './style.css',
   './app.js',
   './config.js',

@@ -28,7 +28,7 @@
       </nav>
       <div class="editor-sidebar-foot">
         <span id="storageBadge" class="storage-badge">MODE LOCAL</span>
-        <small><span data-app-version>v0.9</span> · Gestió de continguts</small>
+        <small><span data-app-version></span> · Gestió de continguts</small>
       </div>
     </aside>
 
@@ -140,14 +140,12 @@
             <div class="audio-library-box">
               <div class="audio-library-head"><strong>CARPETA assets/AUDIO</strong><span id="audioFolderStatus">Sense escanejar</span></div>
               <div class="audio-library-actions">
-                <button type="button" id="chooseAudioFolder" class="secondary-btn">SELECCIONAR CARPETA AUDIO</button>
                 <button type="button" id="refreshAudioFolder" class="ghost-btn">ACTUALITZAR</button>
-                <button type="button" id="uploadMp3Btn" class="primary-btn">AFEGIR MP3</button>
+                <button type="button" id="uploadMp3Btn" class="primary-btn">PREPARAR MP3 NOU</button>
               </div>
-              <select id="audioLibrarySelect"><option value="">— Selecciona un fitxer detectat —</option></select>
-              <input id="audioFolderInput" type="file" webkitdirectory directory multiple accept="audio/*,.mp3,.wav,.m4a,.ogg" hidden />
-              <input id="trackUploadInput" type="file" accept="audio/mpeg,.mp3" hidden />
-              <small>En Chrome pots donar accés a la carpeta <code>assets/AUDIO</code>: l’Editor la llegeix, l’actualitza i pot copiar-hi nous MP3. En altres navegadors podràs seleccionar la carpeta per detectar els fitxers.</small>
+              <select id="audioLibrarySelect"><option value="">— Prem ACTUALITZAR per llegir assets/AUDIO —</option></select>
+              <input id="trackUploadInput" type="file" accept="audio/mpeg,.mp3,audio/wav,.wav,audio/mp4,.m4a,audio/ogg,.ogg" hidden />
+              <small><strong>ACTUALITZAR</strong> llegeix directament els fitxers publicats a <code>assets/AUDIO</code> del repositori de GitHub. Per afegir un àudio nou a la demo, puja el fitxer a aquesta carpeta de GitHub i torna a prémer <strong>ACTUALITZAR</strong>. «PREPARAR MP3 NOU» només prepara automàticament el títol i la ruta abans de pujar-lo al repositori.</small>
             </div>
 
             <label>Ruta o URL de l’àudio<input id="trackSrc" required maxlength="600" placeholder="assets/AUDIO/pista.mp3" /></label>
@@ -178,6 +176,7 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <script src="version.js"></script>
   <script src="config.js"></script>
   <script src="data/content-published.js"></script>
   <script src="content-store.js"></script>

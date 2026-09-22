@@ -6,8 +6,6 @@ const esc = value => String(value ?? '').replace(/[&<>'"]/g,char=>({"&":"&amp;",
 let content = BandaStore.load();
 let draggedTrackId = null;
 let toastTimer = null;
-let audioDirHandle = null;
-let folderFallbackFiles = [];
 let audioLibrary = [];
 
 const DRESS_DEFS = [
@@ -55,7 +53,7 @@ function showToast(message){
 }
 function markSaved(){ $('#saveState').textContent='DESAT'; clearTimeout(markSaved.timer); markSaved.timer=setTimeout(()=>$('#saveState').textContent='DADES CARREGADES',1400); }
 function save(next=content,message='Canvis desats'){ content=BandaStore.save(next); renderAll(); markSaved(); if(message) showToast(message); }
-function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||'v0.9'); }
+function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.10'); }
 function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
@@ -185,31 +183,87 @@ function renderTracks(){ const list=content.tracks||[]; $('#trackCountEditor').t
 }
 function bindTrackForm(){ $('#trackForm').addEventListener('submit',event=>{event.preventDefault();const id=$('#trackId').value||BandaStore.uid('trk');const item={id,title:$('#trackTitle').value.trim(),meta:$('#trackMeta').value.trim(),src:$('#trackSrc').value.trim(),visible:$('#trackVisible').checked};if(!item.title||!item.src){showToast('Cal indicar títol i ruta/URL');return;}const index=content.tracks.findIndex(t=>t.id===id);if(index>=0)content.tracks[index]=item;else content.tracks.push(item);save(content,index>=0?'Pista actualitzada':'Pista afegida');resetTrackForm();}); $('#newTrackBtn').onclick=resetTrackForm; $('#cancelTrackEdit').onclick=resetTrackForm; $('#trackSrc').addEventListener('change',updateTrackPreview); }
 
-function knownAudioFiles(){ return [...new Set((content.tracks||[]).map(t=>t.src).filter(src=>/^assets\/audio\//i.test(src)).map(src=>src.split('/').pop()))]; }
-function renderAudioLibrary(files=audioLibrary){ audioLibrary=[...new Set([...knownAudioFiles(),...files])].sort((a,b)=>a.localeCompare(b,'ca')); const select=$('#audioLibrarySelect'); const current=select.value; select.innerHTML='<option value="">— Selecciona un fitxer detectat —</option>'+audioLibrary.map(name=>`<option value="assets/AUDIO/${esc(name)}">${esc(name)}</option>`).join(''); if([...select.options].some(o=>o.value===current)) select.value=current; $('#audioFolderStatus').textContent=`${audioLibrary.length} fitxer${audioLibrary.length===1?'':'s'} detectat${audioLibrary.length===1?'':'s'}`; }
+function renderAudioLibrary(files=audioLibrary){
+  audioLibrary=[...new Set(files)].filter(name=>/\.(mp3|wav|m4a|ogg)$/i.test(name)).sort((a,b)=>a.localeCompare(b,'ca',{numeric:true}));
+  const select=$('#audioLibrarySelect');
+  const current=select.value;
+  select.innerHTML='<option value="">— Selecciona un àudio de assets/AUDIO —</option>'+audioLibrary.map(name=>`<option value="assets/AUDIO/${esc(name)}">${esc(name)}</option>`).join('');
+  if([...select.options].some(o=>o.value===current)) select.value=current;
+  $('#audioFolderStatus').textContent=`${audioLibrary.length} fitxer${audioLibrary.length===1?'':'s'} publicat${audioLibrary.length===1?'':'s'}`;
+}
+
+function resolveGitHubRepository(){
+  if(CFG.githubOwner && CFG.githubRepo) return {owner:CFG.githubOwner,repo:CFG.githubRepo,branch:CFG.githubBranch||''};
+  const host=location.hostname.toLowerCase();
+  const match=host.match(/^([a-z0-9-]+)\.github\.io$/i);
+  if(!match) return null;
+  const owner=match[1];
+  const parts=location.pathname.split('/').filter(Boolean);
+  const repo=parts[0] || `${owner}.github.io`;
+  return {owner,repo,branch:CFG.githubBranch||''};
+}
+
+async function fetchGitHubAudioFiles(){
+  const gh=resolveGitHubRepository();
+  if(!gh) throw new Error('NOT_GITHUB_PAGES');
+  const branch=gh.branch?`?ref=${encodeURIComponent(gh.branch)}`:'';
+  const url=`https://api.github.com/repos/${encodeURIComponent(gh.owner)}/${encodeURIComponent(gh.repo)}/contents/assets/AUDIO${branch}`;
+  const response=await fetch(url,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+  if(!response.ok) throw new Error(`GITHUB_${response.status}`);
+  const entries=await response.json();
+  if(!Array.isArray(entries)) throw new Error('INVALID_GITHUB_RESPONSE');
+  return entries.filter(item=>item&&item.type==='file'&&/\.(mp3|wav|m4a|ogg)$/i.test(item.name||'')).map(item=>item.name);
+}
+
 async function refreshAudioDirectory(){
+  const status=$('#audioFolderStatus');
+  status.textContent='Actualitzant…';
+  $('#refreshAudioFolder').disabled=true;
   try{
-    if(audioDirHandle){ const names=[]; for await (const [name,handle] of audioDirHandle.entries()){ if(handle.kind==='file'&&/\.(mp3|wav|m4a|ogg)$/i.test(name)) names.push(name); } renderAudioLibrary(names); showToast('Carpeta AUDIO actualitzada'); return; }
-    if(folderFallbackFiles.length){ renderAudioLibrary(folderFallbackFiles.filter(f=>/\.(mp3|wav|m4a|ogg)$/i.test(f.name)).map(f=>f.name)); showToast('Llista d’àudio actualitzada'); return; }
-    renderAudioLibrary(); showToast('Selecciona primer la carpeta assets/AUDIO');
-  }catch(error){showToast('No s’ha pogut llegir la carpeta AUDIO');}
-}
-async function chooseAudioFolder(){
-  if('showDirectoryPicker' in window){
-    try{ audioDirHandle=await window.showDirectoryPicker({mode:'readwrite'}); await refreshAudioDirectory(); return; }catch(error){ if(error?.name==='AbortError') return; }
+    const names=await fetchGitHubAudioFiles();
+    renderAudioLibrary(names);
+    showToast(`${names.length} àudio${names.length===1?'':'s'} detectat${names.length===1?'':'s'} a assets/AUDIO`);
+  }catch(error){
+    renderAudioLibrary([]);
+    if(error.message==='NOT_GITHUB_PAGES'){
+      status.textContent='Disponible des de GitHub Pages';
+      showToast('La lectura automàtica de assets/AUDIO funciona des de la versió publicada a GitHub Pages');
+    }else if(error.message==='GITHUB_404'){
+      status.textContent='Carpeta no trobada';
+      showToast('No s’ha trobat assets/AUDIO al repositori publicat');
+    }else if(error.message==='GITHUB_403'){
+      status.textContent='Límit temporal de GitHub';
+      showToast('GitHub ha limitat temporalment les consultes. Torna-ho a provar més tard');
+    }else{
+      status.textContent='No s’ha pogut actualitzar';
+      showToast('No s’ha pogut llegir assets/AUDIO de GitHub');
+    }
+  }finally{
+    $('#refreshAudioFolder').disabled=false;
   }
-  $('#audioFolderInput').click();
 }
-async function copyMp3ToAudio(file){
-  if(!audioDirHandle){ showToast('Selecciona primer la carpeta assets/AUDIO per poder copiar-hi l’MP3'); return false; }
-  try{ const handle=await audioDirHandle.getFileHandle(file.name,{create:true}); const writable=await handle.createWritable(); await writable.write(file); await writable.close(); await refreshAudioDirectory(); return true; }catch(error){ showToast('No s’ha pogut copiar l’MP3 a assets/AUDIO'); return false; }
-}
+
 function bindAudioLibrary(){
-  renderAudioLibrary(); $('#chooseAudioFolder').onclick=chooseAudioFolder; $('#refreshAudioFolder').onclick=refreshAudioDirectory;
-  $('#audioFolderInput').addEventListener('change',event=>{ folderFallbackFiles=[...(event.target.files||[])]; renderAudioLibrary(folderFallbackFiles.map(f=>f.name)); showToast('Carpeta AUDIO detectada'); });
-  $('#audioLibrarySelect').addEventListener('change',event=>{ const src=event.target.value; if(!src)return; $('#trackSrc').value=src; if(!$('#trackTitle').value.trim()) $('#trackTitle').value=src.split('/').pop().replace(/\.[^.]+$/,'').replace(/[_-]+/g,' '); updateTrackPreview(); });
-  $('#uploadMp3Btn').onclick=async()=>{ if(!audioDirHandle){ showToast('Selecciona primer la carpeta assets/AUDIO'); await chooseAudioFolder(); if(!audioDirHandle) return; } $('#trackUploadInput').click(); };
-  $('#trackUploadInput').addEventListener('change',async event=>{ const file=event.target.files?.[0]; if(!file)return; const copied=await copyMp3ToAudio(file); if(copied){ $('#trackSrc').value=`assets/AUDIO/${file.name}`; if(!$('#trackTitle').value.trim()) $('#trackTitle').value=file.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' '); updateTrackPreview(); showToast('MP3 copiat a assets/AUDIO i preparat'); } event.target.value=''; });
+  renderAudioLibrary([]);
+  $('#refreshAudioFolder').onclick=refreshAudioDirectory;
+  $('#audioLibrarySelect').addEventListener('change',event=>{
+    const src=event.target.value;
+    if(!src)return;
+    $('#trackSrc').value=src;
+    if(!$('#trackTitle').value.trim()) $('#trackTitle').value=src.split('/').pop().replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');
+    updateTrackPreview();
+  });
+  $('#uploadMp3Btn').onclick=()=>$('#trackUploadInput').click();
+  $('#trackUploadInput').addEventListener('change',event=>{
+    const file=event.target.files?.[0];
+    if(!file)return;
+    const filename=file.name;
+    $('#trackSrc').value=`assets/AUDIO/${filename}`;
+    if(!$('#trackTitle').value.trim()) $('#trackTitle').value=filename.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');
+    updateTrackPreview();
+    showToast(`Ruta preparada. Puja “${filename}” a assets/AUDIO de GitHub abans de publicar la pista`);
+    event.target.value='';
+  });
 }
 
 function renderSystem(){ const date=content.updatedAt?new Date(content.updatedAt):null; $('#lastUpdated').textContent=date&&!Number.isNaN(date.valueOf())?new Intl.DateTimeFormat('ca-ES',{dateStyle:'medium',timeStyle:'short'}).format(date):'—'; $('#systemEvents').textContent=(content.events||[]).length; $('#systemDresscodes').textContent=(content.dresscodes||[]).length; $('#systemTracks').textContent=(content.tracks||[]).length; $('#systemProtocol').textContent=location.protocol==='file:'?'Fitxer local':location.host||location.protocol; $('#storageBadge').textContent=location.protocol==='file:'?'MODE LOCAL':'MATEIX ORIGEN'; }

@@ -70,7 +70,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || 'v0.9');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.10');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
