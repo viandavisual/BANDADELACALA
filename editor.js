@@ -8,6 +8,9 @@ let content = BandaStore.loadRemoteCache?.() || BandaStore.loadPublished();
 let supabaseActive = false;
 let migrationPending = false;
 let currentSession = null;
+let currentProfile = null;
+let editorGuestMode = false;
+let editorCanWrite = false;
 let remoteSaveChain = Promise.resolve();
 let draggedTrackId = null;
 let toastTimer = null;
@@ -58,6 +61,7 @@ function showToast(message){
 }
 function markSaved(text='DESAT A SUPABASE'){ $('#saveState').textContent=text; clearTimeout(markSaved.timer); }
 function save(next=content,message='Canvis desats'){
+  if(!editorCanWrite){ showToast('Mode consulta · no pots publicar canvis'); return false; }
   try{
     content=BandaStore.normalize(next);
     renderAll();
@@ -89,7 +93,7 @@ function save(next=content,message='Canvis desats'){
     return false;
   }
 }
-function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.15'); }
+function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.16'); }
 function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
@@ -118,7 +122,7 @@ function bindHomeEditor(){
     try{
       const compressed=await compressImage(file);
       let imageSrc=compressed;
-      if(supabaseActive && currentSession){
+      if(editorCanWrite && supabaseActive && currentSession){
         showToast('Pujant imatge de HOME…');
         imageSrc=(await BandaSupabase.uploadDataUrl('app-images',compressed,'home','home-hero')).url;
       }
@@ -306,8 +310,8 @@ function bindAudioLibrary(){
     const file=event.target.files?.[0];
     if(!file)return;
     try{
-      if(!(supabaseActive && currentSession)){
-        showToast('Inicia sessió i migra les dades abans de pujar àudio a Supabase');
+      if(!(editorCanWrite && supabaseActive && currentSession)){
+        showToast('Cal tenir permisos de gestor per pujar àudio a Supabase');
         return;
       }
       $('#uploadMp3Btn').disabled=true;
@@ -477,7 +481,7 @@ function bindHistoric(){
       try{
         const compressed=await compressHistoricImage(file);
         imageSrc=compressed;
-        if(supabaseActive && currentSession){
+        if(editorCanWrite && supabaseActive && currentSession){
           showToast('Pujant fotografia a Supabase…');
           imageSrc=(await BandaSupabase.uploadDataUrl('historic-media',compressed,String(year),`historic-${year}`)).url;
         }
@@ -511,11 +515,13 @@ function renderSystem(){
   $('#systemProtocol').textContent=supabaseActive?'SUPABASE · sincronització central':(migrationPending?'DADES LOCALS · pendent de migrar':'CONNECTANT…');
   $('#storageBadge').textContent=supabaseActive?'SUPABASE ACTIU':(migrationPending?'MIGRACIÓ PENDENT':'SUPABASE');
   const migrationBtn=$('#migrateToSupabaseBtn');
-  if(migrationBtn) migrationBtn.disabled=supabaseActive && !migrationPending;
+  if(migrationBtn) migrationBtn.disabled=!editorCanWrite || (supabaseActive && !migrationPending);
   const text=$('#supabaseMigrationText');
-  if(text) text.textContent=supabaseActive && !migrationPending
-    ? 'Sincronització activa. Els canvis que desis aquí es publiquen a Supabase i arriben a la resta de dispositius.'
-    : 'Aquest navegador conserva dades locals de versions anteriors. Migra-les una sola vegada a Supabase per convertir-les en el contingut compartit oficial.';
+  if(text) text.textContent=!editorCanWrite
+    ? 'Mode consulta. Aquest accés pot veure el contingut compartit, però no pot publicar canvis.'
+    : (supabaseActive && !migrationPending
+      ? 'Sincronització activa. Els canvis que desis aquí es publiquen a Supabase i arriben a la resta de dispositius.'
+      : 'Aquest navegador conserva dades locals de versions anteriors. Migra-les una sola vegada a Supabase per convertir-les en el contingut compartit oficial.');
 }
 
 async function savePublishedFile(){
@@ -531,7 +537,7 @@ async function savePublishedFile(){
 }
 
 async function migrateCurrentContentToSupabase(){
-  if(!currentSession){ showToast('Cal iniciar sessió'); return; }
+  if(!currentSession || !editorCanWrite){ showToast('Cal iniciar sessió amb permisos de gestor'); return; }
   const btn=$('#migrateToSupabaseBtn');
   if(btn) btn.disabled=true;
   try{
@@ -563,7 +569,6 @@ async function migrateCurrentContentToSupabase(){
 }
 
 async function reloadSupabaseContent(){
-  if(!currentSession) return;
   try{
     const remote=await BandaSupabase.loadContent();
     if(remote && contentHasUsefulData(remote)){
@@ -597,24 +602,95 @@ function bindSystem(){
 function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderDresscodeEventOptions(); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderSystem(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{ if(supabaseActive) return; content=BandaStore.normalize(event.detail);renderAll();}); }
 
-function setEditorAuthenticated(session){
+function setEditorAccess({session=null,profile=null,guest=false}={}){
   currentSession=session||null;
+  currentProfile=profile||null;
+  editorGuestMode=!!guest;
+  editorCanWrite=!!(currentSession && ['admin','gestor'].includes(currentProfile?.role));
   const gate=$('#editorLoginGate'), shell=$('#editorShell');
-  if(currentSession){
-    gate?.classList.add('is-hidden');
-    if(shell){shell.setAttribute('aria-hidden','false');shell.classList.add('is-ready');}
-    $('#editorUserEmail').textContent=currentSession.user?.email||'Usuari autenticat';
-  }else{
-    gate?.classList.remove('is-hidden');
-    if(shell){shell.setAttribute('aria-hidden','true');shell.classList.remove('is-ready');}
-    $('#editorUserEmail').textContent='Sense sessió';
+  gate?.classList.add('is-hidden');
+  if(shell){
+    shell.setAttribute('aria-hidden','false');
+    shell.classList.add('is-ready');
+    shell.classList.toggle('editor-readonly',!editorCanWrite);
+  }
+  const userLabel=editorGuestMode ? 'USUARI NO REGISTRAT' : (currentSession?.user?.email || 'Usuari registrat');
+  $('#editorUserEmail').textContent=userLabel;
+  const badge=$('#editorAccessBadge');
+  if(badge){
+    badge.textContent=editorCanWrite ? `GESTIÓ · ${(currentProfile?.role||'GESTOR').toUpperCase()}` : (editorGuestMode?'MODE CONSULTA':'COMPTE PENDENT');
+    badge.classList.toggle('write',editorCanWrite);
+    badge.classList.toggle('readonly',!editorCanWrite);
+  }
+  const logout=$('#editorLogoutBtn');
+  if(logout) logout.textContent=editorGuestMode?'SORTIR':'TANCAR SESSIÓ';
+}
+
+function showEditorGate(status='Tria com vols accedir al Editor.'){
+  setAuthPanel('login');
+  currentSession=null; currentProfile=null; editorGuestMode=false; editorCanWrite=false;
+  const gate=$('#editorLoginGate'), shell=$('#editorShell');
+  gate?.classList.remove('is-hidden');
+  if(shell){shell.setAttribute('aria-hidden','true');shell.classList.remove('is-ready','editor-readonly');}
+  $('#editorUserEmail').textContent='Sense sessió';
+  if($('#loginStatus')) $('#loginStatus').textContent=status;
+}
+
+function updatePermissionUi(){
+  const readonly=!editorCanWrite;
+  const migrationBtn=$('#migrateToSupabaseBtn');
+  if(migrationBtn && readonly) migrationBtn.disabled=true;
+  const saveState=$('#saveState');
+  if(saveState && readonly) saveState.textContent=editorGuestMode?'MODE CONSULTA':'PENDENT D’AUTORITZACIÓ';
+  const storageBadge=$('#storageBadge');
+  if(storageBadge && readonly) storageBadge.textContent=editorGuestMode?'MODE CONSULTA':'COMPTE PENDENT';
+  const systemProtocol=$('#systemProtocol');
+  if(systemProtocol && readonly) systemProtocol.textContent=editorGuestMode?'SUPABASE · lectura pública':'SUPABASE · lectura autenticada';
+  const dashboard=$('[data-editor-view="dashboard"]');
+  if(dashboard){
+    dashboard.querySelector('.editor-readonly-notice')?.remove();
+    if(readonly){
+      const note=document.createElement('div');
+      note.className='editor-readonly-notice';
+      note.textContent=editorGuestMode
+        ? 'Has entrat com a USUARI NO REGISTRAT. Pots consultar i explorar l’Editor, però no publicar canvis.'
+        : 'El teu compte està registrat però encara no té permisos de gestor. Pots consultar l’Editor mentre esperes autorització.';
+      dashboard.prepend(note);
+    }
   }
 }
 
+async function loadEditorContentReadOnly(){
+  try{
+    const remote=await BandaSupabase.loadContent();
+    content=BandaStore.normalize((remote&&contentHasUsefulData(remote))?remote:(BandaStore.loadPublished?.()||BandaStore.defaults()));
+    if(remote) BandaStore.cacheRemote?.(content);
+    supabaseActive=!!remote; migrationPending=false;
+    renderAll();
+    BandaSupabase.subscribeContent(next=>{
+      if(!contentHasUsefulData(next)) return;
+      content=BandaStore.normalize(next); BandaStore.cacheRemote?.(content); renderAll(); updatePermissionUi();
+    });
+  }catch(error){
+    console.error(error);
+    content=BandaStore.normalize(BandaStore.loadPublished?.()||BandaStore.defaults());
+    supabaseActive=false; migrationPending=false; renderAll();
+    showToast('Mode consulta · mostrant la còpia disponible');
+  }
+  updatePermissionUi();
+}
+
 async function activateSupabaseEditor(session){
-  setEditorAuthenticated(session);
+  currentSession=session||null;
   if(!session) return;
   try{
+    let profile=null;
+    try{ profile=await BandaSupabase.getMyProfile(); }catch(error){ console.warn('Profile unavailable',error); }
+    setEditorAccess({session,profile,guest:false});
+    if(!editorCanWrite){
+      await loadEditorContentReadOnly();
+      return;
+    }
     const remote=await BandaSupabase.loadContent();
     if(remote && contentHasUsefulData(remote)){
       content=BandaStore.normalize(remote);
@@ -635,21 +711,34 @@ async function activateSupabaseEditor(session){
       supabaseActive=true; migrationPending=false;
       markSaved('DESAT A SUPABASE');
     }
-    renderAll();
+    renderAll(); updatePermissionUi();
     BandaSupabase.subscribeContent(next=>{
       if(!supabaseActive || !contentHasUsefulData(next)) return;
-      content=BandaStore.normalize(next); BandaStore.cacheRemote?.(content); renderAll(); markSaved('ACTUALITZAT DES DE SUPABASE');
+      content=BandaStore.normalize(next); BandaStore.cacheRemote?.(content); renderAll(); updatePermissionUi(); markSaved('ACTUALITZAT DES DE SUPABASE');
     });
   }catch(error){
     console.error(error);
-    $('#loginStatus').textContent='Error de connexió. Has executat SUPABASE_SETUP.sql?';
+    $('#loginStatus').textContent='Error de connexió. Has executat SUPABASE_UPDATE_v0.16.sql?';
     showToast('No s’ha pogut inicialitzar Supabase');
   }
 }
 
+function setAuthPanel(mode){
+  const login=mode!=='register';
+  $('#editorLoginForm').hidden=!login;
+  $('#editorRegisterForm').hidden=login;
+  $('#showLoginMode').classList.toggle('active',login);
+  $('#showRegisterMode').classList.toggle('active',!login);
+  $('#showLoginMode').setAttribute('aria-selected',String(login));
+  $('#showRegisterMode').setAttribute('aria-selected',String(!login));
+  $('#loginStatus').textContent=login?'Introdueix el teu email i contrasenya.':'Crea el teu compte. Rebràs un email de confirmació.';
+}
+
 function bindEditorAuth(){
-  const form=$('#editorLoginForm');
-  form?.addEventListener('submit',async event=>{
+  $('#showLoginMode')?.addEventListener('click',()=>setAuthPanel('login'));
+  $('#showRegisterMode')?.addEventListener('click',()=>setAuthPanel('register'));
+
+  $('#editorLoginForm')?.addEventListener('submit',async event=>{
     event.preventDefault();
     const email=$('#loginEmail').value.trim(), password=$('#loginPassword').value;
     $('#loginStatus').textContent='Entrant…';
@@ -657,18 +746,51 @@ function bindEditorAuth(){
       const session=await BandaSupabase.signIn(email,password);
       $('#loginPassword').value=''; $('#loginStatus').textContent='Sessió iniciada';
       await activateSupabaseEditor(session);
-    }catch(error){ console.error(error); $('#loginStatus').textContent='Email o contrasenya incorrectes, o Supabase encara no està configurat.'; }
+    }catch(error){ console.error(error); $('#loginStatus').textContent='Email o contrasenya incorrectes, o el compte encara no està confirmat.'; }
   });
-  $('#editorLogoutBtn')?.addEventListener('click',async()=>{ try{await BandaSupabase.signOut();}catch(error){} supabaseActive=false;currentSession=null;setEditorAuthenticated(null); });
+
+  $('#editorRegisterForm')?.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const email=$('#registerEmail').value.trim();
+    const password=$('#registerPassword').value;
+    const repeat=$('#registerPasswordRepeat').value;
+    if(password!==repeat){ $('#loginStatus').textContent='Les dues contrasenyes no coincideixen.'; return; }
+    $('#loginStatus').textContent='Creant compte…';
+    try{
+      const redirectTo=new URL('./editor.html',location.href).href;
+      const result=await BandaSupabase.signUp(email,password,redirectTo);
+      $('#registerPassword').value=''; $('#registerPasswordRepeat').value='';
+      if(result?.session){
+        $('#loginStatus').textContent='Compte creat. Entrant…';
+        await activateSupabaseEditor(result.session);
+      }else{
+        $('#loginStatus').textContent='Compte creat. Revisa el teu email i confirma’l; després podràs entrar al Editor.';
+      }
+    }catch(error){
+      console.error(error);
+      $('#loginStatus').textContent=error?.message||'No s’ha pogut crear el compte.';
+    }
+  });
+
+  $('#guestAccessBtn')?.addEventListener('click',async()=>{
+    setEditorAccess({guest:true});
+    await loadEditorContentReadOnly();
+  });
+
+  $('#editorLogoutBtn')?.addEventListener('click',async()=>{
+    if(currentSession){ try{await BandaSupabase.signOut();}catch(error){} }
+    supabaseActive=false; currentSession=null; currentProfile=null; editorGuestMode=false; editorCanWrite=false;
+    showEditorGate('Sessió tancada. Tria com vols accedir.');
+  });
 }
 
 async function initEditorBackend(){
-  if(!window.BandaSupabase?.enabled){ $('#loginStatus').textContent='Supabase no està configurat.'; return; }
+  if(!window.BandaSupabase?.enabled){ showEditorGate('Supabase no està configurat. Pots entrar com a usuari no registrat.'); return; }
   try{
     const session=await BandaSupabase.session();
     if(session) await activateSupabaseEditor(session);
-    else { setEditorAuthenticated(null); $('#loginStatus').textContent='Introdueix el teu email i contrasenya.'; }
-  }catch(error){ console.error(error); $('#loginStatus').textContent='No s’ha pogut connectar amb Supabase.'; }
+    else showEditorGate('Tria com vols accedir al Editor.');
+  }catch(error){ console.error(error); showEditorGate('No s’ha pogut connectar amb Supabase. Pots entrar en mode consulta.'); }
 }
 
 let editorDeferredPrompt = null;

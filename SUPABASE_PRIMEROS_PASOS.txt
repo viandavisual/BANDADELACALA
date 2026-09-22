@@ -1,19 +1,23 @@
-BANDA DE LA CALA · v0.15 · PRIMERA CONFIGURACIÓ SUPABASE
+BANDA DE LA CALA · v0.16 · SUPABASE
+====================================
 
-1) Supabase > SQL Editor > New query.
-2) Copia tot el contingut de SUPABASE_SETUP.sql i prem RUN.
-3) Supabase > Authentication > Users > Add user.
-   Crea o convida el teu email i defineix una contrasenya.
-4) Publica el PATCH v0.14 -> v0.15 a GitHub Pages.
-5) Obre editor.html i inicia sessió.
-6) Si ja tens dades configurades en aquest navegador, entra a SISTEMA i prem
-   "MIGRAR DADES LOCALS A SUPABASE". Les imatges locals incrustades es pujaran
-   automàticament a Storage abans de publicar les dades.
-7) A partir d'aquí, DESAR al EDITOR escriu directament a Supabase i la resta de
-   dispositius rep el mateix contingut. GitHub només s'ha de tocar quan canviï
-   el software de la APP/EDITOR.
+SI YA VENÍAS DE v0.15:
+1. En Supabase > SQL Editor, ejecuta SUPABASE_UPDATE_v0.16.sql ANTES de publicar la v0.16.
+2. Comprueba en Authentication > URL Configuration que Site URL y Redirect URLs apuntan a tu GitHub Pages/editor.html.
+3. Mantén activada la confirmación por email si quieres validar cada alta.
+4. Sube el PATCH v0.15 -> v0.16 a GitHub.
 
-IMPORTANT:
-- No posis mai cap Secret Key / sb_secret_... dins dels fitxers web.
-- La Publishable Key inclosa a config.js és la clau pública de client i queda
-  protegida funcionalment per les polítiques RLS del projecte.
+ACCESOS DEL EDITOR:
+- ENTRAR: cuenta ya registrada.
+- REGISTRE NOU: crea una cuenta Supabase y envía confirmación por email.
+- USUARI NO REGISTRAT: acceso de consulta, sin permisos de escritura.
+
+SEGURIDAD:
+- Los usuarios existentes al ejecutar la actualización conservan rol GESTOR.
+- Los registros nuevos reciben rol PENDING y NO pueden publicar cambios.
+- Para autorizar a un nuevo gestor: Supabase > Table Editor > profiles > cambia role de pending a gestor.
+- Los roles admin y gestor pueden editar contenido y subir archivos.
+- pending y music son de solo consulta en el EDITOR v0.16.
+
+No publiques nunca claves sb_secret_ ni contraseñas de base de datos.
+La Publishable Key sí está prevista para ejecutarse en el navegador protegida por RLS.

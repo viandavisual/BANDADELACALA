@@ -33,6 +33,24 @@
     return data.session;
   }
 
+  async function signUp(email,password,redirectTo){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const options={};
+    if(redirectTo) options.emailRedirectTo=redirectTo;
+    const {data,error}=await c.auth.signUp({email,password,options});
+    if(error) throw error;
+    return data;
+  }
+
+  async function getMyProfile(){
+    const c=getClient(); if(!c) return null;
+    const currentSession=await session();
+    if(!currentSession) return null;
+    const {data,error}=await c.from('profiles').select('user_id,email,role,created_at').eq('user_id',currentSession.user.id).maybeSingle();
+    if(error) throw error;
+    return data || null;
+  }
+
   async function signOut(){
     const c=getClient(); if(!c) return;
     const {error}=await c.auth.signOut();
@@ -126,7 +144,7 @@
   }
 
   window.BandaSupabase={
-    enabled,getClient,session,signIn,signOut,loadContent,saveContent,subscribeContent,
+    enabled,getClient,session,signIn,signUp,getMyProfile,signOut,loadContent,saveContent,subscribeContent,
     uploadFile,uploadDataUrl,listPublicFiles,onAuthChange,dataUrlToFile
   };
 })();
