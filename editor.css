@@ -56,3 +56,20 @@ body{background:linear-gradient(145deg,#c69237 0%,#d4ac5f 45%,#e2c277 100%)!impo
 .hero-preview-overlay{z-index:2!important;background:linear-gradient(90deg,#fff 0%,#fff 46%,rgba(255,255,255,.96) 51%,rgba(255,255,255,.76) 57%,rgba(255,255,255,.28) 64%,rgba(255,255,255,0) 72%)!important}
 .hero-preview-copy{z-index:3!important}
 @keyframes editorHeroDriftV07{0%{transform:scale(.965) translateX(-1%)}50%{transform:scale(1) translateX(0)}100%{transform:scale(.972) translateX(1%)}}
+
+/* v0.11 · HISTÒRIC */
+.history-editor-layout{display:grid;grid-template-columns:minmax(330px,.78fr) minmax(480px,1.22fr);gap:18px;align-items:start}
+.history-form-card{position:sticky;top:118px}
+.history-image-preview{margin:10px 0 4px;border:1px solid rgba(139,98,40,.24);border-radius:18px;padding:10px;background:#fffaf0}
+.history-image-preview img{display:block;width:100%;max-height:360px;object-fit:contain;border-radius:12px;background:#fff}
+.history-image-preview small{display:block;margin-top:8px;color:var(--muted);line-height:1.4}
+.history-period-hint{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:#f6e6c6;color:var(--editor-page-gold-dark);font-size:.74rem;font-weight:750;line-height:1.45}
+.historic-editor-list{display:grid;gap:11px}
+.history-editor-period{display:flex;align-items:baseline;gap:9px;margin:8px 0 -2px;padding:9px 12px;border-radius:13px;background:#f5e6c7;border:1px solid rgba(139,98,40,.18)}
+.history-editor-period strong{font-size:.72rem;letter-spacing:.08em;color:#70450e}.history-editor-period span{font-size:.82rem;font-weight:900;color:var(--ink)}
+.historic-editor-item{display:grid;grid-template-columns:92px 1fr auto;gap:13px;align-items:center;padding:11px;border:1px solid rgba(139,98,40,.15);border-radius:16px;background:#fff}
+.historic-thumb{width:92px;height:76px;border-radius:12px;overflow:hidden;background:#f5ead1;display:grid;place-items:center;color:#8b6228;font-size:1.6rem}
+.historic-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.historic-editor-item .list-main h3{margin:4px 0 4px}.historic-editor-item .list-main p{margin:3px 0;color:var(--muted);font-size:.82rem;line-height:1.4}
+@media(max-width:1180px){.history-editor-layout{grid-template-columns:1fr}.history-form-card{position:relative;top:auto}}
+@media(max-width:620px){.historic-editor-item{grid-template-columns:74px 1fr}.historic-thumb{width:74px;height:66px}.historic-editor-item .list-actions{grid-column:1/-1;justify-content:flex-end}.history-editor-period{display:block}.history-editor-period span{display:block;margin-top:2px}}

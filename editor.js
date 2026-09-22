@@ -52,8 +52,8 @@ function showToast(message){
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove('show'),2800);
 }
 function markSaved(){ $('#saveState').textContent='DESAT'; clearTimeout(markSaved.timer); markSaved.timer=setTimeout(()=>$('#saveState').textContent='DADES CARREGADES',1400); }
-function save(next=content,message='Canvis desats'){ content=BandaStore.save(next); renderAll(); markSaved(); if(message) showToast(message); }
-function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.10'); }
+function save(next=content,message='Canvis desats'){ try{ content=BandaStore.save(next); renderAll(); markSaved(); if(message) showToast(message); return true; }catch(error){ if(error?.message==='STORAGE_QUOTA') showToast('No hi ha prou espai local. Redueix el nombre/mida de fotos o publica i connecta Supabase.'); else showToast('No s’han pogut desar els canvis'); return false; } }
+function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.11'); }
 function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
@@ -62,7 +62,7 @@ function renderDashboard(){
   const events=[...(content.events||[])].sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   const tracks=content.tracks||[]; const now=new Date(); const today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; const next=events.find(event=>event.date>=today);
   $('#statEvents').textContent=events.length; $('#statNextEvent').textContent=next?`${formatDate(next.date)} · ${next.title}`:'Cap activitat futura';
-  $('#statDresscodes').textContent=(content.dresscodes||[]).length; $('#statTracks').textContent=tracks.length; $('#statVisibleTracks').textContent=`${tracks.filter(track=>track.visible!==false).length} visibles`;
+  $('#statDresscodes').textContent=(content.dresscodes||[]).length; $('#statTracks').textContent=tracks.length; $('#statVisibleTracks').textContent=`${tracks.filter(track=>track.visible!==false).length} visibles`; $('#statHistoric').textContent=(content.historicItems||[]).length;
 }
 
 function renderHomeEditor(){
@@ -266,10 +266,175 @@ function bindAudioLibrary(){
   });
 }
 
-function renderSystem(){ const date=content.updatedAt?new Date(content.updatedAt):null; $('#lastUpdated').textContent=date&&!Number.isNaN(date.valueOf())?new Intl.DateTimeFormat('ca-ES',{dateStyle:'medium',timeStyle:'short'}).format(date):'—'; $('#systemEvents').textContent=(content.events||[]).length; $('#systemDresscodes').textContent=(content.dresscodes||[]).length; $('#systemTracks').textContent=(content.tracks||[]).length; $('#systemProtocol').textContent=location.protocol==='file:'?'Fitxer local':location.host||location.protocol; $('#storageBadge').textContent=location.protocol==='file:'?'MODE LOCAL':'MATEIX ORIGEN'; }
+
+function historicPeriods(){ return Array.isArray(CFG.historicPeriods) ? CFG.historicPeriods : []; }
+function historicPeriodById(id){ return historicPeriods().find(period=>period.id===id); }
+function historicPeriodLabel(period){ return period ? `${period.years} · ${period.director}` : 'Període desconegut'; }
+function yearFitsPeriod(year,period){ return !!period && year>=period.start && (period.end===null || year<=period.end); }
+
+function renderHistoricPeriodOptions(selected=''){
+  const select=$('#historicPeriod');
+  if(!select) return;
+  select.innerHTML='<option value="">— Selecciona període —</option>'+historicPeriods().map(period=>`<option value="${esc(period.id)}">${esc(historicPeriodLabel(period))}</option>`).join('');
+  if(selected && [...select.options].some(option=>option.value===selected)) select.value=selected;
+}
+
+function autoHistoricPeriodFromYear(){
+  const year=Number.parseInt($('#historicYear').value,10);
+  const hint=$('#historicPeriodHint');
+  if(!Number.isInteger(year)){
+    hint.hidden=true;
+    return;
+  }
+  const matches=historicPeriods().filter(period=>yearFitsPeriod(year,period));
+  if(matches.length===1){
+    $('#historicPeriod').value=matches[0].id;
+    hint.hidden=false;
+    hint.textContent=`Període detectat: ${historicPeriodLabel(matches[0])}`;
+  }else if(matches.length>1){
+    $('#historicPeriod').value='';
+    hint.hidden=false;
+    hint.textContent='Aquest any coincideix amb un canvi de direcció. Selecciona manualment el període correcte.';
+  }else{
+    $('#historicPeriod').value='';
+    hint.hidden=false;
+    hint.textContent='Aquest any queda fora dels períodes configurats.';
+  }
+}
+
+function resetHistoricForm(){
+  const form=$('#historicForm'); if(!form) return;
+  form.reset();
+  $('#historicId').value='';
+  $('#historicFormTitle').textContent='Nova fotografia';
+  $('#historicImagePreview').removeAttribute('src');
+  $('#historicImagePreviewWrap').hidden=true;
+  $('#historicPeriodHint').hidden=true;
+  $('#historicImageFile').required=true;
+  renderHistoricPeriodOptions('');
+  $('#historicYear').max=String(new Date().getFullYear());
+}
+
+async function readImage(file){
+  return await new Promise((resolve,reject)=>{ const reader=new FileReader(); reader.onload=()=>resolve(reader.result); reader.onerror=reject; reader.readAsDataURL(file); });
+}
+
+async function compressHistoricImage(file){
+  const raw=await readImage(file);
+  const img=await new Promise((resolve,reject)=>{ const el=new Image(); el.onload=()=>resolve(el); el.onerror=reject; el.src=raw; });
+  let maxSide=1200;
+  let quality=.76;
+  const encode=(side,q)=>{
+    const scale=Math.min(1,side/img.width,side/img.height);
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(img.width*scale));
+    canvas.height=Math.max(1,Math.round(img.height*scale));
+    const ctx=canvas.getContext('2d');
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    return canvas.toDataURL('image/jpeg',q);
+  };
+  let out=encode(maxSide,quality);
+  if(out.length>520000) out=encode(1100,.66);
+  if(out.length>520000) out=encode(950,.58);
+  return out;
+}
+
+function editHistoric(id){
+  const item=(content.historicItems||[]).find(entry=>entry.id===id); if(!item) return;
+  $('#historicId').value=item.id;
+  $('#historicYear').value=item.year||'';
+  renderHistoricPeriodOptions(item.periodId||'');
+  $('#historicTitle').value=item.title||'';
+  $('#historicDescription').value=item.description||'';
+  $('#historicFormTitle').textContent='Editar fotografia';
+  $('#historicImageFile').required=false;
+  if(item.imageSrc){ $('#historicImagePreview').src=item.imageSrc; $('#historicImagePreviewWrap').hidden=false; }
+  else { $('#historicImagePreview').removeAttribute('src'); $('#historicImagePreviewWrap').hidden=true; }
+  $('#historicPeriodHint').hidden=true;
+  $('#historicForm').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function deleteHistoric(id){
+  const item=(content.historicItems||[]).find(entry=>entry.id===id); if(!item) return;
+  if(!confirm(`Vols eliminar aquesta fotografia de ${item.year}?`)) return;
+  content.historicItems=(content.historicItems||[]).filter(entry=>entry.id!==id);
+  save(content,'Fotografia eliminada');
+  resetHistoricForm();
+}
+
+function renderHistoric(){
+  const list=[...(content.historicItems||[])].sort((a,b)=>{
+    const pa=historicPeriods().findIndex(p=>p.id===a.periodId), pb=historicPeriods().findIndex(p=>p.id===b.periodId);
+    if(pa!==pb) return pa-pb;
+    const ya=Number(a.year)||0,yb=Number(b.year)||0;
+    if(ya!==yb) return ya-yb;
+    return String(a.title||'').localeCompare(String(b.title||''),'ca');
+  });
+  $('#historicCount').textContent=list.length;
+  const host=$('#historicEditorList');
+  if(!list.length){ host.innerHTML='<div class="empty-state">Encara no hi ha cap fotografia a l’Històric.</div>'; return; }
+  let currentPeriod='';
+  host.innerHTML=list.map(item=>{
+    const period=historicPeriodById(item.periodId);
+    const group=item.periodId!==currentPeriod ? `<div class="history-editor-period"><strong>${esc(period?.years||'—')}</strong><span>${esc(period?.director||'Període desconegut')}</span></div>` : '';
+    currentPeriod=item.periodId;
+    return `${group}<article class="historic-editor-item">
+      <div class="historic-thumb">${item.imageSrc?`<img src="${esc(item.imageSrc)}" alt="" loading="lazy" />`:'<span>◷</span>'}</div>
+      <div class="list-main"><div class="list-kicker"><span>${esc(item.year)}</span><span>·</span><span>${esc(period?.director||'Sense període')}</span></div>${item.title?`<h3>${esc(item.title)}</h3>`:'<h3>Sense títol</h3>'}${item.description?`<p>${esc(item.description)}</p>`:''}</div>
+      <div class="list-actions"><button class="tiny-btn" data-edit-historic="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-historic="${esc(item.id)}" title="Eliminar">×</button></div>
+    </article>`;
+  }).join('');
+  $$('[data-edit-historic]').forEach(btn=>btn.onclick=()=>editHistoric(btn.dataset.editHistoric));
+  $$('[data-delete-historic]').forEach(btn=>btn.onclick=()=>deleteHistoric(btn.dataset.deleteHistoric));
+}
+
+function bindHistoric(){
+  renderHistoricPeriodOptions('');
+  $('#historicYear').max=String(new Date().getFullYear());
+  $('#historicYear').addEventListener('input',autoHistoricPeriodFromYear);
+  $('#historicImageFile').addEventListener('change',async event=>{
+    const file=event.target.files?.[0];
+    if(!file) return;
+    try{
+      const image=await compressHistoricImage(file);
+      $('#historicImagePreview').src=image;
+      $('#historicImagePreviewWrap').hidden=false;
+      $('#historicImagePreview').dataset.pending=image;
+      showToast('Fotografia preparada');
+    }catch(error){ showToast('No s’ha pogut processar la fotografia'); }
+  });
+  $('#historicForm').addEventListener('submit',async event=>{
+    event.preventDefault();
+    const id=$('#historicId').value||BandaStore.uid('hist');
+    const year=Number.parseInt($('#historicYear').value,10);
+    const periodId=$('#historicPeriod').value;
+    const period=historicPeriodById(periodId);
+    if(!Number.isInteger(year)){ showToast('Cal indicar un any'); return; }
+    if(!period){ showToast('Cal seleccionar un període'); return; }
+    if(!yearFitsPeriod(year,period)){ showToast('L’any no correspon al període seleccionat'); return; }
+    const existing=(content.historicItems||[]).find(entry=>entry.id===id);
+    let imageSrc=existing?.imageSrc||'';
+    const file=$('#historicImageFile').files?.[0];
+    if(file){
+      try{ imageSrc=await compressHistoricImage(file); }
+      catch(error){ showToast('No s’ha pogut processar la fotografia'); return; }
+    }
+    if(!imageSrc){ showToast('Cal seleccionar una fotografia'); return; }
+    const item={id,year,periodId,title:$('#historicTitle').value.trim(),description:$('#historicDescription').value.trim(),imageSrc,createdAt:existing?.createdAt||new Date().toISOString()};
+    content.historicItems=content.historicItems||[];
+    const index=content.historicItems.findIndex(entry=>entry.id===id);
+    if(index>=0) content.historicItems[index]=item; else content.historicItems.push(item);
+    if(save(content,index>=0?'Fotografia actualitzada':'Fotografia afegida')) resetHistoricForm();
+  });
+  $('#newHistoricBtn').onclick=resetHistoricForm;
+  $('#cancelHistoricEdit').onclick=resetHistoricForm;
+}
+
+function renderSystem(){ const date=content.updatedAt?new Date(content.updatedAt):null; $('#lastUpdated').textContent=date&&!Number.isNaN(date.valueOf())?new Intl.DateTimeFormat('ca-ES',{dateStyle:'medium',timeStyle:'short'}).format(date):'—'; $('#systemEvents').textContent=(content.events||[]).length; $('#systemDresscodes').textContent=(content.dresscodes||[]).length; $('#systemTracks').textContent=(content.tracks||[]).length; $('#systemHistoric').textContent=(content.historicItems||[]).length; $('#systemProtocol').textContent=location.protocol==='file:'?'Fitxer local':location.host||location.protocol; $('#storageBadge').textContent=location.protocol==='file:'?'MODE LOCAL':'MATEIX ORIGEN'; }
 async function savePublishedFile(){ const text=BandaStore.makePublishedJs(content); if('showSaveFilePicker' in window){try{const handle=await window.showSaveFilePicker({suggestedName:'content-published.js',types:[{description:'JavaScript',accept:{'text/javascript':['.js']}}]});const writable=await handle.createWritable();await writable.write(text);await writable.close();showToast('Fitxer content-published.js desat');return;}catch(error){if(error?.name==='AbortError')return;}} BandaStore.exportPublishedJs(content);showToast('Fitxer descarregat'); }
-function bindSystem(){ $('#exportJsonBtn').onclick=()=>{BandaStore.exportJson(content);showToast('Còpia JSON creada');}; $('#importJsonBtn').onclick=()=>$('#importJsonInput').click(); $('#importJsonInput').addEventListener('change',event=>{const file=event.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{content=BandaStore.importObject(JSON.parse(reader.result));renderAll();showToast('Dades importades correctament');resetEventForm();resetTrackForm();resetDresscodeForm();}catch(error){showToast('El fitxer JSON no és vàlid');}event.target.value='';};reader.readAsText(file);}); $('#downloadPublishedBtn').onclick=()=>{BandaStore.exportPublishedJs(content);showToast('content-published.js descarregat');}; $('#savePublishedBtn').onclick=savePublishedFile; $('#resetLocalBtn').onclick=()=>{if(!confirm('Vols descartar tots els canvis locals i tornar al contingut publicat?'))return;content=BandaStore.clearLocal();renderAll();resetEventForm();resetTrackForm();resetDresscodeForm();showToast('Contingut local restaurat');}; }
-function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderDresscodeEventOptions(); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderSystem(); }
+function bindSystem(){ $('#exportJsonBtn').onclick=()=>{BandaStore.exportJson(content);showToast('Còpia JSON creada');}; $('#importJsonBtn').onclick=()=>$('#importJsonInput').click(); $('#importJsonInput').addEventListener('change',event=>{const file=event.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{content=BandaStore.importObject(JSON.parse(reader.result));renderAll();showToast('Dades importades correctament');resetEventForm();resetTrackForm();resetDresscodeForm();resetHistoricForm();}catch(error){showToast('El fitxer JSON no és vàlid');}event.target.value='';};reader.readAsText(file);}); $('#downloadPublishedBtn').onclick=()=>{BandaStore.exportPublishedJs(content);showToast('content-published.js descarregat');}; $('#savePublishedBtn').onclick=savePublishedFile; $('#resetLocalBtn').onclick=()=>{if(!confirm('Vols descartar tots els canvis locals i tornar al contingut publicat?'))return;content=BandaStore.clearLocal();renderAll();resetEventForm();resetTrackForm();resetDresscodeForm();resetHistoricForm();showToast('Contingut local restaurat');}; }
+function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderDresscodeEventOptions(); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderSystem(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{content=BandaStore.normalize(event.detail);renderAll();}); }
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindSystem(); bindExternalUpdates(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindSystem(); bindExternalUpdates(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); }
 init();

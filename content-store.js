@@ -1,16 +1,19 @@
 (function(){
   'use strict';
-  const KEY = 'banda-de-la-cala-content-v3';
-  const LEGACY_KEY = 'banda-de-la-cala-content-v2';
-  const LEGACY_KEY_2 = 'banda-de-la-cala-content-v1';
+  const KEY = 'banda-de-la-cala-content-v4';
+  const LEGACY_KEYS = [
+    'banda-de-la-cala-content-v3',
+    'banda-de-la-cala-content-v2',
+    'banda-de-la-cala-content-v1'
+  ];
   const CHANNEL = 'banda-de-la-cala-content';
   const clone = value => JSON.parse(JSON.stringify(value));
   const uid = prefix => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
-  const defaults = () => clone(window.BANDA_PUBLISHED_CONTENT || {version:3,events:[],tracks:[],dresscodes:[],settings:{}});
+  const defaults = () => clone(window.BANDA_PUBLISHED_CONTENT || {version:4,events:[],tracks:[],dresscodes:[],historicItems:[],settings:{}});
 
   function normalize(raw){
     const base = raw && typeof raw === 'object' ? clone(raw) : defaults();
-    base.version = 3;
+    base.version = 4;
     base.updatedAt = base.updatedAt || new Date().toISOString();
     base.settings = base.settings && typeof base.settings === 'object' ? base.settings : {};
     base.settings.homeHeroImage = typeof base.settings.homeHeroImage === 'string' ? base.settings.homeHeroImage : '';
@@ -41,14 +44,27 @@
       boysItems: Array.isArray(item.boysItems) ? item.boysItems.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||''})) : [],
       girlsItems: Array.isArray(item.girlsItems) ? item.girlsItems.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||''})) : []
     })) : [];
+    base.historicItems = Array.isArray(base.historicItems) ? base.historicItems.map((item,index)=>({
+      id: item.id || uid(`hist${index}`),
+      year: Number.parseInt(item.year,10) || '',
+      periodId: item.periodId || '',
+      title: item.title || '',
+      description: item.description || '',
+      imageSrc: item.imageSrc || item.image || item.src || '',
+      createdAt: item.createdAt || ''
+    })) : [];
     return base;
   }
 
   function readLocal(){
     try{
       let raw = localStorage.getItem(KEY);
-      if(!raw) raw = localStorage.getItem(LEGACY_KEY);
-      if(!raw) raw = localStorage.getItem(LEGACY_KEY_2);
+      if(!raw){
+        for(const legacy of LEGACY_KEYS){
+          raw = localStorage.getItem(legacy);
+          if(raw) break;
+        }
+      }
       return raw ? normalize(JSON.parse(raw)) : null;
     }catch(error){ return null; }
   }
@@ -67,13 +83,21 @@
   function save(content){
     const clean = normalize(content);
     clean.updatedAt = new Date().toISOString();
-    try{ localStorage.setItem(KEY, JSON.stringify(clean)); }catch(error){}
+    try{ localStorage.setItem(KEY, JSON.stringify(clean)); }
+    catch(error){
+      const quota = error && (error.name === 'QuotaExceededError' || error.name === 'NS_ERROR_DOM_QUOTA_REACHED');
+      if(quota) throw new Error('STORAGE_QUOTA');
+      throw error;
+    }
     emit(clean);
     return clean;
   }
 
   function clearLocal(){
-    try{ localStorage.removeItem(KEY); localStorage.removeItem(LEGACY_KEY); localStorage.removeItem(LEGACY_KEY_2); }catch(error){}
+    try{
+      localStorage.removeItem(KEY);
+      LEGACY_KEYS.forEach(key=>localStorage.removeItem(key));
+    }catch(error){}
     const content = normalize(defaults());
     emit(content);
     return content;
@@ -97,7 +121,9 @@
     setTimeout(()=>URL.revokeObjectURL(url),500);
   }
 
-  window.addEventListener('storage',event=>{ if(event.key === KEY || event.key === LEGACY_KEY || event.key === LEGACY_KEY_2) emit(load()); });
+  window.addEventListener('storage',event=>{
+    if(event.key === KEY || LEGACY_KEYS.includes(event.key)) emit(load());
+  });
   if(channel){ channel.onmessage = event => window.dispatchEvent(new CustomEvent('banda-content-changed',{detail:normalize(event.data)})); }
 
   window.BandaStore = {

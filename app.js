@@ -9,7 +9,7 @@ const state = {
   deferredPrompt: null,
   playbackMode: 'normal',
   lastRandomTrack: -1,
-  content: window.BandaStore ? BandaStore.load() : {events:[],tracks:[]}
+  content: window.BandaStore ? BandaStore.load() : {events:[],tracks:[],dresscodes:[],historicItems:[],settings:{}}
 };
 
 const navItems = [
@@ -70,7 +70,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.10');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.11');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
@@ -84,7 +84,7 @@ function renderNavigation(){
 function renderHome(){
   const cards = [
     { id:'calendar', icon:'calendar', title:'CALENDARI', text:'Assajos, actuacions i agenda de la banda.', status:'ACTIU' },
-    { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia multimèdia de la història de la banda.', status:'PROPERAMENT' },
+    { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
     { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
     { id:'games', icon:'games', title:'MINIJOCS', text:'Jocs casuals de la banda.', status:'PROPERAMENT' }
   ];
@@ -218,6 +218,54 @@ function selectDate(date){
     return `<article class="event-card"><span class="event-type">${esc(event.type)}</span><h4>${esc(event.title)}</h4>${event.time?`<p>🕒 ${esc(event.time)}</p>`:''}${event.place?`<p>⌖ ${esc(event.place)}</p>`:''}${event.notes?`<p>${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">⚪️ VEURE DRESSCODE</button>`:''}</article>`;
   }).join('') : '<p class="empty-copy">No hi ha cap activitat prevista per aquest dia.</p>';
   $$('[data-dresscode]').forEach(btn=>btn.addEventListener('click',()=>openDresscode(btn.dataset.dresscode)));
+}
+
+
+function getHistoricPeriods(){
+  return Array.isArray(CFG.historicPeriods) ? CFG.historicPeriods : [];
+}
+
+function getHistoricItems(){
+  return [...(state.content.historicItems || [])].sort((a,b)=>{
+    const ya=Number(a.year)||0, yb=Number(b.year)||0;
+    if(ya!==yb) return ya-yb;
+    return String(a.title||'').localeCompare(String(b.title||''),'ca');
+  });
+}
+
+function renderHistory(){
+  const host=$('#historyTimeline');
+  if(!host) return;
+  const periods=getHistoricPeriods();
+  const items=getHistoricItems();
+  if(!periods.length){
+    host.innerHTML='<div class="history-empty panel">No hi ha períodes configurats.</div>';
+    return;
+  }
+  let visualIndex=0;
+  host.innerHTML=periods.map(period=>{
+    const periodItems=items.filter(item=>item.periodId===period.id);
+    const media=periodItems.length ? periodItems.map(item=>{
+      const side=(visualIndex++ % 2===0)?'left':'right';
+      const title=item.title ? `<h4>${esc(item.title)}</h4>` : '';
+      const desc=item.description ? `<p>${esc(item.description)}</p>` : '';
+      const img=item.imageSrc ? `<img loading="lazy" decoding="async" src="${esc(item.imageSrc)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />` : '';
+      return `<article class="history-item ${side}">
+        <div class="history-node" aria-hidden="true"></div>
+        <div class="history-card">
+          ${img}
+          <div class="history-card-copy"><span class="history-year">${esc(item.year)}</span>${title}${desc}</div>
+        </div>
+      </article>`;
+    }).join('') : `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
+    return `<section class="history-period" data-period="${esc(period.id)}">
+      <div class="history-period-head">
+        <span class="history-period-dot" aria-hidden="true"></span>
+        <div><strong>${esc(period.years)}</strong><span>${esc(period.director)}</span></div>
+      </div>
+      <div class="history-period-items">${media}</div>
+    </section>`;
+  }).join('');
 }
 
 function applyHomeHero(){
@@ -356,6 +404,7 @@ function refreshContent(next){
   renderCalendar();
   if(state.selectedDate) selectDate(state.selectedDate);
   renderTracks();
+  renderHistory();
 }
 
 function bindContentUpdates(){
@@ -404,6 +453,7 @@ function init(){
   applyHomeHero();
   updateHeader('home');
   renderCalendar();
+  renderHistory();
   bindCalendar();
   bindDresscodeModal();
   renderTracks();
