@@ -361,3 +361,57 @@ button,a,input{touch-action:manipulation}
   .topbar-actions{flex:0 0 auto}
   .mute-btn{width:42px;height:38px}
 }
+
+
+/* v0.14 · MUTE, HISTÒRIC i PLAYER */
+.mute-btn{position:relative;width:46px;height:42px;padding:0;border-radius:13px;display:grid;place-items:center;overflow:hidden}
+.mute-music-icon{width:27px;height:27px;display:block;overflow:visible}
+.mute-music-icon .note-blue{fill:none;stroke:var(--blue);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.mute-music-icon .note-gold{fill:var(--gold)}
+.mute-music-icon .note-blue-fill{fill:var(--blue)}
+.mute-btn.is-muted{background:#fff;border-color:rgba(57,58,134,.22);color:var(--blue)}
+.mute-btn.is-muted .mute-music-icon{opacity:.48}
+.mute-btn.is-muted:after{content:"";position:absolute;width:31px;height:2px;background:var(--ink);border-radius:999px;transform:rotate(-42deg)}
+
+.history-period.period-tone-1{--period-color:#5b4a73!important;--period-text:#fff!important}
+.history-period.period-tone-2{--period-color:#2f6f78!important;--period-text:#fff!important}
+.history-period.period-tone-3{--period-color:#8a5c36!important;--period-text:#fff!important}
+.history-period.period-tone-4{--period-color:#393a86!important;--period-text:#fff!important}
+.history-period.period-tone-5{--period-color:#d4ac5f!important;--period-text:#24211f!important}
+.history-period.period-tone-6{--period-color:#9b4f62!important;--period-text:#fff!important}
+.history-period.period-tone-7{--period-color:#55734f!important;--period-text:#fff!important}
+.history-period.period-tone-8{--period-color:#2e5f9a!important;--period-text:#fff!important}
+.history-period-head{background:var(--period-color)!important;color:var(--period-text)!important}
+.history-period .history-node{background:var(--period-color)!important}
+
+.playlist-layout{align-items:start}
+.playlist-layout>.panel:first-child{padding:16px 18px}
+.playlist-layout>.panel:first-child .panel-head{margin-bottom:10px}
+.track-list{gap:6px}
+.track-row{grid-template-columns:34px 1fr auto;gap:9px;border-radius:12px;padding:8px 10px}
+.track-index{width:28px;font-size:.68rem}
+.track-main strong{font-size:.88rem}
+.track-main small{font-size:.72rem;margin-top:1px}
+.player-card{min-height:0!important;padding:16px 18px!important;justify-content:flex-start!important}
+.record-art{width:138px!important;margin-bottom:10px!important;border-width:5px!important;animation:none!important}
+.record-icon{width:54px!important;height:54px!important}
+.record-icon .bar{animation:none!important;transform:scaleY(1)!important}
+.record-icon .wave-line{animation:none!important}
+.player-card.is-playing .record-icon .bar{animation:barBounce .95s ease-in-out infinite!important}
+.player-card.is-playing .record-icon .b2{animation-delay:.14s!important}
+.player-card.is-playing .record-icon .b3{animation-delay:.28s!important}
+.player-card.is-playing .record-icon .b4{animation-delay:.42s!important}
+.player-card h3{margin:4px 0 2px;font-size:1.08rem}
+.player-card p{margin:0 0 8px;font-size:.78rem}
+.player-controls{gap:9px;margin:5px 0 10px}
+.player-controls .icon-btn{min-width:38px;height:38px;padding:0 8px}
+.play-btn{width:50px!important;font-size:1.08rem!important}
+.playback-modes{gap:5px;margin:0 0 10px}
+.mode-btn{min-height:30px;padding:5px 8px;font-size:.66rem}
+.mode-btn span{font-size:.52rem}
+.progress-row{grid-template-columns:34px 1fr 34px;gap:7px;font-size:.68rem}
+@media(max-width:780px){
+  .mute-btn{width:42px;height:40px}
+  .playlist-layout>.panel:first-child,.player-card{padding:14px!important}
+  .record-art{width:128px!important}
+}

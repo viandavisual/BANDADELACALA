@@ -71,7 +71,13 @@
           </div>
         </div>
         <div class="topbar-actions">
-          <button id="muteBtn" class="mute-btn" type="button" aria-pressed="false" aria-label="Silenciar tot l'àudio de l'app" title="Silenciar tot l'àudio de l'app"><span class="mute-icon" aria-hidden="true">🔊</span><span class="mute-label">SO ON</span></button>
+          <button id="muteBtn" class="mute-btn" type="button" aria-pressed="false" aria-label="Silenciar tot l'àudio de l'app" title="Silenciar tot l'àudio de l'app">
+            <svg class="mute-music-icon" viewBox="0 0 32 32" aria-hidden="true">
+              <path class="note-blue" d="M11 7.5v13.2M22.5 5v13.2M11 7.5 22.5 5M11 11l11.5-2.5"/>
+              <ellipse class="note-gold" cx="7.8" cy="22.1" rx="4.1" ry="3.1" transform="rotate(-18 7.8 22.1)"/>
+              <ellipse class="note-blue-fill" cx="19.3" cy="19.7" rx="4.1" ry="3.1" transform="rotate(-18 19.3 19.7)"/>
+            </svg>
+          </button>
           <button id="installBtn" class="install-btn" hidden>INSTAL·LAR APP</button>
         </div>
       </header>
@@ -186,8 +192,8 @@
       <h2 id="dresscodeModalTitle">Dress code</h2>
       <p id="dresscodeModalSubtitle" class="dresscode-subtitle"></p>
       <div class="dresscode-grid">
-        <div><h3>🙇‍♂️ Nois</h3><div id="dresscodeBoysView" class="dresscode-text"></div></div>
-        <div><h3>🙇‍♀️ Noies</h3><div id="dresscodeGirlsView" class="dresscode-text"></div></div>
+        <div><h3>♂ Nois</h3><div id="dresscodeBoysView" class="dresscode-text"></div></div>
+        <div><h3>♀ Noies</h3><div id="dresscodeGirlsView" class="dresscode-text"></div></div>
       </div>
     </section>
   </div>

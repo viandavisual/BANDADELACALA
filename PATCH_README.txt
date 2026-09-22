@@ -1,24 +1,30 @@
-BANDA DE LA CALA · PATCH v0.9 -> v0.10
+BANDA DE LA CALA · v0.14
+PATCH DES DE v0.13
 
 SOBRESCRIURE A GITHUB:
 - index.html
-- editor.html
 - app.js
+- style.css
+- editor.html
+- editor.css
 - editor.js
 - config.js
+- version.js
 - sw.js
 
 AFEGIR A GITHUB:
-- version.js
+- editor-manifest.webmanifest
+- assets/icons/editor-icon-192.png
+- assets/icons/editor-icon-512.png
+- assets/icons/editor-apple-touch-icon-180.png
 
 NO CAL TOCAR:
-- style.css
-- editor.css
-- content-store.js
-- manifest.webmanifest
 - data/content-published.js
-- assets/*
+- assets/AUDIO/
+- assets/brand/
+- manifest.webmanifest
+- content-store.js
+- la resta d'assets
 
-IMPORTANT:
-A partir de v0.10, el número de versió queda centralitzat a version.js.
-Les properes entregues tindran un PATCH amb version.js + només els fitxers realment modificats.
+NOTA:
+Després de pujar el PATCH a GitHub Pages, tanca i torna a obrir la PWA si algun dispositiu encara mostra la versió anterior. El Service Worker v0.14 farà la renovació de caché.

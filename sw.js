@@ -1,9 +1,13 @@
-// BANDA DE LA CALA v0.13
+// BANDA DE LA CALA v0.14
 importScripts('./version.js');
 const CACHE = `banda-de-la-cala-${globalThis.BANDA_VERSION || 'dev'}`;
 const CORE = [
   './',
   './index.html',
+  './editor.html',
+  './editor.css',
+  './editor.js',
+  './editor-manifest.webmanifest',
   './version.js',
   './style.css',
   './app.js',
@@ -14,6 +18,9 @@ const CORE = [
   './assets/brand/logo-banda-de-la-cala.png',
   './assets/brand/app-icon.png',
   './assets/brand/editor-icon.png',
+  './assets/icons/editor-icon-192.png',
+  './assets/icons/editor-icon-512.png',
+  './assets/icons/editor-apple-touch-icon-180.png',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/apple-touch-icon-180.png'
@@ -75,7 +82,8 @@ self.addEventListener('fetch', event => {
   if (request.headers.has('range')) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request, './index.html'));
+    const fallback = url.pathname.endsWith('/editor.html') ? './editor.html' : './index.html';
+    event.respondWith(networkFirst(request, fallback));
     return;
   }
 

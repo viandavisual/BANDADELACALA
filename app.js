@@ -250,7 +250,7 @@ function renderHistory(){
     return;
   }
   let visualIndex=0;
-  host.innerHTML=periods.map(period=>{
+  host.innerHTML=periods.map((period,periodIndex)=>{
     const periodItems=items.filter(item=>item.periodId===period.id);
     const media=periodItems.length ? periodItems.map(item=>{
       const side=(visualIndex++ % 2===0)?'left':'right';
@@ -267,7 +267,7 @@ function renderHistory(){
     }).join('') : `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
     const periodColor = period.color || '#393a86';
     const periodText = period.textColor || '#ffffff';
-    return `<section class="history-period" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}">
+    return `<section class="history-period period-tone-${periodIndex+1}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}">
       <div class="history-period-head">
         <span class="history-period-dot" aria-hidden="true"></span>
         <div><strong>${esc(period.years)}</strong><span>${esc(period.director)}</span></div>
@@ -337,9 +337,11 @@ function loadTrack(index, autoplay = false){
 }
 
 function setPlayIcon(){
-  const playing = !audio().paused;
+  const playing = !audio().paused && !audio().ended;
   $('#playPause').textContent = playing ? '❚❚' : '▶';
   $('#miniPlay').textContent = playing ? '❚❚' : '▶';
+  const card = document.querySelector('.player-card');
+  if(card) card.classList.toggle('is-playing', playing);
 }
 
 function formatTime(seconds){
@@ -394,6 +396,7 @@ function bindPlayer(){
   $('#repeatAllBtn').onclick=()=>setPlaybackMode('all');
   $('#randomBtn').onclick=()=>setPlaybackMode('random');
   updatePlaybackModeButtons();
+  setPlayIcon();
   player.addEventListener('play',setPlayIcon);
   player.addEventListener('pause',setPlayIcon);
   player.addEventListener('ended',playNextFromMode);
@@ -415,10 +418,7 @@ function applyGlobalMute(){
     btn.setAttribute('aria-pressed', state.globalMuted ? 'true' : 'false');
     btn.setAttribute('aria-label', state.globalMuted ? "Activar tot l'àudio de l'app" : "Silenciar tot l'àudio de l'app");
     btn.title = state.globalMuted ? "Activar tot l'àudio de l'app" : "Silenciar tot l'àudio de l'app";
-    const icon = btn.querySelector('.mute-icon');
-    const label = btn.querySelector('.mute-label');
-    if(icon) icon.textContent = state.globalMuted ? '🔇' : '🔊';
-    if(label) label.textContent = state.globalMuted ? 'SO OFF' : 'SO ON';
+
   }
 }
 function toggleGlobalMute(){

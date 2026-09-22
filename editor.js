@@ -54,7 +54,7 @@ function showToast(message){
 function markSaved(){ $('#saveState').textContent='PENDENT DE PUBLICAR'; clearTimeout(markSaved.timer); }
 function save(next=content,message='Canvis desats'){ try{ content=BandaStore.save(next); renderAll(); markSaved(); if(message) showToast(message); return true; }catch(error){ if(error?.message==='STORAGE_QUOTA') showToast('No hi ha prou espai local. Redueix el nombre/mida de fotos o publica i connecta Supabase.'); else showToast('No s’han pogut desar els canvis'); return false; } }
 function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.11'); }
-function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; window.scrollTo({top:0,behavior:'smooth'}); }
+function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
 
@@ -436,5 +436,41 @@ async function savePublishedFile(){ const text=BandaStore.makePublishedJs(conten
 function bindSystem(){ $('#exportJsonBtn').onclick=()=>{BandaStore.exportJson(content);showToast('Còpia JSON creada');}; $('#importJsonBtn').onclick=()=>$('#importJsonInput').click(); $('#importJsonInput').addEventListener('change',event=>{const file=event.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{content=BandaStore.importObject(JSON.parse(reader.result));renderAll();showToast('Dades importades correctament');resetEventForm();resetTrackForm();resetDresscodeForm();resetHistoricForm();}catch(error){showToast('El fitxer JSON no és vàlid');}event.target.value='';};reader.readAsText(file);}); $('#downloadPublishedBtn').onclick=()=>{BandaStore.exportPublishedJs(content);$('#saveState').textContent='PENDENT DE PUJAR A GITHUB';showToast('content-published.js preparat · ara puja’l a GitHub');}; $('#savePublishedBtn').onclick=savePublishedFile; $('#resetLocalBtn').onclick=()=>{if(!confirm('Vols descartar tots els canvis locals i tornar al contingut publicat?'))return;content=BandaStore.clearLocal();renderAll();resetEventForm();resetTrackForm();resetDresscodeForm();resetHistoricForm();showToast('Contingut local restaurat');}; }
 function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderDresscodeEventOptions(); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderSystem(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{content=BandaStore.normalize(event.detail);renderAll();}); }
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindSystem(); bindExternalUpdates(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); }
+
+let editorDeferredPrompt = null;
+
+function editorIsStandalone(){
+  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function bindEditorPwaInstall(){
+  const btn=$('#editorInstallBtn');
+  if(!btn) return;
+  btn.hidden=editorIsStandalone();
+  window.addEventListener('beforeinstallprompt',event=>{
+    event.preventDefault();
+    editorDeferredPrompt=event;
+    if(!editorIsStandalone()) btn.hidden=false;
+  });
+  btn.addEventListener('click',async()=>{
+    if(editorDeferredPrompt){
+      editorDeferredPrompt.prompt();
+      await editorDeferredPrompt.userChoice;
+      editorDeferredPrompt=null;
+      return;
+    }
+    const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
+    showToast(ios ? 'Safari: Compartir → Afegir a la pantalla d’inici' : 'Utilitza l’opció Instal·lar del navegador si no apareix automàticament');
+  });
+  window.addEventListener('appinstalled',()=>{ btn.hidden=true; showToast('EDITOR instal·lat'); });
+}
+
+function registerEditorSW(){
+  if(location.protocol==='file:') return;
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{}));
+  }
+}
+
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindSystem(); bindExternalUpdates(); bindEditorPwaInstall(); registerEditorSW(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); }
 init();

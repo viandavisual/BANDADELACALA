@@ -73,3 +73,11 @@ body{background:linear-gradient(145deg,#c69237 0%,#d4ac5f 45%,#e2c277 100%)!impo
 .historic-editor-item .list-main h3{margin:4px 0 4px}.historic-editor-item .list-main p{margin:3px 0;color:var(--muted);font-size:.82rem;line-height:1.4}
 @media(max-width:1180px){.history-editor-layout{grid-template-columns:1fr}.history-form-card{position:relative;top:auto}}
 @media(max-width:620px){.historic-editor-item{grid-template-columns:74px 1fr}.historic-thumb{width:74px;height:66px}.historic-editor-item .list-actions{grid-column:1/-1;justify-content:flex-end}.history-editor-period{display:block}.history-editor-period span{display:block;margin-top:2px}}
+
+
+/* v0.14 · instal·lació EDITOR + símbols de gènere */
+.editor-install-btn{border:1px solid rgba(101,64,15,.24);background:#fff;color:var(--editor-page-gold-dark);border-radius:999px;padding:11px 16px;font-size:.66rem;font-weight:950;letter-spacing:.07em;box-shadow:0 8px 20px rgba(91,57,12,.10);transition:.16s ease}
+.editor-install-btn:hover{transform:translateY(-1px);background:#fff7e7}.editor-install-btn.view-hidden{display:none!important}
+.gender-symbol{width:42px;height:42px;border-radius:50%;display:grid!important;place-items:center;background:#f4dfb4;color:var(--editor-page-gold-dark);font-family:Arial,sans-serif;font-size:1.9rem!important;font-weight:900;line-height:1}
+@media(max-width:820px){.editor-install-btn{padding:9px 12px;font-size:.6rem}.top-actions{gap:6px}}
+@media(max-width:560px){.editor-install-btn{font-size:0;width:42px;height:38px;padding:0;border-radius:12px}.editor-install-btn:before{content:"＋";font-size:1.15rem}}
