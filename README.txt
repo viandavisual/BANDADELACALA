@@ -1,11 +1,11 @@
-BANDA DE LA CALA · PWA v0.11
+BANDA DE LA CALA · PWA v0.12
 =============================
 
 ENTRADES
 - index.html   -> APP pública
 - editor.html  -> EDITOR de continguts
 
-NOVETAT v0.11 · HISTÒRIC
+NOVETAT v0.12 · HISTÒRIC
 - HISTÒRIC ja és funcional a l'APP i a l'EDITOR.
 - Períodes configurats:
   1980 - 1982 · Joaquim Arqués
@@ -23,7 +23,7 @@ NOVETAT v0.11 · HISTÒRIC
 - Les imatges utilitzen lazy loading a l'APP.
 
 IMPORTANT · FASE ABANS DE SUPABASE
-- En aquesta v0.11 les fotos carregades des de l'EDITOR es comprimeixen i es guarden dins del contingut local del navegador.
+- En aquesta v0.12 les fotos carregades des de l'EDITOR es comprimeixen i es guarden dins del contingut local del navegador.
 - Per veure aquestes fotos en altres dispositius abans de Supabase, cal generar data/content-published.js des de SISTEMA i substituir aquest únic fitxer a GitHub.
 - Quan connectem Supabase, el mateix selector de fotografia passarà a pujar els fitxers al Storage central i desapareixerà aquest pas manual.
 

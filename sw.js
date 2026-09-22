@@ -1,4 +1,4 @@
-// BANDA DE LA CALA v0.11
+// BANDA DE LA CALA v0.13
 importScripts('./version.js');
 const CACHE = `banda-de-la-cala-${globalThis.BANDA_VERSION || 'dev'}`;
 const CORE = [
@@ -13,6 +13,7 @@ const CORE = [
   './manifest.webmanifest',
   './assets/brand/logo-banda-de-la-cala.png',
   './assets/brand/app-icon.png',
+  './assets/brand/editor-icon.png',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/apple-touch-icon-180.png'
@@ -75,6 +76,22 @@ self.addEventListener('fetch', event => {
 
   if (request.mode === 'navigate') {
     event.respondWith(networkFirst(request, './index.html'));
+    return;
+  }
+
+  // El contingut publicat és la font compartida entre dispositius abans de Supabase.
+  // Sempre es consulta a xarxa; si falla, usem la darrera còpia canònica de la caché.
+  if (url.pathname.endsWith('/data/content-published.js')) {
+    event.respondWith((async()=>{
+      const cache = await caches.open(CACHE);
+      try {
+        const response = await fetch(request);
+        if(response && response.ok) cache.put('./data/content-published.js', response.clone()).catch(()=>{});
+        return response;
+      } catch(error) {
+        return (await cache.match('./data/content-published.js')) || Response.error();
+      }
+    })());
     return;
   }
 

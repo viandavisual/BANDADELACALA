@@ -60,14 +60,20 @@
     <main class="main-content">
       <header class="topbar">
         <div class="section-heading">
-          <button id="backBtn" class="back-btn" type="button" aria-label="Tornar enrere" title="Tornar enrere"><span aria-hidden="true">←</span></button>
+          <div class="header-leading-slot">
+            <div id="homeHeaderIcon" class="home-header-icon" aria-hidden="true"><img data-app-icon alt="" /></div>
+            <button id="backBtn" class="back-btn" type="button" aria-label="Tornar enrere" title="Tornar enrere"><span aria-hidden="true">←</span></button>
+          </div>
           <div id="sectionTitleIcon" class="section-title-icon" aria-hidden="true"></div>
           <div class="section-title-copy">
             <span class="eyebrow" id="sectionEyebrow">INICI</span>
             <h2 id="sectionTitle">HOME</h2>
           </div>
         </div>
-        <button id="installBtn" class="install-btn" hidden>INSTAL·LAR APP</button>
+        <div class="topbar-actions">
+          <button id="muteBtn" class="mute-btn" type="button" aria-pressed="false" aria-label="Silenciar tot l'àudio de l'app" title="Silenciar tot l'àudio de l'app"><span class="mute-icon" aria-hidden="true">🔊</span><span class="mute-label">SO ON</span></button>
+          <button id="installBtn" class="install-btn" hidden>INSTAL·LAR APP</button>
+        </div>
       </header>
 
       <section id="view-home" class="view active" data-view="home">

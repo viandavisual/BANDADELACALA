@@ -78,7 +78,25 @@
     try{ channel && channel.postMessage(payload); }catch(error){}
   }
 
+  function isLocalPreview(){
+    return location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  }
+
   function load(){ return readLocal() || normalize(defaults()); }
+  function loadPublished(){ return normalize(defaults()); }
+  function loadApp(){ return isLocalPreview() ? load() : loadPublished(); }
+
+  async function fetchPublished(){
+    if(isLocalPreview()) return loadApp();
+    return await new Promise(resolve=>{
+      const script = document.createElement('script');
+      script.src = `./data/content-published.js?ts=${Date.now()}`;
+      script.async = true;
+      script.onload = () => { script.remove(); resolve(loadPublished()); };
+      script.onerror = () => { script.remove(); resolve(loadPublished()); };
+      document.head.appendChild(script);
+    });
+  }
 
   function save(content){
     const clean = normalize(content);
@@ -129,6 +147,10 @@
   window.BandaStore = {
     key: KEY,
     load,
+    loadPublished,
+    loadApp,
+    fetchPublished,
+    isLocalPreview,
     save,
     clearLocal,
     normalize,

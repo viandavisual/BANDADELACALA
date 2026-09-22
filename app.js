@@ -1,4 +1,5 @@
 const CFG = window.BANDA_CONFIG || {};
+const initialGlobalMuted = (() => { try { return localStorage.getItem('banda-de-la-cala-muted') === '1'; } catch(error) { return false; } })();
 
 const state = {
   currentView: 'home',
@@ -9,7 +10,8 @@ const state = {
   deferredPrompt: null,
   playbackMode: 'normal',
   lastRandomTrack: -1,
-  content: window.BandaStore ? BandaStore.load() : {events:[],tracks:[],dresscodes:[],historicItems:[],settings:{}}
+  globalMuted: initialGlobalMuted,
+  content: window.BandaStore ? (BandaStore.loadApp ? BandaStore.loadApp() : BandaStore.load()) : {events:[],tracks:[],dresscodes:[],historicItems:[],settings:{}}
 };
 
 const navItems = [
@@ -70,7 +72,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.11');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.12');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
@@ -104,9 +106,11 @@ function updateHeader(id){
   $('#sectionEyebrow').textContent = item.eyebrow;
   $('#sectionTitle').textContent = item.title;
   $('#sectionTitleIcon').innerHTML = iconSvg(item.icon);
-  $('#backBtn').classList.toggle('is-hidden', id === 'home');
-  $('#backBtn').setAttribute('aria-hidden', id === 'home' ? 'true' : 'false');
-  $('#backBtn').tabIndex = id === 'home' ? -1 : 0;
+  const isHome = id === 'home';
+  $('#backBtn').classList.toggle('is-hidden', isHome);
+  $('#backBtn').setAttribute('aria-hidden', isHome ? 'true' : 'false');
+  $('#backBtn').tabIndex = isHome ? -1 : 0;
+  $('#homeHeaderIcon')?.classList.toggle('is-hidden', !isHome);
 }
 
 function switchView(id, remember = true){
@@ -197,10 +201,13 @@ function renderCalendar(){
     if(cellMonth<0){cellMonth=11;cellYear--;}
     if(cellMonth>11){cellMonth=0;cellYear++;}
     const key = isoDate(cellYear,cellMonth,day);
-    const has = events.some(event => event.date === key);
+    const dayEvents = events.filter(event => event.date === key);
+    const has = dayEvents.length > 0;
+    const featured = dayEvents.some(event => ['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase()));
+    const eventClass = has ? (featured ? 'event-featured' : 'event-normal') : '';
     const isToday = key === isoDate(today.getFullYear(),today.getMonth(),today.getDate());
     const selected = key === state.selectedDate;
-    cells.push(`<button class="calendar-day ${outside?'outside':''} ${has?'has-event':''} ${isToday?'today':''} ${selected?'selected':''}" data-date="${key}" aria-label="${key}"><span class="day-number">${day}</span></button>`);
+    cells.push(`<button class="calendar-day ${outside?'outside':''} ${has?'has-event':''} ${eventClass} ${isToday?'today':''} ${selected?'selected':''}" data-date="${key}" aria-label="${key}"><span class="day-number">${day}</span></button>`);
   }
   $('#calendarGrid').innerHTML = cells.join('');
   $$('#calendarGrid [data-date]').forEach(btn => btn.addEventListener('click', () => selectDate(btn.dataset.date)));
@@ -258,7 +265,9 @@ function renderHistory(){
         </div>
       </article>`;
     }).join('') : `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
-    return `<section class="history-period" data-period="${esc(period.id)}">
+    const periodColor = period.color || '#393a86';
+    const periodText = period.textColor || '#ffffff';
+    return `<section class="history-period" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}">
       <div class="history-period-head">
         <span class="history-period-dot" aria-hidden="true"></span>
         <div><strong>${esc(period.years)}</strong><span>${esc(period.director)}</span></div>
@@ -398,6 +407,31 @@ function bindPlayer(){
   $('#seekBar').addEventListener('input',event => { if(player.duration) player.currentTime = (+event.target.value/100)*player.duration; });
 }
 
+function applyGlobalMute(){
+  document.querySelectorAll('audio').forEach(el => { el.muted = state.globalMuted; });
+  const btn = $('#muteBtn');
+  if(btn){
+    btn.classList.toggle('is-muted', state.globalMuted);
+    btn.setAttribute('aria-pressed', state.globalMuted ? 'true' : 'false');
+    btn.setAttribute('aria-label', state.globalMuted ? "Activar tot l'àudio de l'app" : "Silenciar tot l'àudio de l'app");
+    btn.title = state.globalMuted ? "Activar tot l'àudio de l'app" : "Silenciar tot l'àudio de l'app";
+    const icon = btn.querySelector('.mute-icon');
+    const label = btn.querySelector('.mute-label');
+    if(icon) icon.textContent = state.globalMuted ? '🔇' : '🔊';
+    if(label) label.textContent = state.globalMuted ? 'SO OFF' : 'SO ON';
+  }
+}
+function toggleGlobalMute(){
+  state.globalMuted = !state.globalMuted;
+  try{ localStorage.setItem('banda-de-la-cala-muted', state.globalMuted ? '1' : '0'); }catch(error){}
+  applyGlobalMute();
+}
+async function refreshPublishedFromNetwork(){
+  if(!window.BandaStore?.fetchPublished || BandaStore.isLocalPreview?.()) return;
+  const latest = await BandaStore.fetchPublished();
+  refreshContent(latest);
+}
+
 function refreshContent(next){
   state.content = next || BandaStore.load();
   applyHomeHero();
@@ -408,7 +442,9 @@ function refreshContent(next){
 }
 
 function bindContentUpdates(){
-  window.addEventListener('banda-content-changed',event=>refreshContent(event.detail));
+  if(window.BandaStore?.isLocalPreview?.()){
+    window.addEventListener('banda-content-changed',event=>refreshContent(event.detail));
+  }
 }
 
 function bindPwaInstall(){
@@ -458,7 +494,11 @@ function init(){
   bindDresscodeModal();
   renderTracks();
   bindPlayer();
+  applyGlobalMute();
+  const muteBtn = $('#muteBtn');
+  if(muteBtn) muteBtn.onclick = toggleGlobalMute;
   bindContentUpdates();
+  refreshPublishedFromNetwork();
   bindPwaInstall();
   registerSW();
   const backBtn = $('#backBtn');
