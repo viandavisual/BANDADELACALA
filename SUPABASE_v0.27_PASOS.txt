@@ -1,0 +1,26 @@
+BANDA DE LA CALA · v0.27
+FIX DEFINITIU DEL FLUX D'ALTA / CONFIRMACIÓ D'USUARIS
+
+No cal executar cap SQL nou.
+
+1. Supabase > Edge Functions > create-band-user.
+2. Substitueix el codi actual pel contingut complet de:
+   EDGE_FUNCTION_CREATE_USER_v0.27.ts
+3. Fes DEPLOY.
+4. A Authentication > Providers > Email, mantén Email actiu.
+5. El registre públic pot continuar DESACTIVAT.
+6. Prova de nou amb el mateix email pendent que havia donat Bad Gateway.
+   La funció detectarà el compte pendent, renovarà la password temporal i enviarà
+   una NOVA confirmació de tipus signup.
+7. Utilitza NOMÉS l'últim email rebut; els enllaços antics poden quedar invalidats.
+
+Canvi tècnic v0.27:
+- ABANS: create/update user -> inviteUserByEmail(email) sobre un user existent.
+- ARA: create/update user -> auth.resend({type:'signup'}) sobre el user pendent.
+
+Això conserva:
+- password temporal generada des de l'EDITOR;
+- validació obligatòria del correu;
+- registre públic desactivat;
+- rols admin / gestor / standard;
+- ADMIN mai disponible al selector de nous usuaris.

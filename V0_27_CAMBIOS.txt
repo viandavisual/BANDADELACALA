@@ -1,0 +1,11 @@
+BANDA DE LA CALA · v0.27
+
+- Correcció específica del flux de creació i confirmació de nous USERS.
+- Eliminat inviteUserByEmail() després de crear un usuari amb password.
+- La confirmació es reenvia ara amb auth.resend({ type: 'signup' }).
+- Compatible amb usuaris pendents creats durant proves v0.25/v0.26.
+- No hi ha canvis de SQL.
+- No es modifica l'arquitectura PWA/INSTALL estable de v0.23.
+- IDs PWA preservats:
+  APP: /banda-de-la-cala-app
+  EDITOR: /banda-de-la-cala-editor
