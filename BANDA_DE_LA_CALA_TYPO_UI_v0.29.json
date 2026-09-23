@@ -1,0 +1,569 @@
+{
+  "project": "BANDA DE LA CALA",
+  "utility": "TYPO / UI LAB",
+  "utilityVersion": "v0.1",
+  "sourceAppVersion": "v0.29",
+  "schemaVersion": 1,
+  "typography": {
+    "bodyText": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 16,
+      "mobileSize": 15,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "startTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 70,
+      "mobileSize": 42,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "startSubtitle": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 20,
+      "mobileSize": 15,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "eyebrow": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 14,
+      "mobileSize": 12,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "primaryButton": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 16,
+      "mobileSize": 14,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "brandTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 15,
+      "mobileSize": 15,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "brandSubtitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 12,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "navLabel": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 14,
+      "mobileSize": 13,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "sidebarVersion": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "sectionEyebrow": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 9,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "sectionTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 44,
+      "mobileSize": 26,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "mobileNavLabel": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 9,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "heroTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 72,
+      "mobileSize": 42,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "heroText": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 18,
+      "mobileSize": 15,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "homeCardTitle": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 20,
+      "mobileSize": 16,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "homeCardText": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 14,
+      "mobileSize": 12,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "statusPill": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 10,
+      "mobileSize": 10,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "installTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 16,
+      "mobileSize": 14,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "installDetail": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "creditsMain": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "creditsSub": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 10,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "panelTitle": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 24,
+      "mobileSize": 21,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "calendarWeekday": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "calendarDay": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 40,
+      "mobileSize": 28,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "miniButton": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 10,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "eventType": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 10,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "eventTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 20,
+      "mobileSize": 17,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "eventDetail": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 14,
+      "mobileSize": 13,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "dresscodeButton": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 10,
+      "bold": false,
+      "italic": false,
+      "underline": true
+    },
+    "historyIntroTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 46,
+      "mobileSize": 32,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "historyIntroText": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 16,
+      "mobileSize": 14,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "periodRange": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "periodDirector": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 15,
+      "mobileSize": 14,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "historyYear": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 10,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "historyEventTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 16,
+      "mobileSize": 15,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "historyEventText": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 13,
+      "mobileSize": 12,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "historyEmpty": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "trackIndex": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 11,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "trackTitle": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 14,
+      "mobileSize": 14,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "trackMeta": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "trackDuration": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "nowPlayingTitle": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 28,
+      "mobileSize": 16,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "nowPlayingMeta": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 17,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "modeMain": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 18,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "modeSub": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 16,
+      "mobileSize": 8,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "progressTime": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 17,
+      "mobileSize": 16,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "miniPlayerTitle": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 13,
+      "mobileSize": 17,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "miniPlayerMeta": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 10,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "miniPlayerTag": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 9,
+      "mobileSize": 9,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "comingBadge": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 24,
+      "mobileSize": 23,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "userLoginTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 24,
+      "mobileSize": 21,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "userIntroText": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 15,
+      "mobileSize": 14,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "formLabel": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 12,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "authStatus": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "profileRole": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 10,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "profileName": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 25,
+      "mobileSize": 22,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "profileEmail": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 14,
+      "mobileSize": 13,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "accountNoticeTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 10,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "accountNoticeText": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 13,
+      "mobileSize": 13,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "settingsEyebrow": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 11,
+      "mobileSize": 10,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "settingsTitle": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 17,
+      "mobileSize": 16,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "passwordSummary": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 16,
+      "mobileSize": 15,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "actionButton": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 14,
+      "mobileSize": 13,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "modalTitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 42,
+      "mobileSize": 30,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "modalSubtitle": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 22,
+      "mobileSize": 17,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "dressHeading": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 30,
+      "mobileSize": 21,
+      "bold": true,
+      "italic": false,
+      "underline": false
+    },
+    "dressBody": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 26,
+      "mobileSize": 21,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "viewerCaptionTitle": {
+      "fontFamily": "Arial,sans-serif",
+      "desktopSize": 14,
+      "mobileSize": 13,
+      "bold": false,
+      "italic": true,
+      "underline": false
+    },
+    "viewerCaptionText": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    },
+    "viewerToolbar": {
+      "fontFamily": "Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+      "desktopSize": 12,
+      "mobileSize": 11,
+      "bold": false,
+      "italic": false,
+      "underline": false
+    }
+  }
+}

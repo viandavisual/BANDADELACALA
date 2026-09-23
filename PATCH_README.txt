@@ -1,31 +1,45 @@
-BANDA DE LA CALA · PATCH v0.28 -> v0.29
-=======================================
+BANDA DE LA CALA · PATCH v0.29 -> v0.30
+=========================================
 
-SOBREESCRIURE / AFEGIR:
-- app/index.html
-- app/sw.js
-- editor/index.html
-- editor/sw.js
-- app.js
-- editor.js
-- style.css
-- editor.css
-- supabase-client.js
-- version.js
-- EDGE_FUNCTION_CREATE_USER_v0.29.ts
-- create-band-user-edge-function.zip
-- SUPABASE_v0.29_PASOS.txt
-- V0_29_CAMBIOS.txt
+OBJETIVO
+--------
+Aplicar a la APP los ajustes de TYPO / UI exportados desde el laboratorio
+BANDA DE LA CALA · TYPO / UI LAB v0.1.
 
-NO TOCAR:
-- app/manifest.webmanifest
-- editor/manifest.webmanifest
-- IDs PWA / scopes / sistema INSTALL v0.23
-- assets/
-- data/content-published.js
-- config.js
-- contingut Supabase
+ARCHIVOS A SOBRESCRIBIR EN GITHUB
+---------------------------------
+version.js
+style.css
+app/index.html
+app/sw.js
+editor/index.html
+editor/sw.js
 
-SUPABASE:
-No cal SQL nou.
-Cal desplegar create-band-user amb EDGE_FUNCTION_CREATE_USER_v0.29.ts.
+ARCHIVOS NUEVOS OPCIONALES / DOCUMENTACION
+-------------------------------------------
+BANDA_DE_LA_CALA_TYPO_UI_v0.29.json
+V0_30_CAMBIOS.txt
+
+NO TOCAR
+--------
+app/manifest.webmanifest
+editor/manifest.webmanifest
+assets/
+data/
+config.js
+content-store.js
+supabase-client.js
+app.js
+editor.js
+Supabase / SQL / Edge Functions
+
+IMPORTANTE - INSTALL
+--------------------
+Se mantiene intacta la arquitectura PWA estable de v0.23:
+APP id: /banda-de-la-cala-app
+EDITOR id: /banda-de-la-cala-editor
+Scopes separados /app/ y /editor/.
+Los manifests NO han cambiado.
+
+Solo se incrementa la cache de ambos Service Workers a v0.30 para que
+las instalaciones existentes reciban los nuevos estilos.

@@ -1,0 +1,47 @@
+BANDA DE LA CALA · v0.30
+========================================
+
+BASE
+----
+Construida directamente sobre la v0.29, versión de control estable.
+
+OBJETIVO
+--------
+Aplicar a la APP los ajustes de TYPO / UI definidos por el usuario en:
+BANDA DE LA CALA · TYPO / UI LAB v0.1
+sourceAppVersion: v0.29
+schemaVersion: 1
+
+CAMBIOS
+-------
+- Aplicados 70 roles tipográficos de la APP.
+- Cada rol respeta:
+  · fontFamily
+  · desktopSize
+  · mobileSize
+  · bold
+  · italic
+  · underline
+- Breakpoint mobile: <= 780 px.
+- Se conserva una copia del JSON fuente:
+  BANDA_DE_LA_CALA_TYPO_UI_v0.29.json
+
+PWA / INSTALL
+-------------
+NO se han cambiado:
+- manifest id de APP
+- manifest id de EDITOR
+- scope de APP
+- scope de EDITOR
+- start_url
+- lógica beforeinstallprompt
+- manifests
+- sistema de instalación independiente de v0.23
+
+Solo se actualiza el número de caché de los Service Workers a v0.30
+para que los dispositivos instalados reciban los nuevos estilos.
+
+SUPABASE / USERS
+----------------
+Sin cambios.
+No requiere SQL ni volver a desplegar Edge Functions.
