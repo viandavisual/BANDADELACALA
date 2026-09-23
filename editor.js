@@ -95,7 +95,7 @@ function save(next=content,message='Canvis desats'){
     return false;
   }
 }
-function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.19'); }
+function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.20'); }
 function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
@@ -765,17 +765,21 @@ function editorIsStandalone(){
 
 function syncEditorInstallButton(){
   const btn=$('#editorInstallBtn');
-  if(!btn) return;
-  if(editorIsStandalone()){
-    btn.hidden=true;
-    return;
-  }
-  btn.hidden=false;
+  const cardBtn=$('#editorInstallCardBtn');
+  const card=$('#editorInstallCard');
+  const status=$('#editorInstallCardStatus');
+  const installed=editorIsStandalone();
+  if(btn) btn.hidden=installed;
+  if(card) card.hidden=installed;
+  if(installed) return;
   const ready=!!(editorDeferredPrompt || window.__editorInstallPrompt);
-  btn.classList.toggle('install-ready',ready);
-  btn.disabled=!ready;
-  btn.textContent=ready ? 'INSTAL·LAR EDITOR' : 'PREPARANT INSTAL·LACIÓ…';
-  btn.title=ready ? 'Instal·lar BANDA DE LA CALA · EDITOR' : 'Chrome està comprovant que l’Editor és instal·lable';
+  [btn,cardBtn].filter(Boolean).forEach(target=>{
+    target.classList.toggle('install-ready',ready);
+    target.disabled=!ready;
+    target.textContent=ready ? 'INSTAL·LAR EDITOR' : 'PREPARANT…';
+    target.title=ready ? 'Instal·lar BANDA DE LA CALA · EDITOR' : 'Verificant la PWA independent';
+  });
+  if(status) status.textContent=ready ? 'Instal·lació directa preparada.' : 'Verificant manifest + Service Worker de l’EDITOR…';
 }
 
 function showEditorInstallHelp(){
@@ -814,7 +818,8 @@ async function waitForEditorInstallPrompt(timeout=2600){
 
 function bindEditorPwaInstall(){
   const btn=$('#editorInstallBtn');
-  if(!btn) return;
+  const cardBtn=$('#editorInstallCardBtn');
+  if(!btn && !cardBtn) return;
 
   editorDeferredPrompt = window.__editorInstallPrompt || editorDeferredPrompt;
   syncEditorInstallButton();
@@ -823,42 +828,37 @@ function bindEditorPwaInstall(){
     editorDeferredPrompt=window.__editorInstallPrompt || editorDeferredPrompt;
     syncEditorInstallButton();
   });
-
   window.addEventListener('beforeinstallprompt',event=>{
-    // Listener de seguretat per navegadors que emetin l'esdeveniment després de carregar editor.js.
     event.preventDefault();
     editorDeferredPrompt=event;
     window.__editorInstallPrompt=event;
     syncEditorInstallButton();
   });
 
-  btn.addEventListener('click',async()=>{
+  const launchInstall=async()=>{
     if(editorIsStandalone()) return;
     const prompt=editorDeferredPrompt || window.__editorInstallPrompt;
     if(!prompt){ syncEditorInstallButton(); return; }
     try{
       await prompt.prompt();
       const choice=await prompt.userChoice;
-      editorDeferredPrompt=null;
-      window.__editorInstallPrompt=null;
+      editorDeferredPrompt=null; window.__editorInstallPrompt=null;
       if(choice?.outcome==='accepted'){
-        btn.hidden=true;
+        if(btn) btn.hidden=true;
+        if($('#editorInstallCard')) $('#editorInstallCard').hidden=true;
         showToast('EDITOR instal·lat');
-      }else{
-        syncEditorInstallButton();
-      }
+      }else syncEditorInstallButton();
     }catch(error){
       console.warn('No s’ha pogut obrir el prompt d’instal·lació',error);
       syncEditorInstallButton();
     }
-  });
-
-  $('#closeEditorInstallHelp')?.addEventListener('click',()=>{$('#editorInstallHelp').hidden=true;});
-  $('#editorInstallHelp')?.addEventListener('click',event=>{if(event.target.id==='editorInstallHelp') event.currentTarget.hidden=true;});
+  };
+  btn?.addEventListener('click',launchInstall);
+  cardBtn?.addEventListener('click',launchInstall);
   window.addEventListener('appinstalled',()=>{
-    editorDeferredPrompt=null;
-    window.__editorInstallPrompt=null;
-    btn.hidden=true;
+    editorDeferredPrompt=null; window.__editorInstallPrompt=null;
+    if(btn) btn.hidden=true;
+    if($('#editorInstallCard')) $('#editorInstallCard').hidden=true;
     showToast('EDITOR instal·lat');
   });
 }

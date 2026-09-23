@@ -14,6 +14,8 @@ const state = {
   session: null,
   profile: null,
   authenticated: false,
+  collapsedPeriods: new Set(),
+  historyViewer: { scale:1, maxScale:1, baseWidth:0 },
   content: window.BandaStore ? (BandaStore.loadApp ? BandaStore.loadApp() : BandaStore.load()) : {events:[],tracks:[],dresscodes:[],historicItems:[],settings:{}}
 };
 
@@ -80,7 +82,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.19');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.20');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
@@ -258,8 +260,8 @@ function getHistoricPeriods(){
 function getHistoricItems(){
   return [...(state.content.historicItems || [])].sort((a,b)=>{
     const ya=Number(a.year)||0, yb=Number(b.year)||0;
-    if(ya!==yb) return ya-yb;
-    return String(a.title||'').localeCompare(String(b.title||''),'ca');
+    if(ya!==yb) return yb-ya;
+    return String(b.title||'').localeCompare(String(a.title||''),'ca');
   });
 }
 
@@ -273,13 +275,16 @@ function renderHistory(){
     return;
   }
   let visualIndex=0;
-  host.innerHTML=periods.map((period,periodIndex)=>{
+  const displayPeriods=[...periods].reverse();
+  host.innerHTML=displayPeriods.map(period=>{
+    const originalIndex=periods.findIndex(p=>p.id===period.id);
     const periodItems=items.filter(item=>item.periodId===period.id);
+    const collapsed=state.collapsedPeriods.has(period.id);
     const media=periodItems.length ? periodItems.map(item=>{
       const side=(visualIndex++ % 2===0)?'left':'right';
       const title=item.title ? `<h4>${esc(item.title)}</h4>` : '';
       const desc=item.description ? `<p>${esc(item.description)}</p>` : '';
-      const img=item.imageSrc ? `<img loading="lazy" decoding="async" src="${esc(item.imageSrc)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />` : '';
+      const img=item.imageSrc ? `<button class="history-image-button" type="button" data-history-image-id="${esc(item.id || item.imageSrc)}" aria-label="Ampliar fotografia de ${esc(item.year)}"><img loading="lazy" decoding="async" src="${esc(item.imageSrc)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" /></button>` : '';
       return `<article class="history-item ${side}">
         <div class="history-node" aria-hidden="true"></div>
         <div class="history-card">
@@ -290,14 +295,89 @@ function renderHistory(){
     }).join('') : `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
     const periodColor = period.color || '#393a86';
     const periodText = period.textColor || '#ffffff';
-    return `<section class="history-period period-tone-${periodIndex+1}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}">
-      <div class="history-period-head">
+    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}">
+      <button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}">
         <span class="history-period-dot" aria-hidden="true"></span>
         <div><strong>${esc(period.years)}</strong><span>${esc(period.director)}</span></div>
-      </div>
+        <span class="history-period-chevron" aria-hidden="true">⌄</span>
+      </button>
       <div class="history-period-items">${media}</div>
     </section>`;
   }).join('');
+  $$('[data-toggle-period]').forEach(btn=>btn.addEventListener('click',()=>{
+    const id=btn.dataset.togglePeriod;
+    if(state.collapsedPeriods.has(id)) state.collapsedPeriods.delete(id); else state.collapsedPeriods.add(id);
+    try{localStorage.setItem('banda-history-collapsed',JSON.stringify([...state.collapsedPeriods]));}catch(_error){}
+    renderHistory();
+  }));
+  $$('[data-history-image-id]').forEach(btn=>btn.addEventListener('click',()=>openHistoryImage(btn.dataset.historyImageId)));
+}
+
+function restoreHistoryCollapsed(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('banda-history-collapsed')||'[]');
+    if(Array.isArray(saved)) state.collapsedPeriods=new Set(saved);
+  }catch(_error){}
+}
+
+function historyViewerApply(){
+  const img=$('#historyImageLarge'), value=$('#historyZoomValue'), out=$('#historyZoomOut'), inn=$('#historyZoomIn');
+  if(!img) return;
+  const scale=Math.max(1,Math.min(state.historyViewer.scale,state.historyViewer.maxScale||1));
+  state.historyViewer.scale=scale;
+  if(state.historyViewer.baseWidth) img.style.width=`${Math.round(state.historyViewer.baseWidth*scale)}px`;
+  if(value) value.textContent=`${Math.round(scale*100)}%`;
+  if(out) out.disabled=scale<=1.001;
+  if(inn) inn.disabled=scale>=(state.historyViewer.maxScale||1)-.001;
+}
+function historyViewerReset(){
+  const img=$('#historyImageLarge'), viewport=$('#historyImageViewport');
+  if(!img||!viewport) return;
+  img.style.width='auto'; img.style.height='auto'; img.style.maxWidth='100%'; img.style.maxHeight='100%';
+  requestAnimationFrame(()=>{
+    const rect=img.getBoundingClientRect();
+    state.historyViewer.baseWidth=Math.max(1,rect.width);
+    const naturalRatio=rect.width ? img.naturalWidth/rect.width : 1;
+    state.historyViewer.maxScale=Math.max(1,Math.min(2.5,naturalRatio));
+    state.historyViewer.scale=1;
+    img.style.maxWidth='none'; img.style.maxHeight='none';
+    img.style.width=`${Math.round(state.historyViewer.baseWidth)}px`;
+    historyViewerApply();
+    viewport.scrollTo({left:0,top:0,behavior:'auto'});
+  });
+}
+function openHistoryImage(id){
+  const item=(state.content.historicItems||[]).find(entry=>String(entry.id||entry.imageSrc)===String(id));
+  if(!item?.imageSrc) return;
+  const modal=$('#historyImageModal'), img=$('#historyImageLarge');
+  $('#historyImageTitle').textContent=item.title || String(item.year||'');
+  $('#historyImageCaption').textContent=item.description || (item.title ? String(item.year||'') : '');
+  img.alt=item.title || `Fotografia de ${item.year||''}`;
+  img.onload=historyViewerReset;
+  img.src=item.imageSrc;
+  modal.hidden=false;
+  document.body.classList.add('modal-open');
+  if(img.complete) historyViewerReset();
+}
+function closeHistoryImage(){
+  const modal=$('#historyImageModal'); if(!modal) return;
+  modal.hidden=true; document.body.classList.remove('modal-open');
+  const img=$('#historyImageLarge'); if(img){img.removeAttribute('src');img.style.width='';}
+}
+function bindHistoryImageModal(){
+  $$('[data-close-history-image]').forEach(el=>el.addEventListener('click',closeHistoryImage));
+  $('#historyZoomIn')?.addEventListener('click',()=>{state.historyViewer.scale=Math.min(state.historyViewer.maxScale,state.historyViewer.scale+.25);historyViewerApply();});
+  $('#historyZoomOut')?.addEventListener('click',()=>{state.historyViewer.scale=Math.max(1,state.historyViewer.scale-.25);historyViewerApply();});
+  $('#historyZoomReset')?.addEventListener('click',historyViewerReset);
+  $('#historyImageViewport')?.addEventListener('wheel',event=>{
+    if(!$('#historyImageModal')?.hidden && (event.ctrlKey || Math.abs(event.deltaY)>0)){
+      event.preventDefault();
+      const delta=event.deltaY<0?.15:-.15;
+      state.historyViewer.scale=Math.max(1,Math.min(state.historyViewer.maxScale,state.historyViewer.scale+delta));
+      historyViewerApply();
+    }
+  },{passive:false});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('#historyImageModal')?.hidden) closeHistoryImage();});
 }
 
 function applyHomeHero(){
@@ -598,23 +678,56 @@ async function initAppAuth(){
 }
 
 
+function appIsStandalone(){
+  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function syncAppInstallUI(){
+  const headerBtn=$('#installBtn'), homeBtn=$('#homeInstallBtn'), card=$('#appInstallCard'), status=$('#appInstallStatus');
+  const installed=appIsStandalone();
+  if(card) card.hidden=installed;
+  if(headerBtn) headerBtn.hidden=installed || !(state.deferredPrompt || window.__appInstallPrompt);
+  if(homeBtn){
+    if(installed){ homeBtn.hidden=true; }
+    else{
+      homeBtn.hidden=false;
+      const ready=!!(state.deferredPrompt || window.__appInstallPrompt);
+      const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+      homeBtn.disabled=!ready && !isiOS;
+      homeBtn.textContent=ready?'INSTAL·LAR APP':(isiOS?'COM INSTAL·LAR':'PREPARANT…');
+      if(status) status.textContent=ready?'Instal·lació directa preparada.':(isiOS?'Safari · Afegir a la pantalla d’inici.':'Verificant la PWA independent…');
+    }
+  }
+}
+async function promptAppInstall(){
+  if(appIsStandalone()) return;
+  let prompt=state.deferredPrompt || window.__appInstallPrompt;
+  if(!prompt && /iPad|iPhone|iPod/.test(navigator.userAgent)){
+    alert('A Safari: prem Compartir i després “Afegir a la pantalla d’inici”.');
+    return;
+  }
+  if(!prompt){ syncAppInstallUI(); return; }
+  try{
+    await prompt.prompt();
+    const choice=await prompt.userChoice;
+    state.deferredPrompt=null; window.__appInstallPrompt=null;
+    if(choice?.outcome==='accepted'){
+      $('#appInstallCard')?.setAttribute('hidden','');
+      $('#installBtn').hidden=true;
+    }else syncAppInstallUI();
+  }catch(error){ console.warn('No s’ha pogut obrir el diàleg d’instal·lació',error); syncAppInstallUI(); }
+}
 function bindPwaInstall(){
-  const btn = $('#installBtn');
-  window.addEventListener('beforeinstallprompt', event => {
-    event.preventDefault();
-    state.deferredPrompt = event;
-    btn.hidden = false;
+  state.deferredPrompt=window.__appInstallPrompt || state.deferredPrompt;
+  syncAppInstallUI();
+  window.addEventListener('appinstallready',()=>{state.deferredPrompt=window.__appInstallPrompt || state.deferredPrompt;syncAppInstallUI();});
+  window.addEventListener('beforeinstallprompt',event=>{
+    event.preventDefault(); state.deferredPrompt=event; window.__appInstallPrompt=event; syncAppInstallUI();
   });
-  btn.addEventListener('click',async() => {
-    if(!state.deferredPrompt) return;
-    state.deferredPrompt.prompt();
-    await state.deferredPrompt.userChoice;
-    state.deferredPrompt = null;
-    btn.hidden = true;
-  });
-  window.addEventListener('appinstalled',() => {
-    $('#pwaStatus').textContent = 'PWA instal·lada';
-    btn.hidden = true;
+  $('#installBtn')?.addEventListener('click',promptAppInstall);
+  $('#homeInstallBtn')?.addEventListener('click',promptAppInstall);
+  window.addEventListener('appinstalled',()=>{
+    state.deferredPrompt=null; window.__appInstallPrompt=null;
+    $('#pwaStatus').textContent='PWA instal·lada'; syncAppInstallUI();
   });
 }
 
@@ -634,6 +747,7 @@ async function init(){
   if(startBtn) startBtn.onclick = startIntro;
   if(startIconBtn) startIconBtn.onclick = startIntro;
   bootIdentity();
+  restoreHistoryCollapsed();
   renderStandaloneSectionIcons();
   applyHomeHero();
   updateHeader('home');
@@ -641,6 +755,7 @@ async function init(){
   renderHistory();
   bindCalendar();
   bindDresscodeModal();
+  bindHistoryImageModal();
   renderTracks();
   bindPlayer();
   applyGlobalMute();
