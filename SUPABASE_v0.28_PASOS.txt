@@ -1,0 +1,22 @@
+BANDA DE LA CALA · SUPABASE v0.28
+=================================
+
+NO CAL EXECUTAR CAP SQL NOU.
+
+Per activar ELIMINAR USUARI des de EDITOR > USUARIS:
+
+1. Entra a Supabase.
+2. Ves a Edge Functions.
+3. Obre la funció existent: create-band-user
+4. Substitueix el seu codi per EDGE_FUNCTION_CREATE_USER_v0.28.ts
+   (també tens create-band-user-edge-function.zip amb index.ts).
+5. Fes DEPLOY.
+6. Recarrega l'EDITOR i entra a USUARIS.
+
+PERMISOS D'ELIMINACIÓ
+- ADMIN: pot eliminar GESTOR i STANDARD.
+- GESTOR: només pot eliminar STANDARD.
+- ADMIN mai es pot eliminar des d'aquest flux.
+- No es pot eliminar el propi usuari connectat.
+
+L'eliminació és definitiva: s'elimina el compte de Supabase Auth i, per la relació ON DELETE CASCADE existent, també el seu perfil de public.profiles.

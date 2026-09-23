@@ -566,3 +566,12 @@ button,a,input{touch-action:manipulation}
 .piece-entering{animation:bandaPieceEnter .52s cubic-bezier(.2,.78,.24,1) var(--piece-enter-delay,0ms) both;will-change:transform,opacity,filter}
 @media(max-width:780px){.piece-entering{animation-duration:.46s}}
 @media(prefers-reduced-motion:reduce){.piece-entering{animation:none!important;opacity:1!important;transform:none!important;filter:none!important}}
+
+
+/* v0.28 · HISTÒRIC: períodes col·lapsats més alts i completament apilats */
+.history-period.is-collapsed{padding-top:0!important;padding-bottom:0!important;margin:0!important}
+.history-period.is-collapsed .history-period-head{margin-top:0!important;margin-bottom:0!important;min-height:66px;padding-top:16px!important;padding-bottom:16px!important}
+.history-period.is-collapsed + .history-period.is-collapsed{margin-top:0!important}
+@media(max-width:780px){
+  .history-period.is-collapsed .history-period-head{min-height:62px;padding-top:15px!important;padding-bottom:15px!important}
+}

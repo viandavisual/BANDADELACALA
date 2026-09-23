@@ -102,6 +102,17 @@
     return {...data,temporaryPassword:data.temporaryPassword||generatedPassword};
   }
 
+  async function deleteManagedUser(userId){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const id=String(userId||'').trim();
+    if(!id) throw new Error('USER_ID_REQUIRED');
+    const {data,error}=await c.functions.invoke('create-band-user',{body:{action:'delete',userId:id}});
+    if(error) throw new Error(await functionsErrorMessage(error));
+    if(data?.error) throw new Error(String(data.error));
+    if(!data?.ok) throw new Error('USER_NOT_DELETED');
+    return data;
+  }
+
   async function updateOwnProfile({name,avatarKey}){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     const cleanName=String(name||'').trim();
@@ -242,7 +253,7 @@
   }
 
   window.BandaSupabase={
-    enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,updateOwnProfile,updatePassword,
+    enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updatePassword,
     loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,onAuthChange,dataUrlToFile
   };
 })();

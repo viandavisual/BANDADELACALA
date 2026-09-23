@@ -756,10 +756,45 @@ function roleEditorLabel(role){
   return ({admin:'USER ADMIN',gestor:'USER GESTOR',standard:'USER STANDARD'})[role] || String(role||'USER').toUpperCase();
 }
 
+function canDeleteUserProfile(profile){
+  if(!profile || !currentSession || !currentProfile) return false;
+  if(profile.user_id===currentSession.user.id) return false;
+  if(profile.role==='admin') return false;
+  if(currentProfile.role==='admin') return ['gestor','standard'].includes(profile.role);
+  if(currentProfile.role==='gestor') return profile.role==='standard';
+  return false;
+}
+
 function renderUsers(){
   const list=$('#usersList'); if(!list) return;
   $('#usersCount').textContent=userProfiles.length;
-  list.innerHTML=userProfiles.length?userProfiles.map(profile=>`<article class="list-item user-list-item"><div class="list-main"><div class="list-kicker"><span>${esc(roleEditorLabel(profile.role))}</span>${profile.must_change_password?'<span>·</span><span class="gold-note">CONTRASENYA TEMPORAL</span>':''}</div><h3>${esc(profile.name||'Sense nom')}</h3><p>${esc(profile.email||'')}</p></div></article>`).join(''):'<div class="empty-state">Encara no hi ha usuaris.</div>';
+  list.innerHTML=userProfiles.length?userProfiles.map(profile=>{
+    const deleteBtn=canDeleteUserProfile(profile)?`<button class="tiny-btn delete" data-delete-user="${esc(profile.user_id)}" title="Eliminar usuari" aria-label="Eliminar ${esc(profile.name||profile.email||'usuari')}">×</button>`:'';
+    return `<article class="list-item user-list-item"><div class="list-main"><div class="list-kicker"><span>${esc(roleEditorLabel(profile.role))}</span>${profile.must_change_password?'<span>·</span><span class="gold-note">CONTRASENYA TEMPORAL</span>':''}</div><h3>${esc(profile.name||'Sense nom')}</h3><p>${esc(profile.email||'')}</p></div>${deleteBtn?`<div class="list-actions">${deleteBtn}</div>`:''}</article>`;
+  }).join(''):'<div class="empty-state">Encara no hi ha usuaris.</div>';
+  $$('[data-delete-user]').forEach(btn=>btn.onclick=()=>deleteManagedUserFromEditor(btn.dataset.deleteUser));
+}
+
+async function deleteManagedUserFromEditor(userId){
+  if(!editorCanWrite || !userId) return;
+  const profile=userProfiles.find(row=>row.user_id===userId);
+  if(!profile || !canDeleteUserProfile(profile)) return;
+  const label=profile.name||profile.email||'aquest usuari';
+  const ok=confirm(`Vols eliminar completament ${label}?\n\nS'esborrarà el seu accés de Supabase Auth i el seu perfil. Aquesta acció no es pot desfer.`);
+  if(!ok) return;
+  try{
+    showToast('Eliminant usuari…');
+    await BandaSupabase.deleteManagedUser(userId);
+    await loadUsers();
+    showToast('Usuari eliminat completament');
+  }catch(error){
+    console.error(error);
+    const message=String(error?.message||'No s’ha pogut eliminar l’usuari.');
+    if(/ADMIN_CANNOT_BE_DELETED/i.test(message)) showToast('El USER ADMIN no es pot eliminar des de l’EDITOR');
+    else if(/GESTOR_CANNOT_DELETE_GESTOR/i.test(message)) showToast('Un USER GESTOR només pot eliminar USER STANDARD');
+    else if(/CANNOT_DELETE_SELF/i.test(message)) showToast('No pots eliminar el teu propi usuari');
+    else showToast(`Error eliminant usuari: ${message}`);
+  }
 }
 
 async function loadUsers(){
@@ -798,7 +833,7 @@ function bindUsers(){
       if(/rate|limit/i.test(message)) status.textContent='Límit temporal d’emails de Supabase. No s’ha creat el compte; torna-ho a provar més tard o configura SMTP propi.';
       else if(/EMAIL_ALREADY_REGISTERED|already registered/i.test(message)) status.textContent='Aquest email ja correspon a un usuari confirmat. Revisa el compte existent.';
       else if(/already|exists/i.test(message)) status.textContent='Aquest email ja existeix a Supabase Auth. Revisa l’usuari existent.';
-      else if(/function|404|not found/i.test(message)) status.textContent='La funció create-band-user no està desplegada/actualitzada. Desplega la versió v0.26 inclosa al paquet.';
+      else if(/function|404|not found/i.test(message)) status.textContent='La funció create-band-user no està desplegada/actualitzada. Desplega la versió v0.28 inclosa al paquet.';
       else status.textContent=`ERROR: ${message}`;
     }finally{btn.disabled=false;}
   });

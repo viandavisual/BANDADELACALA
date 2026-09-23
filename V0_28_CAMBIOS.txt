@@ -1,0 +1,25 @@
+BANDA DE LA CALA · v0.28
+========================
+
+1. EDITOR / USUARIS
+- Nova opció per eliminar usuaris directament des de la llista de comptes.
+- L'eliminació es fa de manera segura a Supabase Auth mitjançant la mateixa Edge Function create-band-user.
+- En eliminar Auth, la fila de public.profiles desapareix per ON DELETE CASCADE.
+- Proteccions:
+  * USER ADMIN no es pot eliminar des de l'EDITOR.
+  * Ningú pot eliminar el seu propi usuari mentre està connectat.
+  * USER ADMIN pot eliminar USER GESTOR i USER STANDARD.
+  * USER GESTOR només pot eliminar USER STANDARD.
+- Abans d'eliminar es demana confirmació explícita.
+
+2. APP / HISTÒRIC
+- Les capçaleres dels períodes COL·LAPSATS són lleugerament més altes.
+- Quan diversos períodes estan col·lapsats queden completament apilats, sense espais blancs entre franges.
+- El comportament dels períodes oberts es manté intacte.
+
+3. PWA / INSTALL
+- Es preserva sense canvis l'arquitectura estable del SAVEPOINT v0.23.
+- ID APP: /banda-de-la-cala-app
+- ID EDITOR: /banda-de-la-cala-editor
+- Scopes independents /app/ i /editor/.
+- Només s'actualitzen les versions de cache dels Service Workers a v0.28.

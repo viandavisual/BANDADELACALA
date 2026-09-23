@@ -154,3 +154,9 @@ body{background:linear-gradient(145deg,#c69237 0%,#d4ac5f 45%,#e2c277 100%)!impo
 .history-image-remove-btn:hover{background:#a64f45}
 .history-image-preview-item.is-new .history-image-remove-btn{background:rgba(57,58,134,.9)}
 .history-image-preview-item.is-new .history-image-remove-btn:hover{background:#a64f45}
+
+
+/* v0.28 · gestió d'usuaris */
+.user-list-item{align-items:center}
+.user-list-item .list-actions{margin-left:auto}
+.user-list-item .tiny-btn.delete{width:38px;height:38px;min-width:38px;border-radius:50%;font-size:1.15rem}
