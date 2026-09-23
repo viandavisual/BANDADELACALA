@@ -1,5 +1,5 @@
-// BANDA DE LA CALA · EDITOR v0.20
-const CACHE='banda-de-la-cala-editor-v0.20';
+// BANDA DE LA CALA · EDITOR v0.21
+const CACHE='banda-de-la-cala-editor-v0.21';
 const EDITOR_CACHE_PREFIX='banda-de-la-cala-editor-';
 const CORE=[
   './','./index.html','./manifest.webmanifest',

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <base href="../" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="BANDA DE LA CALA" />
+  <title>BANDA DE LA CALA</title>
+  <link rel="manifest" href="app/manifest.webmanifest" />
+  <script>
+    window.__appInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', function(event){
+      event.preventDefault();
+      window.__appInstallPrompt = event;
+      window.dispatchEvent(new Event('appinstallready'));
+    });
+    window.addEventListener('appinstalled', function(){ window.__appInstallPrompt = null; });
+    if (location.protocol !== 'file:' && 'serviceWorker' in navigator) {
+      (async function(){
+        try {
+          var root = new URL('../', location.href);
+          var reg = await navigator.serviceWorker.register(new URL('app/sw.js', root).href, { scope: new URL('app/', root).pathname, updateViaCache: 'none' });
+          await reg.update().catch(function(){});
+          if (!navigator.serviceWorker.controller && !sessionStorage.getItem('banda-app-sw-reloaded-v021')) {
+            await Promise.race([navigator.serviceWorker.ready, new Promise(function(resolve){ setTimeout(resolve, 1200); })]);
+            sessionStorage.setItem('banda-app-sw-reloaded-v021','1');
+            location.reload();
+          }
+        } catch(error) { console.warn('APP SW', error); }
+      })();
+    }
+  </script>
+  <link rel="icon" href="assets/icons/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon-180.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <section id="startScreen" class="screen start-screen active" aria-label="Inici">
+    <div class="start-card">
+      <button id="startIconBtn" class="start-icon-btn" type="button" aria-label="Entrar a Banda de la Cala">
+        <img class="start-logo" data-app-icon alt="Icona de l'app de Banda de la Cala" />
+      </button>
+      <button id="startBtn" class="primary-btn">ENTRAR</button>
+    </div>
+  </section>
+
+  <section id="introScreen" class="screen intro-screen" aria-label="Introducció">
+    <video id="introVideo" playsinline muted preload="auto"></video>
+    <audio id="introAudio" preload="auto"></audio>
+  </section>
+
+  <div id="appShell" class="app-shell" hidden>
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <img class="sidebar-logo" data-app-icon alt="Icona de l'app de Banda de la Cala" />
+        <div>
+          <strong data-app-name>BANDA DE LA CALA</strong>
+          <small data-app-subtitle>L’Ametlla de Mar</small>
+        </div>
+      </div>
+      <nav class="desktop-nav" aria-label="Navegació principal"></nav>
+      <div class="sidebar-bottom">
+        <div class="social-links" aria-label="Xarxes socials de la Banda de la Cala">
+          <a class="social-link" href="https://www.facebook.com/bandadelacala" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.2 8.1V6.4c0-.8.5-1 1-1h2.5V1.2L14.2 1C10.8 1 9 3 9 6.1v2H6v4.5h3V23h5.2V12.6h3.5l.6-4.5h-4.1Z"/></svg>
+          </a>
+          <a class="social-link" href="https://www.instagram.com/bandadelacala" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle class="fill-dot" cx="17.6" cy="6.6" r="1.1"/></svg>
+          </a>
+          <a class="social-link" href="https://www.youtube.com/@bandadelacala" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.4 6.4c-.2-1-1-1.8-2-2C17.7 4 12 4 12 4s-5.7 0-7.4.4c-1 .2-1.8 1-2 2C2.2 8.1 2.2 12 2.2 12s0 3.9.4 5.6c.2 1 1 1.8 2 2C6.3 20 12 20 12 20s5.7 0 7.4-.4c1-.2 1.8-1 2-2 .4-1.7.4-5.6.4-5.6s0-3.9-.4-5.6Z"/><path class="play-triangle" d="m10 15 5.2-3L10 9v6Z"/></svg>
+          </a>
+        </div>
+        <div class="sidebar-version" data-app-version></div>
+        <div class="pwa-status" id="pwaStatus">PWA preparada</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="section-heading">
+          <div class="header-leading-slot">
+            <div id="homeHeaderIcon" class="home-header-icon" aria-hidden="true"><img data-app-icon alt="" /></div>
+            <button id="backBtn" class="back-btn" type="button" aria-label="Tornar enrere" title="Tornar enrere"><span aria-hidden="true">←</span></button>
+          </div>
+          <div id="sectionTitleIcon" class="section-title-icon" aria-hidden="true"></div>
+          <div class="section-title-copy">
+            <span class="eyebrow" id="sectionEyebrow">INICI</span>
+            <h2 id="sectionTitle">HOME</h2>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button id="muteBtn" class="mute-btn" type="button" aria-pressed="false" aria-label="Silenciar tot l'àudio de l'app" title="Silenciar tot l'àudio de l'app">
+            <svg class="mute-music-icon" viewBox="0 0 32 32" aria-hidden="true">
+              <path class="note-blue" d="M11 7.5v13.2M22.5 5v13.2M11 7.5 22.5 5M11 11l11.5-2.5"/>
+              <ellipse class="note-gold" cx="7.8" cy="22.1" rx="4.1" ry="3.1" transform="rotate(-18 7.8 22.1)"/>
+              <ellipse class="note-blue-fill" cx="19.3" cy="19.7" rx="4.1" ry="3.1" transform="rotate(-18 19.3 19.7)"/>
+            </svg>
+          </button>
+          <button id="installBtn" class="install-btn" hidden>INSTAL·LAR APP</button>
+        </div>
+      </header>
+
+      <section id="view-home" class="view active" data-view="home">
+        <div class="hero-panel">
+          <div id="heroMedia" class="hero-media" aria-hidden="true">
+            <img id="heroBackground" class="hero-background" alt="" />
+          </div>
+          <div class="hero-overlay" aria-hidden="true"></div>
+          <div class="hero-copy">
+            <span class="eyebrow">BENVINGUT/DA</span>
+            <h3 data-app-name>BANDA DE LA CALA</h3>
+            <p>Calendari, música i continguts de la banda en un únic espai.</p>
+          </div>
+          <div class="hero-wave hero-wave-a" aria-hidden="true"></div>
+          <div class="hero-wave hero-wave-b" aria-hidden="true"></div>
+        </div>
+        <section id="appInstallCard" class="app-install-card" aria-label="Instal·lar l'APP">
+          <img data-app-icon alt="" />
+          <div class="app-install-copy"><span class="eyebrow">PWA</span><strong>INSTAL·LA BANDA DE LA CALA</strong><small id="appInstallStatus">PWA preparada · prem INSTAL·LAR APP.</small></div>
+          <button id="homeInstallBtn" class="primary-btn app-install-action" type="button">INSTAL·LAR APP</button>
+        </section>
+        <div class="home-grid" id="homeGrid"></div>
+        <div class="home-social-links" aria-label="Xarxes socials de la Banda de la Cala">
+          <a href="https://www.facebook.com/bandadelacala" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.2 8.1V6.4c0-.8.5-1 1-1h2.5V1.2L14.2 1C10.8 1 9 3 9 6.1v2H6v4.5h3V23h5.2V12.6h3.5l.6-4.5h-4.1Z"/></svg></a>
+          <a href="https://www.instagram.com/bandadelacala" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle class="fill-dot" cx="17.6" cy="6.6" r="1.1"/></svg></a>
+          <a href="https://www.youtube.com/@bandadelacala" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.4 6.4c-.2-1-1-1.8-2-2C17.7 4 12 4 12 4s-5.7 0-7.4.4c-1 .2-1.8 1-2 2C2.2 8.1 2.2 12 2.2 12s0 3.9.4 5.6c.2 1 1 1.8 2 2C6.3 20 12 20 12 20s5.7 0 7.4-.4c1-.2 1.8-1 2-2 .4-1.7.4-5.6.4-5.6s0-3.9-.4-5.6Z"/><path class="play-triangle" d="m10 15 5.2-3L10 9v6Z"/></svg></a>
+        </div>
+        <div class="home-credits">
+          <div>App development: Vianda Visual</div>
+          <div>© 2026 · <span data-app-version></span></div>
+        </div>
+      </section>
+
+      <section id="view-calendar" class="view" data-view="calendar">
+        <div class="section-grid calendar-layout">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">AGENDA</span>
+                <h3 id="calendarMonthLabel">Calendari</h3>
+              </div>
+              <div class="month-controls">
+                <button id="prevMonth" class="icon-btn" aria-label="Mes anterior">‹</button>
+                <button id="todayMonth" class="mini-btn">AVUI</button>
+                <button id="nextMonth" class="icon-btn" aria-label="Mes següent">›</button>
+              </div>
+            </div>
+            <div class="calendar-weekdays" aria-hidden="true">
+              <span>Dl</span><span>Dt</span><span>Dc</span><span>Dj</span><span>Dv</span><span>Ds</span><span>Dg</span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+          </div>
+          <div class="panel events-panel">
+            <div class="panel-head"><div><span class="eyebrow">DETALL</span><h3 id="selectedDateTitle">Selecciona un dia</h3></div></div>
+            <div id="eventList" class="event-list"><p class="empty-copy">Toca un dia amb activitat per veure'n els detalls.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-history" class="view" data-view="history">
+        <div class="history-intro panel">
+          <span class="eyebrow">MEMÒRIA DE LA BANDA</span>
+          <h3>Històric</h3>
+          <p>Una cronologia visual de la Banda de la Cala, ordenada pels diferents períodes de direcció.</p>
+        </div>
+        <div id="historyTimeline" class="history-timeline" aria-live="polite"></div>
+      </section>
+
+      <section id="view-playlist" class="view" data-view="playlist">
+        <div class="section-grid playlist-layout">
+          <div class="panel">
+            <div class="panel-head"><div><span class="eyebrow">ÀUDIO</span><h3>Player</h3></div><span class="count-badge" id="trackCount">0 pistes</span></div>
+            <div id="trackList" class="track-list"></div>
+          </div>
+          <div class="panel player-card">
+            <div class="record-art"><div data-section-icon="playlist" class="record-icon" aria-hidden="true"></div></div>
+            <span class="eyebrow">ARA SONA</span>
+            <h3 id="nowPlayingTitle">Cap pista seleccionada</h3>
+            <p id="nowPlayingMeta">Selecciona una pista de la playlist.</p>
+            <div class="player-controls">
+              <button id="prevTrack" class="icon-btn" aria-label="Pista anterior">⏮</button>
+              <button id="playPause" class="play-btn" aria-label="Reproduir o pausar">▶</button>
+              <button id="nextTrack" class="icon-btn" aria-label="Pista següent">⏭</button>
+            </div>
+            <div class="playback-modes" aria-label="Modes de reproducció">
+              <button id="repeatOneBtn" class="mode-btn" type="button" aria-pressed="false" title="Repetir una pista">↻1 <span>REPETIR 1</span></button>
+              <button id="repeatAllBtn" class="mode-btn" type="button" aria-pressed="false" title="Repetir tota la llista">↻∞ <span>REPETIR TOT</span></button>
+              <button id="randomBtn" class="mode-btn" type="button" aria-pressed="false" title="Ordre aleatori">⤨ <span>RANDOM</span></button>
+            </div>
+            <div class="progress-row">
+              <span id="currentTime">0:00</span>
+              <input id="seekBar" type="range" min="0" max="100" value="0" step="0.1" aria-label="Progrés de reproducció" />
+              <span id="durationTime">0:00</span>
+            </div>
+            <audio id="audioPlayer" preload="metadata"></audio>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-games" class="view" data-view="games">
+        <div class="coming-soon panel centered-panel"><span class="coming-badge coming-only">PROPERAMENT</span></div>
+      </section>
+
+      <section id="view-user" class="view" data-view="user">
+        <div class="user-view-wrap">
+          <section id="userLoginCard" class="panel user-auth-card">
+            <span class="eyebrow">ACCÉS DE MÚSICS</span>
+            <h3>Inicia sessió</h3>
+            <p>Utilitza l’email i la contrasenya que t’ha facilitat la Banda de la Cala.</p>
+            <form id="userLoginForm" class="user-login-form">
+              <label>Email<input id="userLoginEmail" type="email" autocomplete="username" required /></label>
+              <label>Contrasenya<input id="userLoginPassword" type="password" autocomplete="current-password" required /></label>
+              <button class="primary-btn" type="submit">ENTRAR</button>
+              <small id="userLoginStatus" class="user-auth-status"></small>
+            </form>
+          </section>
+
+          <section id="userProfileCard" class="panel user-profile-card" hidden>
+            <div class="user-profile-head">
+              <div class="user-avatar-mark" aria-hidden="true">●</div>
+              <div><span class="eyebrow" id="userProfileRole">USER</span><h3 id="userProfileName">Músic</h3><p id="userProfileEmail"></p></div>
+            </div>
+            <div id="temporaryPasswordNotice" class="temporary-password-notice" hidden>Estàs utilitzant la contrasenya temporal. Canvia-la per una de privada.</div>
+            <form id="changePasswordForm" class="change-password-form">
+              <span class="eyebrow">CONTRASENYA</span>
+              <h4>Canviar contrasenya</h4>
+              <label>Nova contrasenya<input id="newUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+              <label>Repetir contrasenya<input id="repeatUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+              <button class="user-password-btn" type="submit">CANVIAR CONTRASENYA</button>
+              <small id="changePasswordStatus" class="user-auth-status"></small>
+            </form>
+            <button id="userLogoutBtn" class="user-logout-btn" type="button">TANCAR SESSIÓ</button>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <nav class="mobile-nav" aria-label="Navegació mòbil"></nav>
+    <div id="miniPlayer" class="mini-player" hidden>
+      <button id="miniPlay" class="mini-play" aria-label="Reproduir o pausar">▶</button>
+      <div class="mini-info"><strong id="miniTitle">—</strong><small id="miniMeta">Player</small></div>
+      <div class="mini-progress"><span id="miniProgress"></span></div>
+    </div>
+  </div>
+
+
+  <div id="dresscodeModal" class="dresscode-modal" hidden>
+    <div class="dresscode-backdrop" data-close-dresscode></div>
+    <section class="dresscode-sheet" role="dialog" aria-modal="true" aria-labelledby="dresscodeModalTitle">
+      <button class="dresscode-close" type="button" data-close-dresscode aria-label="Tancar">×</button>
+      <span class="eyebrow">DRESSCODE</span>
+      <h2 id="dresscodeModalTitle">Dress code</h2>
+      <p id="dresscodeModalSubtitle" class="dresscode-subtitle"></p>
+      <div class="dresscode-grid">
+        <div><h3>♂ Nois</h3><div id="dresscodeBoysView" class="dresscode-text"></div></div>
+        <div><h3>♀ Noies</h3><div id="dresscodeGirlsView" class="dresscode-text"></div></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="historyImageModal" class="history-image-modal" hidden>
+    <div class="history-image-backdrop" data-close-history-image></div>
+    <section class="history-image-dialog" role="dialog" aria-modal="true" aria-labelledby="historyImageTitle">
+      <button class="history-image-close" type="button" data-close-history-image aria-label="Tancar">×</button>
+      <div id="historyImageViewport" class="history-image-viewport">
+        <img id="historyImageLarge" alt="" />
+      </div>
+      <div class="history-image-toolbar">
+        <button id="historyZoomOut" type="button" aria-label="Reduir imatge">−</button>
+        <span id="historyZoomValue">100%</span>
+        <button id="historyZoomIn" type="button" aria-label="Ampliar imatge">+</button>
+        <button id="historyZoomReset" type="button">AJUSTAR</button>
+      </div>
+      <div class="history-image-caption"><strong id="historyImageTitle"></strong><span id="historyImageCaption"></span></div>
+    </section>
+  </div>
+
+  <script src="version.js"></script>
+  <script src="config.js"></script>
+  <script src="data/content-published.js"></script>
+  <script src="content-store.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

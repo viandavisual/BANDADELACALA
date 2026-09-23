@@ -758,119 +758,72 @@ async function initEditorBackend(){
 }
 
 let editorDeferredPrompt = window.__editorInstallPrompt || null;
-
 function editorIsStandalone(){
   return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
-
 function syncEditorInstallButton(){
-  const btn=$('#editorInstallBtn');
-  const cardBtn=$('#editorInstallCardBtn');
-  const card=$('#editorInstallCard');
-  const status=$('#editorInstallCardStatus');
+  const btn=$('#editorInstallBtn'), cardBtn=$('#editorInstallCardBtn'), card=$('#editorInstallCard'), status=$('#editorInstallCardStatus');
   const installed=editorIsStandalone();
   if(btn) btn.hidden=installed;
   if(card) card.hidden=installed;
   if(installed) return;
   const ready=!!(editorDeferredPrompt || window.__editorInstallPrompt);
   [btn,cardBtn].filter(Boolean).forEach(target=>{
+    target.disabled=false;
     target.classList.toggle('install-ready',ready);
-    target.disabled=!ready;
-    target.textContent=ready ? 'INSTAL·LAR EDITOR' : 'PREPARANT…';
-    target.title=ready ? 'Instal·lar BANDA DE LA CALA · EDITOR' : 'Verificant la PWA independent';
+    target.textContent='INSTAL·LAR EDITOR';
+    target.title='Instal·lar BANDA DE LA CALA · EDITOR';
   });
-  if(status) status.textContent=ready ? 'Instal·lació directa preparada.' : 'Verificant manifest + Service Worker de l’EDITOR…';
+  if(status) status.textContent=ready?'Preparat · prem INSTAL·LAR EDITOR.':'PWA preparada · prem INSTAL·LAR EDITOR.';
 }
-
-function showEditorInstallHelp(){
-  const modal=$('#editorInstallHelp'), text=$('#editorInstallHelpText');
-  if(!modal||!text) return;
-  const ua=navigator.userAgent;
-  if(/iPad|iPhone|iPod/.test(ua)){
-    text.innerHTML='A Safari: prem <strong>Compartir</strong> → <strong>Afegir a la pantalla d’inici</strong>.';
-  }else if(/Edg\//.test(ua) || /Chrome\//.test(ua)){
-    text.innerHTML='El navegador encara està preparant la instal·lació d’aquest EDITOR com a aplicació independent. Mantén aquesta pàgina oberta uns segons; quan estigui preparada, el botó <strong>INSTAL·LAR EDITOR</strong> quedarà actiu i obrirà directament el diàleg natiu amb un sol clic.';
-  }else{
-    text.innerHTML='Aquest navegador no ha ofert la instal·lació automàtica. Utilitza la seva opció <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.';
-  }
-  modal.hidden=false;
-}
-
-async function waitForEditorInstallPrompt(timeout=2600){
-  const existing=editorDeferredPrompt || window.__editorInstallPrompt;
-  if(existing) return existing;
+async function ensureEditorServiceWorker(){
+  if(location.protocol==='file:' || !('serviceWorker' in navigator)) return false;
   try{
-    if('serviceWorker' in navigator) await Promise.race([
-      navigator.serviceWorker.ready,
-      new Promise(resolve=>setTimeout(resolve,900))
-    ]);
-  }catch(_error){}
-  const afterReady=editorDeferredPrompt || window.__editorInstallPrompt;
-  if(afterReady) return afterReady;
-  return await new Promise(resolve=>{
-    let done=false;
-    const finish=value=>{if(done)return;done=true;window.removeEventListener('editorinstallready',onReady);resolve(value);};
-    const onReady=()=>finish(window.__editorInstallPrompt || editorDeferredPrompt || null);
-    window.addEventListener('editorinstallready',onReady,{once:true});
-    setTimeout(()=>finish(null),timeout);
-  });
+    const root=new URL('../', location.href);
+    const swUrl=new URL('editor/sw.js',root);
+    const scope=new URL('editor/',root).pathname;
+    const reg=await navigator.serviceWorker.register(swUrl.href,{scope,updateViaCache:'none'});
+    await reg.update().catch(()=>{});
+    await Promise.race([navigator.serviceWorker.ready,new Promise(resolve=>setTimeout(resolve,1400))]);
+    return true;
+  }catch(error){console.warn('EDITOR SW',error);return false;}
 }
-
-function bindEditorPwaInstall(){
-  const btn=$('#editorInstallBtn');
-  const cardBtn=$('#editorInstallCardBtn');
-  if(!btn && !cardBtn) return;
-
-  editorDeferredPrompt = window.__editorInstallPrompt || editorDeferredPrompt;
-  syncEditorInstallButton();
-
-  window.addEventListener('editorinstallready',()=>{
-    editorDeferredPrompt=window.__editorInstallPrompt || editorDeferredPrompt;
-    syncEditorInstallButton();
-  });
-  window.addEventListener('beforeinstallprompt',event=>{
-    event.preventDefault();
-    editorDeferredPrompt=event;
-    window.__editorInstallPrompt=event;
-    syncEditorInstallButton();
-  });
-
-  const launchInstall=async()=>{
-    if(editorIsStandalone()) return;
-    const prompt=editorDeferredPrompt || window.__editorInstallPrompt;
-    if(!prompt){ syncEditorInstallButton(); return; }
-    try{
-      await prompt.prompt();
-      const choice=await prompt.userChoice;
-      editorDeferredPrompt=null; window.__editorInstallPrompt=null;
-      if(choice?.outcome==='accepted'){
-        if(btn) btn.hidden=true;
-        if($('#editorInstallCard')) $('#editorInstallCard').hidden=true;
-        showToast('EDITOR instal·lat');
-      }else syncEditorInstallButton();
-    }catch(error){
-      console.warn('No s’ha pogut obrir el prompt d’instal·lació',error);
-      syncEditorInstallButton();
-    }
-  };
-  btn?.addEventListener('click',launchInstall);
-  cardBtn?.addEventListener('click',launchInstall);
-  window.addEventListener('appinstalled',()=>{
-    editorDeferredPrompt=null; window.__editorInstallPrompt=null;
-    if(btn) btn.hidden=true;
-    if($('#editorInstallCard')) $('#editorInstallCard').hidden=true;
-    showToast('EDITOR instal·lat');
-  });
-}
-
-function registerEditorSW(){
-  if(location.protocol==='file:') return;
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('editor/sw.js',{scope:'./editor/',updateViaCache:'none'})
-      .then(reg=>reg.update().catch(()=>{}))
-      .catch(()=>{});
+async function launchEditorInstall(){
+  if(editorIsStandalone()) return;
+  let prompt=editorDeferredPrompt || window.__editorInstallPrompt;
+  if(!prompt){ await ensureEditorServiceWorker(); prompt=editorDeferredPrompt || window.__editorInstallPrompt; }
+  if(!prompt && /iPad|iPhone|iPod/.test(navigator.userAgent)){
+    alert('A Safari: prem Compartir i després “Afegir a la pantalla d’inici”.'); return;
   }
+  if(!prompt){
+    const status=$('#editorInstallCardStatus');
+    if(status) status.textContent='Chrome encara no ha ofert el diàleg. Recarrega una vegada /editor/ i torna a prémer INSTAL·LAR EDITOR.';
+    return;
+  }
+  try{
+    await prompt.prompt();
+    const choice=await prompt.userChoice;
+    editorDeferredPrompt=null; window.__editorInstallPrompt=null;
+    if(choice?.outcome==='accepted'){
+      if($('#editorInstallBtn')) $('#editorInstallBtn').hidden=true;
+      if($('#editorInstallCard')) $('#editorInstallCard').hidden=true;
+      showToast('EDITOR instal·lat');
+    }
+    syncEditorInstallButton();
+  }catch(error){console.warn('Install Editor',error);syncEditorInstallButton();}
 }
+function bindEditorPwaInstall(){
+  const btn=$('#editorInstallBtn'), cardBtn=$('#editorInstallCardBtn');
+  if(!btn && !cardBtn) return;
+  editorDeferredPrompt=window.__editorInstallPrompt || editorDeferredPrompt;
+  syncEditorInstallButton();
+  window.addEventListener('editorinstallready',()=>{editorDeferredPrompt=window.__editorInstallPrompt || editorDeferredPrompt;syncEditorInstallButton();});
+  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();editorDeferredPrompt=event;window.__editorInstallPrompt=event;syncEditorInstallButton();});
+  btn?.addEventListener('click',launchEditorInstall); cardBtn?.addEventListener('click',launchEditorInstall);
+  window.addEventListener('appinstalled',()=>{editorDeferredPrompt=null;window.__editorInstallPrompt=null;if(btn)btn.hidden=true;if($('#editorInstallCard'))$('#editorInstallCard').hidden=true;showToast('EDITOR instal·lat');});
+  setTimeout(syncEditorInstallButton,1800);
+}
+function registerEditorSW(){ ensureEditorServiceWorker(); }
 
 function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); initEditorBackend(); }
 init();

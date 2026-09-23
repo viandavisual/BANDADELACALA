@@ -82,7 +82,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.20');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.21');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
@@ -112,7 +112,9 @@ function renderHome(){
     { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
     { id:'user', icon:'user', title:'USER', text:'Accés privat per als músics de la banda.', status:'ACCÉS' }
   ];
-  $('#homeGrid').innerHTML = cards.map(card => `<button class="home-card ${card.status==='PROPERAMENT'?'disabled':''}" data-open="${card.id}">
+  const homeGrid=$('#homeGrid');
+  homeGrid.classList.toggle('five-cards', cards.length===5);
+  homeGrid.innerHTML = cards.map(card => `<button class="home-card ${card.status==='PROPERAMENT'?'disabled':''}" data-open="${card.id}">
     <span class="big-icon">${iconSvg(card.icon)}</span>
     <div><span class="status-pill">${card.status}</span><h4>${card.title}</h4><p>${card.text}</p></div>
   </button>`).join('');
@@ -307,17 +309,23 @@ function renderHistory(){
   $$('[data-toggle-period]').forEach(btn=>btn.addEventListener('click',()=>{
     const id=btn.dataset.togglePeriod;
     if(state.collapsedPeriods.has(id)) state.collapsedPeriods.delete(id); else state.collapsedPeriods.add(id);
-    try{localStorage.setItem('banda-history-collapsed',JSON.stringify([...state.collapsedPeriods]));}catch(_error){}
+    try{localStorage.setItem('banda-history-collapsed-v021',JSON.stringify([...state.collapsedPeriods]));}catch(_error){}
     renderHistory();
   }));
   $$('[data-history-image-id]').forEach(btn=>btn.addEventListener('click',()=>openHistoryImage(btn.dataset.historyImageId)));
 }
 
 function restoreHistoryCollapsed(){
+  const periods=getHistoricPeriods();
+  const current=periods.find(period=>period.end==null || /actualitat/i.test(period.years||'')) || periods[periods.length-1];
   try{
-    const saved=JSON.parse(localStorage.getItem('banda-history-collapsed')||'[]');
-    if(Array.isArray(saved)) state.collapsedPeriods=new Set(saved);
+    const raw=localStorage.getItem('banda-history-collapsed-v021');
+    if(raw!==null){
+      const saved=JSON.parse(raw);
+      if(Array.isArray(saved)){ state.collapsedPeriods=new Set(saved); return; }
+    }
   }catch(_error){}
+  state.collapsedPeriods=new Set(periods.filter(period=>!current || period.id!==current.id).map(period=>period.id));
 }
 
 function historyViewerApply(){
@@ -435,15 +443,19 @@ function loadTrack(index, autoplay = false){
   $('#miniMeta').textContent = track.meta || 'PLAYER';
   $('#miniPlayer').classList.add('visible');
   $('#miniPlayer').hidden = false;
+  $('#appShell')?.classList.add('has-mini-player');
   renderTracks();
   if(autoplay) player.play().catch(()=>{});
 }
 
 function setPlayIcon(){
-  const playing = !audio().paused && !audio().ended;
+  const player=audio();
+  const playing = !!player && !player.paused && !player.ended && state.currentTrack >= 0;
   $('#playPause').textContent = playing ? '❚❚' : '▶';
   $('#miniPlay').textContent = playing ? '❚❚' : '▶';
-  const card = document.querySelector('.player-card');
+  const icon=document.querySelector('.record-icon');
+  if(icon) icon.classList.toggle('is-playing', playing);
+  const card=document.querySelector('.player-card');
   if(card) card.classList.toggle('is-playing', playing);
 }
 
@@ -685,35 +697,56 @@ function syncAppInstallUI(){
   const headerBtn=$('#installBtn'), homeBtn=$('#homeInstallBtn'), card=$('#appInstallCard'), status=$('#appInstallStatus');
   const installed=appIsStandalone();
   if(card) card.hidden=installed;
-  if(headerBtn) headerBtn.hidden=installed || !(state.deferredPrompt || window.__appInstallPrompt);
-  if(homeBtn){
-    if(installed){ homeBtn.hidden=true; }
-    else{
-      homeBtn.hidden=false;
-      const ready=!!(state.deferredPrompt || window.__appInstallPrompt);
-      const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
-      homeBtn.disabled=!ready && !isiOS;
-      homeBtn.textContent=ready?'INSTAL·LAR APP':(isiOS?'COM INSTAL·LAR':'PREPARANT…');
-      if(status) status.textContent=ready?'Instal·lació directa preparada.':(isiOS?'Safari · Afegir a la pantalla d’inici.':'Verificant la PWA independent…');
-    }
-  }
+  if(headerBtn) headerBtn.hidden=installed;
+  if(homeBtn) homeBtn.hidden=installed;
+  if(installed) return;
+  const ready=!!(state.deferredPrompt || window.__appInstallPrompt);
+  [headerBtn,homeBtn].filter(Boolean).forEach(btn=>{
+    btn.disabled=false;
+    btn.classList.toggle('install-ready',ready);
+    btn.textContent='INSTAL·LAR APP';
+  });
+  if(status) status.textContent=ready ? 'Preparada · prem INSTAL·LAR APP.' : 'PWA preparada · prem INSTAL·LAR APP.';
+}
+async function ensureAppServiceWorker(){
+  if(location.protocol==='file:' || !('serviceWorker' in navigator)) return false;
+  try{
+    const root=new URL('../', location.href);
+    const swUrl=new URL('app/sw.js', root);
+    const scope=new URL('app/', root).pathname;
+    const reg=await navigator.serviceWorker.register(swUrl.href,{scope,updateViaCache:'none'});
+    await reg.update().catch(()=>{});
+    await Promise.race([navigator.serviceWorker.ready,new Promise(resolve=>setTimeout(resolve,1400))]);
+    return true;
+  }catch(error){ console.warn('APP SW',error); return false; }
+}
+function showAppInstallMessage(message){
+  const status=$('#appInstallStatus'); if(status) status.textContent=message;
 }
 async function promptAppInstall(){
   if(appIsStandalone()) return;
   let prompt=state.deferredPrompt || window.__appInstallPrompt;
+  if(!prompt){
+    await ensureAppServiceWorker();
+    prompt=state.deferredPrompt || window.__appInstallPrompt;
+  }
   if(!prompt && /iPad|iPhone|iPod/.test(navigator.userAgent)){
     alert('A Safari: prem Compartir i després “Afegir a la pantalla d’inici”.');
     return;
   }
-  if(!prompt){ syncAppInstallUI(); return; }
+  if(!prompt){
+    showAppInstallMessage('Chrome encara no ha ofert el diàleg. Recarrega una vegada aquesta pàgina i torna a prémer INSTAL·LAR APP.');
+    return;
+  }
   try{
     await prompt.prompt();
     const choice=await prompt.userChoice;
     state.deferredPrompt=null; window.__appInstallPrompt=null;
     if(choice?.outcome==='accepted'){
       $('#appInstallCard')?.setAttribute('hidden','');
-      $('#installBtn').hidden=true;
-    }else syncAppInstallUI();
+      if($('#installBtn')) $('#installBtn').hidden=true;
+    }
+    syncAppInstallUI();
   }catch(error){ console.warn('No s’ha pogut obrir el diàleg d’instal·lació',error); syncAppInstallUI(); }
 }
 function bindPwaInstall(){
@@ -727,18 +760,19 @@ function bindPwaInstall(){
   $('#homeInstallBtn')?.addEventListener('click',promptAppInstall);
   window.addEventListener('appinstalled',()=>{
     state.deferredPrompt=null; window.__appInstallPrompt=null;
-    $('#pwaStatus').textContent='PWA instal·lada'; syncAppInstallUI();
+    if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada'; syncAppInstallUI();
   });
+  setTimeout(syncAppInstallUI,1800);
 }
-
 function registerSW(){
   if(location.protocol === 'file:'){
-    $('#pwaStatus').textContent = 'Mode local · PWA activa quan es publiqui per HTTPS';
+    if($('#pwaStatus')) $('#pwaStatus').textContent = 'Mode local · PWA activa quan es publiqui per HTTPS';
     return;
   }
-  if('serviceWorker' in navigator){
-    window.addEventListener('load',() => navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>{ reg.update().catch(()=>{}); $('#pwaStatus').textContent = 'PWA preparada'; }).catch(() => { $('#pwaStatus').textContent = 'No s’ha pogut activar el Service Worker'; }));
-  }
+  ensureAppServiceWorker().then(ok=>{
+    if($('#pwaStatus')) $('#pwaStatus').textContent=ok?'PWA preparada':'No s’ha pogut activar el Service Worker';
+    syncAppInstallUI();
+  });
 }
 
 async function init(){

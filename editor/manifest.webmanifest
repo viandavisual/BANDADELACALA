@@ -3,7 +3,7 @@
   "short_name": "CALA EDITOR",
   "description": "Editor de continguts de Banda de la Cala.",
   "lang": "ca",
-  "id": "./",
+  "id": "./banda-de-la-cala-editor",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -105,3 +105,6 @@ body{background:linear-gradient(145deg,#c69237 0%,#d4ac5f 45%,#e2c277 100%)!impo
 .editor-pwa-card{display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:14px;margin:16px 0 18px;padding:14px 16px;border:1px solid rgba(255,255,255,.34);border-radius:18px;background:rgba(255,255,255,.18);box-shadow:0 10px 28px rgba(96,65,12,.12)}
 .editor-pwa-card[hidden]{display:none!important}.editor-pwa-card>img{width:58px;height:58px;border-radius:14px;object-fit:cover;box-shadow:0 7px 18px rgba(91,58,8,.18)}.editor-pwa-card>div{display:grid;gap:3px;min-width:0}.editor-pwa-card strong{font-size:.98rem}.editor-pwa-card small{font-size:.74rem;color:rgba(36,33,31,.72)}.editor-pwa-card .editor-install-btn{min-width:170px}.editor-install-btn:disabled{opacity:.52;cursor:default}
 @media(max-width:780px){.editor-pwa-card{grid-template-columns:48px 1fr;padding:12px;gap:10px}.editor-pwa-card>img{width:48px;height:48px}.editor-pwa-card .editor-install-btn{grid-column:1/-1;width:100%;min-width:0}}
+
+/* v0.21 · instal·lació directa */
+.editor-install-btn:disabled{opacity:1!important;cursor:pointer!important}

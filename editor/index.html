@@ -25,7 +25,18 @@
       window.__editorInstallPrompt = null;
     });
     if (location.protocol !== 'file:' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.register('editor/sw.js', { scope: './editor/', updateViaCache: 'none' }).catch(function () {});
+      (async function(){
+        try {
+          var root = new URL('../', location.href);
+          var reg = await navigator.serviceWorker.register(new URL('editor/sw.js', root).href, { scope: new URL('editor/', root).pathname, updateViaCache: 'none' });
+          await reg.update().catch(function(){});
+          if (!navigator.serviceWorker.controller && !sessionStorage.getItem('banda-editor-sw-reloaded-v021')) {
+            await Promise.race([navigator.serviceWorker.ready, new Promise(function(resolve){ setTimeout(resolve, 1200); })]);
+            sessionStorage.setItem('banda-editor-sw-reloaded-v021','1');
+            location.reload();
+          }
+        } catch(error) { console.warn('EDITOR SW', error); }
+      })();
     }
   </script>
   <link rel="icon" href="assets/brand/editor-icon.png" type="image/png" />
@@ -85,7 +96,7 @@
         </div>
         <div id="editorInstallCard" class="editor-pwa-card">
           <img src="assets/brand/editor-icon.png" alt="" />
-          <div><span class="eyebrow">PWA INDEPENDENT</span><strong>INSTAL·LAR EDITOR</strong><small id="editorInstallCardStatus">Verificant instal·lació…</small></div>
+          <div><span class="eyebrow">PWA INDEPENDENT</span><strong>INSTAL·LAR EDITOR</strong><small id="editorInstallCardStatus">PWA preparada · prem INSTAL·LAR EDITOR.</small></div>
           <button id="editorInstallCardBtn" type="button" class="editor-install-btn">INSTAL·LAR EDITOR</button>
         </div>
         <div class="stat-grid">

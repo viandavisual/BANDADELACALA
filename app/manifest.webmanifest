@@ -1,0 +1,20 @@
+{
+  "name": "BANDA DE LA CALA",
+  "short_name": "LA CALA",
+  "description": "Aplicació PWA de la Banda de la Cala de l’Ametlla de Mar.",
+  "lang": "ca",
+  "id": "./banda-de-la-cala-app",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "prefer_related_applications": false,
+  "categories": ["music", "entertainment"],
+  "icons": [
+    {"src":"../assets/icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"../assets/icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"}
+  ]
+}
