@@ -11,31 +11,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="BANDA DE LA CALA · EDITOR" />
   <title>EDITOR · BANDA DE LA CALA</title>
-  <link rel="manifest" href="editor/manifest.webmanifest?v=0.22" />
-  <script>
-    // Captura immediata del prompt abans de carregar Supabase o l'EDITOR.
-    window.__editorInstallPrompt = window.__editorInstallPrompt || null;
-    window.addEventListener('beforeinstallprompt', function(event){
-      event.preventDefault();
-      window.__editorInstallPrompt = event;
-      window.dispatchEvent(new Event('bandaeditorinstallready'));
-    });
-    window.addEventListener('appinstalled', function(){ window.__editorInstallPrompt = null; });
-
-    // Registre primerenc i simple: l'SW de /editor/ només controla /editor/.
-    if (location.protocol !== 'file:' && 'serviceWorker' in navigator) {
-      (async function(){
-        try {
-          var root = new URL('../', location.href);
-          var reg = await navigator.serviceWorker.register(new URL('editor/sw.js?v=0.22', root).href, { updateViaCache: 'none' });
-          try { await reg.update(); } catch(_error) {}
-        } catch(error) { console.warn('EDITOR SW', error); }
-      })();
-    }
-  </script>
-  <link rel="icon" href="editor/icons/icon-192.png?v=0.22" type="image/png" />
-  <link rel="apple-touch-icon" href="editor/icons/icon-180.png?v=0.22" />
-  <link rel="stylesheet" href="editor.css?v=0.22" />
+  <link rel="manifest" href="editor/manifest.webmanifest?v=0.23" />
+  <link rel="icon" href="editor/icons/icon-192.png?v=0.23" type="image/png" />
+  <link rel="apple-touch-icon" href="editor/icons/icon-180.png?v=0.23" />
+  <link rel="stylesheet" href="editor.css?v=0.23" />
 </head>
 <body>
   <section id="editorLoginGate" class="editor-login-gate" aria-label="Accés a l'Editor">
@@ -90,7 +69,7 @@
         </div>
         <div id="editorInstallCard" class="editor-pwa-card">
           <img src="assets/brand/editor-icon.png" alt="" />
-          <div><span class="eyebrow">PWA INDEPENDENT</span><strong>INSTAL·LAR EDITOR</strong><small id="editorInstallCardStatus">PWA preparada · prem INSTAL·LAR EDITOR.</small></div>
+          <div><span class="eyebrow">PWA INDEPENDENT</span><strong>INSTAL·LAR EDITOR</strong><small id="editorInstallCardStatus">Prem INSTAL·LAR EDITOR.</small></div>
           <button id="editorInstallCardBtn" type="button" class="editor-install-btn">INSTAL·LAR EDITOR</button>
         </div>
         <div class="stat-grid">
@@ -288,12 +267,12 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="version.js?v=0.22"></script>
-  <script src="config.js?v=0.22"></script>
-  <script src="data/content-published.js?v=0.22"></script>
-  <script src="content-store.js?v=0.22"></script>
+  <script src="version.js?v=0.23"></script>
+  <script src="config.js?v=0.23"></script>
+  <script src="data/content-published.js?v=0.23"></script>
+  <script src="content-store.js?v=0.23"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.22"></script>
-  <script src="editor.js?v=0.22"></script>
+  <script src="supabase-client.js?v=0.23"></script>
+  <script src="editor.js?v=0.23"></script>
 </body>
 </html>

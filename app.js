@@ -1,3 +1,17 @@
+// PWA INSTALL v0.23 — patró estable de Disturbing Stories App.
+let appInstallPrompt = null;
+function captureAppInstallPrompt(event){
+  event.preventDefault();
+  appInstallPrompt = event;
+  try{ syncAppInstallUI(); }catch(_error){}
+}
+function clearAppInstallPrompt(){
+  appInstallPrompt = null;
+  try{ syncAppInstallUI(); }catch(_error){}
+}
+window.addEventListener('beforeinstallprompt', captureAppInstallPrompt);
+window.addEventListener('appinstalled', clearAppInstallPrompt);
+
 const CFG = window.BANDA_CONFIG || {};
 const initialGlobalMuted = (() => { try { return localStorage.getItem('banda-de-la-cala-muted') === '1'; } catch(error) { return false; } })();
 
@@ -7,7 +21,6 @@ const state = {
   calendarDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   selectedDate: null,
   currentTrack: -1,
-  deferredPrompt: null,
   playbackMode: 'normal',
   lastRandomTrack: -1,
   globalMuted: initialGlobalMuted,
@@ -82,7 +95,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.22');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.23');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
@@ -691,11 +704,20 @@ async function initAppAuth(){
 
 
 function appIsStandalone(){
-  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  try{
+    return window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      window.navigator.standalone === true ||
+      String(document.referrer || '').startsWith('android-app://');
+  }catch(_error){
+    return window.navigator.standalone === true;
+  }
 }
 
-function getAppInstallPrompt(){
-  return state.deferredPrompt || window.__appInstallPrompt || null;
+function appIsIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent || '') ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
 function syncAppInstallUI(){
@@ -705,93 +727,12 @@ function syncAppInstallUI(){
   if(headerBtn) headerBtn.hidden=installed;
   if(homeBtn) homeBtn.hidden=installed;
   if(installed) return;
-  const ready=!!getAppInstallPrompt();
   [headerBtn,homeBtn].filter(Boolean).forEach(btn=>{
     btn.disabled=false;
-    btn.classList.toggle('install-ready',ready);
+    btn.classList.toggle('install-ready',!!appInstallPrompt);
     btn.textContent='INSTAL·LAR APP';
   });
-  if(status) status.textContent=ready ? 'Preparada · prem INSTAL·LAR APP.' : 'PWA activa · prem INSTAL·LAR APP.';
-}
-
-function waitForAppInstallPrompt(timeout=2400){
-  const current=getAppInstallPrompt();
-  if(current) return Promise.resolve(current);
-  return new Promise(resolve=>{
-    let done=false;
-    let timer=0;
-    const finish=value=>{
-      if(done) return;
-      done=true;
-      clearTimeout(timer);
-      window.removeEventListener('beforeinstallprompt',onPrompt);
-      resolve(value || getAppInstallPrompt());
-    };
-    const onPrompt=event=>{
-      event.preventDefault();
-      state.deferredPrompt=event;
-      window.__appInstallPrompt=event;
-      syncAppInstallUI();
-      finish(event);
-    };
-    window.addEventListener('beforeinstallprompt',onPrompt,{once:true});
-    timer=setTimeout(()=>finish(null),timeout);
-  });
-}
-
-function waitForAppController(timeout=3500){
-  if(navigator.serviceWorker?.controller) return Promise.resolve(true);
-  return new Promise(resolve=>{
-    let settled=false;
-    const finish=value=>{
-      if(settled) return;
-      settled=true;
-      clearTimeout(timer);
-      navigator.serviceWorker?.removeEventListener('controllerchange',onChange);
-      resolve(value);
-    };
-    const onChange=()=>finish(!!navigator.serviceWorker.controller);
-    const timer=setTimeout(()=>finish(!!navigator.serviceWorker?.controller),timeout);
-    navigator.serviceWorker?.addEventListener('controllerchange',onChange,{once:true});
-  });
-}
-
-async function ensureAppServiceWorker(){
-  if(location.protocol==='file:' || !('serviceWorker' in navigator)) return {ok:false,controlled:false};
-  try{
-    const root=new URL('../', location.href);
-    const swUrl=new URL('app/sw.js?v=0.22', root);
-    const reg=await navigator.serviceWorker.register(swUrl.href,{updateViaCache:'none'});
-    try{ await reg.update(); }catch(_error){}
-    try{ await Promise.race([navigator.serviceWorker.ready,new Promise(resolve=>setTimeout(resolve,3000))]); }catch(_error){}
-    const controlled=await waitForAppController(3500);
-    return {ok:true,controlled,registration:reg};
-  }catch(error){
-    console.warn('APP SW',error);
-    return {ok:false,controlled:false,error};
-  }
-}
-
-async function appPwaHealth(){
-  const root=new URL('../', location.href);
-  const result={secure:window.isSecureContext,manifest:false,icons:false,sw:false,controlled:!!navigator.serviceWorker?.controller};
-  try{
-    const response=await fetch(new URL('app/manifest.webmanifest?v=0.22',root).href,{cache:'no-store'});
-    const manifest=response.ok ? await response.json() : null;
-    result.manifest=!!(manifest && manifest.start_url && manifest.display && Array.isArray(manifest.icons));
-    if(manifest?.icons?.length){
-      const checks=await Promise.all(manifest.icons.map(async icon=>{
-        try{return (await fetch(new URL(icon.src,new URL('app/manifest.webmanifest',root)).href,{cache:'no-store'})).ok;}catch(_error){return false;}
-      }));
-      result.icons=checks.some(Boolean);
-    }
-  }catch(_error){}
-  try{
-    const reg=await navigator.serviceWorker?.getRegistration(new URL('app/',root).href);
-    result.sw=!!reg?.active;
-    result.controlled=!!navigator.serviceWorker?.controller;
-  }catch(_error){}
-  return result;
+  if(status) status.textContent=appInstallPrompt ? 'Preparada · prem INSTAL·LAR APP.' : 'Prem INSTAL·LAR APP.';
 }
 
 function showAppInstallMessage(message){
@@ -799,85 +740,89 @@ function showAppInstallMessage(message){
   if(status) status.textContent=message;
 }
 
-async function promptAppInstall(){
-  if(appIsStandalone()) return;
-  const buttons=[$('#installBtn'),$('#homeInstallBtn')].filter(Boolean);
-  buttons.forEach(btn=>{btn.disabled=true;btn.textContent='PREPARANT…';});
-  showAppInstallMessage('Preparant la instal·lació…');
+async function waitForNativeAppInstallPrompt(timeout=1800){
+  if(appInstallPrompt) return appInstallPrompt;
+  return await new Promise(resolve=>{
+    let done=false,timer=0;
+    const finish=value=>{
+      if(done) return;
+      done=true;
+      clearTimeout(timer);
+      window.removeEventListener('beforeinstallprompt',onPrompt);
+      resolve(value || appInstallPrompt || null);
+    };
+    const onPrompt=event=>{
+      event.preventDefault();
+      appInstallPrompt=event;
+      syncAppInstallUI();
+      finish(event);
+    };
+    window.addEventListener('beforeinstallprompt',onPrompt,{once:true});
+    timer=setTimeout(()=>finish(appInstallPrompt),timeout);
+  });
+}
 
-  let prompt=getAppInstallPrompt();
+async function requestNativeAppInstall(){
+  const prompt=appInstallPrompt || await waitForNativeAppInstallPrompt();
   if(!prompt){
-    await ensureAppServiceWorker();
-    prompt=await waitForAppInstallPrompt(2600);
+    showAppInstallMessage('Chrome encara no ha ofert el diàleg d’instal·lació.');
+    return false;
   }
+  try{
+    prompt.prompt();
+    const choice=await prompt.userChoice;
+    if(appInstallPrompt===prompt) appInstallPrompt=null;
+    syncAppInstallUI();
+    return choice?.outcome==='accepted';
+  }catch(error){
+    console.warn('APP install',error);
+    showAppInstallMessage('No s’ha pogut obrir el diàleg d’instal·lació.');
+    return false;
+  }
+}
 
-  if(!prompt && /iPad|iPhone|iPod/.test(navigator.userAgent)){
-    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR APP';});
+async function promptAppInstall(){
+  if(appIsStandalone()){
+    syncAppInstallUI();
+    return;
+  }
+  if(appIsIOS()){
     alert('A Safari: prem Compartir i després “Afegir a la pantalla d’inici”.');
     return;
   }
-
-  if(!prompt){
-    const health=await appPwaHealth();
-    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR APP';});
-    if(!health.secure) showAppInstallMessage('La instal·lació PWA necessita HTTPS.');
-    else if(!health.manifest || !health.icons) showAppInstallMessage('No s’ha pogut validar el manifest o les icones de la PWA.');
-    else if(!health.sw) showAppInstallMessage('El Service Worker encara no s’ha activat. Torna a prémer INSTAL·LAR APP en uns segons.');
-    else showAppInstallMessage('PWA validada. Chrome encara no ha lliurat el diàleg; torna a prémer INSTAL·LAR APP en uns segons.');
-    return;
-  }
-
-  try{
-    await prompt.prompt();
-    const choice=await prompt.userChoice;
-    state.deferredPrompt=null;
-    window.__appInstallPrompt=null;
-    if(choice?.outcome==='accepted'){
-      $('#appInstallCard')?.setAttribute('hidden','');
-      if($('#installBtn')) $('#installBtn').hidden=true;
-    }
-  }catch(error){
-    console.warn('No s’ha pogut obrir el diàleg d’instal·lació',error);
-    showAppInstallMessage('No s’ha pogut obrir el diàleg. Torna-ho a provar.');
-  }finally{
-    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR APP';});
-    syncAppInstallUI();
-  }
+  await requestNativeAppInstall();
 }
 
 function bindPwaInstall(){
-  state.deferredPrompt=window.__appInstallPrompt || state.deferredPrompt;
   syncAppInstallUI();
-  window.addEventListener('bandaappinstallready',()=>{
-    state.deferredPrompt=window.__appInstallPrompt || state.deferredPrompt;
-    syncAppInstallUI();
-  });
-  window.addEventListener('beforeinstallprompt',event=>{
-    event.preventDefault();
-    state.deferredPrompt=event;
-    window.__appInstallPrompt=event;
-    syncAppInstallUI();
-  });
   $('#installBtn')?.addEventListener('click',promptAppInstall);
   $('#homeInstallBtn')?.addEventListener('click',promptAppInstall);
   window.addEventListener('appinstalled',()=>{
-    state.deferredPrompt=null;
-    window.__appInstallPrompt=null;
     if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada';
-    syncAppInstallUI();
   });
-  setTimeout(syncAppInstallUI,1000);
+  window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change',syncAppInstallUI);
 }
 
-function registerSW(){
-  if(location.protocol === 'file:'){
-    if($('#pwaStatus')) $('#pwaStatus').textContent='Mode local · PWA activa quan es publiqui per HTTPS';
+async function registerSW(){
+  if(location.protocol==='file:'){
+    if($('#pwaStatus')) $('#pwaStatus').textContent='Mode local · la instal·lació PWA necessita HTTPS';
     return;
   }
-  ensureAppServiceWorker().then(result=>{
-    if($('#pwaStatus')) $('#pwaStatus').textContent=result.ok?'PWA preparada':'No s’ha pogut activar el Service Worker';
-    syncAppInstallUI();
-  });
+  if(!('serviceWorker' in navigator)){
+    if($('#pwaStatus')) $('#pwaStatus').textContent='Aquest navegador no admet Service Worker';
+    return;
+  }
+  try{
+    const root=new URL('../',location.href);
+    const swUrl=new URL('app/sw.js?v=0.23',root).href;
+    const scopeUrl=new URL('app/',root).href;
+    const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
+    try{ await reg.update(); }catch(_error){}
+    if($('#pwaStatus')) $('#pwaStatus').textContent='PWA preparada';
+  }catch(error){
+    console.warn('APP SW',error);
+    if($('#pwaStatus')) $('#pwaStatus').textContent='No s’ha pogut activar el Service Worker';
+  }
 }
 
 async function init(){
@@ -902,12 +847,12 @@ async function init(){
   if(muteBtn) muteBtn.onclick = toggleGlobalMute;
   bindContentUpdates();
   bindUserAuth();
+  bindPwaInstall();
+  registerSW();
   await initAppAuth();
   const requestedView=new URLSearchParams(location.search).get('view');
   renderNavigation(); renderHome(); renderUserSection();
   if(requestedView==='user'){ state.currentView='home'; switchView('user',false); }
-  bindPwaInstall();
-  registerSW();
   const backBtn = $('#backBtn');
   if(backBtn) backBtn.onclick = goBack;
 }

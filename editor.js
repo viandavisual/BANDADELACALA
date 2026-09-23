@@ -1,3 +1,17 @@
+// PWA INSTALL v0.23 — patró estable de Disturbing Stories App.
+let editorInstallPrompt = null;
+function captureEditorInstallPrompt(event){
+  event.preventDefault();
+  editorInstallPrompt = event;
+  try{ syncEditorInstallButton(); }catch(_error){}
+}
+function clearEditorInstallPrompt(){
+  editorInstallPrompt = null;
+  try{ syncEditorInstallButton(); }catch(_error){}
+}
+window.addEventListener('beforeinstallprompt', captureEditorInstallPrompt);
+window.addEventListener('appinstalled', clearEditorInstallPrompt);
+
 const CFG = window.BANDA_CONFIG || {};
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -95,7 +109,7 @@ function save(next=content,message='Canvis desats'){
     return false;
   }
 }
-function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.22'); }
+function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.23'); }
 function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
@@ -757,172 +771,105 @@ async function initEditorBackend(){
   }catch(error){console.error(error);showEditorGate('No s’ha pogut connectar amb Supabase.');}
 }
 
-let editorDeferredPrompt = window.__editorInstallPrompt || null;
 function editorIsStandalone(){
-  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  try{
+    return window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      window.navigator.standalone === true ||
+      String(document.referrer || '').startsWith('android-app://');
+  }catch(_error){
+    return window.navigator.standalone === true;
+  }
 }
-function getEditorInstallPrompt(){ return editorDeferredPrompt || window.__editorInstallPrompt || null; }
+function editorIsIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent || '') ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
 function syncEditorInstallButton(){
   const btn=$('#editorInstallBtn'), cardBtn=$('#editorInstallCardBtn'), card=$('#editorInstallCard'), status=$('#editorInstallCardStatus');
   const installed=editorIsStandalone();
   if(btn) btn.hidden=installed;
   if(card) card.hidden=installed;
   if(installed) return;
-  const ready=!!getEditorInstallPrompt();
   [btn,cardBtn].filter(Boolean).forEach(target=>{
     target.disabled=false;
-    target.classList.toggle('install-ready',ready);
+    target.classList.toggle('install-ready',!!editorInstallPrompt);
     target.textContent='INSTAL·LAR EDITOR';
     target.title='Instal·lar BANDA DE LA CALA · EDITOR';
   });
-  if(status) status.textContent=ready?'Preparat · prem INSTAL·LAR EDITOR.':'PWA activa · prem INSTAL·LAR EDITOR.';
+  if(status) status.textContent=editorInstallPrompt ? 'Preparat · prem INSTAL·LAR EDITOR.' : 'Prem INSTAL·LAR EDITOR.';
 }
-function waitForEditorInstallPrompt(timeout=2400){
-  const current=getEditorInstallPrompt();
-  if(current) return Promise.resolve(current);
-  return new Promise(resolve=>{
+async function waitForNativeEditorInstallPrompt(timeout=1800){
+  if(editorInstallPrompt) return editorInstallPrompt;
+  return await new Promise(resolve=>{
     let done=false,timer=0;
     const finish=value=>{
       if(done)return;
       done=true;
       clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt',onPrompt);
-      resolve(value || getEditorInstallPrompt());
+      resolve(value || editorInstallPrompt || null);
     };
     const onPrompt=event=>{
       event.preventDefault();
-      editorDeferredPrompt=event;
-      window.__editorInstallPrompt=event;
+      editorInstallPrompt=event;
       syncEditorInstallButton();
       finish(event);
     };
     window.addEventListener('beforeinstallprompt',onPrompt,{once:true});
-    timer=setTimeout(()=>finish(null),timeout);
+    timer=setTimeout(()=>finish(editorInstallPrompt),timeout);
   });
-}
-function waitForEditorController(timeout=3500){
-  if(navigator.serviceWorker?.controller) return Promise.resolve(true);
-  return new Promise(resolve=>{
-    let settled=false;
-    const finish=value=>{
-      if(settled)return;
-      settled=true;
-      clearTimeout(timer);
-      navigator.serviceWorker?.removeEventListener('controllerchange',onChange);
-      resolve(value);
-    };
-    const onChange=()=>finish(!!navigator.serviceWorker.controller);
-    const timer=setTimeout(()=>finish(!!navigator.serviceWorker?.controller),timeout);
-    navigator.serviceWorker?.addEventListener('controllerchange',onChange,{once:true});
-  });
-}
-async function ensureEditorServiceWorker(){
-  if(location.protocol==='file:' || !('serviceWorker' in navigator)) return {ok:false,controlled:false};
-  try{
-    const root=new URL('../', location.href);
-    const swUrl=new URL('editor/sw.js?v=0.22',root);
-    const reg=await navigator.serviceWorker.register(swUrl.href,{updateViaCache:'none'});
-    try{await reg.update();}catch(_error){}
-    try{await Promise.race([navigator.serviceWorker.ready,new Promise(resolve=>setTimeout(resolve,3000))]);}catch(_error){}
-    const controlled=await waitForEditorController(3500);
-    return {ok:true,controlled,registration:reg};
-  }catch(error){console.warn('EDITOR SW',error);return {ok:false,controlled:false,error};}
-}
-async function editorPwaHealth(){
-  const root=new URL('../', location.href);
-  const result={secure:window.isSecureContext,manifest:false,icons:false,sw:false,controlled:!!navigator.serviceWorker?.controller};
-  try{
-    const manifestUrl=new URL('editor/manifest.webmanifest?v=0.22',root);
-    const response=await fetch(manifestUrl.href,{cache:'no-store'});
-    const manifest=response.ok ? await response.json() : null;
-    result.manifest=!!(manifest && manifest.start_url && manifest.display && Array.isArray(manifest.icons));
-    if(manifest?.icons?.length){
-      const checks=await Promise.all(manifest.icons.map(async icon=>{
-        try{return (await fetch(new URL(icon.src,manifestUrl).href,{cache:'no-store'})).ok;}catch(_error){return false;}
-      }));
-      result.icons=checks.some(Boolean);
-    }
-  }catch(_error){}
-  try{
-    const reg=await navigator.serviceWorker?.getRegistration(new URL('editor/',root).href);
-    result.sw=!!reg?.active;
-    result.controlled=!!navigator.serviceWorker?.controller;
-  }catch(_error){}
-  return result;
 }
 async function launchEditorInstall(){
-  if(editorIsStandalone()) return;
-  const buttons=[$('#editorInstallBtn'),$('#editorInstallCardBtn')].filter(Boolean);
-  const status=$('#editorInstallCardStatus');
-  buttons.forEach(btn=>{btn.disabled=true;btn.textContent='PREPARANT…';});
-  if(status) status.textContent='Preparant la instal·lació…';
-
-  let prompt=getEditorInstallPrompt();
-  if(!prompt){
-    await ensureEditorServiceWorker();
-    prompt=await waitForEditorInstallPrompt(2600);
+  if(editorIsStandalone()){
+    syncEditorInstallButton();
+    return;
   }
-  if(!prompt && /iPad|iPhone|iPod/.test(navigator.userAgent)){
-    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR EDITOR';});
+  if(editorIsIOS()){
     alert('A Safari: prem Compartir i després “Afegir a la pantalla d’inici”.');
     return;
   }
+  const prompt=editorInstallPrompt || await waitForNativeEditorInstallPrompt();
   if(!prompt){
-    const health=await editorPwaHealth();
-    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR EDITOR';});
-    if(status){
-      if(!health.secure) status.textContent='La instal·lació PWA necessita HTTPS.';
-      else if(!health.manifest || !health.icons) status.textContent='No s’ha pogut validar el manifest o les icones de l’EDITOR.';
-      else if(!health.sw) status.textContent='El Service Worker encara no s’ha activat. Torna a prémer INSTAL·LAR EDITOR en uns segons.';
-      else status.textContent='PWA validada. Chrome encara no ha lliurat el diàleg; torna a prémer INSTAL·LAR EDITOR en uns segons.';
-    }
+    const status=$('#editorInstallCardStatus');
+    if(status) status.textContent='Chrome encara no ha ofert el diàleg d’instal·lació.';
     return;
   }
   try{
-    await prompt.prompt();
+    prompt.prompt();
     const choice=await prompt.userChoice;
-    editorDeferredPrompt=null;
-    window.__editorInstallPrompt=null;
-    if(choice?.outcome==='accepted'){
-      if($('#editorInstallBtn')) $('#editorInstallBtn').hidden=true;
-      if($('#editorInstallCard')) $('#editorInstallCard').hidden=true;
-      showToast('EDITOR instal·lat');
-    }
+    if(editorInstallPrompt===prompt) editorInstallPrompt=null;
+    if(choice?.outcome==='accepted') showToast('EDITOR instal·lat');
   }catch(error){
-    console.warn('Install Editor',error);
-    if(status) status.textContent='No s’ha pogut obrir el diàleg. Torna-ho a provar.';
+    console.warn('EDITOR install',error);
+    const status=$('#editorInstallCardStatus');
+    if(status) status.textContent='No s’ha pogut obrir el diàleg d’instal·lació.';
   }finally{
-    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR EDITOR';});
     syncEditorInstallButton();
   }
 }
 function bindEditorPwaInstall(){
   const btn=$('#editorInstallBtn'), cardBtn=$('#editorInstallCardBtn');
   if(!btn && !cardBtn) return;
-  editorDeferredPrompt=window.__editorInstallPrompt || editorDeferredPrompt;
   syncEditorInstallButton();
-  window.addEventListener('bandaeditorinstallready',()=>{
-    editorDeferredPrompt=window.__editorInstallPrompt || editorDeferredPrompt;
-    syncEditorInstallButton();
-  });
-  window.addEventListener('beforeinstallprompt',event=>{
-    event.preventDefault();
-    editorDeferredPrompt=event;
-    window.__editorInstallPrompt=event;
-    syncEditorInstallButton();
-  });
   btn?.addEventListener('click',launchEditorInstall);
   cardBtn?.addEventListener('click',launchEditorInstall);
   window.addEventListener('appinstalled',()=>{
-    editorDeferredPrompt=null;
-    window.__editorInstallPrompt=null;
-    if(btn)btn.hidden=true;
-    if($('#editorInstallCard'))$('#editorInstallCard').hidden=true;
     showToast('EDITOR instal·lat');
   });
-  setTimeout(syncEditorInstallButton,1000);
+  window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change',syncEditorInstallButton);
 }
-function registerEditorSW(){ ensureEditorServiceWorker(); }
+async function registerEditorSW(){
+  if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
+  try{
+    const root=new URL('../',location.href);
+    const swUrl=new URL('editor/sw.js?v=0.23',root).href;
+    const scopeUrl=new URL('editor/',root).href;
+    const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
+    try{ await reg.update(); }catch(_error){}
+  }catch(error){ console.warn('EDITOR SW',error); }
+}
 
 function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); initEditorBackend(); }
 init();
