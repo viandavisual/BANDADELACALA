@@ -1,5 +1,5 @@
 window.BANDA_CONFIG = {
-  version: globalThis.BANDA_VERSION || 'v0.26',
+  version: globalThis.BANDA_VERSION || 'v0.31',
   appName: 'BANDA DE LA CALA',
   shortName: 'LA CALA',
   subtitle: "L’Ametlla de Mar",
@@ -8,6 +8,13 @@ window.BANDA_CONFIG = {
   introVideo: 'assets/intro.webm',
   introAudio: 'assets/AUDIO/introhimne.mp3',
   introFallbackMs: 6000,
+  avatars: {
+    path: 'assets/avatar',
+    githubOwner: 'viandavisual',
+    githubRepo: 'BANDADELACALA',
+    githubBranch: 'main',
+    maxProbe: 80
+  },
   supabase: {
     url: 'https://ighgvbnsratlektiwrjf.supabase.co',
     publishableKey: 'sb_publishable_tQRAe9SgRhJqj__e3we0uA_qpEE4L13',

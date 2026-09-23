@@ -869,3 +869,31 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   /* viewerToolbar */
   .history-image-toolbar button,.history-image-toolbar>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 }
+
+
+/* v0.31 · HISTÒRIC incremental, AVUI, PLAYER centrat i HEMEROTECA */
+.calendar-day.today,
+.calendar-day.today.event-normal,
+.calendar-day.today.event-featured,
+.calendar-day.today.selected{
+  background:#c72f34!important;
+  border-color:#9f2026!important;
+  color:#fff!important;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.22),0 0 0 2px rgba(159,32,38,.12)!important;
+}
+.calendar-day.today:hover,.calendar-day.today.event-normal:hover,.calendar-day.today.event-featured:hover{background:#b6252b!important}
+.calendar-day.today .day-number,.calendar-day.today.event-featured .day-number,.calendar-day.today.event-normal .day-number{color:#fff!important}
+.calendar-day.today.has-event:after{display:block!important;content:"";position:absolute;left:auto!important;right:9px;top:9px;bottom:auto!important;width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.92)!important;background:var(--blue)!important}
+.calendar-day.today.event-featured:after{background:var(--gold)!important}
+.play-btn,.mini-play{display:grid!important;place-items:center!important;padding:0!important;line-height:1!important}
+.pause-glyph{width:17px;height:19px;display:flex;align-items:stretch;justify-content:center;gap:4px;margin:0;padding:0;transform:none}
+.pause-glyph i{display:block;width:5px;height:100%;border-radius:1.5px;background:currentColor}
+.play-glyph{display:block;width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:14px solid currentColor;margin-left:3px}
+.mini-play .pause-glyph{width:13px;height:15px;gap:3px}.mini-play .pause-glyph i{width:4px}.mini-play .play-glyph{border-top-width:7px;border-bottom-width:7px;border-left-width:11px;margin-left:2px}
+.hemeroteca-launch-wrap{position:relative;z-index:2;display:flex;justify-content:center;padding:8px 0 28px}
+.hemeroteca-launch{width:min(100%,560px);border:1px solid rgba(57,58,134,.16);border-radius:22px;padding:18px 24px;background:linear-gradient(135deg,var(--blue),var(--blue-deep));color:#fff;box-shadow:0 16px 38px rgba(57,58,134,.18);display:grid;gap:3px;text-align:center;transition:.18s ease}
+.hemeroteca-launch:hover{transform:translateY(-2px);box-shadow:0 20px 44px rgba(57,58,134,.24)}.hemeroteca-launch span{font-size:.64rem;letter-spacing:.14em;opacity:.72}.hemeroteca-launch strong{font-size:1.4rem;letter-spacing:.08em}.hemeroteca-launch small{font-size:.74rem;opacity:.82}
+.hemeroteca-panel[hidden],#historyMainContent[hidden]{display:none!important}.hemeroteca-panel{display:grid;gap:16px}.hemeroteca-head{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}.hemeroteca-head h3{margin:4px 0 7px;font-size:2.4rem;letter-spacing:-.04em}.hemeroteca-head p{margin:0;color:var(--muted);line-height:1.55}.hemeroteca-back{min-height:42px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--blue);font-weight:900;padding:0 13px}.hemeroteca-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.hemeroteca-tab{min-height:48px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--blue);font-size:.78rem;font-weight:900;letter-spacing:.06em}.hemeroteca-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}.hemeroteca-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.hemeroteca-card{min-width:0;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:var(--shadow-soft);overflow:hidden}.hemeroteca-media{height:260px;display:grid;grid-template-columns:repeat(var(--hemero-cols,1),minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:3px;background:var(--paper);overflow:hidden}.hemeroteca-image-button{border:0;padding:0;min-width:0;min-height:0;background:var(--paper);cursor:zoom-in;overflow:hidden}.hemeroteca-image-button img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .2s ease}.hemeroteca-image-button:hover img{transform:scale(1.025)}.hemeroteca-card-copy{padding:15px 16px 17px}.hemeroteca-card-meta{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:.64rem;letter-spacing:.08em;color:var(--muted);font-weight:800}.hemeroteca-card-meta strong{color:var(--gold-deep)}.hemeroteca-card h4{margin:9px 0 6px;font-size:1.05rem}.hemeroteca-card p{margin:0 0 12px;color:var(--muted);font-size:.84rem;line-height:1.5}.hemeroteca-link{display:inline-flex;align-items:center;min-height:34px;padding:0 11px;border-radius:10px;background:var(--gold-soft);color:var(--gold-deep);font-size:.68rem;font-weight:900;letter-spacing:.05em;text-decoration:none}.hemeroteca-empty{grid-column:1/-1;text-align:center;color:var(--muted)}
+@media(max-width:900px){.hemeroteca-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:780px){.calendar-day.today.has-event:after{right:6px;top:6px;width:7px;height:7px;box-shadow:0 0 0 1.5px rgba(255,255,255,.94)!important}.hemeroteca-launch{border-radius:18px;padding:16px}.hemeroteca-head{grid-template-columns:1fr;gap:12px}.hemeroteca-head h3{font-size:2rem}.hemeroteca-back{justify-self:start}.hemeroteca-tabs{gap:5px}.hemeroteca-tab{min-height:44px;font-size:.66rem;padding:0 5px}.hemeroteca-grid{grid-template-columns:1fr;gap:12px}.hemeroteca-media{height:230px}}
+.calendar-day.today.outside{opacity:1}

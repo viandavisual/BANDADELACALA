@@ -1,6 +1,6 @@
--- BANDA DE LA CALA · v0.24
+-- BANDA DE LA CALA · esquema completo compatible con v0.31
 -- Configuració completa per a un projecte Supabase NOU.
--- Si ja tens el projecte existent de v0.23, NO executis aquest fitxer: usa SUPABASE_UPDATE_v0.24.sql.
+-- Para un proyecto existente, no vuelvas a ejecutar este esquema completo: aplica únicamente los SUPABASE_UPDATE_vX.XX.sql posteriores que correspondan. En v0.31, ejecuta SUPABASE_UPDATE_v0.31.sql.
 
 begin;
 
@@ -107,7 +107,8 @@ begin
     'events','[]'::jsonb,
     'dresscodes','[]'::jsonb,
     'tracks',coalesce(new.content->'tracks','[]'::jsonb),
-    'historicItems',coalesce(new.content->'historicItems','[]'::jsonb)
+    'historicItems',coalesce(new.content->'historicItems','[]'::jsonb),
+    'hemerotecaItems',coalesce(new.content->'hemerotecaItems','[]'::jsonb)
   );
   insert into public.app_public_content(id,content,updated_at)
   values(new.id,public_json,new.updated_at)
@@ -134,6 +135,9 @@ alter table public.profiles enable row level security;
 grant select on public.profiles to authenticated;
 grant all on public.profiles to service_role;
 create policy "profiles select self or editor" on public.profiles for select to authenticated using(auth.uid()=user_id or public.is_banda_editor());
+revoke update on public.profiles from authenticated;
+grant update (name,avatar_key) on public.profiles to authenticated;
+create policy "profiles update own name avatar" on public.profiles for update to authenticated using(auth.uid()=user_id) with check(auth.uid()=user_id);
 
 insert into public.app_content(id,content) values('main','{}'::jsonb) on conflict(id) do nothing;
 update public.app_content set updated_at=updated_at where id='main';

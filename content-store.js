@@ -10,7 +10,7 @@
   const REMOTE_CACHE_KEY = 'banda-de-la-cala-remote-cache-v1';
   const clone = value => JSON.parse(JSON.stringify(value));
   const uid = prefix => `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
-  const defaults = () => clone(window.BANDA_PUBLISHED_CONTENT || {version:4,events:[],tracks:[],dresscodes:[],historicItems:[],settings:{}});
+  const defaults = () => clone(window.BANDA_PUBLISHED_CONTENT || {version:4,events:[],tracks:[],dresscodes:[],historicItems:[],hemerotecaItems:[],settings:{}});
 
   function normalize(raw){
     const base = raw && typeof raw === 'object' ? clone(raw) : defaults();
@@ -55,6 +55,23 @@
         periodId: item.periodId || '',
         title: item.title || '',
         description: item.description || '',
+        images,
+        imageSrc: images[0] || '',
+        createdAt: item.createdAt || ''
+      };
+    }) : [];
+    base.hemerotecaItems = Array.isArray(base.hemerotecaItems) ? base.hemerotecaItems.map((item,index)=>{
+      const legacyImage = item.imageSrc || item.image || item.src || '';
+      const images = Array.isArray(item.images) ? item.images.filter(src=>typeof src==='string' && src.trim()) : [];
+      if(!images.length && legacyImage) images.push(legacyImage);
+      const type = ['cartells','noticies','entrevistes'].includes(String(item.type||'').toLowerCase()) ? String(item.type).toLowerCase() : 'cartells';
+      return {
+        id: item.id || uid(`hemero${index}`),
+        type,
+        year: Number.parseInt(item.year,10) || '',
+        title: item.title || '',
+        description: item.description || '',
+        url: item.url || '',
         images,
         imageSrc: images[0] || '',
         createdAt: item.createdAt || ''

@@ -14,7 +14,7 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.30" />
+  <link rel="stylesheet" href="style.css?v=0.31" />
 </head>
 <body>
   <section id="startScreen" class="screen start-screen active" aria-label="Inici">
@@ -141,12 +141,29 @@
       </section>
 
       <section id="view-history" class="view" data-view="history">
-        <div class="history-intro panel">
-          <span class="eyebrow">MEMÒRIA DE LA BANDA</span>
-          <h3>Històric</h3>
-          <p>Una cronologia visual de la Banda de la Cala, ordenada pels diferents períodes de direcció.</p>
+        <div id="historyMainContent">
+          <div class="history-intro panel">
+            <span class="eyebrow">MEMÒRIA DE LA BANDA</span>
+            <h3>Històric</h3>
+            <p>Una cronologia visual de la Banda de la Cala, ordenada pels diferents períodes de direcció.</p>
+          </div>
+          <div id="historyTimeline" class="history-timeline" aria-live="polite"></div>
+          <div class="hemeroteca-launch-wrap">
+            <button id="openHemerotecaBtn" class="hemeroteca-launch" type="button"><span>ARXIU DOCUMENTAL</span><strong>HEMEROTECA</strong><small>Cartells · Notícies · Entrevistes</small></button>
+          </div>
         </div>
-        <div id="historyTimeline" class="history-timeline" aria-live="polite"></div>
+        <section id="hemerotecaPanel" class="hemeroteca-panel" hidden aria-label="Hemeroteca">
+          <div class="hemeroteca-head panel">
+            <button id="closeHemerotecaBtn" class="hemeroteca-back" type="button" aria-label="Tornar a l'Històric">← HISTÒRIC</button>
+            <div><span class="eyebrow">ARXIU DOCUMENTAL</span><h3>Hemeroteca</h3><p>Cartells, notícies i entrevistes conservats al llarg de la història de la Banda de la Cala.</p></div>
+          </div>
+          <div class="hemeroteca-tabs" role="tablist" aria-label="Tipus de contingut de l'hemeroteca">
+            <button class="hemeroteca-tab active" type="button" data-hemeroteca-type="cartells" role="tab" aria-selected="true">CARTELLS</button>
+            <button class="hemeroteca-tab" type="button" data-hemeroteca-type="noticies" role="tab" aria-selected="false">NOTÍCIES</button>
+            <button class="hemeroteca-tab" type="button" data-hemeroteca-type="entrevistes" role="tab" aria-selected="false">ENTREVISTES</button>
+          </div>
+          <div id="hemerotecaGrid" class="hemeroteca-grid" aria-live="polite"></div>
+        </section>
       </section>
 
       <section id="view-playlist" class="view" data-view="playlist">
@@ -274,12 +291,12 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.30"></script>
-  <script src="config.js?v=0.30"></script>
-  <script src="data/content-published.js?v=0.30"></script>
-  <script src="content-store.js?v=0.30"></script>
+  <script src="version.js?v=0.31"></script>
+  <script src="config.js?v=0.31"></script>
+  <script src="data/content-published.js?v=0.31"></script>
+  <script src="content-store.js?v=0.31"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.30"></script>
-  <script src="app.js?v=0.30"></script>
+  <script src="supabase-client.js?v=0.31"></script>
+  <script src="app.js?v=0.31"></script>
 </body>
 </html>

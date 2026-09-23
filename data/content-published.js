@@ -9,6 +9,7 @@ window.BANDA_PUBLISHED_CONTENT = {
     { id:"evt-20260927-concert", date:"2026-09-27", type:"CONCERT", title:"Concert de tardor", time:"18:30", place:"Plaça Major", notes:"Concentració 45 minuts abans.", dresscodeId:"dress-diada" },
     { id:"evt-20261002-seccions", date:"2026-10-02", type:"ASSAIG", title:"ASSAIG PARCIAL FUSTA", time:"19:30", place:"LOCAL SOCIAL", notes:"Treball per famílies instrumentals.", dresscodeId:"" }
   ],
+  hemerotecaItems: [],
   tracks: [
     { id:"trk-demo-1", title:"Demo · Fanfara", meta:"Pista de prova", src:"assets/AUDIO/demo-1.wav", visible:true },
     { id:"trk-demo-2", title:"Demo · Marxa", meta:"Pista de prova", src:"assets/AUDIO/demo-2.wav", visible:true },

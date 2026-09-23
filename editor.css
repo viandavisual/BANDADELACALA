@@ -163,3 +163,7 @@ body{background:linear-gradient(145deg,#c69237 0%,#d4ac5f 45%,#e2c277 100%)!impo
 .user-invite-flow{margin:14px 0 4px;padding:13px 14px;border:1px solid rgba(57,58,134,.16);border-radius:14px;background:linear-gradient(145deg,#fff,#f8f7ff);display:grid;gap:4px}
 .user-invite-flow strong{font-size:.64rem;letter-spacing:.09em;color:#393a86}
 .user-invite-flow span{font-size:.76rem;line-height:1.45;color:var(--muted)}
+
+
+/* v0.31 · HEMEROTECA */
+.hemeroteca-editor-title{margin:30px 0 14px;padding-top:24px;border-top:1px solid rgba(139,98,40,.18)}.hemeroteca-editor-title h2{margin:4px 0 6px;font-size:1.7rem}.hemeroteca-editor-title p{margin:0;max-width:850px;color:var(--muted);line-height:1.5}.hemeroteca-editor-layout{margin-top:0}.hemeroteca-editor-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}.hemeroteca-editor-filters button{min-height:34px;padding:0 10px;border:1px solid rgba(139,98,40,.2);border-radius:999px;background:#fff;color:#8b6228;font-size:.68rem;font-weight:900;letter-spacing:.05em}.hemeroteca-editor-filters button.active{background:#393a86;border-color:#393a86;color:#fff}

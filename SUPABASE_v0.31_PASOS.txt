@@ -1,0 +1,12 @@
+BANDA DE LA CALA · v0.31 · PASO SUPABASE
+
+La HEMEROTECA forma parte de HISTÒRIC, que es público también para usuarios no registrados.
+Por eso hay que actualizar una única función de sincronización pública.
+
+1. Abre Supabase > SQL Editor.
+2. Pega TODO el contenido de SUPABASE_UPDATE_v0.31.sql.
+3. Pulsa RUN.
+4. Debe terminar sin errores.
+
+NO hay que crear buckets nuevos: las imágenes de HEMEROTECA reutilizan historic-media y se guardan bajo la carpeta hemeroteca/.
+NO hay que tocar SMTP, Auth, USERS ni la Edge Function create-band-user.

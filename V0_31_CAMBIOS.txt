@@ -1,0 +1,10 @@
+BANDA DE LA CALA · v0.31
+
+- HISTÒRIC: col·lapsar/descol·lapsar ja no reconstrueix tot el timeline. Una secció carrega les seves imatges només quan s’obre per primera vegada; les seccions ja obertes no es toquen ni recarreguen.
+- CALENDARI: AVUI és sempre vermell amb número blanc. Si hi ha activitat, mostra un punt blau (assaig/normal) o daurat (concert/actuació) sobre el dia.
+- PLAYER: icones PLAY/PAUSE dibuixades amb CSS i centrades geomètricament dins del cercle, també al miniplayer.
+- AVATARS: detecció dinàmica dels fitxers avatarN.jpg/jpeg/png/webp de assets/avatar mitjançant el contingut del repositori GitHub, amb caché local i fallback de detecció directa. Ja no hi ha una llista fixa d’un sol avatar.
+- HISTÒRIC > HEMEROTECA: nova subsecció amb CARTELLS, NOTÍCIES i ENTREVISTES.
+- EDITOR > HISTÒRIC: nou gestor d’HEMEROTECA amb càrrega múltiple d’imatges, enllaços, edició, eliminació, descàrrega d’imatges i filtres. Les imatges reutilitzen el bucket historic-media dins la carpeta hemeroteca/.
+- SUPABASE: cal executar una sola vegada SUPABASE_UPDATE_v0.31.sql perquè HEMEROTECA s’inclogui també en la còpia pública d’HISTÒRIC. No es creen taules ni buckets nous.
+- Es preserven sense canvis els IDs/scopes/manifests independents de les PWA APP i EDITOR i el flux USERS estable de v0.29.

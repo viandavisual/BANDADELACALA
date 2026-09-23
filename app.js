@@ -29,7 +29,8 @@ const state = {
   authenticated: false,
   collapsedPeriods: new Set(),
   historyViewer: { scale:1, maxScale:1, baseWidth:0 },
-  content: window.BandaStore ? (BandaStore.loadApp ? BandaStore.loadApp() : BandaStore.load()) : {events:[],tracks:[],dresscodes:[],historicItems:[],settings:{}}
+  hemerotecaType: 'cartells',
+  content: window.BandaStore ? (BandaStore.loadApp ? BandaStore.loadApp() : BandaStore.load()) : {events:[],tracks:[],dresscodes:[],historicItems:[],hemerotecaItems:[],settings:{}}
 };
 
 const navItems = [
@@ -44,11 +45,70 @@ const navItems = [
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
 const esc = value => String(value ?? '').replace(/[&<>'"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':'&quot;'}[char]));
+function safeExternalUrl(value){try{const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)?url.href:'';}catch(_error){return '';}}
 const getEvents = () => [...(state.content.events || [])].sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
 const getTracks = () => (state.content.tracks || []).filter(track=>track.visible !== false);
-const AVAILABLE_AVATARS = [
+let AVAILABLE_AVATARS = [
   {key:'avatar1',label:'AVATAR 1',src:'assets/avatar/avatar1.jpg'}
 ];
+let avatarDiscoveryPromise = null;
+const AVATAR_CACHE_KEY = 'banda-avatar-list-v031';
+function avatarNumber(value){ const m=String(value||'').match(/avatar(\d+)/i); return m?Number(m[1]):Number.MAX_SAFE_INTEGER; }
+function avatarFromKey(key){
+  const n=avatarNumber(key);
+  if(!Number.isFinite(n)||n===Number.MAX_SAFE_INTEGER) return null;
+  const base=String(CFG.avatars?.path||'assets/avatar').replace(/\/$/,'');
+  return {key:`avatar${n}`,label:`AVATAR ${n}`,src:`${base}/avatar${n}.jpg`};
+}
+function setAvailableAvatars(files){
+  const base=String(CFG.avatars?.path||'assets/avatar').replace(/\/$/,'');
+  const list=(files||[]).map(name=>String(name||'')).filter(name=>/^avatar\d+\.(?:jpe?g|png|webp)$/i.test(name)).sort((a,b)=>avatarNumber(a)-avatarNumber(b)).map(name=>{const n=avatarNumber(name);return {key:`avatar${n}`,label:`AVATAR ${n}`,src:`${base}/${name}`};});
+  if(list.length) AVAILABLE_AVATARS=list;
+  return AVAILABLE_AVATARS;
+}
+async function probeAvatarFiles(){
+  const base=String(CFG.avatars?.path||'assets/avatar').replace(/\/$/,'');
+  const max=Math.max(10,Number(CFG.avatars?.maxProbe)||80);
+  const found=[];
+  for(let n=1;n<=max;n++){
+    try{
+      const response=await fetch(`${base}/avatar${n}.jpg`,{method:'HEAD',cache:'no-store'});
+      if(response.ok) found.push(`avatar${n}.jpg`);
+    }catch(_error){}
+  }
+  return found;
+}
+async function discoverAvailableAvatars(){
+  if(avatarDiscoveryPromise) return avatarDiscoveryPromise;
+  avatarDiscoveryPromise=(async()=>{
+    try{
+      const cached=JSON.parse(localStorage.getItem(AVATAR_CACHE_KEY)||'[]');
+      if(Array.isArray(cached)&&cached.length) setAvailableAvatars(cached);
+    }catch(_error){}
+    let files=[];
+    const cfg=CFG.avatars||{};
+    if(cfg.githubOwner&&cfg.githubRepo){
+      try{
+        const api=`https://api.github.com/repos/${encodeURIComponent(cfg.githubOwner)}/${encodeURIComponent(cfg.githubRepo)}/contents/${String(cfg.path||'assets/avatar').replace(/^\/+|\/+$/g,'')}?ref=${encodeURIComponent(cfg.githubBranch||'main')}`;
+        const response=await fetch(api,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+        if(response.ok){
+          const data=await response.json();
+          if(Array.isArray(data)) files=data.filter(item=>item?.type==='file').map(item=>item.name);
+        }
+      }catch(_error){}
+    }
+    if(!files.some(name=>/^avatar\d+\.(?:jpe?g|png|webp)$/i.test(name))){
+      try{files=await probeAvatarFiles();}catch(_error){}
+    }
+    if(files.length){
+      setAvailableAvatars(files);
+      try{localStorage.setItem(AVATAR_CACHE_KEY,JSON.stringify(files));}catch(_error){}
+    }
+    if(state.authenticated){renderAvatarChoices();renderUserAvatar();}
+    return AVAILABLE_AVATARS;
+  })();
+  return avatarDiscoveryPromise;
+}
 
 function currentUserDisplayName(){
   return String(state.profile?.name || state.session?.user?.email?.split('@')[0] || 'USER').trim() || 'USER';
@@ -325,57 +385,76 @@ function getHistoricItems(){
   });
 }
 
+function historyPeriodItems(periodId){
+  return getHistoricItems().filter(item=>item.periodId===periodId);
+}
+function historyMediaMarkup(periodId){
+  const items=getHistoricItems();
+  const periodItems=items.filter(item=>item.periodId===periodId);
+  if(!periodItems.length) return `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
+  return periodItems.map(item=>{
+    const side=(Math.max(0,items.findIndex(entry=>entry.id===item.id)) % 2===0)?'left':'right';
+    const title=item.title ? `<h4>${esc(item.title)}</h4>` : '';
+    const desc=item.description ? `<p>${esc(item.description)}</p>` : '';
+    const images=getHistoricImages(item);
+    const cols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
+    const gallery=images.length ? `<div class="history-media-grid ${images.length===1?'single':''}" style="--history-cols:${cols}">${images.map((src,index)=>`<button class="history-image-button" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${index}" aria-label="Ampliar fotografia ${index+1} de ${esc(item.year)}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" /></button>`).join('')}</div>` : '';
+    return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><span class="history-year">${esc(item.year)}</span>${title}${desc}</div></div></article>`;
+  }).join('');
+}
+function bindHistoryImagesWithin(root=document){
+  root.querySelectorAll?.('[data-history-image-id]').forEach(btn=>{
+    if(btn.dataset.historyBound==='1') return;
+    btn.dataset.historyBound='1';
+    btn.addEventListener('click',()=>openHistoryImage(btn.dataset.historyImageId,Number(btn.dataset.historyImageIndex||0)));
+  });
+}
+function loadHistoryPeriod(periodId){
+  const section=$$('.history-period').find(el=>el.dataset.period===periodId);
+  const itemsHost=section?.querySelector('.history-period-items');
+  if(!itemsHost || itemsHost.dataset.loaded==='1') return;
+  itemsHost.innerHTML=historyMediaMarkup(periodId);
+  itemsHost.dataset.loaded='1';
+  bindHistoryImagesWithin(itemsHost);
+}
+function toggleHistoryPeriod(periodId){
+  const section=$$('.history-period').find(el=>el.dataset.period===periodId);
+  if(!section) return;
+  const head=section.querySelector('[data-toggle-period]');
+  const opening=section.classList.contains('is-collapsed');
+  if(opening){
+    state.collapsedPeriods.delete(periodId);
+    section.classList.remove('is-collapsed');
+    if(head) head.setAttribute('aria-expanded','true');
+    loadHistoryPeriod(periodId);
+    const host=section.querySelector('.history-period-items');
+    if(host && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
+      host.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'ease-out'});
+    }
+  }else{
+    state.collapsedPeriods.add(periodId);
+    section.classList.add('is-collapsed');
+    if(head) head.setAttribute('aria-expanded','false');
+  }
+  try{localStorage.setItem('banda-history-collapsed-v021',JSON.stringify([...state.collapsedPeriods]));}catch(_error){}
+}
 function renderHistory(){
   const host=$('#historyTimeline');
   if(!host) return;
   const periods=getHistoricPeriods();
-  const items=getHistoricItems();
-  if(!periods.length){
-    host.innerHTML='<div class="history-empty panel">No hi ha períodes configurats.</div>';
-    return;
-  }
-  let visualIndex=0;
+  if(!periods.length){host.innerHTML='<div class="history-empty panel">No hi ha períodes configurats.</div>';return;}
   const displayPeriods=[...periods].reverse();
   host.innerHTML=displayPeriods.map(period=>{
     const originalIndex=periods.findIndex(p=>p.id===period.id);
-    const periodItems=items.filter(item=>item.periodId===period.id);
     const collapsed=state.collapsedPeriods.has(period.id);
-    const media=periodItems.length ? periodItems.map(item=>{
-      const side=(visualIndex++ % 2===0)?'left':'right';
-      const title=item.title ? `<h4>${esc(item.title)}</h4>` : '';
-      const desc=item.description ? `<p>${esc(item.description)}</p>` : '';
-      const images=getHistoricImages(item);
-      const cols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
-      const gallery=images.length ? `<div class="history-media-grid ${images.length===1?'single':''}" style="--history-cols:${cols}">${images.map((src,index)=>`<button class="history-image-button" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${index}" aria-label="Ampliar fotografia ${index+1} de ${esc(item.year)}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" /></button>`).join('')}</div>` : '';
-      return `<article class="history-item ${side}">
-        <div class="history-node" aria-hidden="true"></div>
-        <div class="history-card">
-          ${gallery}
-          <div class="history-card-copy"><span class="history-year">${esc(item.year)}</span>${title}${desc}</div>
-        </div>
-      </article>`;
-    }).join('') : `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
-    const periodColor = period.color || '#393a86';
-    const periodText = period.textColor || '#ffffff';
-    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}">
-      <button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}">
-        <span class="history-period-dot" aria-hidden="true"></span>
-        <div><strong>${esc(period.years)}</strong><span>${esc(period.director)}</span></div>
-        <span class="history-period-chevron" aria-hidden="true">⌄</span>
-      </button>
-      <div class="history-period-items">${media}</div>
-    </section>`;
+    const periodColor=period.color||'#393a86';
+    const periodText=period.textColor||'#ffffff';
+    const initialMedia=collapsed?'':historyMediaMarkup(period.id);
+    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-dot" aria-hidden="true"></span><div><strong>${esc(period.years)}</strong><span>${esc(period.director)}</span></div><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}</div></section>`;
   }).join('');
-  $$('[data-toggle-period]').forEach(btn=>btn.addEventListener('click',()=>{
-    const id=btn.dataset.togglePeriod;
-    if(state.collapsedPeriods.has(id)) state.collapsedPeriods.delete(id); else state.collapsedPeriods.add(id);
-    try{localStorage.setItem('banda-history-collapsed-v021',JSON.stringify([...state.collapsedPeriods]));}catch(_error){}
-    renderHistory();
-    requestAnimationFrame(()=>animateViewEntrance('history'));
-  }));
-  $$('[data-history-image-id]').forEach(btn=>btn.addEventListener('click',()=>openHistoryImage(btn.dataset.historyImageId,Number(btn.dataset.historyImageIndex||0))));
+  $$('[data-toggle-period]').forEach(btn=>btn.addEventListener('click',()=>toggleHistoryPeriod(btn.dataset.togglePeriod)));
+  bindHistoryImagesWithin(host);
 }
-
 function restoreHistoryCollapsed(){
   const periods=getHistoricPeriods();
   const current=periods.find(period=>period.end==null || /actualitat/i.test(period.years||'')) || periods[periods.length-1];
@@ -415,21 +494,25 @@ function historyViewerReset(){
     viewport.scrollTo({left:0,top:0,behavior:'auto'});
   });
 }
-function openHistoryImage(id,index=0){
-  const item=(state.content.historicItems||[]).find(entry=>String(entry.id||entry.imageSrc)===String(id));
-  if(!item) return;
-  const images=getHistoricImages(item);
-  const src=images[Math.max(0,Math.min(images.length-1,index))];
+function openImageViewer({src,title='',caption='',alt=''}){
   if(!src) return;
   const modal=$('#historyImageModal'), img=$('#historyImageLarge');
-  $('#historyImageTitle').textContent=item.title || String(item.year||'');
-  $('#historyImageCaption').textContent=item.description || (item.title ? `${item.year||''}${images.length>1?` · Foto ${index+1}/${images.length}`:''}` : (images.length>1?`Foto ${index+1}/${images.length}`:''));
-  img.alt=item.title || `Fotografia de ${item.year||''}`;
+  $('#historyImageTitle').textContent=title;
+  $('#historyImageCaption').textContent=caption;
+  img.alt=alt||title||'Document';
   img.onload=historyViewerReset;
   img.src=src;
   modal.hidden=false;
   document.body.classList.add('modal-open');
   if(img.complete) historyViewerReset();
+}
+function openHistoryImage(id,index=0){
+  const item=(state.content.historicItems||[]).find(entry=>String(entry.id||entry.imageSrc)===String(id));
+  if(!item) return;
+  const images=getHistoricImages(item);
+  const safeIndex=Math.max(0,Math.min(images.length-1,index));
+  const src=images[safeIndex];
+  openImageViewer({src,title:item.title || String(item.year||''),caption:item.description || (item.title ? `${item.year||''}${images.length>1?` · Foto ${safeIndex+1}/${images.length}`:''}` : (images.length>1?`Foto ${safeIndex+1}/${images.length}`:'')),alt:item.title || `Fotografia de ${item.year||''}`});
 }
 function closeHistoryImage(){
   const modal=$('#historyImageModal'); if(!modal) return;
@@ -450,6 +533,52 @@ function bindHistoryImageModal(){
     }
   },{passive:false});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('#historyImageModal')?.hidden) closeHistoryImage();});
+}
+
+function hemerotecaImages(item){
+  const images=Array.isArray(item?.images)?item.images.filter(Boolean):[];
+  if(!images.length&&item?.imageSrc) images.push(item.imageSrc);
+  return images;
+}
+function hemerotecaTypeLabel(type){return ({cartells:'CARTELLS',noticies:'NOTÍCIES',entrevistes:'ENTREVISTES'})[type]||'HEMEROTECA';}
+function getHemerotecaItems(type=state.hemerotecaType){
+  return [...(state.content.hemerotecaItems||[])].filter(item=>!type||item.type===type).sort((a,b)=>{
+    const ya=Number(a.year)||0,yb=Number(b.year)||0;
+    if(ya!==yb)return yb-ya;
+    return String(b.createdAt||'').localeCompare(String(a.createdAt||''));
+  });
+}
+function openHemerotecaImage(id,index=0){
+  const item=(state.content.hemerotecaItems||[]).find(entry=>String(entry.id)===String(id));
+  if(!item)return;
+  const images=hemerotecaImages(item); const safeIndex=Math.max(0,Math.min(images.length-1,index));
+  openImageViewer({src:images[safeIndex],title:item.title||hemerotecaTypeLabel(item.type),caption:item.description||(item.year?String(item.year):''),alt:item.title||hemerotecaTypeLabel(item.type)});
+}
+function renderHemeroteca(){
+  const host=$('#hemerotecaGrid'); if(!host)return;
+  $$('[data-hemeroteca-type]').forEach(btn=>{const active=btn.dataset.hemerotecaType===state.hemerotecaType;btn.classList.toggle('active',active);btn.setAttribute('aria-selected',active?'true':'false');});
+  const items=getHemerotecaItems();
+  if(!items.length){host.innerHTML=`<div class="hemeroteca-empty panel">Encara no hi ha contingut publicat a ${hemerotecaTypeLabel(state.hemerotecaType)}.</div>`;return;}
+  host.innerHTML=items.map(item=>{
+    const images=hemerotecaImages(item); const cols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
+    const gallery=images.length?`<div class="hemeroteca-media ${images.length===1?'single':''}" style="--hemero-cols:${cols}">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))}" /></button>`).join('')}</div>`:'';
+    const safeUrl=safeExternalUrl(item.url); const link=safeUrl?`<a class="hemeroteca-link" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer">OBRIR ENLLAÇ ↗</a>`:'';
+    return `<article class="hemeroteca-card">${gallery}<div class="hemeroteca-card-copy"><div class="hemeroteca-card-meta"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${item.year?`<strong>${esc(item.year)}</strong>`:''}</div><h4>${esc(item.title||hemerotecaTypeLabel(item.type))}</h4>${item.description?`<p>${esc(item.description)}</p>`:''}${link}</div></article>`;
+  }).join('');
+  $$('[data-hemeroteca-image-id]').forEach(btn=>btn.addEventListener('click',()=>openHemerotecaImage(btn.dataset.hemerotecaImageId,Number(btn.dataset.hemerotecaImageIndex||0))));
+}
+function openHemeroteca(){
+  const main=$('#historyMainContent'), panel=$('#hemerotecaPanel'); if(!main||!panel)return;
+  main.hidden=true; panel.hidden=false; state.hemerotecaType='cartells'; renderHemeroteca(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function closeHemeroteca(){
+  const main=$('#historyMainContent'), panel=$('#hemerotecaPanel'); if(!main||!panel)return;
+  panel.hidden=true; main.hidden=false; window.scrollTo({top:0,behavior:'smooth'});
+}
+function bindHemeroteca(){
+  $('#openHemerotecaBtn')?.addEventListener('click',openHemeroteca);
+  $('#closeHemerotecaBtn')?.addEventListener('click',closeHemeroteca);
+  $$('[data-hemeroteca-type]').forEach(btn=>btn.addEventListener('click',()=>{state.hemerotecaType=btn.dataset.hemerotecaType;renderHemeroteca();}));
 }
 
 function applyHomeHero(){
@@ -516,8 +645,11 @@ function loadTrack(index, autoplay = false){
 function setPlayIcon(){
   const player=audio();
   const playing = !!player && player.dataset.playlistTrack==='1' && !player.paused && !player.ended && state.currentTrack >= 0;
-  $('#playPause').textContent = playing ? '❚❚' : '▶';
-  $('#miniPlay').textContent = playing ? '❚❚' : '▶';
+  const markup=playing?'<span class="pause-glyph" aria-hidden="true"><i></i><i></i></span>':'<span class="play-glyph" aria-hidden="true"></span>';
+  $('#playPause').innerHTML=markup;
+  $('#miniPlay').innerHTML=markup;
+  $('#playPause').setAttribute('aria-label',playing?'Pausar':'Reproduir');
+  $('#miniPlay').setAttribute('aria-label',playing?'Pausar':'Reproduir');
   const icon=document.querySelector('.record-icon');
   const art=document.querySelector('.record-art');
   const card=document.querySelector('.player-card');
@@ -627,6 +759,7 @@ function refreshContent(next){
   if(state.selectedDate) selectDate(state.selectedDate);
   renderTracks();
   renderHistory();
+  renderHemeroteca();
 }
 
 function bindContentUpdates(){
@@ -639,7 +772,7 @@ function bindContentUpdates(){
 function remoteContentReady(content){
   if(!content) return false;
   if(content.settings?.supabaseInitialized) return true;
-  return ['events','tracks','dresscodes','historicItems'].some(key=>Array.isArray(content[key]) && content[key].length>0) || !!content.settings?.homeHeroImage;
+  return ['events','tracks','dresscodes','historicItems','hemerotecaItems'].some(key=>Array.isArray(content[key]) && content[key].length>0) || !!content.settings?.homeHeroImage;
 }
 
 async function initSupabaseContent(){
@@ -672,7 +805,7 @@ function roleLabel(role){
 
 function renderUserAvatar(){
   const key=currentAvatarKey();
-  const avatar=AVAILABLE_AVATARS.find(item=>item.key===key);
+  const avatar=AVAILABLE_AVATARS.find(item=>item.key===key) || avatarFromKey(key);
   const img=$('#userProfileAvatar'), fallback=$('#userProfileAvatarFallback');
   if(!img||!fallback) return;
   if(!avatar){ img.hidden=true; img.removeAttribute('src'); fallback.hidden=false; return; }
@@ -917,7 +1050,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.26',root).href;
+    const swUrl=new URL('app/sw.js?v=0.31',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
@@ -934,12 +1067,15 @@ async function init(){
   if(startBtn) startBtn.onclick = startIntro;
   if(startIconBtn) startIconBtn.onclick = startIntro;
   bootIdentity();
+  discoverAvailableAvatars().catch(()=>{});
   restoreHistoryCollapsed();
   renderStandaloneSectionIcons();
   applyHomeHero();
   updateHeader('home');
   renderCalendar();
   renderHistory();
+  renderHemeroteca();
+  bindHemeroteca();
   bindCalendar();
   bindDresscodeModal();
   bindHistoryImageModal();
