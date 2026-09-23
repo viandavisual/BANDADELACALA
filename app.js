@@ -1,4 +1,4 @@
-// PWA INSTALL v0.25 — patró estable de Disturbing Stories App.
+// PWA INSTALL v0.26 — patró estable de Disturbing Stories App.
 let appInstallPrompt = null;
 function captureAppInstallPrompt(event){
   event.preventDefault();
@@ -108,7 +108,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.25');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.26');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
@@ -167,17 +167,45 @@ function updateHeader(id){
   $('#homeHeaderIcon')?.classList.toggle('is-hidden', !isHome);
 }
 
+function animateViewEntrance(id){
+  const view=document.querySelector(`#view-${id}`);
+  if(!view || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  const selectors={
+    home:['.hero-panel','.app-install-card','.home-card','.home-social-links a','.home-credits'],
+    calendar:['.calendar-layout > .panel','.calendar-day','.event-card'],
+    history:['.history-intro','.history-period','.history-period:not(.is-collapsed) .history-item'],
+    playlist:['.playlist-layout > .panel','.track-row','.player-card .record-art','.player-card > .eyebrow','.player-card > h3','.player-card > p','.player-controls','.playback-modes','.progress-row'],
+    games:['.coming-soon','.coming-soon > *'],
+    user:['.user-auth-card','.user-auth-card > *','.user-profile-head','.temporary-password-notice','.user-settings-box','.user-logout-btn']
+  };
+  const nodes=[];
+  (selectors[id]||[':scope > *']).forEach(selector=>{
+    view.querySelectorAll(selector).forEach(el=>{ if(!nodes.includes(el) && el.offsetParent!==null) nodes.push(el); });
+  });
+  nodes.forEach((el,index)=>{
+    el.classList.remove('piece-entering');
+    el.style.setProperty('--piece-enter-delay',`${Math.min(index,14)*42}ms`);
+    void el.offsetWidth;
+    el.classList.add('piece-entering');
+    el.addEventListener('animationend',()=>{
+      el.classList.remove('piece-entering');
+      el.style.removeProperty('--piece-enter-delay');
+    },{once:true});
+  });
+}
+
 function switchView(id, remember = true){
   const target=navItems.find(item=>item.id===id);
   if(!target) id='home';
   else if(!target.public && !state.authenticated) id='user';
-  if(id === state.currentView){ updateHeader(id); return; }
+  if(id === state.currentView){ updateHeader(id); requestAnimationFrame(()=>animateViewEntrance(id)); return; }
   if(remember && state.currentView) state.viewHistory.push(state.currentView);
   state.currentView = id;
   $$('.view').forEach(view => view.classList.toggle('active', view.dataset.view === id));
   $$('[data-nav]').forEach(btn => btn.classList.toggle('active', btn.dataset.nav === id));
   updateHeader(id);
   window.scrollTo({top:0, behavior:'smooth'});
+  requestAnimationFrame(()=>animateViewEntrance(id));
 }
 
 function goBack(){
@@ -190,6 +218,7 @@ function showApp(){
   $('#introScreen').classList.remove('active');
   $('#appShell').hidden = false;
   updateHeader(state.currentView);
+  requestAnimationFrame(()=>animateViewEntrance(state.currentView));
 }
 
 function startIntro(){
@@ -342,6 +371,7 @@ function renderHistory(){
     if(state.collapsedPeriods.has(id)) state.collapsedPeriods.delete(id); else state.collapsedPeriods.add(id);
     try{localStorage.setItem('banda-history-collapsed-v021',JSON.stringify([...state.collapsedPeriods]));}catch(_error){}
     renderHistory();
+    requestAnimationFrame(()=>animateViewEntrance('history'));
   }));
   $$('[data-history-image-id]').forEach(btn=>btn.addEventListener('click',()=>openHistoryImage(btn.dataset.historyImageId,Number(btn.dataset.historyImageIndex||0))));
 }
@@ -882,7 +912,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.25',root).href;
+    const swUrl=new URL('app/sw.js?v=0.26',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

@@ -125,7 +125,7 @@ body{background:linear-gradient(145deg,#c69237 0%,#d4ac5f 45%,#e2c277 100%)!impo
 @media(max-width:620px){.historic-editor-item{grid-template-columns:96px 1fr!important}.historic-thumb-wrap,.historic-thumb-grid{width:96px}.historic-thumb-grid{height:78px}.historic-editor-item .list-actions{grid-column:1/-1}}
 
 
-/* v0.25 · PREVIEW HOME real per dispositiu + HISTÒRIC per tandes */
+/* v0.26 · PREVIEW HOME real per dispositiu + HISTÒRIC per tandes */
 .home-editor-grid{align-items:start}.exact-home-preview-card{min-width:0}.exact-home-preview-card #homePreviewMode{font-size:.86rem;letter-spacing:.015em;margin:3px 0 0;color:var(--editor-page-gold-dark)}
 .app-home-preview-hero{position:relative;isolation:isolate;min-height:300px;padding:clamp(28px,4vw,54px);border:1px solid rgba(73,58,35,.10);border-radius:32px;background:#fff;box-shadow:0 10px 28px rgba(73,58,35,.08);display:grid;grid-template-columns:1fr;align-items:center;overflow:hidden;margin:14px -22px 0}
 .app-home-preview-media{position:absolute;z-index:0;left:48%;right:0;top:0;bottom:0;overflow:hidden;background:none}
@@ -145,3 +145,12 @@ body{background:linear-gradient(145deg,#c69237 0%,#d4ac5f 45%,#e2c277 100%)!impo
 @keyframes editorExactHeroMobile{0%{transform:scale(1.02) translate3d(-2.5%,1%,0)}50%{transform:scale(1.08) translate3d(1%,-1%,0)}100%{transform:scale(1.04) translate3d(2.5%,.5%,0)}}
 
 @media(max-width:520px){.app-home-preview-hero{margin-left:-16px;margin-right:-16px}}
+
+/* v0.26 · HOME en dues files + eliminació individual de fotos HISTÒRIC */
+.home-editor-grid{grid-template-columns:1fr!important;gap:18px!important}
+.home-editor-grid>.editor-card{width:100%;min-width:0}
+.history-image-preview-item{position:relative}
+.history-image-remove-btn{position:absolute;right:6px;top:6px;width:30px;height:30px;aspect-ratio:1;border-radius:50%;border:1px solid rgba(255,255,255,.72);background:rgba(28,28,36,.84);color:#fff;display:grid;place-items:center;padding:0;font-size:1.15rem;font-weight:900;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.history-image-remove-btn:hover{background:#a64f45}
+.history-image-preview-item.is-new .history-image-remove-btn{background:rgba(57,58,134,.9)}
+.history-image-preview-item.is-new .history-image-remove-btn:hover{background:#a64f45}

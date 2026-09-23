@@ -110,7 +110,7 @@
     const currentSession=await session();
     if(!currentSession) throw new Error('AUTH_REQUIRED');
 
-    // v0.25: actualització directa protegida per RLS + permisos de columna.
+    // v0.26: actualització directa protegida per RLS + permisos de columna.
     // Això evita dependre d'una RPC antiga/desplegada de forma incompleta.
     const {error}=await c.from('profiles').update({
       name:cleanName,
@@ -214,6 +214,28 @@
     });
   }
 
+
+  function storagePathFromPublicUrl(bucket,url){
+    try{
+      const parsed=new URL(String(url||''),location.href);
+      const marker=`/storage/v1/object/public/${bucket}/`;
+      const index=parsed.pathname.indexOf(marker);
+      if(index<0) return '';
+      return decodeURIComponent(parsed.pathname.slice(index+marker.length));
+    }catch(_error){ return ''; }
+  }
+
+  async function deletePublicFile(bucket,url){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const currentSession=await session();
+    if(!currentSession) throw new Error('AUTH_REQUIRED');
+    const path=storagePathFromPublicUrl(bucket,url);
+    if(!path) return {deleted:false,path:''};
+    const {data,error}=await c.storage.from(bucket).remove([path]);
+    if(error) throw error;
+    return {deleted:true,path,data:data||[]};
+  }
+
   function onAuthChange(callback){
     const c=getClient(); if(!c) return null;
     return c.auth.onAuthStateChange((_event,s)=>callback(s));
@@ -221,6 +243,6 @@
 
   window.BandaSupabase={
     enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,updateOwnProfile,updatePassword,
-    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,listPublicFiles,onAuthChange,dataUrlToFile
+    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,onAuthChange,dataUrlToFile
   };
 })();

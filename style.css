@@ -556,3 +556,13 @@ button,a,input{touch-action:manipulation}
 @media(max-width:440px){
   .home-card>div{text-align:center!important;align-items:center!important}
 }
+
+/* v0.26 · entrada dinàmica de les peces de cada secció */
+@keyframes bandaPieceEnter{
+  0%{opacity:0;transform:translate3d(0,18px,0) scale(.985);filter:blur(3px)}
+  62%{opacity:1;transform:translate3d(0,-2px,0) scale(1.002);filter:blur(0)}
+  100%{opacity:1;transform:none;filter:none}
+}
+.piece-entering{animation:bandaPieceEnter .52s cubic-bezier(.2,.78,.24,1) var(--piece-enter-delay,0ms) both;will-change:transform,opacity,filter}
+@media(max-width:780px){.piece-entering{animation-duration:.46s}}
+@media(prefers-reduced-motion:reduce){.piece-entering{animation:none!important;opacity:1!important;transform:none!important;filter:none!important}}

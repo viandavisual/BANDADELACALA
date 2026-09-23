@@ -1,5 +1,5 @@
 window.BANDA_CONFIG = {
-  version: globalThis.BANDA_VERSION || 'v0.25',
+  version: globalThis.BANDA_VERSION || 'v0.26',
   appName: 'BANDA DE LA CALA',
   shortName: 'LA CALA',
   subtitle: "L’Ametlla de Mar",

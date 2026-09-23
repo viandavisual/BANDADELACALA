@@ -1,4 +1,4 @@
-// PWA INSTALL v0.25 — patró estable de Disturbing Stories App.
+// PWA INSTALL v0.26 — patró estable de Disturbing Stories App.
 let editorInstallPrompt = null;
 function captureEditorInstallPrompt(event){
   event.preventDefault();
@@ -111,7 +111,7 @@ function save(next=content,message='Canvis desats'){
     return false;
   }
 }
-function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.25'); }
+function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.26'); }
 function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
@@ -397,9 +397,22 @@ function historicImages(item){
 function renderHistoricFormPreview(){
   const wrap=$('#historicImagePreviewWrap'), grid=$('#historicImagePreviewGrid');
   if(!wrap||!grid) return;
+  const savedCount=editingHistoricImages.length;
   const images=[...editingHistoricImages,...pendingHistoricImages];
   wrap.hidden=!images.length;
-  grid.innerHTML=images.map((src,index)=>`<div class="history-image-preview-item ${index>=editingHistoricImages.length?'is-new':''}"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${index<editingHistoricImages.length?'DESADA':'NOVA'}</span></div>`).join('');
+  grid.innerHTML=images.map((src,index)=>{
+    const isNew=index>=savedCount;
+    const localIndex=isNew ? index-savedCount : index;
+    const removeAttr=isNew ? `data-remove-pending-historic="${localIndex}"` : `data-remove-saved-historic="${localIndex}"`;
+    const removeLabel=isNew ? 'Descartar fotografia nova' : 'Eliminar fotografia definitivament';
+    return `<div class="history-image-preview-item ${isNew?'is-new':''}"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span><button class="history-image-remove-btn" type="button" ${removeAttr} title="${removeLabel}" aria-label="${removeLabel}">×</button></div>`;
+  }).join('');
+  $$('[data-remove-pending-historic]').forEach(btn=>btn.onclick=()=>{
+    pendingHistoricImages.splice(Number(btn.dataset.removePendingHistoric||0),1);
+    renderHistoricFormPreview();
+    showToast('Fotografia nova descartada');
+  });
+  $$('[data-remove-saved-historic]').forEach(btn=>btn.onclick=()=>removeHistoricSavedPhoto(Number(btn.dataset.removeSavedHistoric||0)));
 }
 
 async function downloadHistoricPhoto(url,item,index){
@@ -420,6 +433,45 @@ async function downloadHistoricPhoto(url,item,index){
     console.error(error);
     showToast('No s’ha pogut descarregar la fotografia');
   }
+}
+
+
+async function removeHistoricSavedPhoto(index){
+  if(!['admin','gestor'].includes(currentProfile?.role)){ showToast('No tens permisos per eliminar fotografies'); return; }
+  const id=$('#historicId')?.value||'';
+  const item=(content.historicItems||[]).find(entry=>entry.id===id);
+  if(!item) return;
+  const images=historicImages(item);
+  const src=images[index];
+  if(!src) return;
+  const isLast=images.length===1;
+  const question=isLast
+    ? 'Aquesta és l’última fotografia. Si l’elimines, també desapareixerà completament aquest esdeveniment del timeline. Continuar?'
+    : 'Vols eliminar definitivament aquesta fotografia?';
+  if(!confirm(question)) return;
+  try{
+    if(supabaseActive && currentSession && window.BandaSupabase?.deletePublicFile){
+      showToast('Eliminant fotografia de Supabase…');
+      await BandaSupabase.deletePublicFile('historic-media',src);
+    }
+  }catch(error){
+    console.error(error);
+    showToast('No s’ha pogut eliminar la fotografia de Storage');
+    return;
+  }
+  images.splice(index,1);
+  if(!images.length){
+    content.historicItems=(content.historicItems||[]).filter(entry=>entry.id!==id);
+    editingHistoricImages=[];
+    pendingHistoricImages=[];
+    if(save(content,'Última fotografia eliminada · esdeveniment eliminat')) resetHistoricForm();
+    return;
+  }
+  const target=(content.historicItems||[]).find(entry=>entry.id===id);
+  if(target){ target.images=[...images]; target.imageSrc=images[0]||''; }
+  editingHistoricImages=[...images];
+  save(content,'Fotografia eliminada definitivament');
+  renderHistoricFormPreview();
 }
 
 function resetHistoricForm(){
@@ -478,11 +530,24 @@ function editHistoric(id){
   $('#historicForm').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function deleteHistoric(id){
+async function deleteHistoric(id){
   const item=(content.historicItems||[]).find(entry=>entry.id===id); if(!item) return;
   if(!confirm(`Vols eliminar aquesta entrada de ${item.year} i totes les seves fotografies?`)) return;
+  try{
+    if(supabaseActive && currentSession && window.BandaSupabase?.deletePublicFile){
+      const images=historicImages(item);
+      for(let i=0;i<images.length;i++){
+        showToast(`Eliminant fotografia ${i+1}/${images.length}…`);
+        await BandaSupabase.deletePublicFile('historic-media',images[i]);
+      }
+    }
+  }catch(error){
+    console.error(error);
+    showToast('No s’han pogut eliminar totes les fotografies de Storage');
+    return;
+  }
   content.historicItems=(content.historicItems||[]).filter(entry=>entry.id!==id);
-  save(content,'Entrada eliminada');
+  save(content,'Entrada i fotografies eliminades');
   resetHistoricForm();
 }
 
@@ -722,15 +787,18 @@ function bindUsers(){
       if(!temporaryPassword) throw new Error('TEMPORARY_PASSWORD_MISSING');
       $('#temporaryPasswordValue').textContent=temporaryPassword;
       $('#temporaryPasswordBox').hidden=false;
-      status.textContent='Usuari creat correctament. Invitació enviada i contrasenya temporal preparada.';
+      status.textContent=result.recoveredPendingUser
+        ? 'Usuari pendent recuperat. Nova invitació enviada i nova contrasenya temporal preparada.'
+        : 'Usuari creat correctament. Invitació enviada i contrasenya temporal preparada.';
       $('#newUserName').value=''; $('#newUserEmail').value=''; $('#newUserRole').value='standard';
       await loadUsers();
     }catch(error){
       console.error(error);
       const message=String(error?.message||'No s’ha pogut crear l’usuari.');
       if(/rate|limit/i.test(message)) status.textContent='Límit temporal d’emails de Supabase. No s’ha creat el compte; torna-ho a provar més tard o configura SMTP propi.';
-      else if(/already|registered|exists/i.test(message)) status.textContent='Aquest email ja existeix a Supabase Auth. Utilitza un altre email o revisa l’usuari existent.';
-      else if(/function|404|not found/i.test(message)) status.textContent='La funció create-band-user no està desplegada/actualitzada. Desplega la versió v0.25 inclosa al paquet.';
+      else if(/EMAIL_ALREADY_REGISTERED|already registered/i.test(message)) status.textContent='Aquest email ja correspon a un usuari confirmat. Revisa el compte existent.';
+      else if(/already|exists/i.test(message)) status.textContent='Aquest email ja existeix a Supabase Auth. Revisa l’usuari existent.';
+      else if(/function|404|not found/i.test(message)) status.textContent='La funció create-band-user no està desplegada/actualitzada. Desplega la versió v0.26 inclosa al paquet.';
       else status.textContent=`ERROR: ${message}`;
     }finally{btn.disabled=false;}
   });
@@ -941,7 +1009,7 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.25',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.26',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

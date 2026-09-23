@@ -1,0 +1,44 @@
+BANDA DE LA CALA · v0.26 · PASOS SUPABASE
+==========================================
+
+NO HAY QUE EJECUTAR NINGÚN SQL NUEVO EN v0.26.
+
+La única actualización de Supabase es la Edge Function create-band-user.
+
+POR QUÉ FALLABA v0.25
+---------------------
+v0.25 enviaba primero la invitación y DESPUÉS asignaba la contraseña temporal.
+En Supabase, un cambio de contraseña invalida los tokens de confirmación/OTP existentes.
+Por eso el email llegaba correctamente, pero al pulsar el enlace el token ya estaba invalidado y aparecía otp_expired.
+
+QUÉ HACE v0.26
+--------------
+1. Genera/asigna la contraseña temporal PRIMERO.
+2. Envía la invitación DESPUÉS.
+3. No vuelve a modificar la contraseña tras generar el token.
+4. Si el email ya pertenece a un usuario pendiente/no confirmado creado con v0.25,
+   lo recupera: fija una nueva contraseña temporal y envía una NUEVA invitación válida.
+5. Si el email ya está confirmado, no crea ni altera el usuario.
+
+ACTUALIZAR EDGE FUNCTION
+------------------------
+Supabase -> Edge Functions -> create-band-user
+
+Sustituye su contenido por:
+
+    EDGE_FUNCTION_CREATE_USER_v0.26.ts
+
+o usa el ZIP:
+
+    create-band-user-edge-function.zip
+
+Después DEPLOY.
+
+PRUEBA RECOMENDADA
+------------------
+Puedes reutilizar el mismo email de prueba que quedó pendiente con v0.25.
+Desde EDITOR -> USUARIS vuelve a crear ese usuario.
+La v0.26 detectará el usuario pendiente, generará una nueva contraseña temporal
+y enviará una invitación nueva.
+
+Usa SIEMPRE el último email recibido; los enlaces anteriores ya son inválidos.

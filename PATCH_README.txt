@@ -1,24 +1,54 @@
-BANDA DE LA CALA · PATCH v0.24 -> v0.25
+BANDA DE LA CALA · PATCH v0.25 -> v0.26
+=======================================
 
-1) GITHUB
-Sobreescriu/afegeix els fitxers i carpetes d'aquest PATCH mantenint exactament les rutes.
-NO eliminis assets, àudios, fotos ni data/content-published.js.
+OBJETIVO DE ESTA VERSION
+------------------------
+1) Corregir el error otp_expired al confirmar un nuevo USER.
+2) EDITOR > HOME: imagen de bienvenida en fila 1 y preview real en fila 2.
+3) HISTÒRIC: eliminar fotos individualmente y borrar el archivo real de Supabase Storage.
+4) Si una entrada HISTÒRIC se queda sin fotos, eliminar automáticamente el evento.
+5) APP: animaciones de entrada para las piezas de todas las secciones.
 
-2) SUPABASE SQL
-Executa SUPABASE_UPDATE_v0.25.sql una sola vegada.
-Això arregla NOM + AVATAR del propi USER amb permisos restringits només a aquestes columnes.
+ARCHIVOS A SOBRESCRIBIR EN GITHUB
+---------------------------------
+app.js
+config.js
+editor.css
+editor.js
+style.css
+supabase-client.js
+version.js
+app/index.html
+app/sw.js
+editor/index.html
+editor/sw.js
 
-3) EDGE FUNCTION
-Actualitza la funció Supabase "create-band-user" amb EDGE_FUNCTION_CREATE_USER_v0.25.ts i DEPLOY.
-També tens create-band-user-edge-function.zip amb index.ts.
+ARCHIVOS NUEVOS / DE APOYO
+--------------------------
+EDGE_FUNCTION_CREATE_USER_v0.26.ts
+create-band-user-edge-function.zip
+SUPABASE_v0.26_PASOS.txt
+V0_26_CAMBIOS.txt
+README.txt
 
-4) AVATAR
-El primer avatar real s'ha de guardar a:
-assets/avatar/avatar1.jpg
+SUPABASE
+--------
+NO hay SQL nuevo en v0.26.
+Sí debes actualizar y desplegar la Edge Function "create-band-user" usando
+EDGE_FUNCTION_CREATE_USER_v0.26.ts (o el ZIP incluido).
 
-5) SAVEPOINT PWA
-La v0.23 continua sent el savepoint del sistema INSTALL.
-La v0.25 preserva els IDs PWA estables:
-APP: /banda-de-la-cala-app
-EDITOR: /banda-de-la-cala-editor
-No canviïs aquests IDs, scopes ni les rutes /app/ i /editor/.
+IMPORTANTE SOBRE EL USER DE PRUEBA DE v0.25
+-------------------------------------------
+Puedes volver a usar el mismo email que quedó pendiente/no confirmado.
+La función v0.26 lo detecta, le asigna una nueva contraseña temporal y envía una
+NUEVA invitación. Usa el último email recibido; el enlace antiguo seguirá inválido.
+
+PWA / INSTALL
+-------------
+NO se han cambiado los IDs ni los scopes de las PWAs.
+Se conserva el SAVEPOINT v0.23:
+APP    id /banda-de-la-cala-app    scope /app/
+EDITOR id /banda-de-la-cala-editor scope /editor/
+
+Los Service Workers de /app/ y /editor/ únicamente suben su versión de caché para
+recoger los JS/CSS nuevos.

@@ -1,30 +1,23 @@
-BANDA DE LA CALA · v0.24
+BANDA DE LA CALA · v0.26
 ========================
 
-Base estable: v0.23 SAVEPOINT.
+SAVEPOINT PWA / INSTALL: v0.23.
+La v0.26 conserva intactos los IDs PWA, scopes, manifests separados, Service Workers independientes y el flujo beforeinstallprompt que quedó estable en v0.23.
 
-IMPORTANT
----------
-La v0.23 va resoldre definitivament la instal·lació independent de les dues PWA.
-La v0.24 PRESERVA aquesta arquitectura: IDs, scopes, manifests, Service Workers i flux beforeinstallprompt continuen separats entre APP i EDITOR.
-
-CANVIS v0.24
-------------
-- PLAYER: restaurada l'animació de les barres només mentre reprodueix l'àudio de la playlist.
-- Nom instal·lat a mobile: APP = "Banda de la Cala"; EDITOR = "EDITOR".
-- HOME APP i RESUM inicial de l'EDITOR: contingut de les caixes centrat horitzontalment.
-- HISTÒRIC: una entrada pot contenir diverses fotografies.
-- APP HISTÒRIC: les miniatures comparteixen el mateix espai visual d'una fotografia i totes es poden ampliar.
-- EDITOR HISTÒRIC: càrrega múltiple de fotos i botó de descàrrega individual per fotografia (ADMIN/GESTOR).
-- USER: selector d'avatar, canvi de nom i canvi de contrasenya col·lapsat.
-- El nom del USER substitueix "USER" al menú i a la caixa de HOME quan hi ha sessió iniciada.
-
-AVATAR 1
---------
-Guardar la imatge quadrada amb aquest nom exacte:
-assets/avatar/avatar1.jpg
+Cambios principales:
+- FIX definitivo del flujo de invitación de nuevos USERS para evitar otp_expired provocado por asignar el password después de crear el token.
+- Recuperación de usuarios pendientes creados durante v0.25.
+- EDITOR > HOME en dos filas completas: carga de imagen arriba y preview real debajo.
+- HISTÒRIC: eliminación individual y definitiva de fotografías; una entrada sin fotos desaparece.
+- APP: animaciones de entrada escalonadas por sección.
 
 SUPABASE
 --------
-Els projectes que ja venien de v0.23 han d'executar una sola vegada:
-SUPABASE_UPDATE_v0.24.sql
+No hay SQL nuevo en v0.26.
+Hay que actualizar/desplegar la Edge Function create-band-user con EDGE_FUNCTION_CREATE_USER_v0.26.ts.
+Consulta SUPABASE_v0.26_PASOS.txt.
+
+AVATARES
+--------
+El primer avatar sigue en:
+assets/avatar/avatar1.jpg

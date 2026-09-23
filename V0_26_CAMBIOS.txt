@@ -1,0 +1,11 @@
+BANDA DE LA CALA · v0.26
+========================
+
+- FIX USERS: corregido otp_expired en invitaciones. El password se establece antes de emitir la invitación.
+- Recuperación automática de usuarios pendientes/no confirmados creados durante v0.25.
+- EDITOR > HOME: carga de imagen en fila 1 y preview real en fila 2, ambas a ancho completo.
+- HISTÒRIC: eliminación individual y definitiva de fotografías desde la edición de una entrada.
+- Si se elimina la última foto de una entrada, desaparece también el evento del timeline.
+- Al eliminar una entrada completa, se eliminan también sus imágenes de Supabase Storage cuando pertenecen a historic-media.
+- APP: animación de entrada escalonada para las piezas de HOME, CALENDARI, HISTÒRIC, PLAYER, MINIJOCS y USER.
+- Se preserva sin cambios la arquitectura INSTALL/PWA estable de v0.23.
