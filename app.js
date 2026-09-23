@@ -21,6 +21,7 @@ const state = {
   calendarDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   selectedDate: null,
   currentTrack: -1,
+  playlistAudioPlaying: false,
   playbackMode: 'normal',
   lastRandomTrack: -1,
   globalMuted: initialGlobalMuted,
@@ -104,7 +105,7 @@ async function discoverAvailableAvatars(){
       setAvailableAvatars(files);
       try{localStorage.setItem(AVATAR_CACHE_KEY,JSON.stringify(files));}catch(_error){}
     }
-    if(state.authenticated){renderAvatarChoices();renderUserAvatar();}
+    if(state.authenticated){renderAvatarChoices();renderUserAvatar();renderNavigation();renderHome();updateHeader(state.currentView);}
     return AVAILABLE_AVATARS;
   })();
   return avatarDiscoveryPromise;
@@ -160,6 +161,13 @@ function iconSvg(type){
       <path class="blue" d="M7.5 26c.8-5.1 4.1-8 8.5-8s7.7 2.9 8.5 8" stroke-width="1.9" stroke-linecap="round"/>
     </svg>`
   };
+  if(type==='user' && state.authenticated){
+    const key=currentAvatarKey();
+    const avatar=AVAILABLE_AVATARS.find(item=>item.key===key) || avatarFromKey(key);
+    if(avatar?.src){
+      return `<span class="user-avatar-menu-icon"><img src="${esc(avatar.src)}" alt="" onerror="this.hidden=true;this.nextElementSibling.hidden=false"/><span class="user-avatar-menu-fallback" hidden>${icons.user}</span></span>`;
+    }
+  }
   return icons[type] || icons.home;
 }
 
@@ -186,6 +194,7 @@ function renderNavigation(){
   $('.mobile-nav').innerHTML = items.map(make).join('');
   $('.mobile-nav').style.gridTemplateColumns=`repeat(${items.length},1fr)`;
   $$('[data-nav]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.nav, true)));
+  syncPlayerEqualizers();
 }
 
 
@@ -210,11 +219,13 @@ function renderHome(){
     <div><span class="status-pill">${card.status}</span><h4>${card.title}</h4><p>${card.text}</p></div>
   </button>`).join('');
   $$('#homeGrid [data-open]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.open, true)));
+  syncPlayerEqualizers();
 }
 
 
 function renderStandaloneSectionIcons(){
   $$('[data-section-icon]').forEach(el => { el.innerHTML = iconSvg(el.dataset.sectionIcon); });
+  syncPlayerEqualizers();
 }
 
 function updateHeader(id){
@@ -227,6 +238,7 @@ function updateHeader(id){
   $('#backBtn').setAttribute('aria-hidden', isHome ? 'true' : 'false');
   $('#backBtn').tabIndex = isHome ? -1 : 0;
   $('#homeHeaderIcon')?.classList.toggle('is-hidden', !isHome);
+  syncPlayerEqualizers();
 }
 
 function animateViewEntrance(id){
@@ -718,8 +730,10 @@ function loadTrack(index, autoplay = false){
   state.currentTrack = (index + tracks.length) % tracks.length;
   const track = tracks[state.currentTrack];
   const player = audio();
+  state.playlistAudioPlaying=false;
   player.dataset.playlistTrack='1';
   player.src = track.src;
+  syncPlayerEqualizers(false);
   $('#nowPlayingTitle').textContent = track.title;
   $('#nowPlayingMeta').textContent = track.meta || 'Banda de la Cala';
   $('#miniTitle').textContent = track.title;
@@ -731,6 +745,20 @@ function loadTrack(index, autoplay = false){
   if(autoplay) player.play().catch(()=>{});
 }
 
+function playlistAudioIsAudible(){
+  const player=audio();
+  return !!player && state.playlistAudioPlaying && player.dataset.playlistTrack==='1' && !player.paused && !player.ended && !state.globalMuted && !player.muted && player.volume>0 && state.currentTrack>=0;
+}
+
+function syncPlayerEqualizers(forcePlaying=null){
+  const playing=forcePlaying===null ? playlistAudioIsAudible() : !!forcePlaying;
+  document.querySelectorAll('.icon-playlist').forEach(icon=>icon.classList.toggle('is-playing',playing));
+  const art=document.querySelector('.record-art');
+  const card=document.querySelector('.player-card');
+  if(art) art.classList.toggle('is-playing',playing);
+  if(card) card.classList.toggle('is-playing',playing);
+}
+
 function setPlayIcon(){
   const player=audio();
   const playing = !!player && player.dataset.playlistTrack==='1' && !player.paused && !player.ended && state.currentTrack >= 0;
@@ -739,12 +767,7 @@ function setPlayIcon(){
   $('#miniPlay').innerHTML=markup;
   $('#playPause').setAttribute('aria-label',playing?'Pausar':'Reproduir');
   $('#miniPlay').setAttribute('aria-label',playing?'Pausar':'Reproduir');
-  const icon=document.querySelector('.record-icon');
-  const art=document.querySelector('.record-art');
-  const card=document.querySelector('.player-card');
-  if(icon) icon.classList.toggle('is-playing', playing);
-  if(art) art.classList.toggle('is-playing', playing);
-  if(card) card.classList.toggle('is-playing', playing);
+  syncPlayerEqualizers();
 }
 
 function formatTime(seconds){
@@ -800,9 +823,14 @@ function bindPlayer(){
   $('#randomBtn').onclick=()=>setPlaybackMode('random');
   updatePlaybackModeButtons();
   setPlayIcon();
-  player.addEventListener('play',setPlayIcon);
-  player.addEventListener('pause',setPlayIcon);
-  player.addEventListener('ended',playNextFromMode);
+  player.addEventListener('play',()=>{ setPlayIcon(); });
+  player.addEventListener('playing',()=>{ state.playlistAudioPlaying=true; setPlayIcon(); });
+  player.addEventListener('pause',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
+  player.addEventListener('waiting',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
+  player.addEventListener('stalled',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
+  player.addEventListener('emptied',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
+  player.addEventListener('error',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
+  player.addEventListener('ended',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); playNextFromMode(); });
   player.addEventListener('loadedmetadata',() => { $('#durationTime').textContent = formatTime(player.duration); });
   player.addEventListener('timeupdate',() => {
     const progress = player.duration ? (player.currentTime/player.duration)*100 : 0;
@@ -823,6 +851,7 @@ function applyGlobalMute(){
     btn.title = state.globalMuted ? "Activar tot l'àudio de l'app" : "Silenciar tot l'àudio de l'app";
 
   }
+  syncPlayerEqualizers();
 }
 function toggleGlobalMute(){
   state.globalMuted = !state.globalMuted;
@@ -981,7 +1010,7 @@ function bindUserAuth(){
     status.textContent='Desant avatar…';
     try{
       state.profile=await BandaSupabase.updateOwnProfile({name:currentUserDisplayName(),avatarKey});
-      renderNavigation(); renderHome(); renderUserSection();
+      renderNavigation(); renderHome(); renderUserSection(); updateHeader(state.currentView);
       status.textContent='Avatar actualitzat.';
     }catch(error){ console.error(error); status.textContent='No s’ha pogut actualitzar l’avatar.'; }
   });
@@ -1141,7 +1170,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.33',root).href;
+    const swUrl=new URL('app/sw.js?v=0.34',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

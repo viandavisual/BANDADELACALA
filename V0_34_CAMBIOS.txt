@@ -1,0 +1,15 @@
+BANDA DE LA CALA · v0.34
+
+CAMBIOS
+- USER: cuando existe una sesión válida, los iconos genéricos de USER de navegación, HOME y cabecera muestran el avatar activo del usuario.
+- USER: centrado del contenido textual de las cajas PARTITURES, AVATAR, NOM y CONTRASENYA.
+- PLAYER: todos los iconos de barras/equalizer quedan estáticos si la playlist no está reproduciendo audio audible.
+- PLAYER: todos esos iconos se animan de forma sincronizada mientras una pista del PLAYER está sonando; pausa, fin, buffering o MUTE los detienen.
+- PLAYER MOBILE: reorganización de la tarjeta principal en una composición vertical más clara: arte, metadatos, controles, progreso y modos.
+- Release actualizada a v0.34 con version.js, cache-busting y caches PWA.
+
+SIN CAMBIOS
+- Auth / invitaciones / roles.
+- Supabase / SMTP / Edge Function.
+- IDs, scopes y start_url de APP y EDITOR.
+- HEMEROTECA 8/4 de v0.33.
