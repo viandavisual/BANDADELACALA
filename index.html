@@ -173,6 +173,39 @@
       <section id="view-games" class="view" data-view="games">
         <div class="coming-soon panel centered-panel"><span class="coming-badge coming-only">PROPERAMENT</span></div>
       </section>
+
+      <section id="view-user" class="view" data-view="user">
+        <div class="user-view-wrap">
+          <section id="userLoginCard" class="panel user-auth-card">
+            <span class="eyebrow">ACCÉS DE MÚSICS</span>
+            <h3>Inicia sessió</h3>
+            <p>Utilitza l’email i la contrasenya que t’ha facilitat la Banda de la Cala.</p>
+            <form id="userLoginForm" class="user-login-form">
+              <label>Email<input id="userLoginEmail" type="email" autocomplete="username" required /></label>
+              <label>Contrasenya<input id="userLoginPassword" type="password" autocomplete="current-password" required /></label>
+              <button class="primary-btn" type="submit">ENTRAR</button>
+              <small id="userLoginStatus" class="user-auth-status"></small>
+            </form>
+          </section>
+
+          <section id="userProfileCard" class="panel user-profile-card" hidden>
+            <div class="user-profile-head">
+              <div class="user-avatar-mark" aria-hidden="true">●</div>
+              <div><span class="eyebrow" id="userProfileRole">USER</span><h3 id="userProfileName">Músic</h3><p id="userProfileEmail"></p></div>
+            </div>
+            <div id="temporaryPasswordNotice" class="temporary-password-notice" hidden>Estàs utilitzant la contrasenya temporal. Canvia-la per una de privada.</div>
+            <form id="changePasswordForm" class="change-password-form">
+              <span class="eyebrow">CONTRASENYA</span>
+              <h4>Canviar contrasenya</h4>
+              <label>Nova contrasenya<input id="newUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+              <label>Repetir contrasenya<input id="repeatUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+              <button class="user-password-btn" type="submit">CANVIAR CONTRASENYA</button>
+              <small id="changePasswordStatus" class="user-auth-status"></small>
+            </form>
+            <button id="userLogoutBtn" class="user-logout-btn" type="button">TANCAR SESSIÓ</button>
+          </section>
+        </div>
+      </section>
     </main>
 
     <nav class="mobile-nav" aria-label="Navegació mòbil"></nav>

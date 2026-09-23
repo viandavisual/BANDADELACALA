@@ -33,33 +33,57 @@
     return data.session;
   }
 
-  async function signUp(email,password,redirectTo){
-    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
-    const options={};
-    if(redirectTo) options.emailRedirectTo=redirectTo;
-    const {data,error}=await c.auth.signUp({email,password,options});
-    if(error) throw error;
-    return data;
-  }
-
-  async function getMyProfile(){
-    const c=getClient(); if(!c) return null;
-    const currentSession=await session();
-    if(!currentSession) return null;
-    const {data,error}=await c.from('profiles').select('user_id,email,role,created_at').eq('user_id',currentSession.user.id).maybeSingle();
-    if(error) throw error;
-    return data || null;
-  }
-
   async function signOut(){
     const c=getClient(); if(!c) return;
     const {error}=await c.auth.signOut();
     if(error) throw error;
   }
 
-  async function loadContent(){
+  async function getMyProfile(){
+    const c=getClient(); if(!c) return null;
+    const currentSession=await session();
+    if(!currentSession) return null;
+    const {data,error}=await c.from('profiles')
+      .select('user_id,email,name,role,must_change_password,created_at')
+      .eq('user_id',currentSession.user.id)
+      .maybeSingle();
+    if(error) throw error;
+    return data || null;
+  }
+
+  async function listProfiles(){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
-    const {data,error}=await c.from('app_content').select('content,updated_at').eq('id','main').maybeSingle();
+    const {data,error}=await c.from('profiles')
+      .select('user_id,email,name,role,must_change_password,created_at')
+      .order('created_at',{ascending:false});
+    if(error) throw error;
+    return data || [];
+  }
+
+  async function createManagedUser({name,email,role}){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    if(!['gestor','standard'].includes(role)) throw new Error('ROLE_NOT_ALLOWED');
+    const {data,error}=await c.functions.invoke('create-band-user',{body:{name,email,role}});
+    if(error){
+      try{ const detail=await error.context?.json?.(); if(detail?.error) throw new Error(detail.error); }catch(parsed){ if(parsed instanceof Error && parsed.message!==error.message) throw parsed; }
+      throw error;
+    }
+    if(data?.error) throw new Error(data.error);
+    return data;
+  }
+
+  async function updatePassword(password){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const {data,error}=await c.auth.updateUser({password});
+    if(error) throw error;
+    try{ await c.rpc('mark_own_password_changed'); }catch(_error){}
+    return data;
+  }
+
+  async function loadContent({publicOnly=false}={}){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const table=publicOnly?'app_public_content':'app_content';
+    const {data,error}=await c.from(table).select('content,updated_at').eq('id','main').maybeSingle();
     if(error) throw error;
     if(!data?.content) return null;
     const normalized=normalizeContent(data.content);
@@ -84,11 +108,12 @@
     return clean;
   }
 
-  function subscribeContent(callback){
+  function subscribeContent(callback,{publicOnly=false}={}){
     const c=getClient(); if(!c) return null;
     if(contentChannel) c.removeChannel(contentChannel).catch?.(()=>{});
-    contentChannel = c.channel('banda-app-content')
-      .on('postgres_changes',{event:'*',schema:'public',table:'app_content',filter:'id=eq.main'},payload=>{
+    const table=publicOnly?'app_public_content':'app_content';
+    contentChannel = c.channel(`banda-${table}`)
+      .on('postgres_changes',{event:'*',schema:'public',table,filter:'id=eq.main'},payload=>{
         const row=payload.new;
         if(row?.content){
           const normalized=normalizeContent(row.content);
@@ -144,7 +169,7 @@
   }
 
   window.BandaSupabase={
-    enabled,getClient,session,signIn,signUp,getMyProfile,signOut,loadContent,saveContent,subscribeContent,
-    uploadFile,uploadDataUrl,listPublicFiles,onAuthChange,dataUrlToFile
+    enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,updatePassword,
+    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,listPublicFiles,onAuthChange,dataUrlToFile
   };
 })();

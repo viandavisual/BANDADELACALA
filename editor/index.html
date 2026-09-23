@@ -38,32 +38,12 @@
       <img src="assets/brand/editor-icon.png" alt="Icona de l’Editor de Banda de la Cala" />
       <span class="eyebrow">BANDA DE LA CALA</span>
       <h1>EDITOR</h1>
-      <p>Accedeix amb el teu compte, crea'n un de nou o entra en mode consulta sense registrar-te.</p>
-
-      <div class="auth-mode-tabs" role="tablist" aria-label="Tipus d'accés">
-        <button id="showLoginMode" class="auth-mode-btn active" type="button" role="tab" aria-selected="true">ENTRAR</button>
-        <button id="showRegisterMode" class="auth-mode-btn" type="button" role="tab" aria-selected="false">REGISTRE NOU</button>
-      </div>
-
+      <p>Accés reservat exclusivament a USER ADMIN i USER GESTOR.</p>
       <form id="editorLoginForm" class="auth-panel active" data-auth-panel="login">
         <label>Email<input id="loginEmail" type="email" autocomplete="username" required /></label>
         <label>Contrasenya<input id="loginPassword" type="password" autocomplete="current-password" required /></label>
         <button class="primary-btn" type="submit">ENTRAR</button>
       </form>
-
-      <form id="editorRegisterForm" class="auth-panel" data-auth-panel="register" hidden>
-        <label>Email<input id="registerEmail" type="email" autocomplete="email" required /></label>
-        <label>Contrasenya<input id="registerPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
-        <label>Repetir contrasenya<input id="registerPasswordRepeat" type="password" autocomplete="new-password" minlength="8" required /></label>
-        <button class="primary-btn" type="submit">CREAR COMPTE</button>
-        <small class="register-note">El compte es crearà amb accés de consulta. Un gestor o administrador l’haurà d’autoritzar abans de poder publicar canvis.</small>
-      </form>
-
-      <div class="guest-access-block">
-        <span>o bé</span>
-        <button id="guestAccessBtn" class="guest-access-btn" type="button">ENTRAR COM A USUARI NO REGISTRAT</button>
-        <small>Mode consulta: podràs veure el contingut i provar l’Editor, però no publicar canvis.</small>
-      </div>
       <small id="loginStatus">Connectant amb Supabase…</small>
     </div>
   </section>
@@ -81,6 +61,7 @@
         <button class="editor-nav-btn" data-editor-nav="player"><span>≋</span>PLAYER</button>
         <button class="editor-nav-btn" data-editor-nav="history"><span>◷</span>HISTÒRIC</button>
         <button class="editor-nav-btn" data-editor-nav="games"><span>◆</span>MINIJOCS</button>
+        <button class="editor-nav-btn" data-editor-nav="users"><span>♙</span>USUARIS</button>
         <button class="editor-nav-btn" data-editor-nav="system"><span>⚙</span>SISTEMA</button>
       </nav>
       <div class="editor-sidebar-foot">
@@ -99,7 +80,7 @@
 
       <section class="editor-view active" data-editor-view="dashboard">
         <div class="dashboard-hero">
-          <div><span class="eyebrow">BANDA DE LA CALA</span><h2>Centre de gestió</h2><p>Gestiona el calendari, el dresscode, la imatge principal de HOME i el Player. L’editor està preparat per créixer cap a la futura gestió multiusuari.</p></div>
+          <div><span class="eyebrow">BANDA DE LA CALA</span><h2>Centre de gestió</h2><p>Gestiona el calendari, el dresscode, la HOME, el Player, l’Històric i els usuaris autoritzats de la banda.</p></div>
           <img src="assets/brand/editor-icon.png" alt="" />
         </div>
         <div class="stat-grid">
@@ -249,6 +230,31 @@
         </div>
       </section>
       <section class="editor-view" data-editor-view="games"><div class="editor-card coming-card"><span class="coming-icon">🎮</span><span class="eyebrow">MINIJOCS</span><h2>Mòdul preparat</h2><p>Aquí gestionarem els minijocs disponibles, la seva visibilitat i l’ordre amb què apareixen a l’APP.</p><span class="future-pill">PROPERAMENT</span></div></section>
+
+      <section class="editor-view" data-editor-view="users">
+        <div class="editor-two-col users-editor-grid">
+          <form id="createUserForm" class="editor-card form-card">
+            <div class="card-head"><div><span class="eyebrow">USUARIS</span><h2>Nou usuari</h2></div></div>
+            <p class="helper-copy">Crea comptes només per a persones autoritzades de la banda. El rol ADMIN no es pot assignar des d’aquest formulari.</p>
+            <label>Nom<input id="newUserName" required maxlength="120" placeholder="Nom del músic" /></label>
+            <label>Email<input id="newUserEmail" type="email" required autocomplete="off" placeholder="nom@email.com" /></label>
+            <label>Categoria<select id="newUserRole" required><option value="standard">USER STANDARD</option><option value="gestor">USER GESTOR</option></select></label>
+            <div class="form-actions"><button id="createUserBtn" type="submit" class="primary-btn">CREAR USUARI</button></div>
+            <small id="createUserStatus" class="user-create-status"></small>
+            <div id="temporaryPasswordBox" class="temporary-password-box" hidden>
+              <span class="eyebrow">CONTRASENYA TEMPORAL</span>
+              <strong id="temporaryPasswordValue">—</strong>
+              <p>Es mostra només ara. Copia-la i envia-la privadament al nou usuari.</p>
+              <button id="copyTemporaryPassword" type="button" class="secondary-btn">COPIAR CONTRASENYA</button>
+            </div>
+          </form>
+          <div class="editor-card list-card">
+            <div class="card-head"><div><span class="eyebrow">USUARIS</span><h2>Comptes</h2></div><span class="count-pill" id="usersCount">0</span></div>
+            <p class="helper-copy">ADMIN és el propietari del projecte. GESTOR pot editar l’APP. STANDARD és el compte dels músics i mai pot entrar a l’EDITOR.</p>
+            <div id="usersList" class="editor-list users-list"><div class="empty-state">Carregant usuaris…</div></div>
+          </div>
+        </div>
+      </section>
 
       <section class="editor-view" data-editor-view="system">
         <div class="system-grid">

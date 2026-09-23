@@ -1,4 +1,4 @@
-const CACHE='banda-de-la-cala-editor-v0.18';
+const CACHE='banda-de-la-cala-editor-v0.19';
 const CORE=[
   './',
   './index.html',

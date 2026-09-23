@@ -11,15 +11,19 @@ const state = {
   playbackMode: 'normal',
   lastRandomTrack: -1,
   globalMuted: initialGlobalMuted,
+  session: null,
+  profile: null,
+  authenticated: false,
   content: window.BandaStore ? (BandaStore.loadApp ? BandaStore.loadApp() : BandaStore.load()) : {events:[],tracks:[],dresscodes:[],historicItems:[],settings:{}}
 };
 
 const navItems = [
-  { id:'home', label:'HOME', icon:'home', eyebrow:'INICI', title:'HOME' },
-  { id:'calendar', label:'CALENDARI', icon:'calendar', eyebrow:'AGENDA', title:'CALENDARI' },
-  { id:'history', label:'HISTÒRIC', icon:'history', eyebrow:'MEMÒRIA', title:'HISTÒRIC' },
-  { id:'playlist', label:'PLAYER', icon:'playlist', eyebrow:'MÚSICA', title:'PLAYER' },
-  { id:'games', label:'MINIJOCS', icon:'games', eyebrow:'OCI', title:'MINIJOCS' }
+  { id:'home', label:'HOME', icon:'home', eyebrow:'INICI', title:'HOME', public:true },
+  { id:'calendar', label:'CALENDARI', icon:'calendar', eyebrow:'AGENDA', title:'CALENDARI', public:false },
+  { id:'history', label:'HISTÒRIC', icon:'history', eyebrow:'MEMÒRIA', title:'HISTÒRIC', public:true },
+  { id:'playlist', label:'PLAYER', icon:'playlist', eyebrow:'MÚSICA', title:'PLAYER', public:true },
+  { id:'games', label:'MINIJOCS', icon:'games', eyebrow:'OCI', title:'MINIJOCS', public:false },
+  { id:'user', label:'USER', icon:'user', eyebrow:'COMPTE', title:'USER', public:true }
 ];
 
 const $ = selector => document.querySelector(selector);
@@ -62,6 +66,10 @@ function iconSvg(type){
       <circle class="gold-fill game-btn gb1" cx="21.8" cy="19" r="1.6"/>
       <circle class="blue-fill game-btn gb2" cx="24.6" cy="22" r="1.6"/>
       <path class="blue cable" d="M13.5 14.8c.8-2.3 1.9-3.8 2.5-5.8.4-1.2 1.9-1.2 2.3 0 .6 2 1.8 3.5 2.5 5.8" stroke-width="1.4" stroke-linecap="round" opacity=".65"/>
+    </svg>`,
+    user: `<svg ${common}>
+      <circle class="gold" cx="16" cy="10.5" r="5" stroke-width="1.9"/>
+      <path class="blue" d="M7.5 26c.8-5.1 4.1-8 8.5-8s7.7 2.9 8.5 8" stroke-width="1.9" stroke-linecap="round"/>
     </svg>`
   };
   return icons[type] || icons.home;
@@ -72,23 +80,35 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.15');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.19');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
+function availableNavItems(){
+  return navItems.filter(item => item.public || state.authenticated);
+}
+
 function renderNavigation(){
-  const make = item => `<button class="nav-btn ${item.id==='home'?'active':''}" data-nav="${item.id}"><span class="nav-icon">${iconSvg(item.icon)}</span><span>${item.label}</span></button>`;
-  $('.desktop-nav').innerHTML = navItems.map(make).join('');
-  $('.mobile-nav').innerHTML = navItems.map(make).join('');
+  const items=availableNavItems();
+  const make = item => `<button class="nav-btn ${item.id===state.currentView?'active':''}" data-nav="${item.id}"><span class="nav-icon">${iconSvg(item.icon)}</span><span>${item.label}</span></button>`;
+  $('.desktop-nav').innerHTML = items.map(make).join('');
+  $('.mobile-nav').innerHTML = items.map(make).join('');
+  $('.mobile-nav').style.gridTemplateColumns=`repeat(${items.length},1fr)`;
   $$('[data-nav]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.nav, true)));
 }
 
+
 function renderHome(){
-  const cards = [
+  const cards = state.authenticated ? [
     { id:'calendar', icon:'calendar', title:'CALENDARI', text:'Assajos, actuacions i agenda de la banda.', status:'ACTIU' },
     { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
     { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
-    { id:'games', icon:'games', title:'MINIJOCS', text:'Jocs casuals de la banda.', status:'PROPERAMENT' }
+    { id:'games', icon:'games', title:'MINIJOCS', text:'Jocs casuals de la banda.', status:'PROPERAMENT' },
+    { id:'user', icon:'user', title:'USER', text:'Perfil i dades del teu compte.', status:'ACTIU' }
+  ] : [
+    { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
+    { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
+    { id:'user', icon:'user', title:'USER', text:'Accés privat per als músics de la banda.', status:'ACCÉS' }
   ];
   $('#homeGrid').innerHTML = cards.map(card => `<button class="home-card ${card.status==='PROPERAMENT'?'disabled':''}" data-open="${card.id}">
     <span class="big-icon">${iconSvg(card.icon)}</span>
@@ -96,6 +116,7 @@ function renderHome(){
   </button>`).join('');
   $$('#homeGrid [data-open]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.open, true)));
 }
+
 
 function renderStandaloneSectionIcons(){
   $$('[data-section-icon]').forEach(el => { el.innerHTML = iconSvg(el.dataset.sectionIcon); });
@@ -114,7 +135,9 @@ function updateHeader(id){
 }
 
 function switchView(id, remember = true){
-  if(!navItems.some(item => item.id === id)) id = 'home';
+  const target=navItems.find(item=>item.id===id);
+  if(!target) id='home';
+  else if(!target.public && !state.authenticated) id='user';
   if(id === state.currentView){ updateHeader(id); return; }
   if(remember && state.currentView) state.viewHistory.push(state.currentView);
   state.currentView = id;
@@ -426,10 +449,16 @@ function toggleGlobalMute(){
   try{ localStorage.setItem('banda-de-la-cala-muted', state.globalMuted ? '1' : '0'); }catch(error){}
   applyGlobalMute();
 }
+function publicOnlyCopy(source){
+  const clean=BandaStore.normalize(source||BandaStore.defaults());
+  clean.events=[];
+  clean.dresscodes=[];
+  return clean;
+}
 async function refreshPublishedFromNetwork(){
   if(!window.BandaStore?.fetchPublished || BandaStore.isLocalPreview?.()) return;
   const latest = await BandaStore.fetchPublished();
-  refreshContent(latest);
+  refreshContent(state.authenticated?latest:publicOnlyCopy(latest));
 }
 
 function refreshContent(next){
@@ -460,7 +489,7 @@ async function initSupabaseContent(){
     return;
   }
   try{
-    const remote=await BandaSupabase.loadContent();
+    const remote=await BandaSupabase.loadContent({publicOnly:!state.authenticated});
     if(remoteContentReady(remote)){
       BandaStore.cacheRemote?.(remote);
       refreshContent(remote);
@@ -471,12 +500,103 @@ async function initSupabaseContent(){
       if(!remoteContentReady(next)) return;
       BandaStore.cacheRemote?.(next);
       refreshContent(next);
-    });
+    },{publicOnly:!state.authenticated});
   }catch(error){
     console.warn('Supabase no disponible; utilitzant caché/publicat.',error);
     await refreshPublishedFromNetwork();
   }
 }
+
+function roleLabel(role){
+  return ({admin:'USER ADMIN',gestor:'USER GESTOR',standard:'USER STANDARD'})[role] || 'USER';
+}
+
+function renderUserSection(){
+  const login=$('#userLoginCard'), profile=$('#userProfileCard');
+  if(!login||!profile) return;
+  login.hidden=state.authenticated;
+  profile.hidden=!state.authenticated;
+  if(!state.authenticated) return;
+  $('#userProfileName').textContent=state.profile?.name || state.session?.user?.email?.split('@')[0] || 'Músic';
+  $('#userProfileEmail').textContent=state.session?.user?.email || state.profile?.email || '';
+  $('#userProfileRole').textContent=roleLabel(state.profile?.role);
+  const temp=$('#temporaryPasswordNotice');
+  if(temp) temp.hidden=!state.profile?.must_change_password;
+}
+
+async function reloadAuthAwareContent(){
+  renderNavigation();
+  renderHome();
+  renderUserSection();
+  await initSupabaseContent();
+}
+
+async function establishAppSession(session){
+  state.session=session||null;
+  state.authenticated=!!session;
+  state.profile=null;
+  if(session){
+    try{ state.profile=await BandaSupabase.getMyProfile(); }catch(error){ console.warn('No s’ha pogut carregar el perfil',error); }
+  }
+  await reloadAuthAwareContent();
+}
+
+function bindUserAuth(){
+  $('#userLoginForm')?.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const status=$('#userLoginStatus');
+    const email=$('#userLoginEmail').value.trim();
+    const password=$('#userLoginPassword').value;
+    status.textContent='Entrant…';
+    try{
+      const session=await BandaSupabase.signIn(email,password);
+      $('#userLoginPassword').value='';
+      await establishAppSession(session);
+      status.textContent='';
+      switchView('user',false);
+    }catch(error){
+      console.error(error);
+      status.textContent='Email o contrasenya incorrectes, o el compte encara no està validat.';
+    }
+  });
+  $('#userLogoutBtn')?.addEventListener('click',async()=>{
+    try{ await BandaSupabase.signOut(); }catch(_error){}
+    state.session=null; state.profile=null; state.authenticated=false;
+    state.currentView='home'; state.viewHistory=[];
+    await reloadAuthAwareContent();
+    $$('.view').forEach(view=>view.classList.toggle('active',view.dataset.view==='home'));
+    updateHeader('home');
+  });
+  $('#changePasswordForm')?.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const status=$('#changePasswordStatus');
+    const password=$('#newUserPassword').value;
+    const repeat=$('#repeatUserPassword').value;
+    if(password.length<8){status.textContent='La contrasenya ha de tenir almenys 8 caràcters.';return;}
+    if(password!==repeat){status.textContent='Les dues contrasenyes no coincideixen.';return;}
+    status.textContent='Canviant contrasenya…';
+    try{
+      await BandaSupabase.updatePassword(password);
+      $('#newUserPassword').value=''; $('#repeatUserPassword').value='';
+      state.profile=await BandaSupabase.getMyProfile();
+      renderUserSection();
+      status.textContent='Contrasenya actualitzada correctament.';
+    }catch(error){ console.error(error); status.textContent='No s’ha pogut canviar la contrasenya.'; }
+  });
+}
+
+async function initAppAuth(){
+  if(!window.BandaSupabase?.enabled){ state.content=publicOnlyCopy(state.content); renderNavigation(); renderHome(); renderUserSection(); return; }
+  try{
+    const session=await BandaSupabase.session();
+    await establishAppSession(session);
+  }catch(error){
+    console.warn('No s’ha pogut iniciar la sessió',error);
+    state.session=null; state.profile=null; state.authenticated=false;
+    await reloadAuthAwareContent();
+  }
+}
+
 
 function bindPwaInstall(){
   const btn = $('#installBtn');
@@ -508,14 +628,12 @@ function registerSW(){
   }
 }
 
-function init(){
+async function init(){
   const startBtn = $('#startBtn');
   const startIconBtn = $('#startIconBtn');
   if(startBtn) startBtn.onclick = startIntro;
   if(startIconBtn) startIconBtn.onclick = startIntro;
   bootIdentity();
-  renderNavigation();
-  renderHome();
   renderStandaloneSectionIcons();
   applyHomeHero();
   updateHeader('home');
@@ -529,11 +647,16 @@ function init(){
   const muteBtn = $('#muteBtn');
   if(muteBtn) muteBtn.onclick = toggleGlobalMute;
   bindContentUpdates();
-  initSupabaseContent();
+  bindUserAuth();
+  await initAppAuth();
+  const requestedView=new URLSearchParams(location.search).get('view');
+  renderNavigation(); renderHome(); renderUserSection();
+  if(requestedView==='user'){ state.currentView='home'; switchView('user',false); }
   bindPwaInstall();
   registerSW();
   const backBtn = $('#backBtn');
   if(backBtn) backBtn.onclick = goBack;
 }
+
 
 init();
