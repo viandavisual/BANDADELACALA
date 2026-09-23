@@ -69,6 +69,8 @@
         id: item.id || uid(`hemero${index}`),
         type,
         year: Number.parseInt(item.year,10) || '',
+        month: Number.parseInt(item.month,10) || '',
+        day: Number.parseInt(item.day,10) || '',
         title: item.title || '',
         description: item.description || '',
         url: item.url || '',

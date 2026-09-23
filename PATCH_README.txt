@@ -1,44 +1,37 @@
-BANDA DE LA CALA · PATCH v0.30 → v0.31
+BANDA DE LA CALA · PATCH v0.31 → v0.32
 ======================================
 
-SOBREESCRIBIR estos archivos del repositorio con los del PATCH:
-- README.txt
-- SUPABASE_SETUP.sql
-- version.js
-- config.js
-- content-store.js
-- app.js
-- style.css
-- editor.js
-- editor.css
-- data/content-published.js
+SOBRESCRIBIR EN GITHUB
 - app/index.html
 - app/sw.js
+- app.js
+- config.js
+- content-store.js
 - editor/index.html
 - editor/sw.js
+- editor.css
+- editor.js
+- style.css
+- version.js
+- README.txt
 
-AÑADIR estos archivos nuevos:
-- SUPABASE_UPDATE_v0.31.sql
-- SUPABASE_v0.31_PASOS.txt
-- V0_31_CAMBIOS.txt
+AÑADIR
+- BANDA_DE_LA_CALA_TYPO_UI_v0.32.json
+- V0_32_CAMBIOS.txt
+- SUPABASE_v0.32_PASOS.txt
 
-NO TOCAR / NO BORRAR:
-- assets/ (incluido assets/avatar y todos los avatares que hayas añadido)
-- manifests de APP y EDITOR
+NO TOCAR
+- app/manifest.webmanifest
+- editor/manifest.webmanifest
+- assets/avatar/
+- assets/brand/
+- assets/AUDIO/
 - Edge Function create-band-user
-- archivos SQL históricos
-- resto de recursos del repositorio
+- SMTP/Auth de Supabase
 
-PASO SUPABASE OBLIGATORIO PARA HEMEROTECA PÚBLICA:
-1. Supabase > SQL Editor.
-2. Ejecutar una sola vez TODO SUPABASE_UPDATE_v0.31.sql.
-3. No crear buckets nuevos. HEMEROTECA reutiliza historic-media.
+SUPABASE
+No hay SQL nuevo que ejecutar en v0.32.
+Debe mantenerse aplicado SUPABASE_UPDATE_v0.31.sql.
 
-CAMBIOS PRINCIPALES:
-- HISTÒRIC abre/cierra cada período sin reconstruir ni recargar los demás.
-- AVUI rojo con número blanco + punto azul/dorado si hay actividad.
-- PAUSE/PLAY centrados geométricamente.
-- AVATARS detectados dinámicamente desde assets/avatar del repo GitHub.
-- Nueva HEMEROTECA: CARTELLS / NOTÍCIES / ENTREVISTES, gestionable desde EDITOR.
-
-La arquitectura INSTALL estable de v0.23 y el flujo USERS estable de v0.29 se conservan.
+NOTA
+Las imágenes nuevas de HEMEROTECA siguen utilizando el bucket historic-media.

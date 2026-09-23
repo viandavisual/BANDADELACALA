@@ -1,0 +1,8 @@
+BANDA DE LA CALA · v0.32 · SUPABASE
+
+No hay ningún paso nuevo que ejecutar en Supabase para esta versión.
+
+Mantener:
+- SUPABASE_UPDATE_v0.31.sql ya aplicado.
+- SMTP/Auth/USERS/Edge Function sin cambios.
+- Bucket historic-media existente.

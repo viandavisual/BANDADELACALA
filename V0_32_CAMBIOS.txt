@@ -1,0 +1,26 @@
+BANDA DE LA CALA · v0.32
+===========================
+
+Base: v0.31
+
+CAMBIOS PRINCIPALES
+- HOME: si hay un usuario autenticado, el eyebrow principal muestra “BENVINGUT/DA <NOM>”. Sin login conserva “BENVINGUT/DA”.
+- TYPO / UI: aplicada a la APP la nueva configuración JSON adjunta y trasladados sus roles equivalentes al EDITOR.
+- HEMEROTECA: código de color por categoría: CARTELLS amarillo, NOTÍCIES azul, ENTREVISTES gris.
+- HEMEROTECA: maquetación tipo masonry/columnas para preservar mejor formatos verticales, horizontales y cuadrados y aprovechar el espacio disponible.
+- HEMEROTECA: fecha documental ampliada. El año es obligatorio; mes y día son opcionales. Se ordena por fecha completa cuando existe.
+- HEMEROTECA: los enlaces sin imagen muestran una miniatura automática de enlace basada en el sitio web; se puede seguir subiendo una imagen propia desde el EDITOR.
+- HISTÒRIC + HEMEROTECA: visor con flechas laterales y teclado ←/→ para recorrer imágenes sin cerrar el visor.
+- USER registrado: nueva caja DRIVE PARTITURES, con icono musical y enlace al Drive indicado.
+- HEMEROTECA: botón ← HISTÒRIC colocado en una fila propia superior; la caja ARXIU DOCUMENTAL queda debajo.
+- CALENDARI: pequeña leyenda AVUI / ASSAIG / EVENT con los tres colores.
+- HISTÒRIC: eliminado el hueco superior entre franjas de períodos al abrir/desplegar.
+- Mantiene el sistema incremental de carga de imágenes del HISTÒRIC introducido en v0.31.
+- No se cambian los manifest IDs, scopes ni la arquitectura INSTALL estable de v0.23.
+- No se modifica Auth, SMTP ni la Edge Function de usuarios.
+
+SUPABASE
+No requiere SQL adicional respecto a v0.31: HEMEROTECA continúa dentro del JSON de app_content y la función pública de v0.31 copia hemerotecaItems íntegramente.
+
+NOTA SOBRE MINIATURAS DE ENLACES
+Si una entrada de NOTÍCIES o ENTREVISTES no tiene imagen cargada y sí tiene URL, la APP muestra una tarjeta de enlace con el icono del dominio. Si se carga una imagen desde el EDITOR, esa imagen actúa como miniatura/documento visual.

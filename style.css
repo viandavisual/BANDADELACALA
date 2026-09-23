@@ -583,12 +583,11 @@ button,a,input{touch-action:manipulation}
 
 
 /* ============================================================
-   v0.30 · TYPO / UI LAB aplicado desde JSON v0.29
-   Fuente: BANDA DE LA CALA · TYPO / UI LAB v0.1
+   v0.32 · TYPO / UI LAB aplicado desde JSON adjunto
    Desktop base + mobile <= 780px
    ============================================================ */
 /* bodyText */
-body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:16px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:16px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* startTitle */
 .start-copy h1,.start-copy h2{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:70px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* startSubtitle */
@@ -618,13 +617,13 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* homeCardTitle */
 .home-card h4{font-family:Arial,sans-serif!important;font-size:20px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* homeCardText */
-.home-card p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+.home-card p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* statusPill */
 .status-pill{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:10px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* installTitle */
 .app-install-copy strong{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:16px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* installDetail */
-.app-install-copy small{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+.app-install-copy small{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* creditsMain */
 .home-credits>div:first-child{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* creditsSub */
@@ -644,7 +643,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* eventDetail */
 .event-card p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* dresscodeButton */
-.dresscode-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:normal!important;text-decoration:underline!important;}
+.dresscode-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* historyIntroTitle */
 .history-intro h3{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:46px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* historyIntroText */
@@ -652,7 +651,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* periodRange */
 .history-period-head>div>strong{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* periodDirector */
-.history-period-head>div>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:15px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+.history-period-head>div>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:15px!important;font-weight:700!important;font-style:italic!important;text-decoration:none!important;}
 /* historyYear */
 .history-year{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* historyEventTitle */
@@ -664,13 +663,13 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* trackIndex */
 .track-index{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* trackTitle */
-.track-main strong{font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.track-main strong{font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* trackMeta */
 .track-main small{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
 /* trackDuration */
 .track-length{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* nowPlayingTitle */
-#nowPlayingTitle{font-family:Arial,sans-serif!important;font-size:28px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+#nowPlayingTitle{font-family:Arial,sans-serif!important;font-size:28px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* nowPlayingMeta */
 #nowPlayingMeta{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:17px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
 /* modeMain */
@@ -680,13 +679,13 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* progressTime */
 .progress-row>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:17px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* miniPlayerTitle */
-.mini-info strong{font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+.mini-info strong{font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* miniPlayerMeta */
 .mini-info small{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* miniPlayerTag */
-.mini-player:after{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:9px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
+.mini-player:after{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:9px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* comingBadge */
-.coming-badge{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:24px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.coming-badge{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:24px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* userLoginTitle */
 .user-auth-card>h3{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:24px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* userIntroText */
@@ -704,15 +703,15 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* accountNoticeTitle */
 .password-setup-notice strong{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* accountNoticeText */
-.password-setup-notice span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+.password-setup-notice span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* settingsEyebrow */
 .user-settings-title .eyebrow,.user-password-details>summary .eyebrow{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* settingsTitle */
-.user-settings-title h4{font-family:Arial,sans-serif!important;font-size:17px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.user-settings-title h4{font-family:Arial,sans-serif!important;font-size:17px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* passwordSummary */
 .user-password-details>summary strong{font-family:Arial,sans-serif!important;font-size:16px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* actionButton */
-.user-password-btn,.user-logout-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.user-password-btn,.user-logout-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* modalTitle */
 .dresscode-sheet>h2{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:42px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* modalSubtitle */
@@ -722,20 +721,20 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* dressBody */
 .dresscode-text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:26px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* viewerCaptionTitle */
-.history-image-caption strong{font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+.history-image-caption strong{font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* viewerCaptionText */
 .history-image-caption span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* viewerToolbar */
-.history-image-toolbar button,.history-image-toolbar>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.history-image-toolbar button,.history-image-toolbar>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 @media(max-width:780px){
   /* bodyText */
-  body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:15px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+  body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:15px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* startTitle */
   .start-copy h1,.start-copy h2{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:42px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* startSubtitle */
   .start-copy p,.start-copy small{font-family:Arial,sans-serif!important;font-size:15px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* eyebrow */
-  .eyebrow{font-family:Arial,sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  .eyebrow{font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* primaryButton */
   .primary-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* brandTitle */
@@ -759,13 +758,13 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   /* homeCardTitle */
   .home-card h4{font-family:Arial,sans-serif!important;font-size:16px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* homeCardText */
-  .home-card p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+  .home-card p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* statusPill */
   .status-pill{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:10px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* installTitle */
   .app-install-copy strong{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* installDetail */
-  .app-install-copy small{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+  .app-install-copy small{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* creditsMain */
   .home-credits>div:first-child{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* creditsSub */
@@ -783,9 +782,9 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   /* eventTitle */
   .event-card h4{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:17px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* eventDetail */
-  .event-card p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  .event-card p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:19px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* dresscodeButton */
-  .dresscode-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:10px!important;font-weight:400!important;font-style:normal!important;text-decoration:underline!important;}
+  .dresscode-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* historyIntroTitle */
   .history-intro h3{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:32px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* historyIntroText */
@@ -793,7 +792,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   /* periodRange */
   .history-period-head>div>strong{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* periodDirector */
-  .history-period-head>div>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+  .history-period-head>div>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:700!important;font-style:italic!important;text-decoration:none!important;}
   /* historyYear */
   .history-year{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:10px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* historyEventTitle */
@@ -805,29 +804,29 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   /* trackIndex */
   .track-index{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* trackTitle */
-  .track-main strong{font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  .track-main strong{font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* trackMeta */
   .track-main small{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
   /* trackDuration */
   .track-length{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* nowPlayingTitle */
-  #nowPlayingTitle{font-family:Arial,sans-serif!important;font-size:16px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  #nowPlayingTitle{font-family:Arial,sans-serif!important;font-size:19px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* nowPlayingMeta */
-  #nowPlayingMeta{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+  #nowPlayingMeta{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
   /* modeMain */
   .mode-btn{font-family:Arial,sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* modeSub */
-  .mode-btn span{font-family:Arial,sans-serif!important;font-size:8px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  .mode-btn span{font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* progressTime */
   .progress-row>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:16px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* miniPlayerTitle */
-  .mini-info strong{font-family:Arial,sans-serif!important;font-size:17px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+  .mini-info strong{font-family:Arial,sans-serif!important;font-size:17px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* miniPlayerMeta */
   .mini-info small{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:10px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* miniPlayerTag */
-  .mini-player:after{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:9px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
+  .mini-player:after{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:9px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* comingBadge */
-  .coming-badge{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:23px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  .coming-badge{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:19px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* userLoginTitle */
   .user-auth-card>h3{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:21px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* userIntroText */
@@ -845,31 +844,30 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   /* accountNoticeTitle */
   .password-setup-notice strong{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:10px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* accountNoticeText */
-  .password-setup-notice span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+  .password-setup-notice span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* settingsEyebrow */
-  .user-settings-title .eyebrow,.user-password-details>summary .eyebrow{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:10px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
+  .user-settings-title .eyebrow,.user-password-details>summary .eyebrow{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* settingsTitle */
-  .user-settings-title h4{font-family:Arial,sans-serif!important;font-size:16px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  .user-settings-title h4{font-family:Arial,sans-serif!important;font-size:16px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* passwordSummary */
   .user-password-details>summary strong{font-family:Arial,sans-serif!important;font-size:15px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* actionButton */
-  .user-password-btn,.user-logout-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  .user-password-btn,.user-logout-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:13px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* modalTitle */
-  .dresscode-sheet>h2{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:30px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
+  .dresscode-sheet>h2{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:22px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* modalSubtitle */
-  .dresscode-subtitle{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:17px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  .dresscode-subtitle{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:19px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* dressHeading */
-  .dresscode-grid h3{font-family:Arial,sans-serif!important;font-size:21px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
+  .dresscode-grid h3{font-family:Arial,sans-serif!important;font-size:24px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* dressBody */
-  .dresscode-text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:21px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  .dresscode-text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:17px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* viewerCaptionTitle */
-  .history-image-caption strong{font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:italic!important;text-decoration:none!important;}
+  .history-image-caption strong{font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* viewerCaptionText */
   .history-image-caption span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* viewerToolbar */
-  .history-image-toolbar button,.history-image-toolbar>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+  .history-image-toolbar button,.history-image-toolbar>span{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:11px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 }
-
 
 /* v0.31 · HISTÒRIC incremental, AVUI, PLAYER centrat i HEMEROTECA */
 .calendar-day.today,
@@ -897,3 +895,66 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 @media(max-width:900px){.hemeroteca-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:780px){.calendar-day.today.has-event:after{right:6px;top:6px;width:7px;height:7px;box-shadow:0 0 0 1.5px rgba(255,255,255,.94)!important}.hemeroteca-launch{border-radius:18px;padding:16px}.hemeroteca-head{grid-template-columns:1fr;gap:12px}.hemeroteca-head h3{font-size:2rem}.hemeroteca-back{justify-self:start}.hemeroteca-tabs{gap:5px}.hemeroteca-tab{min-height:44px;font-size:.66rem;padding:0 5px}.hemeroteca-grid{grid-template-columns:1fr;gap:12px}.hemeroteca-media{height:230px}}
 .calendar-day.today.outside{opacity:1}
+
+/* v0.32 · HOME USER, CALENDARI, HEMEROTECA, visor i ajustos HISTÒRIC */
+.calendar-legend{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:14px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:.68rem;font-weight:850;letter-spacing:.04em;color:var(--muted)}
+.calendar-legend span{display:inline-flex;align-items:center;gap:6px}
+.legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.legend-dot.today-dot{background:#c72f34}.legend-dot.rehearsal-dot{background:var(--blue)}.legend-dot.event-dot{background:var(--gold)}
+
+.user-drive-box{display:grid;gap:12px}
+.drive-scores-btn{min-height:66px;border:1px solid rgba(57,58,134,.18);border-radius:16px;background:linear-gradient(135deg,var(--blue),var(--blue-deep));color:#fff;display:flex;align-items:center;justify-content:center;gap:13px;padding:12px 18px;font-weight:900;letter-spacing:.06em;text-decoration:none;box-shadow:0 10px 24px rgba(57,58,134,.14);transition:.18s ease}
+.drive-scores-btn:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(57,58,134,.2)}
+.drive-scores-icon{width:38px;height:32px;display:grid;place-items:center;flex:0 0 auto}.drive-scores-icon svg{width:38px;height:32px;display:block}
+
+.history-period{padding-top:0!important}
+.history-period-head{margin-top:0!important}
+.history-period + .history-period{margin-top:0!important}
+.history-period.is-collapsed + .history-period:not(.is-collapsed),
+.history-period:not(.is-collapsed) + .history-period{padding-top:0!important}
+
+.hemeroteca-panel{gap:12px}
+.hemeroteca-back-row{display:block;width:100%}
+.hemeroteca-back{width:100%;min-height:46px;text-align:left;padding:0 16px;border-radius:14px;background:#fff}
+.hemeroteca-head{display:block!important;grid-template-columns:none!important}
+.hemeroteca-tabs{gap:8px}
+.hemeroteca-tab[data-hemeroteca-type="cartells"]{--hemero-color:#d4ac5f;--hemero-text:#24211f;background:#fffaf0;border-color:rgba(212,172,95,.5);color:#8d681f}
+.hemeroteca-tab[data-hemeroteca-type="noticies"]{--hemero-color:#393a86;--hemero-text:#fff;background:#f4f4fb;border-color:rgba(57,58,134,.28);color:var(--blue)}
+.hemeroteca-tab[data-hemeroteca-type="entrevistes"]{--hemero-color:#777b82;--hemero-text:#fff;background:#f4f5f6;border-color:#d6d8db;color:#5c6066}
+.hemeroteca-tab.active{background:var(--hemero-color)!important;border-color:var(--hemero-color)!important;color:var(--hemero-text)!important;box-shadow:0 8px 18px rgba(36,33,31,.08)}
+
+.hemeroteca-grid{display:block!important;columns:3 290px;column-gap:16px}
+.hemeroteca-card{display:inline-block;width:100%;margin:0 0 16px;break-inside:avoid;page-break-inside:avoid;vertical-align:top;border-top:5px solid var(--hemero-accent,var(--blue))}
+.hemeroteca-card.type-cartells{--hemero-accent:#d4ac5f}.hemeroteca-card.type-noticies{--hemero-accent:#393a86}.hemeroteca-card.type-entrevistes{--hemero-accent:#777b82}
+.hemeroteca-media{height:auto!important;display:block!important;background:#fff;overflow:hidden}
+.hemeroteca-image-button{display:block;width:100%;height:auto;min-height:0;border-bottom:3px solid #fff}
+.hemeroteca-image-button:last-child{border-bottom:0}
+.hemeroteca-image-button img{display:block;width:100%;height:auto!important;max-height:none!important;object-fit:contain!important;background:#fff}
+.hemeroteca-link-thumb{min-height:180px;padding:24px;display:flex;align-items:center;justify-content:center;gap:16px;background:linear-gradient(145deg,#f8f8f8,#fff);border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);text-align:left}
+.hemeroteca-link-thumb-icon{width:72px;height:72px;border-radius:20px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow-soft);display:grid;place-items:center;flex:0 0 72px;font-size:2rem;color:var(--blue)}
+.hemeroteca-link-thumb-icon img{width:44px;height:44px;object-fit:contain}
+.hemeroteca-link-thumb strong,.hemeroteca-link-thumb small{display:block}.hemeroteca-link-thumb strong{font-size:1rem;line-height:1.25}.hemeroteca-link-thumb small{margin-top:6px;color:var(--muted);font-size:.7rem;word-break:break-word}
+.hemeroteca-card-meta{align-items:flex-start}.hemeroteca-card-meta strong{text-align:right;line-height:1.25}
+.hemeroteca-card.type-cartells .hemeroteca-card-meta span{color:#9a701f}.hemeroteca-card.type-noticies .hemeroteca-card-meta span{color:var(--blue)}.hemeroteca-card.type-entrevistes .hemeroteca-card-meta span{color:#676b71}
+
+.history-image-viewport{position:relative}
+.history-image-nav{position:sticky;top:50%;z-index:4;width:48px;height:64px;border:1px solid rgba(255,255,255,.22);border-radius:16px;background:rgba(20,20,20,.64);backdrop-filter:blur(8px);color:#fff;font-size:2.2rem;line-height:1;display:grid;place-items:center;transform:translateY(-50%);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.history-image-nav[hidden]{display:none!important}
+.history-image-nav-prev{float:left;left:10px;margin-right:-48px}.history-image-nav-next{float:right;right:10px;margin-left:-48px}
+.history-image-nav:hover{background:rgba(20,20,20,.82)}
+
+@media(max-width:900px){.hemeroteca-grid{columns:2 240px}}
+@media(max-width:780px){
+  .calendar-legend{font-size:.62rem;gap:10px;margin-top:10px;padding-top:10px}
+  .legend-dot{width:9px;height:9px}
+  .drive-scores-btn{min-height:60px;border-radius:14px;padding:10px 14px}
+  .hemeroteca-grid{columns:1}
+  .hemeroteca-card{margin-bottom:12px}
+  .hemeroteca-back{min-height:44px}
+  .hemeroteca-link-thumb{min-height:145px;padding:18px}
+  .hemeroteca-link-thumb-icon{width:58px;height:58px;flex-basis:58px;border-radius:16px}.hemeroteca-link-thumb-icon img{width:36px;height:36px}
+  .history-image-nav{width:42px;height:56px;border-radius:14px;font-size:1.9rem}
+  .history-image-nav-prev{left:6px;margin-right:-42px}.history-image-nav-next{right:6px;margin-left:-42px}
+}
+/* v0.32 · empty state dins masonry */
+.hemeroteca-grid .hemeroteca-empty{column-span:all;width:100%;display:block}

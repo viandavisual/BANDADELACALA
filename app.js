@@ -28,7 +28,7 @@ const state = {
   profile: null,
   authenticated: false,
   collapsedPeriods: new Set(),
-  historyViewer: { scale:1, maxScale:1, baseWidth:0 },
+  historyViewer: { scale:1, maxScale:1, baseWidth:0, items:[], index:0 },
   hemerotecaType: 'cartells',
   content: window.BandaStore ? (BandaStore.loadApp ? BandaStore.loadApp() : BandaStore.load()) : {events:[],tracks:[],dresscodes:[],historicItems:[],hemerotecaItems:[],settings:{}}
 };
@@ -52,7 +52,7 @@ let AVAILABLE_AVATARS = [
   {key:'avatar1',label:'AVATAR 1',src:'assets/avatar/avatar1.jpg'}
 ];
 let avatarDiscoveryPromise = null;
-const AVATAR_CACHE_KEY = 'banda-avatar-list-v031';
+const AVATAR_CACHE_KEY = 'banda-avatar-list-v032';
 function avatarNumber(value){ const m=String(value||'').match(/avatar(\d+)/i); return m?Number(m[1]):Number.MAX_SAFE_INTEGER; }
 function avatarFromKey(key){
   const n=avatarNumber(key);
@@ -190,6 +190,8 @@ function renderNavigation(){
 
 
 function renderHome(){
+  const welcome=$('#homeWelcomeEyebrow');
+  if(welcome) welcome.textContent=state.authenticated ? `BENVINGUT/DA ${currentUserDisplayName()}` : 'BENVINGUT/DA';
   const cards = state.authenticated ? [
     { id:'calendar', icon:'calendar', title:'CALENDARI', text:'Assajos, actuacions i agenda de la banda.', status:'ACTIU' },
     { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
@@ -494,36 +496,80 @@ function historyViewerReset(){
     viewport.scrollTo({left:0,top:0,behavior:'auto'});
   });
 }
-function openImageViewer({src,title='',caption='',alt=''}){
-  if(!src) return;
-  const modal=$('#historyImageModal'), img=$('#historyImageLarge');
-  $('#historyImageTitle').textContent=title;
-  $('#historyImageCaption').textContent=caption;
-  img.alt=alt||title||'Document';
+function updateViewerNav(){
+  const prev=$('#historyImagePrev'), next=$('#historyImageNext');
+  const count=state.historyViewer.items.length;
+  const show=count>1;
+  if(prev){prev.hidden=!show;prev.disabled=!show;}
+  if(next){next.hidden=!show;next.disabled=!show;}
+}
+function renderViewerItem(index){
+  const items=state.historyViewer.items||[];
+  if(!items.length)return;
+  const count=items.length;
+  const safeIndex=((Number(index)||0)%count+count)%count;
+  state.historyViewer.index=safeIndex;
+  const item=items[safeIndex];
+  const img=$('#historyImageLarge');
+  $('#historyImageTitle').textContent=item.title||'';
+  $('#historyImageCaption').textContent=item.caption||'';
+  img.alt=item.alt||item.title||'Document';
   img.onload=historyViewerReset;
-  img.src=src;
+  img.src=item.src;
+  if(img.complete) historyViewerReset();
+  updateViewerNav();
+}
+function openImageViewer({items=[],index=0,src='',title='',caption='',alt=''}){
+  const gallery=Array.isArray(items)&&items.length?items:[{src,title,caption,alt}].filter(item=>item.src);
+  if(!gallery.length)return;
+  state.historyViewer.items=gallery;
+  state.historyViewer.index=Math.max(0,Math.min(gallery.length-1,Number(index)||0));
+  const modal=$('#historyImageModal');
   modal.hidden=false;
   document.body.classList.add('modal-open');
-  if(img.complete) historyViewerReset();
+  renderViewerItem(state.historyViewer.index);
+}
+function stepHistoryViewer(delta){
+  if((state.historyViewer.items||[]).length<2)return;
+  renderViewerItem(state.historyViewer.index+delta);
+}
+function historicViewerItems(){
+  const out=[];
+  for(const item of getHistoricItems()){
+    const images=getHistoricImages(item);
+    images.forEach((src,imageIndex)=>{
+      const photoInfo=images.length>1?` · Foto ${imageIndex+1}/${images.length}`:'';
+      out.push({
+        id:String(item.id||item.imageSrc),
+        imageIndex,
+        src,
+        title:item.title||String(item.year||''),
+        caption:item.description || (item.title ? `${item.year||''}${photoInfo}` : (photoInfo?photoInfo.replace(/^ · /,''):String(item.year||''))),
+        alt:item.title||`Fotografia de ${item.year||''}`
+      });
+    });
+  }
+  return out;
 }
 function openHistoryImage(id,index=0){
-  const item=(state.content.historicItems||[]).find(entry=>String(entry.id||entry.imageSrc)===String(id));
-  if(!item) return;
-  const images=getHistoricImages(item);
-  const safeIndex=Math.max(0,Math.min(images.length-1,index));
-  const src=images[safeIndex];
-  openImageViewer({src,title:item.title || String(item.year||''),caption:item.description || (item.title ? `${item.year||''}${images.length>1?` · Foto ${safeIndex+1}/${images.length}`:''}` : (images.length>1?`Foto ${safeIndex+1}/${images.length}`:'')),alt:item.title || `Fotografia de ${item.year||''}`});
+  const items=historicViewerItems();
+  const target=items.findIndex(entry=>entry.id===String(id)&&entry.imageIndex===Number(index||0));
+  if(target<0)return;
+  openImageViewer({items,index:target});
 }
 function closeHistoryImage(){
   const modal=$('#historyImageModal'); if(!modal) return;
   modal.hidden=true; document.body.classList.remove('modal-open');
   const img=$('#historyImageLarge'); if(img){img.removeAttribute('src');img.style.width='';}
+  state.historyViewer.items=[];state.historyViewer.index=0;
 }
 function bindHistoryImageModal(){
   $$('[data-close-history-image]').forEach(el=>el.addEventListener('click',closeHistoryImage));
   $('#historyZoomIn')?.addEventListener('click',()=>{state.historyViewer.scale=Math.min(state.historyViewer.maxScale,state.historyViewer.scale+.25);historyViewerApply();});
   $('#historyZoomOut')?.addEventListener('click',()=>{state.historyViewer.scale=Math.max(1,state.historyViewer.scale-.25);historyViewerApply();});
   $('#historyZoomReset')?.addEventListener('click',historyViewerReset);
+  $('#historyImagePrev')?.addEventListener('click',()=>stepHistoryViewer(-1));
+  $('#historyImageNext')?.addEventListener('click',()=>stepHistoryViewer(1));
   $('#historyImageViewport')?.addEventListener('wheel',event=>{
     if(!$('#historyImageModal')?.hidden && (event.ctrlKey || Math.abs(event.deltaY)>0)){
       event.preventDefault();
@@ -532,7 +578,12 @@ function bindHistoryImageModal(){
       historyViewerApply();
     }
   },{passive:false});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('#historyImageModal')?.hidden) closeHistoryImage();});
+  document.addEventListener('keydown',event=>{
+    if($('#historyImageModal')?.hidden)return;
+    if(event.key==='Escape') closeHistoryImage();
+    else if(event.key==='ArrowLeft') stepHistoryViewer(-1);
+    else if(event.key==='ArrowRight') stepHistoryViewer(1);
+  });
 }
 
 function hemerotecaImages(item){
@@ -541,29 +592,67 @@ function hemerotecaImages(item){
   return images;
 }
 function hemerotecaTypeLabel(type){return ({cartells:'CARTELLS',noticies:'NOTÍCIES',entrevistes:'ENTREVISTES'})[type]||'HEMEROTECA';}
+const HEMEROTECA_MONTHS=['','gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'];
+function hemerotecaDateLabel(item){
+  const year=Number.parseInt(item?.year,10)||'';
+  const month=Number.parseInt(item?.month,10)||0;
+  const day=Number.parseInt(item?.day,10)||0;
+  if(!year)return '';
+  if(month>=1&&month<=12&&day>=1&&day<=31)return `${day} ${HEMEROTECA_MONTHS[month]} ${year}`;
+  if(month>=1&&month<=12)return `${HEMEROTECA_MONTHS[month]} ${year}`;
+  return String(year);
+}
 function getHemerotecaItems(type=state.hemerotecaType){
   return [...(state.content.hemerotecaItems||[])].filter(item=>!type||item.type===type).sort((a,b)=>{
-    const ya=Number(a.year)||0,yb=Number(b.year)||0;
-    if(ya!==yb)return yb-ya;
+    const da=(Number(a.year)||0)*10000+(Number(a.month)||0)*100+(Number(a.day)||0);
+    const db=(Number(b.year)||0)*10000+(Number(b.month)||0)*100+(Number(b.day)||0);
+    if(da!==db)return db-da;
     return String(b.createdAt||'').localeCompare(String(a.createdAt||''));
   });
 }
+function hemerotecaViewerItems(type=state.hemerotecaType){
+  const out=[];
+  for(const item of getHemerotecaItems(type)){
+    const images=hemerotecaImages(item);
+    images.forEach((src,imageIndex)=>out.push({
+      id:String(item.id),
+      imageIndex,
+      src,
+      title:item.title||hemerotecaTypeLabel(item.type),
+      caption:[hemerotecaDateLabel(item),item.description].filter(Boolean).join(' · '),
+      alt:item.title||hemerotecaTypeLabel(item.type)
+    }));
+  }
+  return out;
+}
 function openHemerotecaImage(id,index=0){
-  const item=(state.content.hemerotecaItems||[]).find(entry=>String(entry.id)===String(id));
-  if(!item)return;
-  const images=hemerotecaImages(item); const safeIndex=Math.max(0,Math.min(images.length-1,index));
-  openImageViewer({src:images[safeIndex],title:item.title||hemerotecaTypeLabel(item.type),caption:item.description||(item.year?String(item.year):''),alt:item.title||hemerotecaTypeLabel(item.type)});
+  const items=hemerotecaViewerItems();
+  const target=items.findIndex(entry=>entry.id===String(id)&&entry.imageIndex===Number(index||0));
+  if(target<0)return;
+  openImageViewer({items,index:target});
+}
+function linkThumbMarkup(item,safeUrl){
+  if(!safeUrl)return '';
+  let host='';
+  try{host=new URL(safeUrl).hostname.replace(/^www\./,'');}catch(_error){}
+  const favicon=host?`https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`:'';
+  return `<a class="hemeroteca-link-thumb" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Obrir ${esc(item.title||host||'enllaç')}"><span class="hemeroteca-link-thumb-icon">${favicon?`<img src="${esc(favicon)}" alt="" loading="lazy" />`:'↗'}</span><span><strong>${esc(item.title||host||'ENLLAÇ')}</strong><small>${esc(host||'OBRIR ENLLAÇ')} ↗</small></span></a>`;
 }
 function renderHemeroteca(){
   const host=$('#hemerotecaGrid'); if(!host)return;
+  const panel=$('#hemerotecaPanel');
+  if(panel) panel.dataset.hemerotecaType=state.hemerotecaType;
   $$('[data-hemeroteca-type]').forEach(btn=>{const active=btn.dataset.hemerotecaType===state.hemerotecaType;btn.classList.toggle('active',active);btn.setAttribute('aria-selected',active?'true':'false');});
   const items=getHemerotecaItems();
   if(!items.length){host.innerHTML=`<div class="hemeroteca-empty panel">Encara no hi ha contingut publicat a ${hemerotecaTypeLabel(state.hemerotecaType)}.</div>`;return;}
   host.innerHTML=items.map(item=>{
-    const images=hemerotecaImages(item); const cols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
-    const gallery=images.length?`<div class="hemeroteca-media ${images.length===1?'single':''}" style="--hemero-cols:${cols}">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))}" /></button>`).join('')}</div>`:'';
-    const safeUrl=safeExternalUrl(item.url); const link=safeUrl?`<a class="hemeroteca-link" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer">OBRIR ENLLAÇ ↗</a>`:'';
-    return `<article class="hemeroteca-card">${gallery}<div class="hemeroteca-card-copy"><div class="hemeroteca-card-meta"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${item.year?`<strong>${esc(item.year)}</strong>`:''}</div><h4>${esc(item.title||hemerotecaTypeLabel(item.type))}</h4>${item.description?`<p>${esc(item.description)}</p>`:''}${link}</div></article>`;
+    const images=hemerotecaImages(item);
+    const gallery=images.length?`<div class="hemeroteca-media ${images.length===1?'single':''}">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))}" /></button>`).join('')}</div>`:'';
+    const safeUrl=safeExternalUrl(item.url);
+    const linkPreview=!images.length&&safeUrl?linkThumbMarkup(item,safeUrl):'';
+    const link=safeUrl?`<a class="hemeroteca-link" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer">OBRIR ENLLAÇ ↗</a>`:'';
+    const dateLabel=hemerotecaDateLabel(item);
+    return `<article class="hemeroteca-card type-${esc(item.type)}">${gallery}${linkPreview}<div class="hemeroteca-card-copy"><div class="hemeroteca-card-meta"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${dateLabel?`<strong>${esc(dateLabel)}</strong>`:''}</div><h4>${esc(item.title||hemerotecaTypeLabel(item.type))}</h4>${item.description?`<p>${esc(item.description)}</p>`:''}${link}</div></article>`;
   }).join('');
   $$('[data-hemeroteca-image-id]').forEach(btn=>btn.addEventListener('click',()=>openHemerotecaImage(btn.dataset.hemerotecaImageId,Number(btn.dataset.hemerotecaImageIndex||0))));
 }
@@ -838,6 +927,8 @@ function renderUserSection(){
   if(temp) temp.hidden=!needsPassword;
   const passwordDetails=$('#passwordDetails');
   if(passwordDetails && needsPassword) passwordDetails.open=true;
+  const driveBox=$('#userDriveBox');
+  if(driveBox) driveBox.hidden=needsPassword;
 }
 
 async function reloadAuthAwareContent(){
@@ -1050,7 +1141,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.31',root).href;
+    const swUrl=new URL('app/sw.js?v=0.32',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
