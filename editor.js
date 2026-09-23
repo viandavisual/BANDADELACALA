@@ -757,7 +757,7 @@ function bindEditorAuth(){
     if(password!==repeat){ $('#loginStatus').textContent='Les dues contrasenyes no coincideixen.'; return; }
     $('#loginStatus').textContent='Creant compte…';
     try{
-      const redirectTo=new URL('./editor.html',location.href).href;
+      const redirectTo=new URL('./',location.href).href;
       const result=await BandaSupabase.signUp(email,password,redirectTo);
       $('#registerPassword').value=''; $('#registerPasswordRepeat').value='';
       if(result?.session){
@@ -809,7 +809,9 @@ function syncEditorInstallButton(){
   btn.hidden=false;
   const ready=!!(editorDeferredPrompt || window.__editorInstallPrompt);
   btn.classList.toggle('install-ready',ready);
-  btn.title=ready ? 'Instal·lar BANDA DE LA CALA · EDITOR' : 'Preparant instal·lació…';
+  btn.disabled=!ready;
+  btn.textContent=ready ? 'INSTAL·LAR EDITOR' : 'PREPARANT INSTAL·LACIÓ…';
+  btn.title=ready ? 'Instal·lar BANDA DE LA CALA · EDITOR' : 'Chrome està comprovant que l’Editor és instal·lable';
 }
 
 function showEditorInstallHelp(){
@@ -818,10 +820,8 @@ function showEditorInstallHelp(){
   const ua=navigator.userAgent;
   if(/iPad|iPhone|iPod/.test(ua)){
     text.innerHTML='A Safari: prem <strong>Compartir</strong> → <strong>Afegir a la pantalla d’inici</strong>.';
-  }else if(/Edg\//.test(ua)){
-    text.innerHTML='Edge encara no ha ofert el diàleg automàtic. Prem <strong>⋯</strong> → <strong>Aplicacions</strong> → <strong>Instal·lar aquest lloc com una aplicació</strong>.';
-  }else if(/Chrome\//.test(ua)){
-    text.innerHTML='Chrome encara no ha ofert el diàleg automàtic. Prem <strong>⋮</strong> → <strong>Transmetre, desar i compartir</strong> → <strong>Instal·lar pàgina com a aplicació…</strong>. Si acabes d’actualitzar l’Editor, recarrega aquesta pàgina una vegada i torna a prémer <strong>INSTAL·LAR EDITOR</strong>.';
+  }else if(/Edg\//.test(ua) || /Chrome\//.test(ua)){
+    text.innerHTML='El navegador encara està preparant la instal·lació d’aquest EDITOR com a aplicació independent. Mantén aquesta pàgina oberta uns segons; quan estigui preparada, el botó <strong>INSTAL·LAR EDITOR</strong> quedarà actiu i obrirà directament el diàleg natiu amb un sol clic.';
   }else{
     text.innerHTML='Aquest navegador no ha ofert la instal·lació automàtica. Utilitza la seva opció <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.';
   }
@@ -870,31 +870,23 @@ function bindEditorPwaInstall(){
 
   btn.addEventListener('click',async()=>{
     if(editorIsStandalone()) return;
-    const original=btn.textContent;
-    btn.disabled=true;
-    btn.textContent='PREPARANT…';
-    const prompt=await waitForEditorInstallPrompt();
-    btn.disabled=false;
-    btn.textContent=original;
-
-    if(prompt){
-      try{
-        await prompt.prompt();
-        const choice=await prompt.userChoice;
-        editorDeferredPrompt=null;
-        window.__editorInstallPrompt=null;
-        if(choice?.outcome==='accepted'){
-          btn.hidden=true;
-          showToast('EDITOR instal·lat');
-        }else{
-          syncEditorInstallButton();
-        }
-        return;
-      }catch(error){
-        console.warn('No s’ha pogut obrir el prompt d’instal·lació',error);
+    const prompt=editorDeferredPrompt || window.__editorInstallPrompt;
+    if(!prompt){ syncEditorInstallButton(); return; }
+    try{
+      await prompt.prompt();
+      const choice=await prompt.userChoice;
+      editorDeferredPrompt=null;
+      window.__editorInstallPrompt=null;
+      if(choice?.outcome==='accepted'){
+        btn.hidden=true;
+        showToast('EDITOR instal·lat');
+      }else{
+        syncEditorInstallButton();
       }
+    }catch(error){
+      console.warn('No s’ha pogut obrir el prompt d’instal·lació',error);
+      syncEditorInstallButton();
     }
-    showEditorInstallHelp();
   });
 
   $('#closeEditorInstallHelp')?.addEventListener('click',()=>{$('#editorInstallHelp').hidden=true;});
@@ -910,7 +902,7 @@ function bindEditorPwaInstall(){
 function registerEditorSW(){
   if(location.protocol==='file:') return;
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'})
+    navigator.serviceWorker.register('editor/sw.js',{scope:'./editor/',updateViaCache:'none'})
       .then(reg=>reg.update().catch(()=>{}))
       .catch(()=>{});
   }

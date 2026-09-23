@@ -1,19 +1,27 @@
-BANDA DE LA CALA — PATCH v0.16 → v0.17
+BANDA DE LA CALA · PATCH v0.17 → v0.18
 
-SOBRESCRIBIR EN GITHUB:
+SOBRESCRIURE A L'ARREL:
 - editor.html
 - editor.js
-- editor-manifest.webmanifest
 - version.js
 - sw.js
 
+AFEGIR CARPETA NOVA:
+- editor/
+  - index.html
+  - manifest.webmanifest
+  - sw.js
+
 NO TOCAR:
-- index.html / app.js / style.css
 - data/content-published.js
 - assets/
-- configuració de Supabase
+- Supabase
+- config.js
+- app.js / style.css / index.html
 
-CAMBIO PRINCIPAL:
-El botón INSTAL·LAR EDITOR captura el prompt de instalación desde el primer instante de carga y abre directamente el diálogo nativo de Chrome/Edge cuando el navegador lo ofrece.
+URL CANÒNICA NOVA DEL EDITOR:
+https://viandavisual.github.io/BANDADELACALA/editor/
 
-Después de subir el patch, abre /BANDADELACALA/editor y haz una recarga completa una vez para activar el nuevo Service Worker/manifest.
+IMPORTANT:
+Després de pujar el PATCH, obre directament /editor/ (amb la barra final).
+El botó d'instal·lació només s'activa quan Chrome confirma que la PWA és instal·lable; quan s'activa, un clic obre el diàleg natiu.

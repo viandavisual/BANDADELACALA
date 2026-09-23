@@ -1,1 +1,1 @@
-globalThis.BANDA_VERSION = 'v0.17';
+window.BANDA_VERSION = 'v0.18';

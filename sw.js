@@ -1,10 +1,14 @@
-// BANDA DE LA CALA v0.17
+// BANDA DE LA CALA v0.18
 importScripts('./version.js');
 const CACHE = `banda-de-la-cala-${globalThis.BANDA_VERSION || 'dev'}`;
 const CORE = [
   './',
   './index.html',
   './editor.html',
+  './editor/',
+  './editor/index.html',
+  './editor/manifest.webmanifest',
+  './editor/sw.js',
   './editor.css',
   './editor.js',
   './editor-manifest.webmanifest',
