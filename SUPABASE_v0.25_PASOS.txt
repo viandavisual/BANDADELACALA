@@ -1,0 +1,19 @@
+BANDA DE LA CALA · SUPABASE v0.25
+
+1. SQL EDITOR
+- Obre SUPABASE_UPDATE_v0.25.sql.
+- Copia-ho tot a Supabase > SQL Editor > New query > RUN.
+- Aquest update habilita que cada USER autenticat pugui modificar NOM + AVATAR, però només aquestes dues columnes.
+
+2. EDGE FUNCTION create-band-user
+- Supabase > Edge Functions > create-band-user.
+- Substitueix el codi pel contingut complet de EDGE_FUNCTION_CREATE_USER_v0.25.ts.
+- Torna a DEPLOY.
+- La funció continua reservada a ADMIN/GESTOR, envia la invitació de validació i fixa la contrasenya temporal que l'EDITOR mostra per copiar.
+
+3. AVATAR 1
+- Guarda el JPG quadrat a: assets/avatar/avatar1.jpg
+
+4. GITHUB
+- Puja el PATCH v0.24 -> v0.25.
+- No canviïs els IDs/scopes/manifests PWA de la v0.23: la v0.25 conserva el sistema INSTALL estable.

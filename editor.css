@@ -123,3 +123,25 @@ body{background:linear-gradient(145deg,#c69237 0%,#d4ac5f 45%,#e2c277 100%)!impo
 .historic-download-btn{position:absolute;right:4px;bottom:4px;width:27px;height:27px;border:1px solid rgba(255,255,255,.72);border-radius:50%;background:rgba(28,28,34,.78);color:#fff;display:grid;place-items:center;font-size:.9rem;font-weight:950;padding:0;box-shadow:0 3px 10px rgba(0,0,0,.2)}.historic-download-btn:hover{background:#393a86}
 .historic-editor-item{grid-template-columns:132px 1fr auto!important}
 @media(max-width:620px){.historic-editor-item{grid-template-columns:96px 1fr!important}.historic-thumb-wrap,.historic-thumb-grid{width:96px}.historic-thumb-grid{height:78px}.historic-editor-item .list-actions{grid-column:1/-1}}
+
+
+/* v0.25 · PREVIEW HOME real per dispositiu + HISTÒRIC per tandes */
+.home-editor-grid{align-items:start}.exact-home-preview-card{min-width:0}.exact-home-preview-card #homePreviewMode{font-size:.86rem;letter-spacing:.015em;margin:3px 0 0;color:var(--editor-page-gold-dark)}
+.app-home-preview-hero{position:relative;isolation:isolate;min-height:300px;padding:clamp(28px,4vw,54px);border:1px solid rgba(73,58,35,.10);border-radius:32px;background:#fff;box-shadow:0 10px 28px rgba(73,58,35,.08);display:grid;grid-template-columns:1fr;align-items:center;overflow:hidden;margin:14px -22px 0}
+.app-home-preview-media{position:absolute;z-index:0;left:48%;right:0;top:0;bottom:0;overflow:hidden;background:none}
+.app-home-preview-image{position:absolute;z-index:0;left:-7%;top:-9%;width:114%;height:118%;max-width:none;object-fit:cover;object-position:center center;opacity:1;transform-origin:center center;pointer-events:none;animation:editorExactHeroDesktop 18s ease-in-out infinite alternate}
+.app-home-preview-overlay{position:absolute;z-index:1;inset:0;pointer-events:none;background:linear-gradient(90deg,#fff 0%,#fff 43%,rgba(255,255,255,1) 48%,rgba(255,255,255,.97) 51%,rgba(255,255,255,.78) 55%,rgba(255,255,255,.40) 60%,rgba(255,255,255,.12) 65%,rgba(255,255,255,0) 70%)}
+.app-home-preview-copy{position:relative;z-index:2;min-width:0}.app-home-preview-copy .eyebrow{color:var(--gold-deep)}.app-home-preview-copy h3{font-size:clamp(2.35rem,6vw,5.5rem);line-height:.9;margin:8px 0 13px;letter-spacing:-.055em;max-width:780px;color:var(--ink)}.app-home-preview-copy p{max-width:630px;color:var(--muted);font-size:clamp(1rem,1.7vw,1.18rem);margin:0}.exact-preview-note{display:block;margin-top:10px;color:var(--muted);font-size:.68rem;line-height:1.45}
+@keyframes editorExactHeroDesktop{0%{transform:scale(1.08) translate3d(-1.4%,.5%,0)}50%{transform:scale(1.12) translate3d(.8%,-.6%,0)}100%{transform:scale(1.09) translate3d(1.4%,.4%,0)}}
+.history-batch-help{margin-top:-4px}.history-preview-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}.history-preview-actions small{margin:0!important}.history-preview-actions .ghost-btn{padding:7px 9px;font-size:.58rem;white-space:nowrap}
+@media(max-width:780px){
+  .app-home-preview-hero{min-height:470px;display:flex;align-items:flex-end;padding:0 20px 24px;border-radius:24px;margin-left:-22px;margin-right:-22px}
+  .app-home-preview-media{left:0;right:0;top:0;bottom:auto;width:100%;height:58%}
+  .app-home-preview-image{inset:-9%;left:-9%;top:-9%;width:118%;height:118%;object-fit:cover;object-position:center;animation:editorExactHeroMobile 18s ease-in-out infinite alternate}
+  .app-home-preview-overlay{background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0) 48%,rgba(255,255,255,.34) 66%,rgba(255,255,255,.88) 84%,#fff 100%)}
+  .app-home-preview-copy{width:100%}.app-home-preview-copy h3{font-size:clamp(2.15rem,11vw,3.45rem);max-width:100%;margin:7px 0 10px}.app-home-preview-copy p{max-width:100%;font-size:.92rem;line-height:1.45}
+  .history-preview-actions{align-items:flex-start;flex-direction:column}.history-preview-actions .ghost-btn{width:100%}
+}
+@keyframes editorExactHeroMobile{0%{transform:scale(1.02) translate3d(-2.5%,1%,0)}50%{transform:scale(1.08) translate3d(1%,-1%,0)}100%{transform:scale(1.04) translate3d(2.5%,.5%,0)}}
+
+@media(max-width:520px){.app-home-preview-hero{margin-left:-16px;margin-right:-16px}}

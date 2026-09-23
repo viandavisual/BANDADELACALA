@@ -1,0 +1,8 @@
+BANDA DE LA CALA · v0.25
+
+- Fix canvi de nom i avatar USER amb UPDATE propi protegit per RLS.
+- Fix ruta real de avatar1.jpg des de /app/.
+- Alta ADMIN/GESTOR de STANDARD/GESTOR reforçada: contrasenya temporal generada de forma robusta + Edge Function v0.25.
+- HISTÒRIC: selector multifoto acumulatiu; es poden afegir diverses tandes abans de desar una sola entrada.
+- EDITOR > HOME: previsualització responsive que replica la capçalera real de l'APP en DESKTOP/MOBILE segons el dispositiu actual.
+- INSTALL PWA: arquitectura v0.23 preservada (IDs/scopes/flux sense canvis funcionals).

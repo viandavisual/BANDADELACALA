@@ -1,4 +1,4 @@
-// PWA INSTALL v0.24 — patró estable de Disturbing Stories App.
+// PWA INSTALL v0.25 — patró estable de Disturbing Stories App.
 let editorInstallPrompt = null;
 function captureEditorInstallPrompt(event){
   event.preventDefault();
@@ -111,7 +111,7 @@ function save(next=content,message='Canvis desats'){
     return false;
   }
 }
-function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.24'); }
+function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.25'); }
 function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
@@ -125,8 +125,9 @@ function renderDashboard(){
 
 function renderHomeEditor(){
   const src=content.settings?.homeHeroImage || CFG.logo || 'assets/brand/logo-banda-de-la-cala.png';
-  $('#homeHeroPreview').src=src;
-  const preview=$('.hero-preview'); if(preview) preview.style.setProperty('--hero-preview-image',`url(${JSON.stringify(src)})`);
+  const previewImage=$('#homeHeroPreview'); if(previewImage) previewImage.src=src;
+  const mode=$('#homePreviewMode');
+  if(mode) mode.textContent=window.matchMedia('(max-width: 780px)').matches?'MOBILE · MATEIXA COMPOSICIÓ DE L’APP':'DESKTOP · MATEIXA COMPOSICIÓ DE L’APP';
 }
 async function compressImage(file){
   const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});
@@ -135,6 +136,12 @@ async function compressImage(file){
   canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height); return canvas.toDataURL('image/jpeg',0.84);
 }
 function bindHomeEditor(){
+  try{
+    const mq=window.matchMedia('(max-width: 780px)');
+    const syncPreviewMode=()=>renderHomeEditor();
+    if(mq.addEventListener) mq.addEventListener('change',syncPreviewMode);
+    else if(mq.addListener) mq.addListener(syncPreviewMode);
+  }catch(_error){}
   $('#homeHeroFile').addEventListener('change',async event=>{
     const file=event.target.files?.[0]; if(!file) return;
     try{
@@ -515,14 +522,31 @@ function bindHistoric(){
   $('#historicYear').addEventListener('input',autoHistoricPeriodFromYear);
   $('#historicImageFile').addEventListener('change',async event=>{
     const files=[...(event.target.files||[])];
-    pendingHistoricImages=[];
     if(!files.length){ renderHistoricFormPreview(); return; }
+    const added=[];
     try{
       showToast(`Preparant ${files.length} ${files.length===1?'fotografia':'fotografies'}…`);
-      for(const file of files) pendingHistoricImages.push(await compressHistoricImage(file));
+      for(const file of files){
+        const compressed=await compressHistoricImage(file);
+        pendingHistoricImages.push(compressed);
+        added.push(compressed);
+      }
       renderHistoricFormPreview();
-      showToast(`${files.length} ${files.length===1?'fotografia preparada':'fotografies preparades'}`);
-    }catch(error){ console.error(error); pendingHistoricImages=[]; renderHistoricFormPreview(); showToast('No s’han pogut processar les fotografies'); }
+      showToast(`${files.length} ${files.length===1?'fotografia afegida':'fotografies afegides'} · ${pendingHistoricImages.length} pendents de desar`);
+    }catch(error){
+      console.error(error);
+      if(added.length) pendingHistoricImages.splice(Math.max(0,pendingHistoricImages.length-added.length),added.length);
+      renderHistoricFormPreview();
+      showToast('No s’han pogut processar totes les fotografies');
+    }finally{
+      // Permet tornar a obrir el selector i afegir una altra tanda abans de DESAR ENTRADA.
+      event.target.value='';
+    }
+  });
+  $('#clearPendingHistoricImages')?.addEventListener('click',()=>{
+    pendingHistoricImages=[];
+    renderHistoricFormPreview();
+    showToast('Fotografies noves descartades');
   });
   $('#historicForm').addEventListener('submit',async event=>{
     event.preventDefault();
@@ -694,15 +718,20 @@ function bindUsers(){
     $('#temporaryPasswordBox').hidden=true;
     try{
       const result=await BandaSupabase.createManagedUser({name,email,role});
-      $('#temporaryPasswordValue').textContent=result.temporaryPassword||'—';
+      const temporaryPassword=String(result.temporaryPassword||'').trim();
+      if(!temporaryPassword) throw new Error('TEMPORARY_PASSWORD_MISSING');
+      $('#temporaryPasswordValue').textContent=temporaryPassword;
       $('#temporaryPasswordBox').hidden=false;
-      status.textContent='Usuari creat. La invitació s’ha enviat per email.';
+      status.textContent='Usuari creat correctament. Invitació enviada i contrasenya temporal preparada.';
       $('#newUserName').value=''; $('#newUserEmail').value=''; $('#newUserRole').value='standard';
       await loadUsers();
     }catch(error){
       console.error(error);
-      const message=error?.message||'No s’ha pogut crear l’usuari.';
-      status.textContent=message.includes('rate')?'Límit temporal d’emails de Supabase. Espera una estona o configura SMTP propi.':message;
+      const message=String(error?.message||'No s’ha pogut crear l’usuari.');
+      if(/rate|limit/i.test(message)) status.textContent='Límit temporal d’emails de Supabase. No s’ha creat el compte; torna-ho a provar més tard o configura SMTP propi.';
+      else if(/already|registered|exists/i.test(message)) status.textContent='Aquest email ja existeix a Supabase Auth. Utilitza un altre email o revisa l’usuari existent.';
+      else if(/function|404|not found/i.test(message)) status.textContent='La funció create-band-user no està desplegada/actualitzada. Desplega la versió v0.25 inclosa al paquet.';
+      else status.textContent=`ERROR: ${message}`;
     }finally{btn.disabled=false;}
   });
   $('#copyTemporaryPassword')?.addEventListener('click',async()=>{
@@ -912,7 +941,7 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.24',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.25',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

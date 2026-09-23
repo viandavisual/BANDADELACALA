@@ -1,7 +1,9 @@
 BANDA DE LA CALA · AVATARS
 
-Guarda el primer avatar cuadrado en esta carpeta con el nombre exacto:
+Primer avatar:
+assets/avatar/avatar1.jpg
 
-avatar1.jpg
+Format recomanat: JPG quadrat (1:1).
+L'APP v0.25 utilitza la base del projecte, de manera que aquesta ruta és correcta tant al navegador com a la PWA instal·lada.
 
-La APP v0.24 lo detecta mediante esa ruta.
+Futurs avatars: avatar2.jpg, avatar3.jpg, etc.

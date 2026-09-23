@@ -1,4 +1,4 @@
-// PWA INSTALL v0.24 — patró estable de Disturbing Stories App.
+// PWA INSTALL v0.25 — patró estable de Disturbing Stories App.
 let appInstallPrompt = null;
 function captureAppInstallPrompt(event){
   event.preventDefault();
@@ -108,7 +108,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.24');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.25');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
@@ -882,7 +882,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.24',root).href;
+    const swUrl=new URL('app/sw.js?v=0.25',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

@@ -71,25 +71,55 @@
     return (result.data||[]).map(row=>({...row,avatar_key:row.avatar_key||''}));
   }
 
+  function temporaryPassword(length=16){
+    const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@$%';
+    const random=new Uint32Array(length);
+    crypto.getRandomValues(random);
+    return Array.from(random,n=>chars[n%chars.length]).join('');
+  }
+
+  async function functionsErrorMessage(error){
+    try{
+      const response=error?.context;
+      if(response?.clone){
+        const clone=response.clone();
+        const detail=await clone.json().catch(()=>null);
+        if(detail?.error) return String(detail.error);
+        if(detail?.message) return String(detail.message);
+      }
+    }catch(_error){}
+    return String(error?.message||'EDGE_FUNCTION_ERROR');
+  }
+
   async function createManagedUser({name,email,role}){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     if(!['gestor','standard'].includes(role)) throw new Error('ROLE_NOT_ALLOWED');
-    const {data,error}=await c.functions.invoke('create-band-user',{body:{name,email,role}});
-    if(error){
-      try{ const detail=await error.context?.json?.(); if(detail?.error) throw new Error(detail.error); }catch(parsed){ if(parsed instanceof Error && parsed.message!==error.message) throw parsed; }
-      throw error;
-    }
-    if(data?.error) throw new Error(data.error);
-    return data;
+    const generatedPassword=temporaryPassword();
+    const {data,error}=await c.functions.invoke('create-band-user',{body:{name,email,role,temporaryPassword:generatedPassword}});
+    if(error) throw new Error(await functionsErrorMessage(error));
+    if(data?.error) throw new Error(String(data.error));
+    if(!data?.ok) throw new Error('USER_NOT_CREATED');
+    return {...data,temporaryPassword:data.temporaryPassword||generatedPassword};
   }
-
 
   async function updateOwnProfile({name,avatarKey}){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     const cleanName=String(name||'').trim();
     const cleanAvatar=String(avatarKey||'').trim();
-    const {error}=await c.rpc('update_own_banda_profile',{p_name:cleanName,p_avatar_key:cleanAvatar || null});
+    if(!cleanName) throw new Error('INVALID_NAME');
+    const currentSession=await session();
+    if(!currentSession) throw new Error('AUTH_REQUIRED');
+
+    // v0.25: actualització directa protegida per RLS + permisos de columna.
+    // Això evita dependre d'una RPC antiga/desplegada de forma incompleta.
+    const {error}=await c.from('profiles').update({
+      name:cleanName,
+      avatar_key:cleanAvatar||null
+    }).eq('user_id',currentSession.user.id);
     if(error) throw error;
+
+    // Metadades només com a còpia de conveniència; els permisos continuen depenent de profiles.role.
+    try{ await c.auth.updateUser({data:{name:cleanName,avatar_key:cleanAvatar||null}}); }catch(_error){}
     return await getMyProfile();
   }
 

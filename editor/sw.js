@@ -1,5 +1,5 @@
-// BANDA DE LA CALA · EDITOR v0.24 · scope /editor/
-const CACHE='banda-de-la-cala-editor-v0.24';
+// BANDA DE LA CALA · EDITOR v0.25 · scope /editor/
+const CACHE='banda-de-la-cala-editor-v0.25';
 const PREFIX='banda-de-la-cala-editor-';
 const CORE=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','../editor.css','../editor.js','../version.js','../config.js','../content-store.js','../supabase-client.js','../data/content-published.js','../assets/brand/editor-icon.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>Promise.allSettled(CORE.map(url=>cache.add(url)))).then(()=>self.skipWaiting()))});
