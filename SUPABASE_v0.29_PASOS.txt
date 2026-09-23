@@ -1,0 +1,50 @@
+BANDA DE LA CALA · v0.29 · ALTA DE USERS PER INVITACIÓ
+=======================================================
+
+OBJECTIU
+--------
+A partir de v0.29 l'EDITOR NO genera cap contrasenya temporal.
+El nou USER rep una invitació per email i és ell mateix qui defineix
+la seva contrasenya privada en obrir l'enllaç.
+
+NO CAL EXECUTAR CAP SQL NOU.
+NO CAL CANVIAR EL SMTP que ja funciona.
+NO CAL TOCAR els manifests/IDs PWA.
+
+PAS ÚNIC A SUPABASE
+-------------------
+1. Supabase -> Edge Functions -> create-band-user.
+2. Substitueix el codi actual pel contingut complet de:
+   EDGE_FUNCTION_CREATE_USER_v0.29.ts
+3. DEPLOY.
+
+També s'inclou create-band-user-edge-function.zip amb index.ts.
+
+FLUX NOU
+--------
+ADMIN/GESTOR -> EDITOR -> USUARIS -> CREAR USUARI
+      -> Supabase envia INVITACIÓ per email
+      -> USER obre l'enllaç
+      -> APP s'obre directament a USER amb sessió iniciada
+      -> apareix COMPTE NOU
+      -> USER escriu dues vegades la contrasenya que ell vulgui
+      -> DESAR CONTRASENYA
+      -> compte preparat
+
+IMPORTANT
+---------
+La plantilla que intervé ara és Authentication -> Email Templates -> Invite user.
+Ha de conservar un enllaç basat en {{ .ConfirmationURL }}.
+El redirect de la funció és:
+https://viandavisual.github.io/BANDADELACALA/app/?view=user&setup=password
+
+Si existeix un compte NO CONFIRMAT del mateix email d'una prova anterior,
+la funció v0.29 el reinicia abans d'enviar una invitació nova.
+Un compte ja confirmat NO es reemplaça i retorna EMAIL_ALREADY_REGISTERED.
+
+SEGURETAT
+---------
+- ADMIN continua sense ser assignable des del formulari.
+- Només es poden crear GESTOR o STANDARD.
+- STANDARD continua sense poder entrar mai a l'EDITOR.
+- La contrasenya del nou USER no passa mai per l'EDITOR ni pels GESTORS.

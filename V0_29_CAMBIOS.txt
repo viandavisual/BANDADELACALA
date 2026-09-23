@@ -1,0 +1,16 @@
+BANDA DE LA CALA · v0.29
+========================
+
+- Alta de nous USERS redissenyada como invitació.
+- Eliminada completament la contrasenya temporal del flux d'alta.
+- ADMIN/GESTOR només introdueix NOM + EMAIL + GESTOR/STANDARD.
+- Supabase inviteUserByEmail envia la invitació oficial.
+- L'enllaç obre APP -> USER i el nou USER defineix la seva pròpia contrasenya.
+- El bloc CONTRASENYA s'obre automàticament quan must_change_password=true.
+- Nou missatge COMPTE NOU explicant que la contrasenya és privada.
+- Després de desar-la, must_change_password passa a false i l'avís desapareix.
+- El llistat de l'EDITOR mostra PENDENT DE CONFIGURAR en comptes de CONTRASENYA TEMPORAL.
+- Els comptes pendents antics poden reiniciar-se automàticament en tornar-los a crear.
+- Es manté intacte el sistema d'eliminació de USERS de v0.28.
+- No hi ha SQL nou.
+- PWA INSTALL preservat: manifests, IDs i scopes no es modifiquen.

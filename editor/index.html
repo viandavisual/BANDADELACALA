@@ -14,7 +14,7 @@
   <link rel="manifest" href="editor/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="editor/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="editor/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="editor.css?v=0.28" />
+  <link rel="stylesheet" href="editor.css?v=0.29" />
 </head>
 <body>
   <section id="editorLoginGate" class="editor-login-gate" aria-label="Accés a l'Editor">
@@ -231,17 +231,12 @@
           <form id="createUserForm" class="editor-card form-card">
             <div class="card-head"><div><span class="eyebrow">USUARIS</span><h2>Nou usuari</h2></div></div>
             <p class="helper-copy">Crea comptes només per a persones autoritzades de la banda. El rol ADMIN no es pot assignar des d’aquest formulari.</p>
+            <div class="user-invite-flow"><strong>ALTA PER INVITACIÓ</strong><span>El nou usuari rebrà un email. En obrir-lo entrarà a l’APP i triarà personalment la seva contrasenya. L’EDITOR no genera ni mostra contrasenyes.</span></div>
             <label>Nom<input id="newUserName" required maxlength="120" placeholder="Nom del músic" /></label>
             <label>Email<input id="newUserEmail" type="email" required autocomplete="off" placeholder="nom@email.com" /></label>
             <label>Categoria<select id="newUserRole" required><option value="standard">USER STANDARD</option><option value="gestor">USER GESTOR</option></select></label>
             <div class="form-actions"><button id="createUserBtn" type="submit" class="primary-btn">CREAR USUARI</button></div>
             <small id="createUserStatus" class="user-create-status"></small>
-            <div id="temporaryPasswordBox" class="temporary-password-box" hidden>
-              <span class="eyebrow">CONTRASENYA TEMPORAL</span>
-              <strong id="temporaryPasswordValue">—</strong>
-              <p>Es mostra només ara. Copia-la i envia-la privadament al nou usuari.</p>
-              <button id="copyTemporaryPassword" type="button" class="secondary-btn">COPIAR CONTRASENYA</button>
-            </div>
           </form>
           <div class="editor-card list-card">
             <div class="card-head"><div><span class="eyebrow">USUARIS</span><h2>Comptes</h2></div><span class="count-pill" id="usersCount">0</span></div>
@@ -273,12 +268,12 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="version.js?v=0.28"></script>
-  <script src="config.js?v=0.28"></script>
-  <script src="data/content-published.js?v=0.28"></script>
-  <script src="content-store.js?v=0.28"></script>
+  <script src="version.js?v=0.29"></script>
+  <script src="config.js?v=0.29"></script>
+  <script src="data/content-published.js?v=0.29"></script>
+  <script src="content-store.js?v=0.29"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.28"></script>
-  <script src="editor.js?v=0.28"></script>
+  <script src="supabase-client.js?v=0.29"></script>
+  <script src="editor.js?v=0.29"></script>
 </body>
 </html>

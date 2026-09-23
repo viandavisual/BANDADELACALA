@@ -435,7 +435,7 @@ button,a,input{touch-action:manipulation}
 .user-profile-head{display:flex;align-items:center;gap:15px;padding-bottom:18px;border-bottom:1px solid var(--line)}
 .user-profile-head h3{margin:2px 0 3px;font-size:1.55rem}.user-profile-head p{margin:0;color:var(--muted)}
 .user-avatar-mark{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:var(--gold-soft);color:var(--gold-deep);font-size:1.8rem;box-shadow:inset 0 0 0 1px rgba(212,172,95,.28)}
-.temporary-password-notice{margin:16px 0 0;padding:12px 14px;border-radius:13px;background:var(--gold-soft);border:1px solid rgba(212,172,95,.4);color:var(--ink);font-size:.82rem;font-weight:800}
+.password-setup-notice{margin:16px 0 0;padding:12px 14px;border-radius:13px;background:linear-gradient(135deg,var(--gold-soft),#fff);border:1px solid rgba(212,172,95,.55);color:var(--ink);display:grid;gap:4px}
 .change-password-form{margin-top:20px;padding-top:2px}.change-password-form h4{margin:2px 0 4px;font-size:1.08rem}
 .user-logout-btn{margin-top:20px;width:100%;min-height:44px;border:1px solid rgba(160,42,42,.25);border-radius:13px;background:#fff;color:#a02a2a;font-weight:900;letter-spacing:.04em}
 .icon-user{animation:userIconFloat 2.4s ease-in-out infinite}@keyframes userIconFloat{50%{transform:translateY(-1.4px)}}
@@ -575,3 +575,8 @@ button,a,input{touch-action:manipulation}
 @media(max-width:780px){
   .history-period.is-collapsed .history-period-head{min-height:62px;padding-top:15px!important;padding-bottom:15px!important}
 }
+
+
+/* v0.29 · alta per invitació: l'usuari defineix la seva pròpia contrasenya */
+.password-setup-notice strong{font-size:.68rem;letter-spacing:.10em;color:var(--gold-deep)}
+.password-setup-notice span{font-size:.82rem;line-height:1.45;font-weight:780}

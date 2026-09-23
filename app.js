@@ -700,8 +700,11 @@ function renderUserSection(){
   const nameInput=$('#profileDisplayName'); if(nameInput) nameInput.value=currentUserDisplayName();
   renderAvatarChoices();
   renderUserAvatar();
-  const temp=$('#temporaryPasswordNotice');
-  if(temp) temp.hidden=!state.profile?.must_change_password;
+  const needsPassword=!!state.profile?.must_change_password;
+  const temp=$('#passwordSetupNotice');
+  if(temp) temp.hidden=!needsPassword;
+  const passwordDetails=$('#passwordDetails');
+  if(passwordDetails && needsPassword) passwordDetails.open=true;
 }
 
 async function reloadAuthAwareContent(){
@@ -777,13 +780,15 @@ function bindUserAuth(){
     const repeat=$('#repeatUserPassword').value;
     if(password.length<8){status.textContent='La contrasenya ha de tenir almenys 8 caràcters.';return;}
     if(password!==repeat){status.textContent='Les dues contrasenyes no coincideixen.';return;}
-    status.textContent='Canviant contrasenya…';
+    const initialSetup=!!state.profile?.must_change_password;
+    status.textContent=initialSetup?'Configurant la teva contrasenya…':'Canviant contrasenya…';
     try{
       await BandaSupabase.updatePassword(password);
       $('#newUserPassword').value=''; $('#repeatUserPassword').value='';
       state.profile=await BandaSupabase.getMyProfile();
       renderUserSection();
-      status.textContent='Contrasenya actualitzada correctament.';
+      const details=$('#passwordDetails'); if(details) details.open=false;
+      status.textContent=initialSetup?'Contrasenya creada correctament. El teu compte ja està preparat.':'Contrasenya actualitzada correctament.';
     }catch(error){ console.error(error); status.textContent='No s’ha pogut canviar la contrasenya.'; }
   });
 }

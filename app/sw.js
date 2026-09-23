@@ -1,5 +1,5 @@
-// BANDA DE LA CALA · APP v0.28 · scope /app/
-const CACHE='banda-de-la-cala-app-v0.28';
+// BANDA DE LA CALA · APP v0.29 · scope /app/
+const CACHE='banda-de-la-cala-app-v0.29';
 const PREFIX='banda-de-la-cala-app-';
 const CORE=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','../version.js','../style.css','../app.js','../config.js','../content-store.js','../supabase-client.js','../data/content-published.js','../assets/brand/logo-banda-de-la-cala.png','../assets/brand/app-icon.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>Promise.allSettled(CORE.map(url=>cache.add(url)))).then(()=>self.skipWaiting()))});

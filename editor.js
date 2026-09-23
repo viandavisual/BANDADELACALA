@@ -770,7 +770,7 @@ function renderUsers(){
   $('#usersCount').textContent=userProfiles.length;
   list.innerHTML=userProfiles.length?userProfiles.map(profile=>{
     const deleteBtn=canDeleteUserProfile(profile)?`<button class="tiny-btn delete" data-delete-user="${esc(profile.user_id)}" title="Eliminar usuari" aria-label="Eliminar ${esc(profile.name||profile.email||'usuari')}">×</button>`:'';
-    return `<article class="list-item user-list-item"><div class="list-main"><div class="list-kicker"><span>${esc(roleEditorLabel(profile.role))}</span>${profile.must_change_password?'<span>·</span><span class="gold-note">CONTRASENYA TEMPORAL</span>':''}</div><h3>${esc(profile.name||'Sense nom')}</h3><p>${esc(profile.email||'')}</p></div>${deleteBtn?`<div class="list-actions">${deleteBtn}</div>`:''}</article>`;
+    return `<article class="list-item user-list-item"><div class="list-main"><div class="list-kicker"><span>${esc(roleEditorLabel(profile.role))}</span>${profile.must_change_password?'<span>·</span><span class="gold-note">PENDENT DE CONFIGURAR</span>':''}</div><h3>${esc(profile.name||'Sense nom')}</h3><p>${esc(profile.email||'')}</p></div>${deleteBtn?`<div class="list-actions">${deleteBtn}</div>`:''}</article>`;
   }).join(''):'<div class="empty-state">Encara no hi ha usuaris.</div>';
   $$('[data-delete-user]').forEach(btn=>btn.onclick=()=>deleteManagedUserFromEditor(btn.dataset.deleteUser));
 }
@@ -815,16 +815,11 @@ function bindUsers(){
     const status=$('#createUserStatus'), btn=$('#createUserBtn');
     if(!name||!email||!['gestor','standard'].includes(role)){status.textContent='Revisa les dades del nou usuari.';return;}
     status.textContent='Creant usuari i enviant invitació…'; btn.disabled=true;
-    $('#temporaryPasswordBox').hidden=true;
     try{
       const result=await BandaSupabase.createManagedUser({name,email,role});
-      const temporaryPassword=String(result.temporaryPassword||'').trim();
-      if(!temporaryPassword) throw new Error('TEMPORARY_PASSWORD_MISSING');
-      $('#temporaryPasswordValue').textContent=temporaryPassword;
-      $('#temporaryPasswordBox').hidden=false;
-      status.textContent=result.recoveredPendingUser
-        ? 'Usuari pendent recuperat. Nova invitació enviada i nova contrasenya temporal preparada.'
-        : 'Usuari creat correctament. Invitació enviada i contrasenya temporal preparada.';
+      status.textContent=result.replacedPendingUser
+        ? 'Compte pendent reiniciat. S’ha enviat una nova invitació perquè l’usuari triï la seva contrasenya.'
+        : 'Usuari creat correctament. Invitació enviada: l’usuari triarà la seva pròpia contrasenya.';
       $('#newUserName').value=''; $('#newUserEmail').value=''; $('#newUserRole').value='standard';
       await loadUsers();
     }catch(error){
@@ -833,15 +828,9 @@ function bindUsers(){
       if(/rate|limit/i.test(message)) status.textContent='Límit temporal d’emails de Supabase. No s’ha creat el compte; torna-ho a provar més tard o configura SMTP propi.';
       else if(/EMAIL_ALREADY_REGISTERED|already registered/i.test(message)) status.textContent='Aquest email ja correspon a un usuari confirmat. Revisa el compte existent.';
       else if(/already|exists/i.test(message)) status.textContent='Aquest email ja existeix a Supabase Auth. Revisa l’usuari existent.';
-      else if(/function|404|not found/i.test(message)) status.textContent='La funció create-band-user no està desplegada/actualitzada. Desplega la versió v0.28 inclosa al paquet.';
+      else if(/function|404|not found/i.test(message)) status.textContent='La funció create-band-user no està desplegada/actualitzada. Desplega la versió v0.29 inclosa al paquet.';
       else status.textContent=`ERROR: ${message}`;
     }finally{btn.disabled=false;}
-  });
-  $('#copyTemporaryPassword')?.addEventListener('click',async()=>{
-    const value=$('#temporaryPasswordValue')?.textContent||'';
-    if(!value||value==='—') return;
-    try{await navigator.clipboard.writeText(value);showToast('Contrasenya temporal copiada');}
-    catch(_error){showToast('No s’ha pogut copiar automàticament');}
   });
 }
 

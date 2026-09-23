@@ -14,7 +14,7 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.28" />
+  <link rel="stylesheet" href="style.css?v=0.29" />
 </head>
 <body>
   <section id="startScreen" class="screen start-screen active" aria-label="Inici">
@@ -189,7 +189,7 @@
           <section id="userLoginCard" class="panel user-auth-card">
             <span class="eyebrow">ACCÉS DE MÚSICS</span>
             <h3>Inicia sessió</h3>
-            <p>Utilitza l’email i la contrasenya que t’ha facilitat la Banda de la Cala.</p>
+            <p>Utilitza l’email i la contrasenya que has configurat. Si és el teu primer accés, obre abans l’enllaç d’invitació que has rebut per email.</p>
             <form id="userLoginForm" class="user-login-form">
               <label>Email<input id="userLoginEmail" type="email" autocomplete="username" required /></label>
               <label>Contrasenya<input id="userLoginPassword" type="password" autocomplete="current-password" required /></label>
@@ -203,7 +203,7 @@
               <div class="user-avatar-mark"><img id="userProfileAvatar" alt="Avatar del perfil" hidden /><span id="userProfileAvatarFallback" aria-hidden="true">●</span></div>
               <div><span class="eyebrow" id="userProfileRole">USER</span><h3 id="userProfileName">Músic</h3><p id="userProfileEmail"></p></div>
             </div>
-            <div id="temporaryPasswordNotice" class="temporary-password-notice" hidden>Estàs utilitzant la contrasenya temporal. Canvia-la per una de privada.</div>
+            <div id="passwordSetupNotice" class="password-setup-notice" hidden><strong>COMPTE NOU</strong><span>Per completar l’alta, tria ara la contrasenya privada que vulguis utilitzar. Aquesta contrasenya només la coneixeràs tu.</span></div>
 
             <form id="avatarProfileForm" class="user-settings-box user-avatar-form">
               <div class="user-settings-title"><span class="eyebrow">AVATAR</span><h4>Foto de perfil</h4></div>
@@ -220,11 +220,11 @@
             </form>
 
             <details id="passwordDetails" class="user-settings-box user-password-details">
-              <summary><span><span class="eyebrow">CONTRASENYA</span><strong>Canviar contrasenya</strong></span><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+              <summary><span><span class="eyebrow">CONTRASENYA</span><strong>Definir / canviar contrasenya</strong></span><span class="details-chevron" aria-hidden="true">⌄</span></summary>
               <form id="changePasswordForm" class="change-password-form">
                 <label>Nova contrasenya<input id="newUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
                 <label>Repetir contrasenya<input id="repeatUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
-                <button class="user-password-btn" type="submit">CANVIAR CONTRASENYA</button>
+                <button class="user-password-btn" type="submit">DESAR CONTRASENYA</button>
                 <small id="changePasswordStatus" class="user-auth-status"></small>
               </form>
             </details>
@@ -274,12 +274,12 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.28"></script>
-  <script src="config.js?v=0.28"></script>
-  <script src="data/content-published.js?v=0.28"></script>
-  <script src="content-store.js?v=0.28"></script>
+  <script src="version.js?v=0.29"></script>
+  <script src="config.js?v=0.29"></script>
+  <script src="data/content-published.js?v=0.29"></script>
+  <script src="content-store.js?v=0.29"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.28"></script>
-  <script src="app.js?v=0.28"></script>
+  <script src="supabase-client.js?v=0.29"></script>
+  <script src="app.js?v=0.29"></script>
 </body>
 </html>

@@ -71,12 +71,7 @@
     return (result.data||[]).map(row=>({...row,avatar_key:row.avatar_key||''}));
   }
 
-  function temporaryPassword(length=16){
-    const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@$%';
-    const random=new Uint32Array(length);
-    crypto.getRandomValues(random);
-    return Array.from(random,n=>chars[n%chars.length]).join('');
-  }
+
 
   async function functionsErrorMessage(error){
     try{
@@ -94,12 +89,11 @@
   async function createManagedUser({name,email,role}){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     if(!['gestor','standard'].includes(role)) throw new Error('ROLE_NOT_ALLOWED');
-    const generatedPassword=temporaryPassword();
-    const {data,error}=await c.functions.invoke('create-band-user',{body:{name,email,role,temporaryPassword:generatedPassword}});
+    const {data,error}=await c.functions.invoke('create-band-user',{body:{name,email,role}});
     if(error) throw new Error(await functionsErrorMessage(error));
     if(data?.error) throw new Error(String(data.error));
     if(!data?.ok) throw new Error('USER_NOT_CREATED');
-    return {...data,temporaryPassword:data.temporaryPassword||generatedPassword};
+    return data;
   }
 
   async function deleteManagedUser(userId){
