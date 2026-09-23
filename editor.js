@@ -793,50 +793,126 @@ async function initEditorBackend(){
   }catch(error){ console.error(error); showEditorGate('No s’ha pogut connectar amb Supabase. Pots entrar en mode consulta.'); }
 }
 
-let editorDeferredPrompt = null;
+let editorDeferredPrompt = window.__editorInstallPrompt || null;
 
 function editorIsStandalone(){
   return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function syncEditorInstallButton(){
+  const btn=$('#editorInstallBtn');
+  if(!btn) return;
+  if(editorIsStandalone()){
+    btn.hidden=true;
+    return;
+  }
+  btn.hidden=false;
+  const ready=!!(editorDeferredPrompt || window.__editorInstallPrompt);
+  btn.classList.toggle('install-ready',ready);
+  btn.title=ready ? 'Instal·lar BANDA DE LA CALA · EDITOR' : 'Preparant instal·lació…';
 }
 
 function showEditorInstallHelp(){
   const modal=$('#editorInstallHelp'), text=$('#editorInstallHelpText');
   if(!modal||!text) return;
   const ua=navigator.userAgent;
-  if(/iPad|iPhone|iPod/.test(ua)) text.innerHTML='A Safari: prem <strong>Compartir</strong> → <strong>Afegir a la pantalla d’inici</strong>.';
-  else if(/Edg\//.test(ua)) text.innerHTML='A Edge: prem el menú <strong>⋯</strong> → <strong>Aplicacions</strong> → <strong>Instal·lar BANDA DE LA CALA · EDITOR</strong>.';
-  else if(/Chrome\//.test(ua)) text.innerHTML='A Chrome: busca la icona <strong>Instal·lar</strong> a la dreta de la barra d’adreces, o menú <strong>⋮</strong> → <strong>Instal·lar pàgina com a aplicació</strong>.';
-  else text.innerHTML='Obre el menú del navegador i tria <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.';
+  if(/iPad|iPhone|iPod/.test(ua)){
+    text.innerHTML='A Safari: prem <strong>Compartir</strong> → <strong>Afegir a la pantalla d’inici</strong>.';
+  }else if(/Edg\//.test(ua)){
+    text.innerHTML='Edge encara no ha ofert el diàleg automàtic. Prem <strong>⋯</strong> → <strong>Aplicacions</strong> → <strong>Instal·lar aquest lloc com una aplicació</strong>.';
+  }else if(/Chrome\//.test(ua)){
+    text.innerHTML='Chrome encara no ha ofert el diàleg automàtic. Prem <strong>⋮</strong> → <strong>Transmetre, desar i compartir</strong> → <strong>Instal·lar pàgina com a aplicació…</strong>. Si acabes d’actualitzar l’Editor, recarrega aquesta pàgina una vegada i torna a prémer <strong>INSTAL·LAR EDITOR</strong>.';
+  }else{
+    text.innerHTML='Aquest navegador no ha ofert la instal·lació automàtica. Utilitza la seva opció <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.';
+  }
   modal.hidden=false;
+}
+
+async function waitForEditorInstallPrompt(timeout=2600){
+  const existing=editorDeferredPrompt || window.__editorInstallPrompt;
+  if(existing) return existing;
+  try{
+    if('serviceWorker' in navigator) await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise(resolve=>setTimeout(resolve,900))
+    ]);
+  }catch(_error){}
+  const afterReady=editorDeferredPrompt || window.__editorInstallPrompt;
+  if(afterReady) return afterReady;
+  return await new Promise(resolve=>{
+    let done=false;
+    const finish=value=>{if(done)return;done=true;window.removeEventListener('editorinstallready',onReady);resolve(value);};
+    const onReady=()=>finish(window.__editorInstallPrompt || editorDeferredPrompt || null);
+    window.addEventListener('editorinstallready',onReady,{once:true});
+    setTimeout(()=>finish(null),timeout);
+  });
 }
 
 function bindEditorPwaInstall(){
   const btn=$('#editorInstallBtn');
   if(!btn) return;
-  btn.hidden=editorIsStandalone();
+
+  editorDeferredPrompt = window.__editorInstallPrompt || editorDeferredPrompt;
+  syncEditorInstallButton();
+
+  window.addEventListener('editorinstallready',()=>{
+    editorDeferredPrompt=window.__editorInstallPrompt || editorDeferredPrompt;
+    syncEditorInstallButton();
+  });
+
   window.addEventListener('beforeinstallprompt',event=>{
+    // Listener de seguretat per navegadors que emetin l'esdeveniment després de carregar editor.js.
     event.preventDefault();
     editorDeferredPrompt=event;
-    if(!editorIsStandalone()) btn.hidden=false;
+    window.__editorInstallPrompt=event;
+    syncEditorInstallButton();
   });
+
   btn.addEventListener('click',async()=>{
-    if(editorDeferredPrompt){
-      editorDeferredPrompt.prompt();
-      await editorDeferredPrompt.userChoice;
-      editorDeferredPrompt=null;
-      return;
+    if(editorIsStandalone()) return;
+    const original=btn.textContent;
+    btn.disabled=true;
+    btn.textContent='PREPARANT…';
+    const prompt=await waitForEditorInstallPrompt();
+    btn.disabled=false;
+    btn.textContent=original;
+
+    if(prompt){
+      try{
+        await prompt.prompt();
+        const choice=await prompt.userChoice;
+        editorDeferredPrompt=null;
+        window.__editorInstallPrompt=null;
+        if(choice?.outcome==='accepted'){
+          btn.hidden=true;
+          showToast('EDITOR instal·lat');
+        }else{
+          syncEditorInstallButton();
+        }
+        return;
+      }catch(error){
+        console.warn('No s’ha pogut obrir el prompt d’instal·lació',error);
+      }
     }
     showEditorInstallHelp();
   });
+
   $('#closeEditorInstallHelp')?.addEventListener('click',()=>{$('#editorInstallHelp').hidden=true;});
   $('#editorInstallHelp')?.addEventListener('click',event=>{if(event.target.id==='editorInstallHelp') event.currentTarget.hidden=true;});
-  window.addEventListener('appinstalled',()=>{ btn.hidden=true; showToast('EDITOR instal·lat'); });
+  window.addEventListener('appinstalled',()=>{
+    editorDeferredPrompt=null;
+    window.__editorInstallPrompt=null;
+    btn.hidden=true;
+    showToast('EDITOR instal·lat');
+  });
 }
 
 function registerEditorSW(){
   if(location.protocol==='file:') return;
   if('serviceWorker' in navigator){
-    window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>reg.update().catch(()=>{})).catch(()=>{}));
+    navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'})
+      .then(reg=>reg.update().catch(()=>{}))
+      .catch(()=>{});
   }
 }
 

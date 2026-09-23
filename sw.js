@@ -1,4 +1,4 @@
-// BANDA DE LA CALA v0.16
+// BANDA DE LA CALA v0.17
 importScripts('./version.js');
 const CACHE = `banda-de-la-cala-${globalThis.BANDA_VERSION || 'dev'}`;
 const CORE = [
@@ -84,7 +84,8 @@ self.addEventListener('fetch', event => {
   if (request.headers.has('range')) return;
 
   if (request.mode === 'navigate') {
-    const fallback = url.pathname.endsWith('/editor.html') ? './editor.html' : './index.html';
+    const isEditorRoute = /\/editor(?:\.html)?\/?$/.test(url.pathname);
+    const fallback = isEditorRoute ? './editor.html' : './index.html';
     event.respondWith(networkFirst(request, fallback));
     return;
   }

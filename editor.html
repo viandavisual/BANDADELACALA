@@ -11,6 +11,22 @@
   <meta name="apple-mobile-web-app-title" content="BANDA DE LA CALA · EDITOR" />
   <title>EDITOR · BANDA DE LA CALA</title>
   <link rel="manifest" href="editor-manifest.webmanifest" />
+  <script>
+    // Capturem el prompt d'instal·lació tan aviat com Chrome el genera.
+    // Això evita perdre'l mentre carreguen Supabase i la resta de l'Editor.
+    window.__editorInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (event) {
+      event.preventDefault();
+      window.__editorInstallPrompt = event;
+      window.dispatchEvent(new Event('editorinstallready'));
+    });
+    window.addEventListener('appinstalled', function () {
+      window.__editorInstallPrompt = null;
+    });
+    if (location.protocol !== 'file:' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(function () {});
+    }
+  </script>
   <link rel="icon" href="assets/brand/editor-icon.png" type="image/png" />
   <link rel="apple-touch-icon" href="assets/icons/editor-apple-touch-icon-180.png" />
   <link rel="stylesheet" href="editor.css" />
@@ -39,7 +55,7 @@
         <label>Contrasenya<input id="registerPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
         <label>Repetir contrasenya<input id="registerPasswordRepeat" type="password" autocomplete="new-password" minlength="8" required /></label>
         <button class="primary-btn" type="submit">CREAR COMPTE</button>
-        <small class="register-note">Després de confirmar l’email podràs entrar al Editor. Els comptes nous comencen en mode consulta fins que siguin autoritzats com a gestors.</small>
+        <small class="register-note">El compte es crearà amb accés de consulta. Un gestor o administrador l’haurà d’autoritzar abans de poder publicar canvis.</small>
       </form>
 
       <div class="guest-access-block">

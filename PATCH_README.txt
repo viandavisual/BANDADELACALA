@@ -1,29 +1,19 @@
-BANDA DE LA CALA · PATCH v0.15 -> v0.16
-=======================================
+BANDA DE LA CALA — PATCH v0.16 → v0.17
 
-ANTES DE SUBIR EL PATCH A GITHUB:
-1) Ejecuta SUPABASE_UPDATE_v0.16.sql en Supabase > SQL Editor.
-
-DESPUÉS, EN GITHUB SOBRESCRIBE:
+SOBRESCRIBIR EN GITHUB:
 - editor.html
 - editor.js
-- editor.css
-- supabase-client.js
+- editor-manifest.webmanifest
 - version.js
 - sw.js
-- SUPABASE_PRIMEROS_PASOS.txt
 
-NO HACE FALTA SUBIR SUPABASE_UPDATE_v0.16.sql A GITHUB.
 NO TOCAR:
-- index.html
-- app.js
-- style.css
-- config.js
-- assets/
+- index.html / app.js / style.css
 - data/content-published.js
+- assets/
+- configuració de Supabase
 
-NOVEDADES:
-- ENTRAR / REGISTRE NOU en EDITOR.
-- Acceso como USUARI NO REGISTRAT en modo consulta.
-- Nuevos registros = PENDING hasta autorización.
-- RLS de Supabase reforzado: solo ADMIN/GESTOR puede publicar.
+CAMBIO PRINCIPAL:
+El botón INSTAL·LAR EDITOR captura el prompt de instalación desde el primer instante de carga y abre directamente el diálogo nativo de Chrome/Edge cuando el navegador lo ofrece.
+
+Después de subir el patch, abre /BANDADELACALA/editor y haz una recarga completa una vez para activar el nuevo Service Worker/manifest.
