@@ -1,36 +1,30 @@
-BANDA DE LA CALA · v0.21 · PWA APP/EDITOR INDEPENDENTS
-======================================================
+BANDA DE LA CALA · v0.24
+========================
 
-PWA
-- APP: https://viandavisual.github.io/BANDADELACALA/
-- EDITOR: https://viandavisual.github.io/BANDADELACALA/editor/
-- Cada PWA té manifest, ID/scope lògic, icona, Service Worker i caché independents.
-- El Service Worker de l'APP ja no intercepta ni cacheja cap ruta de /editor/.
-- El Service Worker de l'APP només neteja cachés de l'APP; el de l'EDITOR només les de l'EDITOR.
-- HOME de l'APP incorpora una caixa visible d'instal·lació.
-- RESUM de l'EDITOR incorpora una caixa visible d'instal·lació.
+Base estable: v0.23 SAVEPOINT.
 
-HOME APP
-- Mobile: imatge a la meitat superior i textos a la meitat inferior sobre blanc.
-- Gradient vertical només entre la foto i la zona blanca inferior.
-- Crèdits sota les xarxes socials: App development: Vianda Visual / © 2026 · versió actual.
+IMPORTANT
+---------
+La v0.23 va resoldre definitivament la instal·lació independent de les dues PWA.
+La v0.24 PRESERVA aquesta arquitectura: IDs, scopes, manifests, Service Workers i flux beforeinstallprompt continuen separats entre APP i EDITOR.
 
-HISTÒRIC
-- Ordre invers: primer els períodes i fotografies més recents.
-- Cada període és col·lapsable tocant la franja de color.
-- Fotografies més compactes en desktop i mobile.
-- Tocant una foto s'obre un visor amb fons fosc, X, zoom +/− i AJUSTAR.
-- El zoom màxim es limita segons la resolució natural de la imatge i un màxim de 250%.
+CANVIS v0.24
+------------
+- PLAYER: restaurada l'animació de les barres només mentre reprodueix l'àudio de la playlist.
+- Nom instal·lat a mobile: APP = "Banda de la Cala"; EDITOR = "EDITOR".
+- HOME APP i RESUM inicial de l'EDITOR: contingut de les caixes centrat horitzontalment.
+- HISTÒRIC: una entrada pot contenir diverses fotografies.
+- APP HISTÒRIC: les miniatures comparteixen el mateix espai visual d'una fotografia i totes es poden ampliar.
+- EDITOR HISTÒRIC: càrrega múltiple de fotos i botó de descàrrega individual per fotografia (ADMIN/GESTOR).
+- USER: selector d'avatar, canvi de nom i canvi de contrasenya col·lapsat.
+- El nom del USER substitueix "USER" al menú i a la caixa de HOME quan hi ha sessió iniciada.
 
-DRESSCODE
-- X de tancament reforçada com a cercle 1:1 en mobile.
+AVATAR 1
+--------
+Guardar la imatge quadrada amb aquest nom exacte:
+assets/avatar/avatar1.jpg
 
-USERS / SUPABASE
-- Es manté l'arquitectura v0.19: ADMIN / GESTOR / STANDARD.
-- Aquesta versió no requereix executar cap SQL nou.
-
-ACTUALITZACIÓ DES DE v0.19
-Utilitza el PATCH. No sobreescriguis dades ni assets si no estan al PATCH.
-
-
-v0.21: APP instal·lable canònica a /app/ i EDITOR a /editor/, amb manifests i Service Workers independents. La URL arrel redirigeix a /app/.
+SUPABASE
+--------
+Els projectes que ja venien de v0.23 han d'executar una sola vegada:
+SUPABASE_UPDATE_v0.24.sql

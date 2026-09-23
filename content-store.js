@@ -45,15 +45,21 @@
       boysItems: Array.isArray(item.boysItems) ? item.boysItems.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||''})) : [],
       girlsItems: Array.isArray(item.girlsItems) ? item.girlsItems.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||''})) : []
     })) : [];
-    base.historicItems = Array.isArray(base.historicItems) ? base.historicItems.map((item,index)=>({
-      id: item.id || uid(`hist${index}`),
-      year: Number.parseInt(item.year,10) || '',
-      periodId: item.periodId || '',
-      title: item.title || '',
-      description: item.description || '',
-      imageSrc: item.imageSrc || item.image || item.src || '',
-      createdAt: item.createdAt || ''
-    })) : [];
+    base.historicItems = Array.isArray(base.historicItems) ? base.historicItems.map((item,index)=>{
+      const legacyImage = item.imageSrc || item.image || item.src || '';
+      const images = Array.isArray(item.images) ? item.images.filter(src=>typeof src==='string' && src.trim()) : [];
+      if(!images.length && legacyImage) images.push(legacyImage);
+      return {
+        id: item.id || uid(`hist${index}`),
+        year: Number.parseInt(item.year,10) || '',
+        periodId: item.periodId || '',
+        title: item.title || '',
+        description: item.description || '',
+        images,
+        imageSrc: images[0] || '',
+        createdAt: item.createdAt || ''
+      };
+    }) : [];
     return base;
   }
 

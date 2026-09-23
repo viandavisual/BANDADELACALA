@@ -1,0 +1,40 @@
+BANDA DE LA CALA · v0.24 · CANVIS
+=================================
+
+1. INSTALL / PWA
+- Es conserva íntegrament el sistema estable de v0.23.
+- APP id: /banda-de-la-cala-app
+- EDITOR id: /banda-de-la-cala-editor
+- APP scope/start_url: /app/
+- EDITOR scope/start_url: /editor/
+- Nom manifest APP: Banda de la Cala
+- Nom manifest EDITOR: EDITOR
+
+2. PLAYER
+- Les barres del visualitzador només s'animen si #audioPlayer està reproduint una pista carregada des de la playlist.
+- Intro i altres àudios no poden activar aquesta animació.
+
+3. HOME
+- Contingut de les caixes centrat horitzontalment a APP.
+- Targetes de resum inicial de l'EDITOR centrades horitzontalment.
+
+4. HISTÒRIC MULTIFOTO
+- Cada entrada admet un array images[] i manté imageSrc com a compatibilitat legacy.
+- Una entrada antiga amb imageSrc es converteix automàticament en una galeria d'una foto.
+- El formulari de l'EDITOR accepta múltiples fitxers.
+- En editar una entrada, les fotos noves s'afegeixen a les existents.
+- L'APP reparteix les miniatures dins del mateix espai visual reservat a una sola foto.
+- Cada miniatura continua obrint el visor ampliat amb zoom.
+- L'EDITOR mostra un botó de descàrrega a cada foto. Només funciona per ADMIN/GESTOR.
+
+5. USER
+- Avatar de perfil.
+- Canvi de nom.
+- Canvi de contrasenya dins d'un desplegable col·lapsat per defecte.
+- El nom del perfil apareix al menú i a la caixa HOME en lloc de USER.
+- Primer avatar esperat a: assets/avatar/avatar1.jpg
+
+6. SUPABASE
+- Nova columna profiles.avatar_key.
+- Nova RPC update_own_banda_profile(name, avatar_key), limitada al propi USER.
+- Executar SUPABASE_UPDATE_v0.24.sql una sola vegada.

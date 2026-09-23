@@ -9,12 +9,12 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="BANDA DE LA CALA" />
+  <meta name="apple-mobile-web-app-title" content="Banda de la Cala" />
   <title>BANDA DE LA CALA</title>
-  <link rel="manifest" href="app/manifest.webmanifest?v=0.23" />
-  <link rel="icon" href="app/icons/icon-192.png?v=0.23" type="image/png" />
-  <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.23" />
-  <link rel="stylesheet" href="style.css?v=0.23" />
+  <link rel="manifest" href="app/manifest.webmanifest?v=0.24" />
+  <link rel="icon" href="app/icons/icon-192.png?v=0.24" type="image/png" />
+  <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.24" />
+  <link rel="stylesheet" href="style.css?v=0.24" />
 </head>
 <body>
   <section id="startScreen" class="screen start-screen active" aria-label="Inici">
@@ -200,18 +200,34 @@
 
           <section id="userProfileCard" class="panel user-profile-card" hidden>
             <div class="user-profile-head">
-              <div class="user-avatar-mark" aria-hidden="true">●</div>
+              <div class="user-avatar-mark"><img id="userProfileAvatar" alt="Avatar del perfil" hidden /><span id="userProfileAvatarFallback" aria-hidden="true">●</span></div>
               <div><span class="eyebrow" id="userProfileRole">USER</span><h3 id="userProfileName">Músic</h3><p id="userProfileEmail"></p></div>
             </div>
             <div id="temporaryPasswordNotice" class="temporary-password-notice" hidden>Estàs utilitzant la contrasenya temporal. Canvia-la per una de privada.</div>
-            <form id="changePasswordForm" class="change-password-form">
-              <span class="eyebrow">CONTRASENYA</span>
-              <h4>Canviar contrasenya</h4>
-              <label>Nova contrasenya<input id="newUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
-              <label>Repetir contrasenya<input id="repeatUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
-              <button class="user-password-btn" type="submit">CANVIAR CONTRASENYA</button>
-              <small id="changePasswordStatus" class="user-auth-status"></small>
+
+            <form id="avatarProfileForm" class="user-settings-box user-avatar-form">
+              <div class="user-settings-title"><span class="eyebrow">AVATAR</span><h4>Foto de perfil</h4></div>
+              <div id="avatarChoices" class="avatar-choices"></div>
+              <button class="user-password-btn" type="submit">DESAR AVATAR</button>
+              <small id="avatarProfileStatus" class="user-auth-status"></small>
             </form>
+
+            <form id="nameProfileForm" class="user-settings-box user-name-form">
+              <div class="user-settings-title"><span class="eyebrow">NOM</span><h4>Canviar nom</h4></div>
+              <label>Nom visible<input id="profileDisplayName" type="text" maxlength="120" required /></label>
+              <button class="user-password-btn" type="submit">DESAR NOM</button>
+              <small id="nameProfileStatus" class="user-auth-status"></small>
+            </form>
+
+            <details id="passwordDetails" class="user-settings-box user-password-details">
+              <summary><span><span class="eyebrow">CONTRASENYA</span><strong>Canviar contrasenya</strong></span><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+              <form id="changePasswordForm" class="change-password-form">
+                <label>Nova contrasenya<input id="newUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+                <label>Repetir contrasenya<input id="repeatUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+                <button class="user-password-btn" type="submit">CANVIAR CONTRASENYA</button>
+                <small id="changePasswordStatus" class="user-auth-status"></small>
+              </form>
+            </details>
             <button id="userLogoutBtn" class="user-logout-btn" type="button">TANCAR SESSIÓ</button>
           </section>
         </div>
@@ -258,12 +274,12 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.23"></script>
-  <script src="config.js?v=0.23"></script>
-  <script src="data/content-published.js?v=0.23"></script>
-  <script src="content-store.js?v=0.23"></script>
+  <script src="version.js?v=0.24"></script>
+  <script src="config.js?v=0.24"></script>
+  <script src="data/content-published.js?v=0.24"></script>
+  <script src="content-store.js?v=0.24"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.23"></script>
-  <script src="app.js?v=0.23"></script>
+  <script src="supabase-client.js?v=0.24"></script>
+  <script src="app.js?v=0.24"></script>
 </body>
 </html>

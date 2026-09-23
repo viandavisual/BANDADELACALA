@@ -1,4 +1,4 @@
-// PWA INSTALL v0.23 — patró estable de Disturbing Stories App.
+// PWA INSTALL v0.24 — patró estable de Disturbing Stories App.
 let appInstallPrompt = null;
 function captureAppInstallPrompt(event){
   event.preventDefault();
@@ -46,6 +46,19 @@ const $$ = selector => [...document.querySelectorAll(selector)];
 const esc = value => String(value ?? '').replace(/[&<>'"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':'&quot;'}[char]));
 const getEvents = () => [...(state.content.events || [])].sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
 const getTracks = () => (state.content.tracks || []).filter(track=>track.visible !== false);
+const AVAILABLE_AVATARS = [
+  {key:'avatar1',label:'AVATAR 1',src:'assets/avatar/avatar1.jpg'}
+];
+
+function currentUserDisplayName(){
+  return String(state.profile?.name || state.session?.user?.email?.split('@')[0] || 'USER').trim() || 'USER';
+}
+function currentAvatarKey(){ return String(state.profile?.avatar_key || '').trim(); }
+function getHistoricImages(item){
+  const images=Array.isArray(item?.images) ? item.images.filter(Boolean) : [];
+  if(!images.length && item?.imageSrc) images.push(item.imageSrc);
+  return images;
+}
 
 function iconSvg(type){
   const common = `viewBox="0 0 32 32" class="menu-icon icon-${type}" aria-hidden="true"`;
@@ -95,7 +108,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.23');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.24');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
@@ -105,7 +118,10 @@ function availableNavItems(){
 
 function renderNavigation(){
   const items=availableNavItems();
-  const make = item => `<button class="nav-btn ${item.id===state.currentView?'active':''}" data-nav="${item.id}"><span class="nav-icon">${iconSvg(item.icon)}</span><span>${item.label}</span></button>`;
+  const make = item => {
+    const label=item.id==='user' && state.authenticated ? currentUserDisplayName() : item.label;
+    return `<button class="nav-btn ${item.id===state.currentView?'active':''}" data-nav="${item.id}"><span class="nav-icon">${iconSvg(item.icon)}</span><span>${esc(label)}</span></button>`;
+  };
   $('.desktop-nav').innerHTML = items.map(make).join('');
   $('.mobile-nav').innerHTML = items.map(make).join('');
   $('.mobile-nav').style.gridTemplateColumns=`repeat(${items.length},1fr)`;
@@ -119,7 +135,7 @@ function renderHome(){
     { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
     { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
     { id:'games', icon:'games', title:'MINIJOCS', text:'Jocs casuals de la banda.', status:'PROPERAMENT' },
-    { id:'user', icon:'user', title:'USER', text:'Perfil i dades del teu compte.', status:'ACTIU' }
+    { id:'user', icon:'user', title:currentUserDisplayName(), text:'Perfil i dades del teu compte.', status:'ACTIU' }
   ] : [
     { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
     { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
@@ -299,11 +315,13 @@ function renderHistory(){
       const side=(visualIndex++ % 2===0)?'left':'right';
       const title=item.title ? `<h4>${esc(item.title)}</h4>` : '';
       const desc=item.description ? `<p>${esc(item.description)}</p>` : '';
-      const img=item.imageSrc ? `<button class="history-image-button" type="button" data-history-image-id="${esc(item.id || item.imageSrc)}" aria-label="Ampliar fotografia de ${esc(item.year)}"><img loading="lazy" decoding="async" src="${esc(item.imageSrc)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" /></button>` : '';
+      const images=getHistoricImages(item);
+      const cols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
+      const gallery=images.length ? `<div class="history-media-grid ${images.length===1?'single':''}" style="--history-cols:${cols}">${images.map((src,index)=>`<button class="history-image-button" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${index}" aria-label="Ampliar fotografia ${index+1} de ${esc(item.year)}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" /></button>`).join('')}</div>` : '';
       return `<article class="history-item ${side}">
         <div class="history-node" aria-hidden="true"></div>
         <div class="history-card">
-          ${img}
+          ${gallery}
           <div class="history-card-copy"><span class="history-year">${esc(item.year)}</span>${title}${desc}</div>
         </div>
       </article>`;
@@ -325,7 +343,7 @@ function renderHistory(){
     try{localStorage.setItem('banda-history-collapsed-v021',JSON.stringify([...state.collapsedPeriods]));}catch(_error){}
     renderHistory();
   }));
-  $$('[data-history-image-id]').forEach(btn=>btn.addEventListener('click',()=>openHistoryImage(btn.dataset.historyImageId)));
+  $$('[data-history-image-id]').forEach(btn=>btn.addEventListener('click',()=>openHistoryImage(btn.dataset.historyImageId,Number(btn.dataset.historyImageIndex||0))));
 }
 
 function restoreHistoryCollapsed(){
@@ -367,15 +385,18 @@ function historyViewerReset(){
     viewport.scrollTo({left:0,top:0,behavior:'auto'});
   });
 }
-function openHistoryImage(id){
+function openHistoryImage(id,index=0){
   const item=(state.content.historicItems||[]).find(entry=>String(entry.id||entry.imageSrc)===String(id));
-  if(!item?.imageSrc) return;
+  if(!item) return;
+  const images=getHistoricImages(item);
+  const src=images[Math.max(0,Math.min(images.length-1,index))];
+  if(!src) return;
   const modal=$('#historyImageModal'), img=$('#historyImageLarge');
   $('#historyImageTitle').textContent=item.title || String(item.year||'');
-  $('#historyImageCaption').textContent=item.description || (item.title ? String(item.year||'') : '');
+  $('#historyImageCaption').textContent=item.description || (item.title ? `${item.year||''}${images.length>1?` · Foto ${index+1}/${images.length}`:''}` : (images.length>1?`Foto ${index+1}/${images.length}`:''));
   img.alt=item.title || `Fotografia de ${item.year||''}`;
   img.onload=historyViewerReset;
-  img.src=item.imageSrc;
+  img.src=src;
   modal.hidden=false;
   document.body.classList.add('modal-open');
   if(img.complete) historyViewerReset();
@@ -449,6 +470,7 @@ function loadTrack(index, autoplay = false){
   state.currentTrack = (index + tracks.length) % tracks.length;
   const track = tracks[state.currentTrack];
   const player = audio();
+  player.dataset.playlistTrack='1';
   player.src = track.src;
   $('#nowPlayingTitle').textContent = track.title;
   $('#nowPlayingMeta').textContent = track.meta || 'Banda de la Cala';
@@ -463,12 +485,14 @@ function loadTrack(index, autoplay = false){
 
 function setPlayIcon(){
   const player=audio();
-  const playing = !!player && !player.paused && !player.ended && state.currentTrack >= 0;
+  const playing = !!player && player.dataset.playlistTrack==='1' && !player.paused && !player.ended && state.currentTrack >= 0;
   $('#playPause').textContent = playing ? '❚❚' : '▶';
   $('#miniPlay').textContent = playing ? '❚❚' : '▶';
   const icon=document.querySelector('.record-icon');
-  if(icon) icon.classList.toggle('is-playing', playing);
+  const art=document.querySelector('.record-art');
   const card=document.querySelector('.player-card');
+  if(icon) icon.classList.toggle('is-playing', playing);
+  if(art) art.classList.toggle('is-playing', playing);
   if(card) card.classList.toggle('is-playing', playing);
 }
 
@@ -616,15 +640,36 @@ function roleLabel(role){
   return ({admin:'USER ADMIN',gestor:'USER GESTOR',standard:'USER STANDARD'})[role] || 'USER';
 }
 
+function renderUserAvatar(){
+  const key=currentAvatarKey();
+  const avatar=AVAILABLE_AVATARS.find(item=>item.key===key);
+  const img=$('#userProfileAvatar'), fallback=$('#userProfileAvatarFallback');
+  if(!img||!fallback) return;
+  if(!avatar){ img.hidden=true; img.removeAttribute('src'); fallback.hidden=false; return; }
+  img.hidden=false; fallback.hidden=true;
+  img.onerror=()=>{img.hidden=true;fallback.hidden=false;};
+  img.onload=()=>{img.hidden=false;fallback.hidden=true;};
+  img.src=avatar.src;
+}
+
+function renderAvatarChoices(){
+  const host=$('#avatarChoices'); if(!host) return;
+  const selected=currentAvatarKey();
+  host.innerHTML=AVAILABLE_AVATARS.map(avatar=>`<label class="avatar-choice"><input type="radio" name="profileAvatar" value="${esc(avatar.key)}" ${selected===avatar.key?'checked':''}/><span class="avatar-choice-frame"><img src="${esc(avatar.src)}" alt="${esc(avatar.label)}" onerror="this.classList.add('avatar-missing')" /><span>${esc(avatar.label)}</span></span></label>`).join('');
+}
+
 function renderUserSection(){
   const login=$('#userLoginCard'), profile=$('#userProfileCard');
   if(!login||!profile) return;
   login.hidden=state.authenticated;
   profile.hidden=!state.authenticated;
   if(!state.authenticated) return;
-  $('#userProfileName').textContent=state.profile?.name || state.session?.user?.email?.split('@')[0] || 'Músic';
+  $('#userProfileName').textContent=currentUserDisplayName();
   $('#userProfileEmail').textContent=state.session?.user?.email || state.profile?.email || '';
   $('#userProfileRole').textContent=roleLabel(state.profile?.role);
+  const nameInput=$('#profileDisplayName'); if(nameInput) nameInput.value=currentUserDisplayName();
+  renderAvatarChoices();
+  renderUserAvatar();
   const temp=$('#temporaryPasswordNotice');
   if(temp) temp.hidden=!state.profile?.must_change_password;
 }
@@ -671,6 +716,29 @@ function bindUserAuth(){
     await reloadAuthAwareContent();
     $$('.view').forEach(view=>view.classList.toggle('active',view.dataset.view==='home'));
     updateHeader('home');
+  });
+  $('#avatarProfileForm')?.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const status=$('#avatarProfileStatus');
+    const avatarKey=document.querySelector('input[name="profileAvatar"]:checked')?.value || '';
+    status.textContent='Desant avatar…';
+    try{
+      state.profile=await BandaSupabase.updateOwnProfile({name:currentUserDisplayName(),avatarKey});
+      renderNavigation(); renderHome(); renderUserSection();
+      status.textContent='Avatar actualitzat.';
+    }catch(error){ console.error(error); status.textContent='No s’ha pogut actualitzar l’avatar.'; }
+  });
+  $('#nameProfileForm')?.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const status=$('#nameProfileStatus');
+    const name=$('#profileDisplayName').value.trim();
+    if(!name){ status.textContent='Cal indicar un nom.'; return; }
+    status.textContent='Desant nom…';
+    try{
+      state.profile=await BandaSupabase.updateOwnProfile({name,avatarKey:currentAvatarKey()});
+      renderNavigation(); renderHome(); renderUserSection();
+      status.textContent='Nom actualitzat.';
+    }catch(error){ console.error(error); status.textContent='No s’ha pogut actualitzar el nom.'; }
   });
   $('#changePasswordForm')?.addEventListener('submit',async event=>{
     event.preventDefault();
@@ -814,7 +882,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.23',root).href;
+    const swUrl=new URL('app/sw.js?v=0.24',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

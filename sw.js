@@ -1,4 +1,4 @@
-// BANDA DE LA CALA · v0.22 · legacy root worker cleanup
+// BANDA DE LA CALA · v0.24 · legacy root worker cleanup
 // Aquest worker antic NO toca mai les caches independents de /app/ ni /editor/.
 self.addEventListener('install',event=>{ event.waitUntil(self.skipWaiting()); });
 self.addEventListener('activate',event=>{

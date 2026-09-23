@@ -1,4 +1,4 @@
-// PWA INSTALL v0.23 — patró estable de Disturbing Stories App.
+// PWA INSTALL v0.24 — patró estable de Disturbing Stories App.
 let editorInstallPrompt = null;
 function captureEditorInstallPrompt(event){
   event.preventDefault();
@@ -30,6 +30,8 @@ let draggedTrackId = null;
 let toastTimer = null;
 let audioLibrary = [];
 let userProfiles = [];
+let pendingHistoricImages = [];
+let editingHistoricImages = [];
 
 const DRESS_DEFS = [
   {key:'shirt', label:'CAMISA', options:[
@@ -109,7 +111,7 @@ function save(next=content,message='Canvis desats'){
     return false;
   }
 }
-function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.23'); }
+function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.24'); }
 function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
@@ -379,13 +381,49 @@ function autoHistoricPeriodFromYear(){
   }
 }
 
+function historicImages(item){
+  const images=Array.isArray(item?.images) ? item.images.filter(Boolean) : [];
+  if(!images.length && item?.imageSrc) images.push(item.imageSrc);
+  return images;
+}
+
+function renderHistoricFormPreview(){
+  const wrap=$('#historicImagePreviewWrap'), grid=$('#historicImagePreviewGrid');
+  if(!wrap||!grid) return;
+  const images=[...editingHistoricImages,...pendingHistoricImages];
+  wrap.hidden=!images.length;
+  grid.innerHTML=images.map((src,index)=>`<div class="history-image-preview-item ${index>=editingHistoricImages.length?'is-new':''}"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${index<editingHistoricImages.length?'DESADA':'NOVA'}</span></div>`).join('');
+}
+
+async function downloadHistoricPhoto(url,item,index){
+  if(!['admin','gestor'].includes(currentProfile?.role)){ showToast('Només ADMIN/GESTOR poden descarregar fotografies'); return; }
+  try{
+    showToast('Preparant descàrrega…');
+    const response=await fetch(url,{cache:'no-store'});
+    if(!response.ok) throw new Error(`HTTP_${response.status}`);
+    const blob=await response.blob();
+    const ext=(blob.type.split('/')[1]||'jpg').replace('jpeg','jpg').replace(/[^a-z0-9]/gi,'')||'jpg';
+    const title=String(item.title||'historic').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()||'historic';
+    const filename=`${item.year||'sense-any'}-${title}-${String(index+1).padStart(2,'0')}.${ext}`;
+    const objectUrl=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=objectUrl; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(objectUrl),1200);
+    showToast('Fotografia descarregada');
+  }catch(error){
+    console.error(error);
+    showToast('No s’ha pogut descarregar la fotografia');
+  }
+}
+
 function resetHistoricForm(){
   const form=$('#historicForm'); if(!form) return;
   form.reset();
+  pendingHistoricImages=[];
+  editingHistoricImages=[];
   $('#historicId').value='';
-  $('#historicFormTitle').textContent='Nova fotografia';
-  $('#historicImagePreview').removeAttribute('src');
+  $('#historicFormTitle').textContent='Nova entrada';
   $('#historicImagePreviewWrap').hidden=true;
+  $('#historicImagePreviewGrid').innerHTML='';
   $('#historicPeriodHint').hidden=true;
   $('#historicImageFile').required=true;
   renderHistoricPeriodOptions('');
@@ -419,24 +457,25 @@ async function compressHistoricImage(file){
 
 function editHistoric(id){
   const item=(content.historicItems||[]).find(entry=>entry.id===id); if(!item) return;
+  pendingHistoricImages=[];
+  editingHistoricImages=historicImages(item);
   $('#historicId').value=item.id;
   $('#historicYear').value=item.year||'';
   renderHistoricPeriodOptions(item.periodId||'');
   $('#historicTitle').value=item.title||'';
   $('#historicDescription').value=item.description||'';
-  $('#historicFormTitle').textContent='Editar fotografia';
+  $('#historicFormTitle').textContent='Editar entrada';
   $('#historicImageFile').required=false;
-  if(item.imageSrc){ $('#historicImagePreview').src=item.imageSrc; $('#historicImagePreviewWrap').hidden=false; }
-  else { $('#historicImagePreview').removeAttribute('src'); $('#historicImagePreviewWrap').hidden=true; }
+  renderHistoricFormPreview();
   $('#historicPeriodHint').hidden=true;
   $('#historicForm').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function deleteHistoric(id){
   const item=(content.historicItems||[]).find(entry=>entry.id===id); if(!item) return;
-  if(!confirm(`Vols eliminar aquesta fotografia de ${item.year}?`)) return;
+  if(!confirm(`Vols eliminar aquesta entrada de ${item.year} i totes les seves fotografies?`)) return;
   content.historicItems=(content.historicItems||[]).filter(entry=>entry.id!==id);
-  save(content,'Fotografia eliminada');
+  save(content,'Entrada eliminada');
   resetHistoricForm();
 }
 
@@ -456,14 +495,18 @@ function renderHistoric(){
     const period=historicPeriodById(item.periodId);
     const group=item.periodId!==currentPeriod ? `<div class="history-editor-period"><strong>${esc(period?.years||'—')}</strong><span>${esc(period?.director||'Període desconegut')}</span></div>` : '';
     currentPeriod=item.periodId;
+    const images=historicImages(item);
+    const thumbCols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
+    const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button></div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
     return `${group}<article class="historic-editor-item">
-      <div class="historic-thumb">${item.imageSrc?`<img src="${esc(item.imageSrc)}" alt="" loading="lazy" />`:'<span>◷</span>'}</div>
-      <div class="list-main"><div class="list-kicker"><span>${esc(item.year)}</span><span>·</span><span>${esc(period?.director||'Sense període')}</span></div>${item.title?`<h3>${esc(item.title)}</h3>`:'<h3>Sense títol</h3>'}${item.description?`<p>${esc(item.description)}</p>`:''}</div>
+      <div class="historic-thumb-wrap">${thumbs}</div>
+      <div class="list-main"><div class="list-kicker"><span>${esc(item.year)}</span><span>·</span><span>${esc(period?.director||'Sense període')}</span><span>·</span><span>${images.length} ${images.length===1?'foto':'fotos'}</span></div>${item.title?`<h3>${esc(item.title)}</h3>`:'<h3>Sense títol</h3>'}${item.description?`<p>${esc(item.description)}</p>`:''}</div>
       <div class="list-actions"><button class="tiny-btn" data-edit-historic="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-historic="${esc(item.id)}" title="Eliminar">×</button></div>
     </article>`;
   }).join('');
   $$('[data-edit-historic]').forEach(btn=>btn.onclick=()=>editHistoric(btn.dataset.editHistoric));
   $$('[data-delete-historic]').forEach(btn=>btn.onclick=()=>deleteHistoric(btn.dataset.deleteHistoric));
+  $$('[data-download-historic]').forEach(btn=>btn.onclick=()=>{ const item=(content.historicItems||[]).find(entry=>entry.id===btn.dataset.downloadHistoric); const images=historicImages(item); const index=Number(btn.dataset.downloadIndex||0); if(item&&images[index]) downloadHistoricPhoto(images[index],item,index); });
 }
 
 function bindHistoric(){
@@ -471,15 +514,15 @@ function bindHistoric(){
   $('#historicYear').max=String(new Date().getFullYear());
   $('#historicYear').addEventListener('input',autoHistoricPeriodFromYear);
   $('#historicImageFile').addEventListener('change',async event=>{
-    const file=event.target.files?.[0];
-    if(!file) return;
+    const files=[...(event.target.files||[])];
+    pendingHistoricImages=[];
+    if(!files.length){ renderHistoricFormPreview(); return; }
     try{
-      const image=await compressHistoricImage(file);
-      $('#historicImagePreview').src=image;
-      $('#historicImagePreviewWrap').hidden=false;
-      $('#historicImagePreview').dataset.pending=image;
-      showToast('Fotografia preparada');
-    }catch(error){ showToast('No s’ha pogut processar la fotografia'); }
+      showToast(`Preparant ${files.length} ${files.length===1?'fotografia':'fotografies'}…`);
+      for(const file of files) pendingHistoricImages.push(await compressHistoricImage(file));
+      renderHistoricFormPreview();
+      showToast(`${files.length} ${files.length===1?'fotografia preparada':'fotografies preparades'}`);
+    }catch(error){ console.error(error); pendingHistoricImages=[]; renderHistoricFormPreview(); showToast('No s’han pogut processar les fotografies'); }
   });
   $('#historicForm').addEventListener('submit',async event=>{
     event.preventDefault();
@@ -491,25 +534,25 @@ function bindHistoric(){
     if(!period){ showToast('Cal seleccionar un període'); return; }
     if(!yearFitsPeriod(year,period)){ showToast('L’any no correspon al període seleccionat'); return; }
     const existing=(content.historicItems||[]).find(entry=>entry.id===id);
-    let imageSrc=existing?.imageSrc||'';
-    const file=$('#historicImageFile').files?.[0];
-    if(file){
+    const images=existing ? historicImages(existing) : [];
+    if(pendingHistoricImages.length){
       try{
-        const compressed=await compressHistoricImage(file);
-        imageSrc=compressed;
-        if(editorCanWrite && supabaseActive && currentSession){
-          showToast('Pujant fotografia a Supabase…');
-          imageSrc=(await BandaSupabase.uploadDataUrl('historic-media',compressed,String(year),`historic-${year}`)).url;
+        for(let i=0;i<pendingHistoricImages.length;i++){
+          let src=pendingHistoricImages[i];
+          if(editorCanWrite && supabaseActive && currentSession){
+            showToast(`Pujant fotografia ${i+1}/${pendingHistoricImages.length} a Supabase…`);
+            src=(await BandaSupabase.uploadDataUrl('historic-media',src,String(year),`historic-${year}-${images.length+i+1}`)).url;
+          }
+          images.push(src);
         }
-      }
-      catch(error){ console.error(error); showToast('No s’ha pogut processar o pujar la fotografia'); return; }
+      }catch(error){ console.error(error); showToast('No s’han pogut pujar les fotografies'); return; }
     }
-    if(!imageSrc){ showToast('Cal seleccionar una fotografia'); return; }
-    const item={id,year,periodId,title:$('#historicTitle').value.trim(),description:$('#historicDescription').value.trim(),imageSrc,createdAt:existing?.createdAt||new Date().toISOString()};
+    if(!images.length){ showToast('Cal seleccionar almenys una fotografia'); return; }
+    const item={id,year,periodId,title:$('#historicTitle').value.trim(),description:$('#historicDescription').value.trim(),images,imageSrc:images[0]||'',createdAt:existing?.createdAt||new Date().toISOString()};
     content.historicItems=content.historicItems||[];
     const index=content.historicItems.findIndex(entry=>entry.id===id);
     if(index>=0) content.historicItems[index]=item; else content.historicItems.push(item);
-    if(save(content,index>=0?'Fotografia actualitzada':'Fotografia afegida')) resetHistoricForm();
+    if(save(content,index>=0?'Entrada actualitzada':'Entrada afegida')) resetHistoricForm();
   });
   $('#newHistoricBtn').onclick=resetHistoricForm;
   $('#cancelHistoricEdit').onclick=resetHistoricForm;
@@ -565,10 +608,15 @@ async function migrateCurrentContentToSupabase(){
     }
     const items=migrating.historicItems||[];
     for(let i=0;i<items.length;i++){
-      if(/^data:image\//i.test(items[i].imageSrc||'')){
-        showToast(`Migrant fotografia ${i+1}/${items.length}…`);
-        items[i].imageSrc=(await BandaSupabase.uploadDataUrl('historic-media',items[i].imageSrc,String(items[i].year||'sense-any'),`historic-${items[i].year||i+1}`)).url;
+      const images=historicImages(items[i]);
+      for(let j=0;j<images.length;j++){
+        if(/^data:image\//i.test(images[j]||'')){
+          showToast(`Migrant fotografia ${j+1}/${images.length} de l’entrada ${i+1}/${items.length}…`);
+          images[j]=(await BandaSupabase.uploadDataUrl('historic-media',images[j],String(items[i].year||'sense-any'),`historic-${items[i].year||i+1}-${j+1}`)).url;
+        }
       }
+      items[i].images=images;
+      items[i].imageSrc=images[0]||'';
     }
     migrating.settings.supabaseInitialized=true;
     content=await BandaSupabase.saveContent(migrating);
@@ -864,7 +912,7 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.23',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.24',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

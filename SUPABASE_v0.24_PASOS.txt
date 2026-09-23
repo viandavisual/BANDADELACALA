@@ -1,0 +1,18 @@
+BANDA DE LA CALA · SUPABASE v0.24
+=================================
+
+Aquesta actualització només és necessària per activar NOM + AVATAR del perfil.
+No modifica rols ni Auth.
+
+1. Supabase → SQL Editor → New query.
+2. Obre SUPABASE_UPDATE_v0.24.sql.
+3. Copia tot el contingut, enganxa'l i prem RUN.
+4. Hauria de finalitzar sense errors.
+5. Publica després els fitxers de la v0.24 a GitHub.
+
+AVATAR
+------
+Abans de provar l'avatar, afegeix al repositori:
+assets/avatar/avatar1.jpg
+
+Ha de ser una imatge quadrada. La UI la retalla visualment en cercle, però el fitxer es conserva quadrat.

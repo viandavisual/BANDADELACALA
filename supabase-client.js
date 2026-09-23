@@ -43,21 +43,32 @@
     const c=getClient(); if(!c) return null;
     const currentSession=await session();
     if(!currentSession) return null;
-    const {data,error}=await c.from('profiles')
-      .select('user_id,email,name,role,must_change_password,created_at')
+    let result=await c.from('profiles')
+      .select('user_id,email,name,role,avatar_key,must_change_password,created_at')
       .eq('user_id',currentSession.user.id)
       .maybeSingle();
-    if(error) throw error;
-    return data || null;
+    if(result.error && /avatar_key/i.test(result.error.message||'')){
+      result=await c.from('profiles')
+        .select('user_id,email,name,role,must_change_password,created_at')
+        .eq('user_id',currentSession.user.id)
+        .maybeSingle();
+    }
+    if(result.error) throw result.error;
+    return result.data ? {...result.data,avatar_key:result.data.avatar_key||''} : null;
   }
 
   async function listProfiles(){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
-    const {data,error}=await c.from('profiles')
-      .select('user_id,email,name,role,must_change_password,created_at')
+    let result=await c.from('profiles')
+      .select('user_id,email,name,role,avatar_key,must_change_password,created_at')
       .order('created_at',{ascending:false});
-    if(error) throw error;
-    return data || [];
+    if(result.error && /avatar_key/i.test(result.error.message||'')){
+      result=await c.from('profiles')
+        .select('user_id,email,name,role,must_change_password,created_at')
+        .order('created_at',{ascending:false});
+    }
+    if(result.error) throw result.error;
+    return (result.data||[]).map(row=>({...row,avatar_key:row.avatar_key||''}));
   }
 
   async function createManagedUser({name,email,role}){
@@ -70,6 +81,16 @@
     }
     if(data?.error) throw new Error(data.error);
     return data;
+  }
+
+
+  async function updateOwnProfile({name,avatarKey}){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const cleanName=String(name||'').trim();
+    const cleanAvatar=String(avatarKey||'').trim();
+    const {error}=await c.rpc('update_own_banda_profile',{p_name:cleanName,p_avatar_key:cleanAvatar || null});
+    if(error) throw error;
+    return await getMyProfile();
   }
 
   async function updatePassword(password){
@@ -169,7 +190,7 @@
   }
 
   window.BandaSupabase={
-    enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,updatePassword,
+    enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,updateOwnProfile,updatePassword,
     loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,listPublicFiles,onAuthChange,dataUrlToFile
   };
 })();
