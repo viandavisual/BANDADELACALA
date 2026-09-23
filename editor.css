@@ -464,3 +464,14 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 .hemeroteca-editor-filters button[data-hemeroteca-editor-filter="entrevistes"].active{background:#777b82;color:#fff;border-color:#777b82}
 .hemeroteca-editor-item{border-left:5px solid var(--hemero-editor-accent,#393a86)}
 .hemeroteca-editor-item.type-cartells{--hemero-editor-accent:#d4ac5f}.hemeroteca-editor-item.type-noticies{--hemero-editor-accent:#393a86}.hemeroteca-editor-item.type-entrevistes{--hemero-editor-accent:#777b82}
+
+
+/* ============================================================
+   v0.35 · DRESSCODE desplegables compactes
+   ============================================================ */
+.dress-item-row select{font-size:9px!important;min-height:30px!important;height:30px!important;padding:4px 26px 4px 8px!important;border-radius:9px!important;line-height:1.1!important}
+.dress-item-row select option{font-size:9px!important}
+@media(max-width:560px){
+  .dress-item-row select{font-size:8.5px!important;min-height:29px!important;height:29px!important;padding-top:3px!important;padding-bottom:3px!important}
+  .dress-item-row select option{font-size:8.5px!important}
+}

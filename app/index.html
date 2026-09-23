@@ -14,7 +14,7 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.34" />
+  <link rel="stylesheet" href="style.css?v=0.35" />
 </head>
 <body>
   <section id="startScreen" class="screen start-screen active" aria-label="Inici">
@@ -103,6 +103,7 @@
           <button id="homeInstallBtn" class="primary-btn app-install-action" type="button">INSTAL·LAR APP</button>
         </section>
         <div class="home-grid" id="homeGrid"></div>
+        <div class="band-logo-block home-band-logo" aria-label="Logo de la Banda de la Cala"><img src="assets/bandalogo.jpg" alt="Banda de la Cala" /></div>
         <div class="home-social-links" aria-label="Xarxes socials de la Banda de la Cala">
           <a href="https://www.facebook.com/bandadelacala" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.2 8.1V6.4c0-.8.5-1 1-1h2.5V1.2L14.2 1C10.8 1 9 3 9 6.1v2H6v4.5h3V23h5.2V12.6h3.5l.6-4.5h-4.1Z"/></svg></a>
           <a href="https://www.instagram.com/bandadelacala" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle class="fill-dot" cx="17.6" cy="6.6" r="1.1"/></svg></a>
@@ -262,6 +263,7 @@
                 <small id="changePasswordStatus" class="user-auth-status"></small>
               </form>
             </details>
+            <div class="band-logo-block user-band-logo" aria-label="Logo de la Banda de la Cala"><img src="assets/bandalogo.jpg" alt="Banda de la Cala" /></div>
             <button id="userLogoutBtn" class="user-logout-btn" type="button">TANCAR SESSIÓ</button>
           </section>
         </div>
@@ -310,12 +312,12 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.34"></script>
-  <script src="config.js?v=0.34"></script>
-  <script src="data/content-published.js?v=0.34"></script>
-  <script src="content-store.js?v=0.34"></script>
+  <script src="version.js?v=0.35"></script>
+  <script src="config.js?v=0.35"></script>
+  <script src="data/content-published.js?v=0.35"></script>
+  <script src="content-store.js?v=0.35"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.34"></script>
-  <script src="app.js?v=0.34"></script>
+  <script src="supabase-client.js?v=0.35"></script>
+  <script src="app.js?v=0.35"></script>
 </body>
 </html>

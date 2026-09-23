@@ -747,16 +747,15 @@ function loadTrack(index, autoplay = false){
 
 function playlistAudioIsAudible(){
   const player=audio();
-  return !!player && state.playlistAudioPlaying && player.dataset.playlistTrack==='1' && !player.paused && !player.ended && !state.globalMuted && !player.muted && player.volume>0 && state.currentTrack>=0;
+  if(!player || player.dataset.playlistTrack!=='1' || state.currentTrack<0) return false;
+  const hasAudioData = player.readyState >= 2; // HAVE_CURRENT_DATA
+  return !player.paused && !player.ended && hasAudioData && !state.globalMuted && !player.muted && player.volume>0;
 }
 
 function syncPlayerEqualizers(forcePlaying=null){
   const playing=forcePlaying===null ? playlistAudioIsAudible() : !!forcePlaying;
   document.querySelectorAll('.icon-playlist').forEach(icon=>icon.classList.toggle('is-playing',playing));
-  const art=document.querySelector('.record-art');
-  const card=document.querySelector('.player-card');
-  if(art) art.classList.toggle('is-playing',playing);
-  if(card) card.classList.toggle('is-playing',playing);
+  document.documentElement.classList.toggle('playlist-audio-playing',playing);
 }
 
 function setPlayIcon(){
@@ -823,11 +822,14 @@ function bindPlayer(){
   $('#randomBtn').onclick=()=>setPlaybackMode('random');
   updatePlaybackModeButtons();
   setPlayIcon();
-  player.addEventListener('play',()=>{ setPlayIcon(); });
-  player.addEventListener('playing',()=>{ state.playlistAudioPlaying=true; setPlayIcon(); });
-  player.addEventListener('pause',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
+  player.addEventListener('play',()=>{ syncPlayerEqualizers(); setPlayIcon(); });
+  player.addEventListener('playing',()=>{ state.playlistAudioPlaying=true; syncPlayerEqualizers(); setPlayIcon(); });
+  player.addEventListener('pause',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); setPlayIcon(); });
   player.addEventListener('waiting',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
   player.addEventListener('stalled',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
+  player.addEventListener('canplay',()=>{ syncPlayerEqualizers(); });
+  player.addEventListener('seeked',()=>{ syncPlayerEqualizers(); });
+  player.addEventListener('volumechange',()=>{ syncPlayerEqualizers(); });
   player.addEventListener('emptied',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
   player.addEventListener('error',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
   player.addEventListener('ended',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); playNextFromMode(); });

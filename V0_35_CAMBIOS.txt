@@ -1,0 +1,11 @@
+BANDA DE LA CALA · v0.35
+
+- PLAYER: equalitzadors vinculats directament a l'estat real de reproducció de la playlist. Totes les barres estan quietes sense àudio i animades mentre sona una pista audible.
+- EDITOR / DRESSCODE: eliminat el text auxiliar indicat i desplegables de peces reduïts aproximadament a la meitat d'escala.
+- APP / CALENDARI MOBILE: compactació del mes, controls, dies, llegenda i detall per reduir scroll. Desktop no es modifica.
+- APP / USER: logo assets/bandalogo.jpg abans de TANCAR SESSIÓ.
+- APP / HOME: logo assets/bandalogo.jpg sota les caixes i abans de xarxes socials.
+- USER: avatars circulars amb traç blau marí corporatiu.
+- PWA: version.js i caches APP/EDITOR actualitzades a v0.35, sense modificar manifests, IDs, scopes ni start_url.
+
+NOTA: assets/bandalogo.jpg es referencia perquè ja està pujat al projecte segons la configuració indicada. No formava part del ZIP v0.34 rebut.
