@@ -1,57 +1,54 @@
-BANDA DE LA CALA · PATCH v0.20 -> v0.21
-==========================================
+BANDA DE LA CALA · PATCH v0.21 → v0.22
+========================================
 
-SOBRESCRIBIR EN LA RAIZ:
-- index.html
-- manifest.webmanifest
-- sw.js
-- app.js
-- style.css
-- config.js
-- version.js
-- editor.js
-- editor.css
+OBJECTIU
+--------
+Corregir definitivament el bootstrap d'instal·lació PWA de l'APP i de l'EDITOR,
+mantenint-les com dues aplicacions independents.
 
-AÑADIR LA CARPETA NUEVA COMPLETA:
-- app/
-  - index.html
-  - manifest.webmanifest
-  - sw.js
+SOBREESCRIURE
+-------------
+app.js
+config.js
+editor.js
+sw.js
+version.js
+app/index.html
+app/manifest.webmanifest
+app/sw.js
+editor/index.html
+editor/manifest.webmanifest
+editor/sw.js
 
-SOBRESCRIBIR EN editor/:
-- editor/index.html
-- editor/manifest.webmanifest
-- editor/sw.js
+AFEGIR
+------
+app/icons/icon-180.png
+app/icons/icon-192.png
+app/icons/icon-512.png
+editor/icons/icon-180.png
+editor/icons/icon-192.png
+editor/icons/icon-512.png
 
-NO TOCAR:
-- data/content-published.js
-- assets/
-- Supabase
-- SQL / Edge Functions
-- content-store.js
-- supabase-client.js
+NO CAL TOCAR
+------------
+assets/
+data/
+Supabase
+SQL
+Edge Functions
+style.css
+editor.css
+content-store.js
+supabase-client.js
 
-CAMBIO IMPORTANTE DE PWA EN v0.21
-----------------------------------
-A partir de esta versión las dos aplicaciones instalables viven en scopes hermanos y separados:
+DESPRÉS DE PUJAR EL PATCH
+--------------------------
+1. Obre una vegada https://viandavisual.github.io/BANDADELACALA/
+   perquè es retiri qualsevol Service Worker legacy de l'arrel i et redirigeixi a /app/.
+2. Prova INSTAL·LAR APP des de /app/.
+3. Obre /editor/ i prova INSTAL·LAR EDITOR.
 
-APP:
-https://viandavisual.github.io/BANDADELACALA/app/
-
-EDITOR:
-https://viandavisual.github.io/BANDADELACALA/editor/
-
-La URL histórica:
-https://viandavisual.github.io/BANDADELACALA/
-redirige automáticamente a /app/.
-
-PRIMERA ACTUALIZACION DESDE v0.20
----------------------------------
-1. Sube este PATCH.
-2. Abre una vez https://viandavisual.github.io/BANDADELACALA/ en una pestaña normal de Chrome.
-   La raíz elimina el antiguo Service Worker global y redirige a /app/.
-3. /app/ y /editor/ pueden recargarse automáticamente UNA sola vez en la primera visita para quedar controladas por su propio Service Worker.
-4. Si conservas instalaciones antiguas de versiones anteriores, desinstálalas una sola vez antes de instalar las dos PWAs nuevas.
-5. Instala APP desde /app/ e instala EDITOR desde /editor/. Sus IDs, manifests, scopes, caches y Service Workers son distintos.
-
-No es necesario volver a hacer este saneamiento en futuras versiones.
+A v0.22 NO hi ha reload automàtic del bootstrap PWA.
+Els dos manifests tenen identitats estables i diferents:
+- APP: /banda-de-la-cala-app
+- EDITOR: /banda-de-la-cala-editor

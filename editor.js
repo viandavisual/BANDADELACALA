@@ -95,7 +95,7 @@ function save(next=content,message='Canvis desats'){
     return false;
   }
 }
-function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.20'); }
+function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.22'); }
 function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
@@ -761,67 +761,166 @@ let editorDeferredPrompt = window.__editorInstallPrompt || null;
 function editorIsStandalone(){
   return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
+function getEditorInstallPrompt(){ return editorDeferredPrompt || window.__editorInstallPrompt || null; }
 function syncEditorInstallButton(){
   const btn=$('#editorInstallBtn'), cardBtn=$('#editorInstallCardBtn'), card=$('#editorInstallCard'), status=$('#editorInstallCardStatus');
   const installed=editorIsStandalone();
   if(btn) btn.hidden=installed;
   if(card) card.hidden=installed;
   if(installed) return;
-  const ready=!!(editorDeferredPrompt || window.__editorInstallPrompt);
+  const ready=!!getEditorInstallPrompt();
   [btn,cardBtn].filter(Boolean).forEach(target=>{
     target.disabled=false;
     target.classList.toggle('install-ready',ready);
     target.textContent='INSTAL·LAR EDITOR';
     target.title='Instal·lar BANDA DE LA CALA · EDITOR';
   });
-  if(status) status.textContent=ready?'Preparat · prem INSTAL·LAR EDITOR.':'PWA preparada · prem INSTAL·LAR EDITOR.';
+  if(status) status.textContent=ready?'Preparat · prem INSTAL·LAR EDITOR.':'PWA activa · prem INSTAL·LAR EDITOR.';
+}
+function waitForEditorInstallPrompt(timeout=2400){
+  const current=getEditorInstallPrompt();
+  if(current) return Promise.resolve(current);
+  return new Promise(resolve=>{
+    let done=false,timer=0;
+    const finish=value=>{
+      if(done)return;
+      done=true;
+      clearTimeout(timer);
+      window.removeEventListener('beforeinstallprompt',onPrompt);
+      resolve(value || getEditorInstallPrompt());
+    };
+    const onPrompt=event=>{
+      event.preventDefault();
+      editorDeferredPrompt=event;
+      window.__editorInstallPrompt=event;
+      syncEditorInstallButton();
+      finish(event);
+    };
+    window.addEventListener('beforeinstallprompt',onPrompt,{once:true});
+    timer=setTimeout(()=>finish(null),timeout);
+  });
+}
+function waitForEditorController(timeout=3500){
+  if(navigator.serviceWorker?.controller) return Promise.resolve(true);
+  return new Promise(resolve=>{
+    let settled=false;
+    const finish=value=>{
+      if(settled)return;
+      settled=true;
+      clearTimeout(timer);
+      navigator.serviceWorker?.removeEventListener('controllerchange',onChange);
+      resolve(value);
+    };
+    const onChange=()=>finish(!!navigator.serviceWorker.controller);
+    const timer=setTimeout(()=>finish(!!navigator.serviceWorker?.controller),timeout);
+    navigator.serviceWorker?.addEventListener('controllerchange',onChange,{once:true});
+  });
 }
 async function ensureEditorServiceWorker(){
-  if(location.protocol==='file:' || !('serviceWorker' in navigator)) return false;
+  if(location.protocol==='file:' || !('serviceWorker' in navigator)) return {ok:false,controlled:false};
   try{
     const root=new URL('../', location.href);
-    const swUrl=new URL('editor/sw.js',root);
-    const scope=new URL('editor/',root).pathname;
-    const reg=await navigator.serviceWorker.register(swUrl.href,{scope,updateViaCache:'none'});
-    await reg.update().catch(()=>{});
-    await Promise.race([navigator.serviceWorker.ready,new Promise(resolve=>setTimeout(resolve,1400))]);
-    return true;
-  }catch(error){console.warn('EDITOR SW',error);return false;}
+    const swUrl=new URL('editor/sw.js?v=0.22',root);
+    const reg=await navigator.serviceWorker.register(swUrl.href,{updateViaCache:'none'});
+    try{await reg.update();}catch(_error){}
+    try{await Promise.race([navigator.serviceWorker.ready,new Promise(resolve=>setTimeout(resolve,3000))]);}catch(_error){}
+    const controlled=await waitForEditorController(3500);
+    return {ok:true,controlled,registration:reg};
+  }catch(error){console.warn('EDITOR SW',error);return {ok:false,controlled:false,error};}
+}
+async function editorPwaHealth(){
+  const root=new URL('../', location.href);
+  const result={secure:window.isSecureContext,manifest:false,icons:false,sw:false,controlled:!!navigator.serviceWorker?.controller};
+  try{
+    const manifestUrl=new URL('editor/manifest.webmanifest?v=0.22',root);
+    const response=await fetch(manifestUrl.href,{cache:'no-store'});
+    const manifest=response.ok ? await response.json() : null;
+    result.manifest=!!(manifest && manifest.start_url && manifest.display && Array.isArray(manifest.icons));
+    if(manifest?.icons?.length){
+      const checks=await Promise.all(manifest.icons.map(async icon=>{
+        try{return (await fetch(new URL(icon.src,manifestUrl).href,{cache:'no-store'})).ok;}catch(_error){return false;}
+      }));
+      result.icons=checks.some(Boolean);
+    }
+  }catch(_error){}
+  try{
+    const reg=await navigator.serviceWorker?.getRegistration(new URL('editor/',root).href);
+    result.sw=!!reg?.active;
+    result.controlled=!!navigator.serviceWorker?.controller;
+  }catch(_error){}
+  return result;
 }
 async function launchEditorInstall(){
   if(editorIsStandalone()) return;
-  let prompt=editorDeferredPrompt || window.__editorInstallPrompt;
-  if(!prompt){ await ensureEditorServiceWorker(); prompt=editorDeferredPrompt || window.__editorInstallPrompt; }
+  const buttons=[$('#editorInstallBtn'),$('#editorInstallCardBtn')].filter(Boolean);
+  const status=$('#editorInstallCardStatus');
+  buttons.forEach(btn=>{btn.disabled=true;btn.textContent='PREPARANT…';});
+  if(status) status.textContent='Preparant la instal·lació…';
+
+  let prompt=getEditorInstallPrompt();
+  if(!prompt){
+    await ensureEditorServiceWorker();
+    prompt=await waitForEditorInstallPrompt(2600);
+  }
   if(!prompt && /iPad|iPhone|iPod/.test(navigator.userAgent)){
-    alert('A Safari: prem Compartir i després “Afegir a la pantalla d’inici”.'); return;
+    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR EDITOR';});
+    alert('A Safari: prem Compartir i després “Afegir a la pantalla d’inici”.');
+    return;
   }
   if(!prompt){
-    const status=$('#editorInstallCardStatus');
-    if(status) status.textContent='Chrome encara no ha ofert el diàleg. Recarrega una vegada /editor/ i torna a prémer INSTAL·LAR EDITOR.';
+    const health=await editorPwaHealth();
+    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR EDITOR';});
+    if(status){
+      if(!health.secure) status.textContent='La instal·lació PWA necessita HTTPS.';
+      else if(!health.manifest || !health.icons) status.textContent='No s’ha pogut validar el manifest o les icones de l’EDITOR.';
+      else if(!health.sw) status.textContent='El Service Worker encara no s’ha activat. Torna a prémer INSTAL·LAR EDITOR en uns segons.';
+      else status.textContent='PWA validada. Chrome encara no ha lliurat el diàleg; torna a prémer INSTAL·LAR EDITOR en uns segons.';
+    }
     return;
   }
   try{
     await prompt.prompt();
     const choice=await prompt.userChoice;
-    editorDeferredPrompt=null; window.__editorInstallPrompt=null;
+    editorDeferredPrompt=null;
+    window.__editorInstallPrompt=null;
     if(choice?.outcome==='accepted'){
       if($('#editorInstallBtn')) $('#editorInstallBtn').hidden=true;
       if($('#editorInstallCard')) $('#editorInstallCard').hidden=true;
       showToast('EDITOR instal·lat');
     }
+  }catch(error){
+    console.warn('Install Editor',error);
+    if(status) status.textContent='No s’ha pogut obrir el diàleg. Torna-ho a provar.';
+  }finally{
+    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR EDITOR';});
     syncEditorInstallButton();
-  }catch(error){console.warn('Install Editor',error);syncEditorInstallButton();}
+  }
 }
 function bindEditorPwaInstall(){
   const btn=$('#editorInstallBtn'), cardBtn=$('#editorInstallCardBtn');
   if(!btn && !cardBtn) return;
   editorDeferredPrompt=window.__editorInstallPrompt || editorDeferredPrompt;
   syncEditorInstallButton();
-  window.addEventListener('editorinstallready',()=>{editorDeferredPrompt=window.__editorInstallPrompt || editorDeferredPrompt;syncEditorInstallButton();});
-  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();editorDeferredPrompt=event;window.__editorInstallPrompt=event;syncEditorInstallButton();});
-  btn?.addEventListener('click',launchEditorInstall); cardBtn?.addEventListener('click',launchEditorInstall);
-  window.addEventListener('appinstalled',()=>{editorDeferredPrompt=null;window.__editorInstallPrompt=null;if(btn)btn.hidden=true;if($('#editorInstallCard'))$('#editorInstallCard').hidden=true;showToast('EDITOR instal·lat');});
-  setTimeout(syncEditorInstallButton,1800);
+  window.addEventListener('bandaeditorinstallready',()=>{
+    editorDeferredPrompt=window.__editorInstallPrompt || editorDeferredPrompt;
+    syncEditorInstallButton();
+  });
+  window.addEventListener('beforeinstallprompt',event=>{
+    event.preventDefault();
+    editorDeferredPrompt=event;
+    window.__editorInstallPrompt=event;
+    syncEditorInstallButton();
+  });
+  btn?.addEventListener('click',launchEditorInstall);
+  cardBtn?.addEventListener('click',launchEditorInstall);
+  window.addEventListener('appinstalled',()=>{
+    editorDeferredPrompt=null;
+    window.__editorInstallPrompt=null;
+    if(btn)btn.hidden=true;
+    if($('#editorInstallCard'))$('#editorInstallCard').hidden=true;
+    showToast('EDITOR instal·lat');
+  });
+  setTimeout(syncEditorInstallButton,1000);
 }
 function registerEditorSW(){ ensureEditorServiceWorker(); }
 

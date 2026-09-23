@@ -1,10 +1,11 @@
-// BANDA DE LA CALA · v0.21 · legacy root worker cleanup
-self.addEventListener('install', event => { self.skipWaiting(); });
-self.addEventListener('activate', event => {
+// BANDA DE LA CALA · v0.22 · legacy root worker cleanup
+// Aquest worker antic NO toca mai les caches independents de /app/ ni /editor/.
+self.addEventListener('install',event=>{ event.waitUntil(self.skipWaiting()); });
+self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     try{
       const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('banda-de-la-cala-app-')||/^banda-de-la-cala-v/.test(k)).map(k=>caches.delete(k)));
+      await Promise.all(keys.filter(key=>/^banda-de-la-cala-v/.test(key)).map(key=>caches.delete(key)));
     }catch(_error){}
     try{ await self.registration.unregister(); }catch(_error){}
   })());

@@ -82,7 +82,7 @@ function bootIdentity(){
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
   $$('[data-app-logo]').forEach(el => el.src = CFG.logo || 'assets/brand/logo-banda-de-la-cala.png');
   $$('[data-app-icon]').forEach(el => el.src = CFG.appIcon || CFG.logo || 'assets/brand/app-icon.png');
-  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.21');
+  $$('[data-app-version]').forEach(el => el.textContent = CFG.version || window.BANDA_VERSION || 'v0.22');
   document.title = CFG.appName || 'BANDA DE LA CALA';
 }
 
@@ -693,6 +693,11 @@ async function initAppAuth(){
 function appIsStandalone(){
   return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
+
+function getAppInstallPrompt(){
+  return state.deferredPrompt || window.__appInstallPrompt || null;
+}
+
 function syncAppInstallUI(){
   const headerBtn=$('#installBtn'), homeBtn=$('#homeInstallBtn'), card=$('#appInstallCard'), status=$('#appInstallStatus');
   const installed=appIsStandalone();
@@ -700,77 +705,177 @@ function syncAppInstallUI(){
   if(headerBtn) headerBtn.hidden=installed;
   if(homeBtn) homeBtn.hidden=installed;
   if(installed) return;
-  const ready=!!(state.deferredPrompt || window.__appInstallPrompt);
+  const ready=!!getAppInstallPrompt();
   [headerBtn,homeBtn].filter(Boolean).forEach(btn=>{
     btn.disabled=false;
     btn.classList.toggle('install-ready',ready);
     btn.textContent='INSTAL·LAR APP';
   });
-  if(status) status.textContent=ready ? 'Preparada · prem INSTAL·LAR APP.' : 'PWA preparada · prem INSTAL·LAR APP.';
+  if(status) status.textContent=ready ? 'Preparada · prem INSTAL·LAR APP.' : 'PWA activa · prem INSTAL·LAR APP.';
 }
+
+function waitForAppInstallPrompt(timeout=2400){
+  const current=getAppInstallPrompt();
+  if(current) return Promise.resolve(current);
+  return new Promise(resolve=>{
+    let done=false;
+    let timer=0;
+    const finish=value=>{
+      if(done) return;
+      done=true;
+      clearTimeout(timer);
+      window.removeEventListener('beforeinstallprompt',onPrompt);
+      resolve(value || getAppInstallPrompt());
+    };
+    const onPrompt=event=>{
+      event.preventDefault();
+      state.deferredPrompt=event;
+      window.__appInstallPrompt=event;
+      syncAppInstallUI();
+      finish(event);
+    };
+    window.addEventListener('beforeinstallprompt',onPrompt,{once:true});
+    timer=setTimeout(()=>finish(null),timeout);
+  });
+}
+
+function waitForAppController(timeout=3500){
+  if(navigator.serviceWorker?.controller) return Promise.resolve(true);
+  return new Promise(resolve=>{
+    let settled=false;
+    const finish=value=>{
+      if(settled) return;
+      settled=true;
+      clearTimeout(timer);
+      navigator.serviceWorker?.removeEventListener('controllerchange',onChange);
+      resolve(value);
+    };
+    const onChange=()=>finish(!!navigator.serviceWorker.controller);
+    const timer=setTimeout(()=>finish(!!navigator.serviceWorker?.controller),timeout);
+    navigator.serviceWorker?.addEventListener('controllerchange',onChange,{once:true});
+  });
+}
+
 async function ensureAppServiceWorker(){
-  if(location.protocol==='file:' || !('serviceWorker' in navigator)) return false;
+  if(location.protocol==='file:' || !('serviceWorker' in navigator)) return {ok:false,controlled:false};
   try{
     const root=new URL('../', location.href);
-    const swUrl=new URL('app/sw.js', root);
-    const scope=new URL('app/', root).pathname;
-    const reg=await navigator.serviceWorker.register(swUrl.href,{scope,updateViaCache:'none'});
-    await reg.update().catch(()=>{});
-    await Promise.race([navigator.serviceWorker.ready,new Promise(resolve=>setTimeout(resolve,1400))]);
-    return true;
-  }catch(error){ console.warn('APP SW',error); return false; }
+    const swUrl=new URL('app/sw.js?v=0.22', root);
+    const reg=await navigator.serviceWorker.register(swUrl.href,{updateViaCache:'none'});
+    try{ await reg.update(); }catch(_error){}
+    try{ await Promise.race([navigator.serviceWorker.ready,new Promise(resolve=>setTimeout(resolve,3000))]); }catch(_error){}
+    const controlled=await waitForAppController(3500);
+    return {ok:true,controlled,registration:reg};
+  }catch(error){
+    console.warn('APP SW',error);
+    return {ok:false,controlled:false,error};
+  }
 }
+
+async function appPwaHealth(){
+  const root=new URL('../', location.href);
+  const result={secure:window.isSecureContext,manifest:false,icons:false,sw:false,controlled:!!navigator.serviceWorker?.controller};
+  try{
+    const response=await fetch(new URL('app/manifest.webmanifest?v=0.22',root).href,{cache:'no-store'});
+    const manifest=response.ok ? await response.json() : null;
+    result.manifest=!!(manifest && manifest.start_url && manifest.display && Array.isArray(manifest.icons));
+    if(manifest?.icons?.length){
+      const checks=await Promise.all(manifest.icons.map(async icon=>{
+        try{return (await fetch(new URL(icon.src,new URL('app/manifest.webmanifest',root)).href,{cache:'no-store'})).ok;}catch(_error){return false;}
+      }));
+      result.icons=checks.some(Boolean);
+    }
+  }catch(_error){}
+  try{
+    const reg=await navigator.serviceWorker?.getRegistration(new URL('app/',root).href);
+    result.sw=!!reg?.active;
+    result.controlled=!!navigator.serviceWorker?.controller;
+  }catch(_error){}
+  return result;
+}
+
 function showAppInstallMessage(message){
-  const status=$('#appInstallStatus'); if(status) status.textContent=message;
+  const status=$('#appInstallStatus');
+  if(status) status.textContent=message;
 }
+
 async function promptAppInstall(){
   if(appIsStandalone()) return;
-  let prompt=state.deferredPrompt || window.__appInstallPrompt;
+  const buttons=[$('#installBtn'),$('#homeInstallBtn')].filter(Boolean);
+  buttons.forEach(btn=>{btn.disabled=true;btn.textContent='PREPARANT…';});
+  showAppInstallMessage('Preparant la instal·lació…');
+
+  let prompt=getAppInstallPrompt();
   if(!prompt){
     await ensureAppServiceWorker();
-    prompt=state.deferredPrompt || window.__appInstallPrompt;
+    prompt=await waitForAppInstallPrompt(2600);
   }
+
   if(!prompt && /iPad|iPhone|iPod/.test(navigator.userAgent)){
+    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR APP';});
     alert('A Safari: prem Compartir i després “Afegir a la pantalla d’inici”.');
     return;
   }
+
   if(!prompt){
-    showAppInstallMessage('Chrome encara no ha ofert el diàleg. Recarrega una vegada aquesta pàgina i torna a prémer INSTAL·LAR APP.');
+    const health=await appPwaHealth();
+    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR APP';});
+    if(!health.secure) showAppInstallMessage('La instal·lació PWA necessita HTTPS.');
+    else if(!health.manifest || !health.icons) showAppInstallMessage('No s’ha pogut validar el manifest o les icones de la PWA.');
+    else if(!health.sw) showAppInstallMessage('El Service Worker encara no s’ha activat. Torna a prémer INSTAL·LAR APP en uns segons.');
+    else showAppInstallMessage('PWA validada. Chrome encara no ha lliurat el diàleg; torna a prémer INSTAL·LAR APP en uns segons.');
     return;
   }
+
   try{
     await prompt.prompt();
     const choice=await prompt.userChoice;
-    state.deferredPrompt=null; window.__appInstallPrompt=null;
+    state.deferredPrompt=null;
+    window.__appInstallPrompt=null;
     if(choice?.outcome==='accepted'){
       $('#appInstallCard')?.setAttribute('hidden','');
       if($('#installBtn')) $('#installBtn').hidden=true;
     }
+  }catch(error){
+    console.warn('No s’ha pogut obrir el diàleg d’instal·lació',error);
+    showAppInstallMessage('No s’ha pogut obrir el diàleg. Torna-ho a provar.');
+  }finally{
+    buttons.forEach(btn=>{btn.disabled=false;btn.textContent='INSTAL·LAR APP';});
     syncAppInstallUI();
-  }catch(error){ console.warn('No s’ha pogut obrir el diàleg d’instal·lació',error); syncAppInstallUI(); }
+  }
 }
+
 function bindPwaInstall(){
   state.deferredPrompt=window.__appInstallPrompt || state.deferredPrompt;
   syncAppInstallUI();
-  window.addEventListener('appinstallready',()=>{state.deferredPrompt=window.__appInstallPrompt || state.deferredPrompt;syncAppInstallUI();});
+  window.addEventListener('bandaappinstallready',()=>{
+    state.deferredPrompt=window.__appInstallPrompt || state.deferredPrompt;
+    syncAppInstallUI();
+  });
   window.addEventListener('beforeinstallprompt',event=>{
-    event.preventDefault(); state.deferredPrompt=event; window.__appInstallPrompt=event; syncAppInstallUI();
+    event.preventDefault();
+    state.deferredPrompt=event;
+    window.__appInstallPrompt=event;
+    syncAppInstallUI();
   });
   $('#installBtn')?.addEventListener('click',promptAppInstall);
   $('#homeInstallBtn')?.addEventListener('click',promptAppInstall);
   window.addEventListener('appinstalled',()=>{
-    state.deferredPrompt=null; window.__appInstallPrompt=null;
-    if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada'; syncAppInstallUI();
+    state.deferredPrompt=null;
+    window.__appInstallPrompt=null;
+    if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada';
+    syncAppInstallUI();
   });
-  setTimeout(syncAppInstallUI,1800);
+  setTimeout(syncAppInstallUI,1000);
 }
+
 function registerSW(){
   if(location.protocol === 'file:'){
-    if($('#pwaStatus')) $('#pwaStatus').textContent = 'Mode local · PWA activa quan es publiqui per HTTPS';
+    if($('#pwaStatus')) $('#pwaStatus').textContent='Mode local · PWA activa quan es publiqui per HTTPS';
     return;
   }
-  ensureAppServiceWorker().then(ok=>{
-    if($('#pwaStatus')) $('#pwaStatus').textContent=ok?'PWA preparada':'No s’ha pogut activar el Service Worker';
+  ensureAppServiceWorker().then(result=>{
+    if($('#pwaStatus')) $('#pwaStatus').textContent=result.ok?'PWA preparada':'No s’ha pogut activar el Service Worker';
     syncAppInstallUI();
   });
 }

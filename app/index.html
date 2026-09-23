@@ -11,33 +11,31 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="BANDA DE LA CALA" />
   <title>BANDA DE LA CALA</title>
-  <link rel="manifest" href="app/manifest.webmanifest" />
+  <link rel="manifest" href="app/manifest.webmanifest?v=0.22" />
   <script>
-    window.__appInstallPrompt = null;
+    // Captura immediata del prompt, igual que a la PWA estable de Disturbing Stories.
+    window.__appInstallPrompt = window.__appInstallPrompt || null;
     window.addEventListener('beforeinstallprompt', function(event){
       event.preventDefault();
       window.__appInstallPrompt = event;
-      window.dispatchEvent(new Event('appinstallready'));
+      window.dispatchEvent(new Event('bandaappinstallready'));
     });
     window.addEventListener('appinstalled', function(){ window.__appInstallPrompt = null; });
+
+    // Registre primerenc i simple: sense reload automàtic ni espera bloquejant.
     if (location.protocol !== 'file:' && 'serviceWorker' in navigator) {
       (async function(){
         try {
           var root = new URL('../', location.href);
-          var reg = await navigator.serviceWorker.register(new URL('app/sw.js', root).href, { scope: new URL('app/', root).pathname, updateViaCache: 'none' });
-          await reg.update().catch(function(){});
-          if (!navigator.serviceWorker.controller && !sessionStorage.getItem('banda-app-sw-reloaded-v021')) {
-            await Promise.race([navigator.serviceWorker.ready, new Promise(function(resolve){ setTimeout(resolve, 1200); })]);
-            sessionStorage.setItem('banda-app-sw-reloaded-v021','1');
-            location.reload();
-          }
+          var reg = await navigator.serviceWorker.register(new URL('app/sw.js?v=0.22', root).href, { updateViaCache: 'none' });
+          try { await reg.update(); } catch(_error) {}
         } catch(error) { console.warn('APP SW', error); }
       })();
     }
   </script>
-  <link rel="icon" href="assets/icons/icon-192.png" type="image/png" />
-  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon-180.png" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="app/icons/icon-192.png?v=0.22" type="image/png" />
+  <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.22" />
+  <link rel="stylesheet" href="style.css?v=0.22" />
 </head>
 <body>
   <section id="startScreen" class="screen start-screen active" aria-label="Inici">
@@ -281,12 +279,12 @@
     </section>
   </div>
 
-  <script src="version.js"></script>
-  <script src="config.js"></script>
-  <script src="data/content-published.js"></script>
-  <script src="content-store.js"></script>
+  <script src="version.js?v=0.22"></script>
+  <script src="config.js?v=0.22"></script>
+  <script src="data/content-published.js?v=0.22"></script>
+  <script src="content-store.js?v=0.22"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js"></script>
-  <script src="app.js"></script>
+  <script src="supabase-client.js?v=0.22"></script>
+  <script src="app.js?v=0.22"></script>
 </body>
 </html>
