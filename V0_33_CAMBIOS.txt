@@ -1,0 +1,22 @@
+BANDA DE LA CALA · v0.33
+===========================
+
+Base: v0.32
+
+CAMBIOS PRINCIPALES
+- HEMEROTECA: parrilla fija de 8 elementos por fila en DESKTOP para CARTELLS, NOTÍCIES y ENTREVISTES.
+- HEMEROTECA: parrilla fija de 4 elementos por fila en MOBILE.
+- Se mantiene el contenido visual completo, los colores por categoría, fechas, visor y enlaces; las tarjetas se compactan para funcionar correctamente con la nueva densidad.
+- PLAYER: PREV/NEXT dejan de depender visualmente de los glifos ⏮/⏭ y usan iconos geométricos centrados en sus botones.
+- TYPO / UI: integrado el nuevo JSON facilitado por el usuario en APP y EDITOR.
+- Cambios tipográficos respecto v0.32: eventDetail, dresscodeButton, actionButton y dressBody.
+- Actualizada toda la identificación/cache-busting de la release a v0.33.
+
+PRESERVADO
+- Arquitectura PWA/INSTALL del savepoint v0.23.
+- Auth/USERS/SMTP de la versión de control v0.29.
+- Manifest IDs, scopes y start_url de APP y EDITOR.
+- PLAYER, HISTÒRIC, CALENDARI y USER fuera de los ajustes indicados.
+
+SUPABASE
+No requiere SQL adicional.

@@ -169,7 +169,7 @@ body{background:linear-gradient(145deg,#c69237 0%,#d4ac5f 45%,#e2c277 100%)!impo
 .hemeroteca-editor-title{margin:30px 0 14px;padding-top:24px;border-top:1px solid rgba(139,98,40,.18)}.hemeroteca-editor-title h2{margin:4px 0 6px;font-size:1.7rem}.hemeroteca-editor-title p{margin:0;max-width:850px;color:var(--muted);line-height:1.5}.hemeroteca-editor-layout{margin-top:0}.hemeroteca-editor-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}.hemeroteca-editor-filters button{min-height:34px;padding:0 10px;border:1px solid rgba(139,98,40,.2);border-radius:999px;background:#fff;color:#8b6228;font-size:.68rem;font-weight:900;letter-spacing:.05em}.hemeroteca-editor-filters button.active{background:#393a86;border-color:#393a86;color:#fff}
 
 /* ============================================================
-   v0.32 · TYPO / UI LAB aplicado al EDITOR
+   v0.33 · TYPO / UI LAB aplicado al EDITOR
    ============================================================ */
 /* bodyText */
 body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:16px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
@@ -226,9 +226,9 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* eventTitle */
 .list-main h3{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:20px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* eventDetail */
-.list-main p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.list-main p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:21px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* dresscodeButton */
-.secondary-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.secondary-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* historyIntroTitle */
 .hemeroteca-editor-title h2{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:46px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* historyIntroText */
@@ -296,7 +296,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* passwordSummary */
 .helper-copy{font-family:Arial,sans-serif!important;font-size:16px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* actionButton */
-.secondary-btn,.ghost-btn,.danger-btn,.tiny-btn,.editor-logout-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
+.secondary-btn,.ghost-btn,.danger-btn,.tiny-btn,.editor-logout-btn{font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* modalTitle */
 .editor-install-help-card h2{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:42px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* modalSubtitle */
@@ -304,7 +304,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* dressHeading */
 .dress-sex-head h3{font-family:Arial,sans-serif!important;font-size:30px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* dressBody */
-.dress-item-row input,.dress-item-row select{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:26px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.dress-item-row input,.dress-item-row select{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:18px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* viewerCaptionTitle */
 .history-image-preview-item>span{font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* viewerCaptionText */
@@ -437,7 +437,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   /* passwordSummary */
   .helper-copy{font-family:Arial,sans-serif!important;font-size:15px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* actionButton */
-  .secondary-btn,.ghost-btn,.danger-btn,.tiny-btn,.editor-logout-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:13px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
+  .secondary-btn,.ghost-btn,.danger-btn,.tiny-btn,.editor-logout-btn{font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* modalTitle */
   .editor-install-help-card h2{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:22px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* modalSubtitle */

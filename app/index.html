@@ -14,7 +14,7 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.32" />
+  <link rel="stylesheet" href="style.css?v=0.33" />
 </head>
 <body>
   <section id="startScreen" class="screen start-screen active" aria-label="Inici">
@@ -185,9 +185,9 @@
             <h3 id="nowPlayingTitle">Cap pista seleccionada</h3>
             <p id="nowPlayingMeta">Selecciona una pista de la playlist.</p>
             <div class="player-controls">
-              <button id="prevTrack" class="icon-btn" aria-label="Pista anterior">⏮</button>
+              <button id="prevTrack" class="icon-btn" aria-label="Pista anterior"><span class="skip-glyph skip-glyph-prev" aria-hidden="true"><i class="skip-bar"></i><i class="skip-triangle"></i></span></button>
               <button id="playPause" class="play-btn" aria-label="Reproduir o pausar">▶</button>
-              <button id="nextTrack" class="icon-btn" aria-label="Pista següent">⏭</button>
+              <button id="nextTrack" class="icon-btn" aria-label="Pista següent"><span class="skip-glyph skip-glyph-next" aria-hidden="true"><i class="skip-triangle"></i><i class="skip-bar"></i></span></button>
             </div>
             <div class="playback-modes" aria-label="Modes de reproducció">
               <button id="repeatOneBtn" class="mode-btn" type="button" aria-pressed="false" title="Repetir una pista">↻1 <span>REPETIR 1</span></button>
@@ -310,12 +310,12 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.32"></script>
-  <script src="config.js?v=0.32"></script>
-  <script src="data/content-published.js?v=0.32"></script>
-  <script src="content-store.js?v=0.32"></script>
+  <script src="version.js?v=0.33"></script>
+  <script src="config.js?v=0.33"></script>
+  <script src="data/content-published.js?v=0.33"></script>
+  <script src="content-store.js?v=0.33"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.32"></script>
-  <script src="app.js?v=0.32"></script>
+  <script src="supabase-client.js?v=0.33"></script>
+  <script src="app.js?v=0.33"></script>
 </body>
 </html>

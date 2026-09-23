@@ -583,7 +583,7 @@ button,a,input{touch-action:manipulation}
 
 
 /* ============================================================
-   v0.32 · TYPO / UI LAB aplicado desde JSON adjunto
+   v0.33 · TYPO / UI LAB aplicado desde JSON adjunto
    Desktop base + mobile <= 780px
    ============================================================ */
 /* bodyText */
@@ -641,9 +641,9 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* eventTitle */
 .event-card h4{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:20px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* eventDetail */
-.event-card p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.event-card p{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:21px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* dresscodeButton */
-.dresscode-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:12px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.dresscode-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* historyIntroTitle */
 .history-intro h3{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:46px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* historyIntroText */
@@ -711,7 +711,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* passwordSummary */
 .user-password-details>summary strong{font-family:Arial,sans-serif!important;font-size:16px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* actionButton */
-.user-password-btn,.user-logout-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:14px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
+.user-password-btn,.user-logout-btn{font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* modalTitle */
 .dresscode-sheet>h2{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:42px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* modalSubtitle */
@@ -719,7 +719,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* dressHeading */
 .dresscode-grid h3{font-family:Arial,sans-serif!important;font-size:30px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
 /* dressBody */
-.dresscode-text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:26px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
+.dresscode-text{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:18px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* viewerCaptionTitle */
 .history-image-caption strong{font-family:Arial,sans-serif!important;font-size:14px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
 /* viewerCaptionText */
@@ -852,7 +852,7 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   /* passwordSummary */
   .user-password-details>summary strong{font-family:Arial,sans-serif!important;font-size:15px!important;font-weight:400!important;font-style:normal!important;text-decoration:none!important;}
   /* actionButton */
-  .user-password-btn,.user-logout-btn{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:13px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
+  .user-password-btn,.user-logout-btn{font-family:Arial,sans-serif!important;font-size:13px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* modalTitle */
   .dresscode-sheet>h2{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;font-size:22px!important;font-weight:700!important;font-style:normal!important;text-decoration:none!important;}
   /* modalSubtitle */
@@ -958,3 +958,73 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 }
 /* v0.32 · empty state dins masonry */
 .hemeroteca-grid .hemeroteca-empty{column-span:all;width:100%;display:block}
+
+
+/* ============================================================
+   v0.33 · HEMEROTECA 8/4 + PLAYER PREV/NEXT centrat
+   ============================================================ */
+/* HEMEROTECA: graella fixa de 8 elements per fila en desktop. */
+.hemeroteca-grid{
+  display:grid!important;
+  columns:auto!important;
+  grid-template-columns:repeat(8,minmax(0,1fr))!important;
+  gap:10px!important;
+  align-items:start!important;
+}
+.hemeroteca-grid .hemeroteca-card{
+  display:block!important;
+  width:auto!important;
+  min-width:0!important;
+  margin:0!important;
+  break-inside:auto!important;
+  page-break-inside:auto!important;
+  border-radius:12px!important;
+}
+.hemeroteca-grid .hemeroteca-card-copy{padding:9px 8px 10px!important}
+.hemeroteca-grid .hemeroteca-card-meta{display:block!important;font-size:.52rem!important;line-height:1.25!important}
+.hemeroteca-grid .hemeroteca-card-meta strong{display:block!important;margin-top:3px;text-align:left!important;font-size:.54rem!important}
+.hemeroteca-grid .hemeroteca-card h4{margin:6px 0 4px!important;font-size:.76rem!important;line-height:1.15!important;overflow-wrap:anywhere}
+.hemeroteca-grid .hemeroteca-card p{margin:0 0 7px!important;font-size:.64rem!important;line-height:1.3!important;overflow-wrap:anywhere}
+.hemeroteca-grid .hemeroteca-link{min-height:27px!important;padding:0 7px!important;border-radius:7px!important;font-size:.54rem!important}
+.hemeroteca-grid .hemeroteca-link-thumb{min-height:108px!important;padding:10px!important;gap:8px!important;flex-direction:column!important;text-align:center!important}
+.hemeroteca-grid .hemeroteca-link-thumb-icon{width:42px!important;height:42px!important;flex-basis:42px!important;border-radius:12px!important;font-size:1.25rem!important}
+.hemeroteca-grid .hemeroteca-link-thumb-icon img{width:27px!important;height:27px!important}
+.hemeroteca-grid .hemeroteca-link-thumb strong{font-size:.7rem!important;line-height:1.15!important;overflow-wrap:anywhere}
+.hemeroteca-grid .hemeroteca-link-thumb small{font-size:.52rem!important;line-height:1.2!important;overflow-wrap:anywhere}
+.hemeroteca-grid .hemeroteca-empty{grid-column:1/-1!important;column-span:none!important}
+
+/* PLAYER: glifs geomètrics amb centrament independent de la tipografia del sistema. */
+#prevTrack,#nextTrack{
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+  line-height:1!important;
+}
+.skip-glyph{display:flex;align-items:center;justify-content:center;gap:2px;width:18px;height:16px;margin:0 auto;line-height:1}
+.skip-glyph i{display:block;flex:0 0 auto}
+.skip-bar{width:3px;height:14px;border-radius:1px;background:currentColor}
+.skip-triangle{width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent}
+.skip-glyph-prev .skip-triangle{border-right:11px solid currentColor}
+.skip-glyph-next .skip-triangle{border-left:11px solid currentColor}
+
+@media(max-width:780px){
+  /* HEMEROTECA: 4 elements per fila en mobile. */
+  .hemeroteca-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important}
+  .hemeroteca-grid .hemeroteca-card{border-radius:9px!important;border-top-width:3px!important}
+  .hemeroteca-grid .hemeroteca-card-copy{padding:6px 5px 7px!important}
+  .hemeroteca-grid .hemeroteca-card-meta{font-size:.44rem!important}
+  .hemeroteca-grid .hemeroteca-card-meta strong{font-size:.46rem!important;margin-top:2px}
+  .hemeroteca-grid .hemeroteca-card h4{margin:4px 0 3px!important;font-size:.61rem!important;line-height:1.1!important}
+  .hemeroteca-grid .hemeroteca-card p{margin-bottom:5px!important;font-size:.52rem!important;line-height:1.22!important}
+  .hemeroteca-grid .hemeroteca-link{min-height:23px!important;padding:0 5px!important;font-size:.45rem!important}
+  .hemeroteca-grid .hemeroteca-link-thumb{min-height:78px!important;padding:7px 4px!important;gap:5px!important}
+  .hemeroteca-grid .hemeroteca-link-thumb-icon{width:32px!important;height:32px!important;flex-basis:32px!important;border-radius:9px!important}
+  .hemeroteca-grid .hemeroteca-link-thumb-icon img{width:21px!important;height:21px!important}
+  .hemeroteca-grid .hemeroteca-link-thumb strong{font-size:.56rem!important}
+  .hemeroteca-grid .hemeroteca-link-thumb small{font-size:.43rem!important}
+  .skip-glyph{width:17px;height:15px;gap:2px}
+  .skip-bar{width:3px;height:13px}
+  .skip-triangle{border-top-width:6.5px;border-bottom-width:6.5px}
+  .skip-glyph-prev .skip-triangle{border-right-width:10px}
+  .skip-glyph-next .skip-triangle{border-left-width:10px}
+}

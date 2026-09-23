@@ -1,4 +1,4 @@
-BANDA DE LA CALA · PATCH v0.31 → v0.32
+BANDA DE LA CALA · PATCH v0.32 → v0.33
 ======================================
 
 SOBRESCRIBIR EN GITHUB
@@ -6,7 +6,6 @@ SOBRESCRIBIR EN GITHUB
 - app/sw.js
 - app.js
 - config.js
-- content-store.js
 - editor/index.html
 - editor/sw.js
 - editor.css
@@ -14,11 +13,11 @@ SOBRESCRIBIR EN GITHUB
 - style.css
 - version.js
 - README.txt
+- PATCH_README.txt
 
 AÑADIR
-- BANDA_DE_LA_CALA_TYPO_UI_v0.32.json
-- V0_32_CAMBIOS.txt
-- SUPABASE_v0.32_PASOS.txt
+- BANDA_DE_LA_CALA_TYPO_UI_v0.33.json
+- V0_33_CAMBIOS.txt
 
 NO TOCAR
 - app/manifest.webmanifest
@@ -28,10 +27,12 @@ NO TOCAR
 - assets/AUDIO/
 - Edge Function create-band-user
 - SMTP/Auth de Supabase
+- buckets/storage existentes
 
 SUPABASE
-No hay SQL nuevo que ejecutar en v0.32.
-Debe mantenerse aplicado SUPABASE_UPDATE_v0.31.sql.
+No hay SQL nuevo que ejecutar en v0.33.
 
-NOTA
-Las imágenes nuevas de HEMEROTECA siguen utilizando el bucket historic-media.
+CAMBIOS VISIBLES
+- HEMEROTECA: 8 elementos/fila DESKTOP y 4 elementos/fila MOBILE.
+- PLAYER: PREV/NEXT centrados geométricamente.
+- TYPO/UI: nuevo JSON aplicado a APP + EDITOR.
