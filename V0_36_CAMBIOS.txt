@@ -1,0 +1,22 @@
+BANDA DE LA CALA · v0.36
+Fecha: 24/09/2026
+
+CAMBIOS
+1. PLAYER · BARRAS ANIMADAS
+- Corregido el fallo real de v0.34/v0.35: transform:scaleY(1)!important bloqueaba visualmente los keyframes.
+- La animación deja de depender de transform/keyframes CSS.
+- app.js anima directamente y/height de las 5 barras SVG mediante requestAnimationFrame.
+- Se aplica a TODOS los iconos PLAYER presentes en la UI, incluido el icono dentro del círculo del reproductor.
+- Barras quietas sin reproducción, pausa, fin, buffering o MUTE.
+- Barras animadas cuando audioPlayer reproduce realmente una pista audible de la playlist.
+
+2. BANDALOGO.JPG
+- Aumentada la escala visual a 75 en HOME y USER.
+- Conserva proporción natural.
+
+3. RELEASE
+- version.js -> v0.36.
+- Service Workers / cache -> v0.36.
+- Cache-busting HTML -> v0.36.
+- IDs/scopes/start_url de manifests sin cambios.
+- Sin cambios en Supabase, SMTP, roles ni Edge Functions.

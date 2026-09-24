@@ -752,10 +752,74 @@ function playlistAudioIsAudible(){
   return !player.paused && !player.ended && hasAudioData && !state.globalMuted && !player.muted && player.volume>0;
 }
 
+/*
+ * v0.36 · Animació robusta de les barres del PLAYER.
+ *
+ * Les versions 0.34/0.35 activaven correctament la classe is-playing,
+ * però un transform:scaleY(1)!important del CSS bloquejava el transform
+ * dels keyframes. Per evitar qualsevol conflicte de cascada CSS (i donar
+ * el mateix comportament a TOTS els iconos PLAYER), ara animem directament
+ * la geometria SVG (y + height) amb requestAnimationFrame.
+ */
+let playerBarsAnimationFrame = 0;
+const PLAYER_BAR_PHASES = [0.0, 1.35, 2.55, 3.8, 5.05];
+const PLAYER_BAR_SPEEDS = [1.70, 1.18, 1.48, 1.02, 1.34];
+
+function initPlayerBarGeometry(bar){
+  if(bar.dataset.baseHeight) return;
+  const y=Number(bar.getAttribute('y'));
+  const height=Number(bar.getAttribute('height'));
+  if(!Number.isFinite(y) || !Number.isFinite(height)) return;
+  bar.dataset.baseY=String(y);
+  bar.dataset.baseHeight=String(height);
+  bar.dataset.baseBottom=String(y+height);
+}
+
+function resetPlayerBars(){
+  document.querySelectorAll('.icon-playlist .bar').forEach(bar=>{
+    initPlayerBarGeometry(bar);
+    const y=Number(bar.dataset.baseY);
+    const height=Number(bar.dataset.baseHeight);
+    if(Number.isFinite(y)) bar.setAttribute('y',String(y));
+    if(Number.isFinite(height)) bar.setAttribute('height',String(height));
+  });
+}
+
+function animatePlayerBars(timestamp){
+  if(!playlistAudioIsAudible()){
+    playerBarsAnimationFrame=0;
+    resetPlayerBars();
+    return;
+  }
+  const time=timestamp/1000;
+  document.querySelectorAll('.icon-playlist .bar').forEach((bar,index)=>{
+    initPlayerBarGeometry(bar);
+    const baseHeight=Number(bar.dataset.baseHeight);
+    const bottom=Number(bar.dataset.baseBottom);
+    if(!Number.isFinite(baseHeight) || !Number.isFinite(bottom)) return;
+    const match=String(bar.getAttribute('class')||'').match(/\bb([1-5])\b/);
+    const slot=match ? Number(match[1])-1 : index%5;
+    const wave=(Math.sin((time*PLAYER_BAR_SPEEDS[slot]*Math.PI*2)+PLAYER_BAR_PHASES[slot])+1)/2;
+    const scale=.28 + (.72*wave);
+    const height=Math.max(2.2,baseHeight*scale);
+    const y=bottom-height;
+    bar.setAttribute('height',height.toFixed(3));
+    bar.setAttribute('y',y.toFixed(3));
+  });
+  playerBarsAnimationFrame=requestAnimationFrame(animatePlayerBars);
+}
+
 function syncPlayerEqualizers(forcePlaying=null){
   const playing=forcePlaying===null ? playlistAudioIsAudible() : !!forcePlaying;
   document.querySelectorAll('.icon-playlist').forEach(icon=>icon.classList.toggle('is-playing',playing));
   document.documentElement.classList.toggle('playlist-audio-playing',playing);
+  if(playing){
+    if(!playerBarsAnimationFrame) playerBarsAnimationFrame=requestAnimationFrame(animatePlayerBars);
+  }else{
+    if(playerBarsAnimationFrame) cancelAnimationFrame(playerBarsAnimationFrame);
+    playerBarsAnimationFrame=0;
+    resetPlayerBars();
+  }
 }
 
 function setPlayIcon(){
@@ -1172,7 +1236,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.34',root).href;
+    const swUrl=new URL('app/sw.js?v=0.36',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

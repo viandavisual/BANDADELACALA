@@ -1156,3 +1156,45 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   .user-band-logo img{max-width:52vw;max-height:60px}
   .user-logout-btn{margin-top:12px!important}
 }
+
+
+/* ============================================================
+   v0.36 · PLAYER bars fix definitiu + logo banda escala 75
+   ============================================================ */
+/*
+ * IMPORTANT: la geometria de les barres PLAYER s'anima des d'app.js
+ * modificant directament y/height. Això evita el bloqueig que produïa
+ * transform:scaleY(1)!important sobre els keyframes de v0.34/v0.35.
+ */
+.icon-playlist .bar,
+.icon-playlist.is-playing .bar,
+.record-icon .bar,
+.record-icon.is-playing .bar,
+.record-art.is-playing .record-icon .bar,
+.player-card.is-playing .record-icon .bar{
+  animation:none!important;
+  transform:none!important;
+  transform-origin:50% 100%!important;
+}
+
+/* bandalogo.jpg: escala visual solicitada 20 -> 75. */
+.band-logo-block img{
+  width:75%!important;
+  max-width:900px!important;
+  max-height:none!important;
+  height:auto!important;
+}
+.user-band-logo img{
+  width:75%!important;
+  max-width:720px!important;
+  max-height:none!important;
+}
+@media(max-width:780px){
+  .band-logo-block img,
+  .user-band-logo img{
+    width:75%!important;
+    max-width:75vw!important;
+    max-height:none!important;
+    height:auto!important;
+  }
+}

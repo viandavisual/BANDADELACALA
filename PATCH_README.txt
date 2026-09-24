@@ -1,36 +1,36 @@
-BANDA DE LA CALA · v0.35
-PATCH DESDE v0.34
+BANDA DE LA CALA · PATCH v0.36 DESDE v0.35
+Fecha: 24/09/2026
 
-SOBRESCRIBIR:
-- app.js
-- style.css
-- editor.css
-- version.js
-- app/index.html
-- app/sw.js
-- editor/index.html
-- editor/sw.js
+APLICACIÓN
+1. Parte de una instalación v0.35 correcta.
+2. Sobrescribe exactamente estos archivos:
+   - app.js
+   - style.css
+   - config.js
+   - version.js
+   - app/index.html
+   - app/sw.js
+   - editor/index.html
+   - editor/sw.js
+   - editor.js
+3. Añade:
+   - V0_36_CAMBIOS.txt
+4. Conserva assets/bandalogo.jpg en su ubicación actual del repositorio.
 
-AÑADIR:
-- V0_35_CAMBIOS.txt
+NO TOCAR
+- manifest.webmanifest de APP ni EDITOR.
+- IDs PWA, scopes ni start_url.
+- Supabase / SMTP / Edge Functions.
+- tablas, buckets, auth ni roles.
 
-ASSET YA EXISTENTE EN EL PROYECTO:
-- assets/bandalogo.jpg
-  La v0.35 lo referencia en HOME y USER. Este archivo no venía dentro del FULL v0.34 recibido, por lo que no se incluye en este PATCH. Debe conservarse en esa ruta del repositorio.
+CAMBIO CRÍTICO DEL PLAYER
+- v0.34/v0.35 sí activaban is-playing, pero transform:scaleY(1)!important impedía que los keyframes modificaran visualmente las barras.
+- v0.36 deja de usar transform/keyframes para este icono.
+- app.js modifica directamente y/height de cada rectángulo SVG mediante requestAnimationFrame mientras audioPlayer está reproduciendo una pista audible.
+- Al pausar, terminar, entrar en buffering o silenciar, las barras vuelven a su geometría original y quedan quietas.
 
-NO TOCAR:
-- app/manifest.webmanifest
-- editor/manifest.webmanifest
-- manifest.webmanifest
-- editor-manifest.webmanifest
-- Supabase / Edge Functions / SQL
-- configuración SMTP
-- assets de audio existentes
+BANDALOGO
+- Escala visual aumentada a 75% en HOME y USER.
 
-CAMBIOS PRINCIPALES:
-1) PLAYER: las barras de TODOS los iconos PLAYER se animan solo cuando el audio real de la playlist está reproduciéndose y es audible; quedan quietas en pausa, espera, fin o MUTE.
-2) EDITOR / DRESSCODE: eliminado el texto auxiliar indicado y desplegables de prendas compactados aproximadamente al 50%.
-3) CALENDARI MOBILE: calendario y detalle compactados para reducir scroll; DESKTOP no cambia.
-4) HOME + USER: añadido assets/bandalogo.jpg en las posiciones solicitadas.
-5) USER: borde azul marino corporativo en avatares circulares activos.
-6) PWA: versión/cache actualizada a v0.35 sin cambiar IDs, scopes ni start_url.
+VERSIÓN
+- v0.36
