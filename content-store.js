@@ -42,8 +42,9 @@
       subtitle: item.subtitle || 'Uniforme de banda',
       boys: item.boys || '',
       girls: item.girls || '',
-      boysItems: Array.isArray(item.boysItems) ? item.boysItems.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||''})) : [],
-      girlsItems: Array.isArray(item.girlsItems) ? item.girlsItems.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||''})) : []
+      other: item.other || '',
+      boysItems: Array.isArray(item.boysItems) ? item.boysItems.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||'',detail:x.detail||''})) : [],
+      girlsItems: Array.isArray(item.girlsItems) ? item.girlsItems.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||'',detail:x.detail||''})) : []
     })) : [];
     base.historicItems = Array.isArray(base.historicItems) ? base.historicItems.map((item,index)=>{
       const legacyImage = item.imageSrc || item.image || item.src || '';

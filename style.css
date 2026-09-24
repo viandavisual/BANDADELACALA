@@ -1276,3 +1276,41 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 @media(prefers-reduced-motion:reduce){
   .band-logo-block img{animation:none!important;transform:none!important}
 }
+
+
+/* ============================================================
+   v0.39 · FLAG intensa + HOME compacta + crèdits sidebar + DRESSCODE
+   ============================================================ */
+/* FLAG: ondulació més visible i freqüent. */
+.band-logo-block{perspective:720px;overflow:visible}
+.band-logo-block img{
+  transform-origin:8% 50%!important;
+  animation:bandLogoFlagWaveV039 1.55s cubic-bezier(.45,.05,.55,.95) infinite!important;
+}
+@keyframes bandLogoFlagWaveV039{
+  0%,100%{transform:perspective(720px) rotateY(-7deg) skewY(-1.3deg) rotateZ(-.35deg) translate3d(0,0,0) scaleX(.986)}
+  12.5%{transform:perspective(720px) rotateY(3deg) skewY(.9deg) rotateZ(.22deg) translate3d(1.2px,-1.4px,0) scaleX(1.008)}
+  25%{transform:perspective(720px) rotateY(8deg) skewY(1.7deg) rotateZ(.48deg) translate3d(2px,-.4px,0) scaleX(.982)}
+  37.5%{transform:perspective(720px) rotateY(1deg) skewY(.2deg) rotateZ(.05deg) translate3d(.8px,1.3px,0) scaleX(1.012)}
+  50%{transform:perspective(720px) rotateY(-8.5deg) skewY(-1.8deg) rotateZ(-.5deg) translate3d(-1.6px,.3px,0) scaleX(.981)}
+  62.5%{transform:perspective(720px) rotateY(-2deg) skewY(-.35deg) rotateZ(-.08deg) translate3d(-.6px,-1.2px,0) scaleX(1.01)}
+  75%{transform:perspective(720px) rotateY(7deg) skewY(1.45deg) rotateZ(.38deg) translate3d(1.7px,.2px,0) scaleX(.984)}
+  87.5%{transform:perspective(720px) rotateY(2deg) skewY(.35deg) rotateZ(.08deg) translate3d(.5px,1px,0) scaleX(1.007)}
+}
+@media(prefers-reduced-motion:reduce){.band-logo-block img{animation:none!important;transform:none!important}}
+
+/* Crèdits també a la columna esquerra DESKTOP. */
+.sidebar-credits{color:var(--muted);font-size:.68rem;line-height:1.5;padding-top:2px}
+.sidebar-credits>div:last-child{font-size:.64rem;color:#8c8781}
+
+/* HOME: icona i títol formen un únic bloc visual, sense buit excessiu. */
+.home-card{justify-content:flex-start!important;gap:9px!important}
+.home-card>div{margin-top:0!important}
+.home-card h4{margin:5px 0 5px!important}
+.home-card .status-pill+h4{margin-top:7px!important}
+@media(min-width:781px){.home-grid.five-cards .home-card h4{margin-top:5px!important}}
+@media(max-width:780px) and (min-width:441px){.home-card h4{margin-top:4px!important}}
+
+/* Dresscode APP: nota ALTRES comuna. */
+.dresscode-other-view{margin-top:14px;border:1px solid var(--line);border-radius:18px;padding:18px;background:linear-gradient(145deg,#fff,#fdfaf4)}
+.dresscode-other-view h3{margin:0 0 8px;font-family:Arial,sans-serif}

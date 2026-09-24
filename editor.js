@@ -39,30 +39,40 @@ let hemerotecaEditorFilter = 'all';
 
 const DRESS_DEFS = [
   {key:'shirt', label:'CAMISA', options:[
-    ['white_short','CAMISA BLANCA MÀNIGA CURTA','Camisa blanca màniga curta ⚪️'],
-    ['white_long','CAMISA BLANCA MÀNIGA LLARGA','Camisa blanca màniga llarga ⚪️'],
-    ['black','CAMISA NEGRA','Camisa negra ⚫️']
+    {id:'white_long',label:'MÀNIGA LLARGA · BLANCA',text:'Camisa blanca de màniga llarga'},
+    {id:'black_long',label:'MÀNIGA LLARGA · NEGRA',text:'Camisa negra de màniga llarga'},
+    {id:'white_short',label:'MÀNIGA CURTA · BLANCA',text:'Camisa blanca de màniga curta'},
+    {id:'black_short',label:'MÀNIGA CURTA · NEGRA',text:'Camisa negra de màniga curta'}
   ]},
-  {key:'bottom', label:'PANTALÓ / FALDILLA', options:[
-    ['suit_trousers','PANTALONS DEL TRATGE','Pantalons del tratge 👖'],
-    ['skirt','FALDILLA DEL TRATGE','Faldilla del tratge ⚫️'],
-    ['jeans','TEJANOS','Tejanos 👖']
+  {key:'bottom', label:'PANTALÓ/FALDILLA', optionsBySex:{
+    boys:[
+      {id:'suit_trousers',label:'PANTALONS DEL TRATGE (NEGRE)',text:'Pantalons del tratge (negre)'},
+      {id:'jeans',label:'TEXANS (NORMALS)',text:'Texans (normals)'}
+    ],
+    girls:[
+      {id:'skirt',label:'FALDILLA DEL TRATGE',text:'Faldilla del tratge'},
+      {id:'denim_bottom',label:'FALDILLA O PANTALÓ TEXÀ (NORMAL)',text:'Faldilla o pantaló texà (normal)'}
+    ]
+  }},
+  {key:'socks', label:'MITJA/MITJÓ', customPreset:'other', options:[
+    {id:'black',label:'NEGRES',textBySex:{boys:'Mitjons negres',girls:'Mitges negres'}},
+    {id:'other',label:'ALTRES (ESPECIFICA)',textBySex:{boys:'Altres mitjons',girls:'Altres mitges'}}
+  ]},
+  {key:'jacket', label:'AMERICANA', options:[
+    {id:'yes',label:'SÍ',text:'Americana: sí'},
+    {id:'no',label:'NO',text:'Americana: no'}
   ]},
   {key:'footwear', label:'CALÇAT', options:[
-    ['black','CALÇAT NEGRE (NI ESPORTIU NI CONVERSE)','Calçat negre, no esportiu, no Converse ⚫️⛔']
+    {id:'black',label:'CALÇAT NEGRE (NO ES PERMET ESPORTIU NI CONVERSE)',text:'Calçat negre (no es permet esportiu ni Converse)'}
   ]},
-  {key:'socks', label:'MITJONS', options:[
-    ['black','MITJONS NEGRES','Mitjons negres ⚫️'],
-    ['none','SENSE INDICACIÓ','']
-  ]},
-  {key:'tie', label:'CORBATA', options:[
-    ['tie','CORBATA I PINZA','Corbata i pinza 👔'],
-    ['none','SENSE CORBATA','Sense corbata']
+  {key:'tie', label:'CORBATA + PINZA', options:[
+    {id:'yes',label:'SÍ',text:'Corbata + pinza: sí'},
+    {id:'no',label:'NO',text:'Corbata + pinza: no'}
   ]}
 ];
 const DEFAULT_DRESS_PRESETS = {
-  boys:{shirt:'white_short',bottom:'suit_trousers',footwear:'black',socks:'black',tie:'tie'},
-  girls:{shirt:'white_short',bottom:'skirt',footwear:'black',socks:'none',tie:'tie'}
+  boys:{shirt:'white_short',bottom:'suit_trousers',socks:'black',jacket:'no',footwear:'black',tie:'yes'},
+  girls:{shirt:'white_short',bottom:'skirt',socks:'black',jacket:'no',footwear:'black',tie:'yes'}
 };
 
 const views = {
@@ -298,45 +308,76 @@ function renderDresscodeEventOptions(){
   if(current && events.some(e=>e.id===current)) $('#dresscodeEvent').value=current;
 }
 function dressDef(key){ return DRESS_DEFS.find(def=>def.key===key); }
-function optionText(def,preset){ const option=def.options.find(opt=>opt[0]===preset) || def.options[0]; return option?.[2] ?? ''; }
+function dressOptions(def,sex){ return def?.optionsBySex?.[sex] || def?.options || []; }
+function dressOption(def,preset,sex){ const options=dressOptions(def,sex); return options.find(opt=>opt.id===preset) || options[0]; }
+function optionText(def,preset,sex,detail=''){
+  const option=dressOption(def,preset,sex); if(!option) return '';
+  if(def.customPreset && preset===def.customPreset){
+    const clean=String(detail||'').trim();
+    if(clean) return sex==='girls' ? `Mitges: ${clean}` : `Mitjons: ${clean}`;
+  }
+  return option.textBySex?.[sex] ?? option.text ?? '';
+}
 function normalizeDressItems(items,sex,legacyText=''){
   const incoming=Array.isArray(items)?items:[];
   const legacyLines=String(legacyText||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
-  return DRESS_DEFS.map((def,index)=>{
+  return DRESS_DEFS.map(def=>{
     const found=incoming.find(item=>item.key===def.key);
-    const preset=found?.preset || DEFAULT_DRESS_PRESETS[sex][def.key] || def.options[0][0];
-    let text=typeof found?.text==='string'?found.text:optionText(def,preset);
+    const options=dressOptions(def,sex);
+    let preset=found?.preset || DEFAULT_DRESS_PRESETS[sex][def.key] || options[0]?.id || '';
+    // Compatibilitat amb presets antics.
+    const legacyPresetMap={white_short:'white_short',white_long:'white_long',black:'black_long',tie:'yes',none:'no'};
+    if(def.key==='bottom' && sex==='girls' && preset==='jeans') preset='denim_bottom';
+    if(!options.some(opt=>opt.id===preset) && legacyPresetMap[preset] && options.some(opt=>opt.id===legacyPresetMap[preset])) preset=legacyPresetMap[preset];
+    if(!options.some(opt=>opt.id===preset)) preset=options[0]?.id||'';
+    const detail=typeof found?.detail==='string'?found.detail:'';
+    let text=typeof found?.text==='string'&&found.text.trim()?found.text:optionText(def,preset,sex,detail);
     if(!incoming.length && legacyLines.length){
       const legacyMap=sex==='girls'&&legacyLines.length===4?{shirt:0,bottom:1,footwear:2,tie:3}:{shirt:0,bottom:1,footwear:2,socks:3,tie:4};
       const legacyIndex=legacyMap[def.key]; if(Number.isInteger(legacyIndex)&&legacyLines[legacyIndex]) text=legacyLines[legacyIndex];
     }
-    return {key:def.key,preset,text};
+    return {key:def.key,preset,text,detail};
   });
+}
+function syncDressCustomRow(row,sex,{forceText=false}={}){
+  if(!row) return;
+  const def=dressDef(row.dataset.key); const select=row.querySelector('.dress-preset'); const detailWrap=row.querySelector('.dress-detail-wrap'); const detailInput=row.querySelector('.dress-detail'); const finalInput=row.querySelector('.dress-final-text');
+  const isCustom=!!def?.customPreset && select?.value===def.customPreset;
+  if(detailWrap) detailWrap.hidden=!isCustom;
+  if(isCustom && detailInput){ detailInput.required=true; }
+  else if(detailInput){ detailInput.required=false; }
+  if(finalInput && (forceText || !finalInput.value.trim())) finalInput.value=optionText(def,select?.value,sex,detailInput?.value||'');
 }
 function renderDressItems(sex,items){
   const target=$(`#${sex}DressItems`); if(!target) return;
   target.innerHTML=normalizeDressItems(items,sex).map(item=>{
-    const def=dressDef(item.key); const opts=def.options.map(opt=>`<option value="${esc(opt[0])}" ${opt[0]===item.preset?'selected':''}>${esc(opt[1])}</option>`).join('');
-    return `<div class="dress-item-row" data-dress-row="${sex}" data-key="${esc(item.key)}"><label>${esc(def.label)}<select class="dress-preset">${opts}</select></label><label>TEXT FINAL<input class="dress-final-text" maxlength="180" value="${esc(item.text)}" placeholder="Text que veuran els músics" /></label></div>`;
+    const def=dressDef(item.key); const options=dressOptions(def,sex); const opts=options.map(opt=>`<option value="${esc(opt.id)}" ${opt.id===item.preset?'selected':''}>${esc(opt.label)}</option>`).join('');
+    const detailField=def.customPreset?`<label class="dress-detail-wrap" ${item.preset===def.customPreset?'':'hidden'}>ESPECIFICA<input class="dress-detail" maxlength="120" value="${esc(item.detail||'')}" placeholder="Indica color / tipus" /></label>`:'';
+    return `<div class="dress-item-row" data-dress-row="${sex}" data-key="${esc(item.key)}"><label>${esc(def.label)}<select class="dress-preset">${opts}</select></label>${detailField}<label>TEXT FINAL<input class="dress-final-text" maxlength="180" value="${esc(item.text)}" placeholder="Text que veuran els músics" /></label></div>`;
   }).join('');
-  target.querySelectorAll('.dress-preset').forEach(select=>select.addEventListener('change',()=>{ const row=select.closest('.dress-item-row'); const def=dressDef(row.dataset.key); row.querySelector('.dress-final-text').value=optionText(def,select.value); }));
+  target.querySelectorAll('[data-dress-row]').forEach(row=>{
+    const select=row.querySelector('.dress-preset'); const detail=row.querySelector('.dress-detail');
+    select?.addEventListener('change',()=>syncDressCustomRow(row,sex,{forceText:true}));
+    detail?.addEventListener('input',()=>syncDressCustomRow(row,sex,{forceText:true}));
+    syncDressCustomRow(row,sex);
+  });
 }
 function collectDressItems(sex){
-  return [...document.querySelectorAll(`[data-dress-row="${sex}"]`)].map(row=>({key:row.dataset.key,preset:row.querySelector('.dress-preset').value,text:row.querySelector('.dress-final-text').value.trim()}));
+  return [...document.querySelectorAll(`[data-dress-row="${sex}"]`)].map(row=>({key:row.dataset.key,preset:row.querySelector('.dress-preset').value,text:row.querySelector('.dress-final-text').value.trim(),detail:row.querySelector('.dress-detail')?.value.trim()||''}));
 }
 function itemsToText(items){ return (items||[]).map(item=>item.text?.trim()).filter(Boolean).join('\n'); }
 function resetDresscodeForm(){
-  $('#dresscodeForm').reset(); $('#dresscodeId').value=''; $('#dresscodeFormTitle').textContent='Nou dresscode'; $('#dresscodeTitle').value='Dress code - diada'; $('#dresscodeSubtitle').value='Uniforme de banda';
+  $('#dresscodeForm').reset(); $('#dresscodeId').value=''; $('#dresscodeFormTitle').textContent='Nou dresscode'; $('#dresscodeTitle').value='Dress code - diada'; $('#dresscodeSubtitle').value='Uniforme de banda'; $('#dresscodeOther').value='';
   renderDressItems('boys',normalizeDressItems([], 'boys')); renderDressItems('girls',normalizeDressItems([], 'girls')); renderDresscodeEventOptions();
 }
 function editDresscode(id){
-  const d=(content.dresscodes||[]).find(x=>x.id===id); if(!d) return; $('#dresscodeId').value=d.id; renderDresscodeEventOptions(); $('#dresscodeEvent').value=d.eventId||''; $('#dresscodeTitle').value=d.title||''; $('#dresscodeSubtitle').value=d.subtitle||'';
+  const d=(content.dresscodes||[]).find(x=>x.id===id); if(!d) return; $('#dresscodeId').value=d.id; renderDresscodeEventOptions(); $('#dresscodeEvent').value=d.eventId||''; $('#dresscodeTitle').value=d.title||''; $('#dresscodeSubtitle').value=d.subtitle||''; $('#dresscodeOther').value=d.other||'';
   renderDressItems('boys',normalizeDressItems(d.boysItems,'boys',d.boys)); renderDressItems('girls',normalizeDressItems(d.girlsItems,'girls',d.girls)); $('#dresscodeFormTitle').textContent='Editar dresscode'; $('#dresscodeForm').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function deleteDresscode(id){ const d=(content.dresscodes||[]).find(x=>x.id===id); if(!d) return; if(!confirm(`Vols eliminar “${d.title}”?`)) return; content.dresscodes=content.dresscodes.filter(x=>x.id!==id); content.events.forEach(e=>{if(e.dresscodeId===id)e.dresscodeId='';}); save(content,'Dresscode eliminat'); resetDresscodeForm(); }
 function renderDresscodes(){ const list=content.dresscodes||[]; $('#dresscodeCount').textContent=list.length; $('#dresscodeList').innerHTML=list.length?list.map(d=>{const e=(content.events||[]).find(x=>x.id===d.eventId);return `<article class="list-item"><div class="list-main"><div class="list-kicker"><span>DRESSCODE</span><span>·</span><span>${e?esc(formatDate(e.date)):'Sense esdeveniment'}</span></div><h3>${esc(d.title)}</h3><p>${e?esc(e.title):'Esdeveniment eliminat'}</p><p>${esc(d.subtitle)}</p></div><div class="list-actions"><button class="tiny-btn" data-edit-dress="${d.id}">✎</button><button class="tiny-btn delete" data-delete-dress="${d.id}">×</button></div></article>`;}).join(''):'<div class="empty-state">Encara no hi ha cap dresscode.</div>'; $$('[data-edit-dress]').forEach(btn=>btn.onclick=()=>editDresscode(btn.dataset.editDress)); $$('[data-delete-dress]').forEach(btn=>btn.onclick=()=>deleteDresscode(btn.dataset.deleteDress)); }
 function bindDresscodes(){
-  $('#dresscodeForm').addEventListener('submit',event=>{ event.preventDefault(); const eventId=$('#dresscodeEvent').value; if(!eventId){showToast('Selecciona un CONCERT o una ACTUACIÓ');return;} const linkedEvent=(content.events||[]).find(e=>e.id===eventId); if(!linkedEvent || !['CONCERT','ACTUACIÓ'].includes(String(linkedEvent.type||'').toUpperCase())){showToast('El dresscode només es pot aplicar a CONCERTS o ACTUACIONS');return;} const id=$('#dresscodeId').value||BandaStore.uid('dress'); const boysItems=collectDressItems('boys'), girlsItems=collectDressItems('girls'); const item={id,eventId,title:$('#dresscodeTitle').value.trim()||'Dress code',subtitle:$('#dresscodeSubtitle').value.trim()||'Uniforme de banda',boysItems,girlsItems,boys:itemsToText(boysItems),girls:itemsToText(girlsItems)}; const previous=(content.dresscodes||[]).find(d=>d.id===id); if(previous && previous.eventId!==eventId){ const oldEvent=content.events.find(e=>e.id===previous.eventId); if(oldEvent&&oldEvent.dresscodeId===id) oldEvent.dresscodeId=''; }
+  $('#dresscodeForm').addEventListener('submit',event=>{ event.preventDefault(); const eventId=$('#dresscodeEvent').value; if(!eventId){showToast('Selecciona un CONCERT o una ACTUACIÓ');return;} const linkedEvent=(content.events||[]).find(e=>e.id===eventId); if(!linkedEvent || !['CONCERT','ACTUACIÓ'].includes(String(linkedEvent.type||'').toUpperCase())){showToast('El dresscode només es pot aplicar a CONCERTS o ACTUACIONS');return;} const id=$('#dresscodeId').value||BandaStore.uid('dress'); const boysItems=collectDressItems('boys'), girlsItems=collectDressItems('girls'); const item={id,eventId,title:$('#dresscodeTitle').value.trim()||'Dress code',subtitle:$('#dresscodeSubtitle').value.trim()||'Uniforme de banda',boysItems,girlsItems,boys:itemsToText(boysItems),girls:itemsToText(girlsItems),other:$('#dresscodeOther').value.trim()}; const previous=(content.dresscodes||[]).find(d=>d.id===id); if(previous && previous.eventId!==eventId){ const oldEvent=content.events.find(e=>e.id===previous.eventId); if(oldEvent&&oldEvent.dresscodeId===id) oldEvent.dresscodeId=''; }
     const existingForEvent=(content.dresscodes||[]).find(d=>d.eventId===eventId&&d.id!==id); if(existingForEvent){ content.dresscodes=content.dresscodes.filter(d=>d.id!==existingForEvent.id); }
     const index=content.dresscodes.findIndex(d=>d.id===id); if(index>=0) content.dresscodes[index]=item; else content.dresscodes.push(item); const ev=content.events.find(e=>e.id===eventId); if(ev) ev.dresscodeId=id; save(content,index>=0?'Dresscode actualitzat':'Dresscode afegit'); resetDresscodeForm(); }); $('#newDresscodeBtn').onclick=resetDresscodeForm; $('#cancelDresscodeEdit').onclick=resetDresscodeForm;
 }

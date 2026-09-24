@@ -1,0 +1,26 @@
+BANDA DE LA CALA — v0.39
+
+APP
+- bandalogo.jpg: animació FLAG molt més marcada i freqüent (1,55 s per cicle), mantenint 35% DESKTOP / 75% MOBILE.
+- Afegits a la columna esquerra DESKTOP els crèdits: App development: Vianda Visual / © 2026 · vX.XX.
+- HOME: reduïda la distància entre icones i títols de les cards.
+- DRESSCODE: la vista de l'APP mostra també ALTRES quan el dresscode conté una nota extra.
+
+EDITOR · DRESSCODE
+- Nou esquema: CAMISA, PANTALÓ/FALDILLA, MITJA/MITJÓ, AMERICANA, CALÇAT, CORBATA + PINZA.
+- CAMISA: màniga llarga/curta, blanca/negra.
+- PANTALÓ/FALDILLA: opcions específiques per NOIS i NOIES.
+- MITJA/MITJÓ: negres o ALTRES amb camp d'especificació.
+- AMERICANA: SÍ / NO.
+- CALÇAT: calçat negre; no es permet esportiu ni Converse.
+- CORBATA + PINZA: SÍ / NO.
+- ALTRES: camp opcional general per afegir indicacions extra.
+- Mantinguda compatibilitat amb dresscodes antics.
+
+DADES
+- content-store conserva el nou camp ALTRES i l'especificació de MITJA/MITJÓ dins del JSON existent.
+- No cal cap SQL nou.
+
+PWA
+- Versió i cache-busting actualitzats a v0.39.
+- Sense canvis en manifests, IDs, scopes, Auth, Supabase, SMTP o rols.

@@ -702,6 +702,9 @@ function openDresscode(id){
   const girls=item.girls || (item.girlsItems||[]).map(x=>x.text).filter(Boolean).join('\n');
   $('#dresscodeBoysView').textContent=boys;
   $('#dresscodeGirlsView').textContent=girls;
+  const other=String(item.other||'').trim();
+  const otherBlock=$('#dresscodeOtherViewBlock');
+  if(otherBlock){ otherBlock.hidden=!other; $('#dresscodeOtherView').textContent=other; }
   const modal=$('#dresscodeModal'); modal.hidden=false; document.body.classList.add('modal-open');
 }
 function closeDresscode(){ $('#dresscodeModal').hidden=true; document.body.classList.remove('modal-open'); }

@@ -14,7 +14,7 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.38" />
+  <link rel="stylesheet" href="style.css?v=0.39" />
 </head>
 <body>
   <section id="startScreen" class="screen start-screen active" aria-label="Inici">
@@ -52,6 +52,10 @@
           <a class="social-link" href="https://www.youtube.com/@bandadelacala" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.4 6.4c-.2-1-1-1.8-2-2C17.7 4 12 4 12 4s-5.7 0-7.4.4c-1 .2-1.8 1-2 2C2.2 8.1 2.2 12 2.2 12s0 3.9.4 5.6c.2 1 1 1.8 2 2C6.3 20 12 20 12 20s5.7 0 7.4-.4c1-.2 1.8-1 2-2 .4-1.7.4-5.6.4-5.6s0-3.9-.4-5.6Z"/><path class="play-triangle" d="m10 15 5.2-3L10 9v6Z"/></svg>
           </a>
+        </div>
+        <div class="sidebar-credits">
+          <div>App development: Vianda Visual</div>
+          <div>© 2026 · <span data-app-version></span></div>
         </div>
         <div class="sidebar-version" data-app-version></div>
         <div class="pwa-status" id="pwaStatus">PWA preparada</div>
@@ -290,6 +294,7 @@
         <div><h3>♂ Nois</h3><div id="dresscodeBoysView" class="dresscode-text"></div></div>
         <div><h3>♀ Noies</h3><div id="dresscodeGirlsView" class="dresscode-text"></div></div>
       </div>
+      <div id="dresscodeOtherViewBlock" class="dresscode-other-view" hidden><h3>ALTRES</h3><div id="dresscodeOtherView" class="dresscode-text"></div></div>
     </section>
   </div>
 
@@ -312,12 +317,12 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.38"></script>
-  <script src="config.js?v=0.38"></script>
-  <script src="data/content-published.js?v=0.38"></script>
-  <script src="content-store.js?v=0.38"></script>
+  <script src="version.js?v=0.39"></script>
+  <script src="config.js?v=0.39"></script>
+  <script src="data/content-published.js?v=0.39"></script>
+  <script src="content-store.js?v=0.39"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.38"></script>
-  <script src="app.js?v=0.38"></script>
+  <script src="supabase-client.js?v=0.39"></script>
+  <script src="app.js?v=0.39"></script>
 </body>
 </html>

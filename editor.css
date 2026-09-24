@@ -521,3 +521,16 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   scrollbar-gutter:stable;
   align-content:start;
 }
+
+
+/* ============================================================
+   v0.39 · DRESSCODE configurador refinat
+   ============================================================ */
+.dress-item-row{grid-template-columns:minmax(0,.9fr) minmax(0,.72fr) minmax(0,1fr);align-items:end}
+.dress-item-row label{min-width:0}
+.dress-item-row select,.dress-item-row input{width:100%}
+.dress-detail-wrap[hidden]{display:none!important}
+.dresscode-other-field{display:grid;gap:7px;margin-top:16px!important;font-weight:900;color:#5d4930}
+.dresscode-other-field textarea{width:100%;resize:vertical;min-height:88px}
+@media(max-width:1050px){.dress-item-row{grid-template-columns:1fr 1fr}.dress-item-row .dress-detail-wrap{grid-column:1/-1}}
+@media(max-width:560px){.dress-item-row{grid-template-columns:1fr}.dress-item-row .dress-detail-wrap{grid-column:auto}}
