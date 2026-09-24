@@ -1,0 +1,19 @@
+BANDA DE LA CALA — v0.37
+
+APP
+- bandalogo.jpg: escala desktop ajustada al 35%; mobile conserva 75%.
+- Avatar de USER: borde circular azul marino unificado, incluida la cabecera del perfil.
+- HOME: eliminados únicamente los indicadores ACTIU.
+- TANCAR SESSIÓ: botón rojo con texto blanco.
+- DRESSCODE: el círculo blanco se sustituye por un icono animado de ropa, azul/dorado y en loop.
+
+EDITOR
+- Sidebar desktop: nombres de secciones al doble de tamaño.
+- RESUM: títulos y cifras de las 4 estadísticas al doble; cifras con animación contador.
+- Listas de contenido gestionado: 4 elementos visibles; desde el 5º, scroll interno.
+- CALENDARI: texto del campo de fecha al 50% de escala.
+- MINIJOCS: solo icono de mando + PROPERAMENT.
+
+PWA
+- Version y cache-busting actualizados a v0.37.
+- Sin cambios en manifests, IDs, scopes, Auth, Supabase, SMTP o roles.

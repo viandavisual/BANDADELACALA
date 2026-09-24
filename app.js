@@ -171,6 +171,10 @@ function iconSvg(type){
   return icons[type] || icons.home;
 }
 
+function dresscodeClothesIcon(){
+  return `<span class="dresscode-clothes-icon" aria-hidden="true"><svg viewBox="0 0 32 32" role="presentation"><g class="dress-shirt"><path class="dress-blue" d="M11.1 7.5 14 6h4l2.9 1.5 5.1 4.2-3.2 4.1-2.4-1.8v11H11.6V14l-2.4 1.8L6 11.7Z"/><path class="dress-gold" d="M13.8 6.4c.4 1.6 1.1 2.5 2.2 2.5s1.8-.9 2.2-2.5"/></g><path class="dress-hanger" d="M13.8 4.1c0-1.1.8-1.8 2-1.8 1 0 1.8.6 1.8 1.5 0 1.7-2.1 1.7-2.1 3.3M15.5 7.1 8.3 11h15.4Z"/></svg></span>`;
+}
+
 function bootIdentity(){
   $$('[data-app-name]').forEach(el => el.textContent = CFG.appName || 'BANDA DE LA CALA');
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
@@ -216,7 +220,7 @@ function renderHome(){
   homeGrid.classList.toggle('five-cards', cards.length===5);
   homeGrid.innerHTML = cards.map(card => `<button class="home-card ${card.status==='PROPERAMENT'?'disabled':''}" data-open="${card.id}">
     <span class="big-icon">${iconSvg(card.icon)}</span>
-    <div><span class="status-pill">${card.status}</span><h4>${card.title}</h4><p>${card.text}</p></div>
+    <div>${card.status && card.status!=='ACTIU'?`<span class="status-pill">${card.status}</span>`:''}<h4>${card.title}</h4><p>${card.text}</p></div>
   </button>`).join('');
   $$('#homeGrid [data-open]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.open, true)));
   syncPlayerEqualizers();
@@ -381,7 +385,7 @@ function selectDate(date){
   $('#eventList').innerHTML = list.length ? list.map(event => {
     const dresscodeAllowed=['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase());
     const dresscode=dresscodeAllowed?(state.content.dresscodes||[]).find(item=>item.id===event.dresscodeId):null;
-    return `<article class="event-card"><span class="event-type">${esc(event.type)}</span><h4>${esc(event.title)}</h4>${event.time?`<p>🕒 ${esc(event.time)}</p>`:''}${event.place?`<p>⌖ ${esc(event.place)}</p>`:''}${event.notes?`<p>${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">⚪️ VEURE DRESSCODE</button>`:''}</article>`;
+    return `<article class="event-card"><span class="event-type">${esc(event.type)}</span><h4>${esc(event.title)}</h4>${event.time?`<p>🕒 ${esc(event.time)}</p>`:''}${event.place?`<p>⌖ ${esc(event.place)}</p>`:''}${event.notes?`<p>${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
   }).join('') : '<p class="empty-copy">No hi ha cap activitat prevista per aquest dia.</p>';
   $$('[data-dresscode]').forEach(btn=>btn.addEventListener('click',()=>openDresscode(btn.dataset.dresscode)));
 }
@@ -1236,7 +1240,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.36',root).href;
+    const swUrl=new URL('app/sw.js?v=0.37',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

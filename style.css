@@ -1198,3 +1198,58 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
     height:auto!important;
   }
 }
+
+
+/* ============================================================
+   v0.37 · HOME / USER / DRESSCODE refinements
+   ============================================================ */
+/* Logo: desktop més contingut; mobile conserva la presència gran de v0.36. */
+@media(min-width:781px){
+  .band-logo-block img,
+  .user-band-logo img{
+    width:35%!important;
+    max-width:520px!important;
+    max-height:none!important;
+    height:auto!important;
+  }
+}
+
+/* Avatar: mateix cercle blau marí real a tots els punts de la UI. */
+.user-avatar-menu-icon,
+.user-avatar-mark{
+  border:2px solid var(--blue)!important;
+  border-radius:50%!important;
+  box-shadow:none!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+.user-avatar-menu-icon>img,
+.user-avatar-mark>img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  border:0!important;
+  border-radius:50%!important;
+  box-sizing:border-box!important;
+}
+
+/* Tancar sessió: acció destructiva inequívoca. */
+.user-logout-btn{
+  background:#a02a2a!important;
+  border-color:#a02a2a!important;
+  color:#fff!important;
+  box-shadow:0 8px 22px rgba(160,42,42,.18)!important;
+}
+.user-logout-btn:hover{background:#812020!important;border-color:#812020!important;color:#fff!important}
+
+/* DRESSCODE: icona de roba animada, blau + daurat com la resta de seccions. */
+.dresscode-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important}
+.dresscode-clothes-icon{width:30px;height:30px;display:inline-grid;place-items:center;flex:0 0 30px}
+.dresscode-clothes-icon svg{width:100%;height:100%;display:block;overflow:visible}
+.dresscode-clothes-icon .dress-blue{fill:var(--blue-soft);stroke:var(--blue);stroke-width:1.65;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.dresscode-clothes-icon .dress-gold{fill:none;stroke:var(--gold-deep);stroke-width:1.65;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.dresscode-clothes-icon .dress-hanger{fill:none;stroke:var(--gold);stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;transform-origin:16px 6px;animation:dressHangerSwing 1.8s ease-in-out infinite}
+.dresscode-clothes-icon .dress-shirt{transform-origin:16px 16px;animation:dressShirtFloat 1.8s ease-in-out infinite}
+@keyframes dressShirtFloat{0%,100%{transform:translateY(1px) rotate(-1deg)}50%{transform:translateY(-1.4px) rotate(1.2deg)}}
+@keyframes dressHangerSwing{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+@media(prefers-reduced-motion:reduce){.dresscode-clothes-icon .dress-shirt,.dresscode-clothes-icon .dress-hanger{animation:none!important}}

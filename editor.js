@@ -116,15 +116,57 @@ function save(next=content,message='Canvis desats'){
   }
 }
 function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.26'); }
-function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); window.scrollTo({top:0,behavior:'smooth'}); }
+function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
+
+function animateStatCounter(element,target,duration=720){
+  if(!element) return;
+  const end=Math.max(0,Number(target)||0);
+  if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){element.textContent=String(end);return;}
+  if(element._counterFrame) cancelAnimationFrame(element._counterFrame);
+  const start=performance.now();
+  const step=now=>{
+    const progress=Math.min(1,(now-start)/duration);
+    const eased=1-Math.pow(1-progress,3);
+    element.textContent=String(Math.round(end*eased));
+    if(progress<1) element._counterFrame=requestAnimationFrame(step);
+    else element._counterFrame=null;
+  };
+  element.textContent='0';
+  element._counterFrame=requestAnimationFrame(step);
+}
+
+const MANAGED_LIST_IDS=['eventEditorList','dresscodeList','trackEditorList','historicEditorList','hemerotecaEditorList','usersList'];
+function fitManagedListToFour(host){
+  if(!host) return;
+  requestAnimationFrame(()=>{
+    host.style.maxHeight='';
+    host.classList.remove('managed-scroll-list');
+    const items=[...host.children].filter(child=>!child.classList.contains('empty-state'));
+    if(items.length<=4) return;
+    const css=getComputedStyle(host);
+    const gap=parseFloat(css.rowGap||css.gap)||0;
+    const height=items.slice(0,4).reduce((sum,item)=>sum+item.getBoundingClientRect().height,0)+(gap*3);
+    host.style.maxHeight=`${Math.ceil(height)}px`;
+    host.classList.add('managed-scroll-list');
+  });
+}
+function refreshManagedLists(){MANAGED_LIST_IDS.forEach(id=>fitManagedListToFour(document.getElementById(id)));}
+function initManagedListViewports(){
+  MANAGED_LIST_IDS.forEach(id=>{
+    const host=document.getElementById(id); if(!host) return;
+    new MutationObserver(()=>fitManagedListToFour(host)).observe(host,{childList:true});
+    fitManagedListToFour(host);
+  });
+  window.addEventListener('resize',refreshManagedLists,{passive:true});
+}
 
 function renderDashboard(){
   const events=[...(content.events||[])].sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   const tracks=content.tracks||[]; const now=new Date(); const today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; const next=events.find(event=>event.date>=today);
-  $('#statEvents').textContent=events.length; $('#statNextEvent').textContent=next?`${formatDate(next.date)} · ${next.title}`:'Cap activitat futura';
-  $('#statDresscodes').textContent=(content.dresscodes||[]).length; $('#statTracks').textContent=tracks.length; $('#statVisibleTracks').textContent=`${tracks.filter(track=>track.visible!==false).length} visibles`; $('#statHistoric').textContent=(content.historicItems||[]).length;
+  animateStatCounter($('#statEvents'),events.length); $('#statNextEvent').textContent=next?`${formatDate(next.date)} · ${next.title}`:'Cap activitat futura';
+  animateStatCounter($('#statDresscodes'),(content.dresscodes||[]).length); animateStatCounter($('#statTracks'),tracks.length); $('#statVisibleTracks').textContent=`${tracks.filter(track=>track.visible!==false).length} visibles`; animateStatCounter($('#statHistoric'),(content.historicItems||[]).length);
 }
 
 function renderHomeEditor(){
@@ -1155,12 +1197,12 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.36',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.37',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();

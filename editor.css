@@ -475,3 +475,38 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   .dress-item-row select{font-size:8.5px!important;min-height:29px!important;height:29px!important;padding-top:3px!important;padding-bottom:3px!important}
   .dress-item-row select option{font-size:8.5px!important}
 }
+
+
+/* ============================================================
+   v0.37 · EDITOR desktop scale + dashboard counters + list viewport
+   ============================================================ */
+/* Barra lateral: noms de secció x2 només en desktop. */
+@media(min-width:821px){
+  .editor-nav-btn{font-size:22px!important;line-height:1.05!important}
+}
+
+/* RESUM: títols i xifres de les quatre caixes al doble de l'escala visible. */
+.stat-card>span{font-size:20px!important;line-height:1.08!important}
+.stat-card>strong{font-size:40px!important;line-height:1!important;min-height:1em;font-variant-numeric:tabular-nums}
+.stat-card{overflow:hidden}
+.stat-card>strong{animation:statCounterPop .72s cubic-bezier(.2,.75,.25,1)}
+@keyframes statCounterPop{0%{opacity:.15;transform:translateY(10px) scale(.86)}70%{opacity:1;transform:translateY(-2px) scale(1.05)}100%{transform:none}}
+@media(max-width:780px){
+  .stat-card>span{font-size:19px!important}
+  .stat-card>strong{font-size:32px!important}
+}
+@media(prefers-reduced-motion:reduce){.stat-card>strong{animation:none!important}}
+
+/* Llistes de material: 4 elements visibles; el cinquè activa scroll intern. */
+.managed-scroll-list{overflow-y:auto!important;overscroll-behavior:contain;padding-right:5px;scrollbar-gutter:stable}
+.managed-scroll-list::-webkit-scrollbar{width:8px}
+.managed-scroll-list::-webkit-scrollbar-track{background:#f6eddc;border-radius:999px}
+.managed-scroll-list::-webkit-scrollbar-thumb{background:#c89b4a;border-radius:999px;border:2px solid #f6eddc}
+
+/* CALENDARI: data al 50% de l'escala anterior. */
+#eventDate{font-size:20px!important}
+@media(max-width:780px){#eventDate{font-size:14px!important}}
+
+/* MINIJOCS: només comandament + PROPERAMENT. */
+[data-editor-view="games"] .coming-card{gap:8px}
+[data-editor-view="games"] .coming-icon{margin-bottom:8px}
