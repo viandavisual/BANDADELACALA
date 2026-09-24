@@ -1314,3 +1314,39 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* Dresscode APP: nota ALTRES comuna. */
 .dresscode-other-view{margin-top:14px;border:1px solid var(--line);border-radius:18px;padding:18px;background:linear-gradient(145deg,#fff,#fdfaf4)}
 .dresscode-other-view h3{margin:0 0 8px;font-family:Arial,sans-serif}
+
+
+/* ============================================================
+   v0.40 · BANDALOGO FLAG de tela (SVG turbulence/displacement)
+   ============================================================ */
+/*
+ * Inspirado en el comportamiento FLAG del mockup de referencia:
+ * la imagen ya no se deforma como una placa rígida mediante rotateY/skew.
+ * El filtro SVG #bandFlagWaveV040 desplaza internamente los píxeles,
+ * simulando una bandera de tela. El transform solo aporta un sway mínimo.
+ */
+.band-logo-block{
+  perspective:none!important;
+  overflow:visible!important;
+}
+.band-logo-block img{
+  transform-origin:center!important;
+  backface-visibility:visible!important;
+  will-change:transform,filter!important;
+  -webkit-filter:url(#bandFlagWaveV040)!important;
+  filter:url(#bandFlagWaveV040)!important;
+  animation:bandLogoClothSwayV040 3.8s ease-in-out infinite!important;
+}
+@keyframes bandLogoClothSwayV040{
+  0%{transform:rotateZ(-.8deg) translateY(0)}
+  50%{transform:rotateZ(.8deg) translateY(2px)}
+  100%{transform:rotateZ(-.8deg) translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .band-logo-block img{
+    animation:none!important;
+    transform:none!important;
+    -webkit-filter:none!important;
+    filter:none!important;
+  }
+}

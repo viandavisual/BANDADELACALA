@@ -1,39 +1,25 @@
-BANDA DE LA CALA · PATCH v0.39 DESDE v0.38
+BANDA DE LA CALA · PATCH v0.40 DESDE v0.39
 Fecha: 24/09/2026
 
 APLICACIÓN
-1. Parte de una instalación v0.38 correcta.
+1. Parte de una instalación v0.39 correcta.
 2. Sobrescribe exactamente estos archivos:
-   - app.js
    - style.css
-   - editor.js
-   - editor.css
-   - content-store.js
-   - config.js
    - version.js
+   - config.js
    - app/index.html
    - app/sw.js
    - editor/index.html
    - editor/sw.js
 3. Añade:
-   - V0_39_CAMBIOS.txt
-4. Conserva assets/bandalogo.jpg en su ubicación actual del repositorio.
+   - V0_40_CAMBIOS.txt
+4. Conserva assets/bandalogo.jpg en su ubicación actual.
 
-APP
-- FLAG del logo con mucha más ondulación y frecuencia.
-- Créditos también en la columna izquierda DESKTOP.
-- Cards HOME más compactas entre icono y título.
-- El modal DRESSCODE muestra ALTRES si existe.
-
-EDITOR · DRESSCODE
-- CAMISA: Màniga llarga/curta + blanca/negra.
-- PANTALÓ/FALDILLA: opciones diferenciadas NOIS / NOIES.
-- MITJA/MITJÓ: Negres / Altres (especifica).
-- AMERICANA: Sí / No.
-- CALÇAT: calçat negre (no esportiu ni Converse).
-- CORBATA + PINZA: Sí / No.
-- ALTRES: caja de texto opcional general.
-- Compatibilidad conservada con dresscodes ya existentes.
+APP · BANDALOGO FLAG
+- Eliminada visualmente la ondulación rígida rotateY/skew de v0.39.
+- Nuevo FLAG tipo tela con filtro SVG turbulence + displacement, siguiendo el mockup aportado.
+- Sway secundario muy leve; la deformación principal ocurre dentro de la imagen.
+- Mantiene escala existente: 35% DESKTOP / 75% MOBILE.
 
 NO TOCAR
 - manifest.webmanifest de APP ni EDITOR.
@@ -42,4 +28,4 @@ NO TOCAR
 - tablas, buckets, auth ni roles.
 
 VERSIÓN
-- v0.39
+- v0.40

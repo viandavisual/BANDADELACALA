@@ -1,0 +1,17 @@
+BANDA DE LA CALA — v0.40
+Fecha: 24/09/2026
+
+APP · BANDALOGO FLAG
+- Sustituida la animación rígida rotateY/skew de v0.39.
+- bandalogo.jpg usa ahora un filtro SVG animado de turbulence + displacement.
+- El comportamiento replica el principio del logo FLAG del HTML de referencia aportado por el usuario.
+- La deformación actúa dentro de la propia imagen y produce sensación de tela flexible.
+- Añadido únicamente un sway secundario muy leve (3,8 s).
+- Se mantienen intactos los tamaños actuales del logo: 35% desktop / 75% mobile.
+- prefers-reduced-motion desactiva deformación y movimiento.
+
+SISTEMA
+- Versión y cache-busting actualizados a v0.40.
+- Cache APP y EDITOR actualizadas a v0.40.
+- Manifests, IDs PWA, scopes y start_url sin cambios.
+- Sin cambios en Supabase, SMTP, AUTH, roles, PLAYER ni DRESSCODE.
