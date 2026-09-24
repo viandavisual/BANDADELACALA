@@ -1240,7 +1240,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.37',root).href;
+    const swUrl=new URL('app/sw.js?v=0.38',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

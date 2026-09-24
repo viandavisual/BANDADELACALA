@@ -1,0 +1,17 @@
+BANDA DE LA CALA — v0.38
+
+EDITOR
+- Corregida la ventana de listas de material gestionado.
+- Si hay 1-4 elementos, se muestran completos sin scroll interno.
+- Si hay 5 o más, la altura visible termina exactamente tras la cuarta TARJETA REAL y aparece scroll interno desde la quinta.
+- HISTÒRIC y HEMEROTECA cuentan únicamente tarjetas de contenido; las cabeceras de periodo no consumen uno de los cuatro puestos.
+- La altura se recalcula cuando cambian las dimensiones de las cuatro primeras tarjetas (incluida la carga posterior de imágenes), al cambiar el contenido, al redimensionar la ventana y al terminar de cargar las fuentes.
+
+APP
+- bandalogo.jpg incorpora una animación loopeable muy suave tipo bandera ondeando.
+- Se mantiene el tamaño ya fijado: 35% en DESKTOP y 75% en MOBILE.
+- Respeta prefers-reduced-motion.
+
+PWA
+- Versión y cache-busting actualizados a v0.38.
+- Sin cambios en manifests, IDs, scopes, Auth, Supabase, SMTP o roles.

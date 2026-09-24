@@ -510,3 +510,14 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 /* MINIJOCS: només comandament + PROPERAMENT. */
 [data-editor-view="games"] .coming-card{gap:8px}
 [data-editor-view="games"] .coming-icon{margin-bottom:8px}
+
+
+/* ============================================================
+   v0.38 · viewport de llistes: quatre targetes reals completes
+   ============================================================ */
+.managed-scroll-list{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scrollbar-gutter:stable;
+  align-content:start;
+}

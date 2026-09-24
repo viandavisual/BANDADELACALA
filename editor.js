@@ -137,29 +137,75 @@ function animateStatCounter(element,target,duration=720){
   element._counterFrame=requestAnimationFrame(step);
 }
 
-const MANAGED_LIST_IDS=['eventEditorList','dresscodeList','trackEditorList','historicEditorList','hemerotecaEditorList','usersList'];
+const MANAGED_LISTS={
+  eventEditorList:'.list-item',
+  dresscodeList:'.list-item',
+  trackEditorList:'.list-item',
+  historicEditorList:'.historic-editor-item',
+  hemerotecaEditorList:'.historic-editor-item',
+  usersList:'.list-item'
+};
+const managedListResizeObservers=new Map();
+function managedMaterialItems(host){
+  const selector=MANAGED_LISTS[host?.id];
+  if(!host||!selector) return [];
+  return [...host.children].filter(child=>child.matches?.(selector));
+}
+function observeManagedListGeometry(host,items){
+  if(!('ResizeObserver' in window)) return;
+  let observer=managedListResizeObservers.get(host);
+  if(!observer){
+    observer=new ResizeObserver(()=>fitManagedListToFour(host));
+    managedListResizeObservers.set(host,observer);
+  }
+  observer.disconnect();
+  if(items.length<5) return;
+  const fourth=items[3];
+  const allChildren=[...host.children];
+  const fourthIndex=allChildren.indexOf(fourth);
+  allChildren.slice(0,Math.max(0,fourthIndex+1)).forEach(child=>observer.observe(child));
+}
 function fitManagedListToFour(host){
   if(!host) return;
-  requestAnimationFrame(()=>{
-    host.style.maxHeight='';
-    host.classList.remove('managed-scroll-list');
-    const items=[...host.children].filter(child=>!child.classList.contains('empty-state'));
-    if(items.length<=4) return;
-    const css=getComputedStyle(host);
-    const gap=parseFloat(css.rowGap||css.gap)||0;
-    const height=items.slice(0,4).reduce((sum,item)=>sum+item.getBoundingClientRect().height,0)+(gap*3);
-    host.style.maxHeight=`${Math.ceil(height)}px`;
+  if(host._managedFitFrame) cancelAnimationFrame(host._managedFitFrame);
+  host._managedFitFrame=requestAnimationFrame(()=>{
+    host._managedFitFrame=0;
+    const items=managedMaterialItems(host);
+    observeManagedListGeometry(host,items);
+    if(items.length<=4){
+      host.style.maxHeight='';
+      host.classList.remove('managed-scroll-list');
+      return;
+    }
+
+    /*
+     * La finestra visible acaba EXACTAMENT després de la quarta targeta real.
+     * No comptem capçalera de període com a element, però la seva alçada sí queda
+     * inclosa si està situada abans d'aquesta quarta targeta. Així HISTÒRIC i
+     * HEMEROTECA poden tenir targetes/alçades diferents sense retallar la quarta.
+     */
+    const previousScroll=host.scrollTop;
     host.classList.add('managed-scroll-list');
+    host.style.maxHeight='none';
+    void host.offsetWidth; // aplica scrollbar-gutter abans de mesurar amplades/alçades
+    const hostRect=host.getBoundingClientRect();
+    const fourthRect=items[3].getBoundingClientRect();
+    const visibleHeight=Math.max(1,fourthRect.bottom-hostRect.top+host.scrollTop);
+    host.style.maxHeight=`${Math.ceil(visibleHeight)}px`;
+    host.scrollTop=Math.min(previousScroll,Math.max(0,host.scrollHeight-host.clientHeight));
   });
 }
-function refreshManagedLists(){MANAGED_LIST_IDS.forEach(id=>fitManagedListToFour(document.getElementById(id)));}
+function refreshManagedLists(){Object.keys(MANAGED_LISTS).forEach(id=>fitManagedListToFour(document.getElementById(id)));}
 function initManagedListViewports(){
-  MANAGED_LIST_IDS.forEach(id=>{
+  Object.keys(MANAGED_LISTS).forEach(id=>{
     const host=document.getElementById(id); if(!host) return;
     new MutationObserver(()=>fitManagedListToFour(host)).observe(host,{childList:true});
+    /* Les imatges de HISTÒRIC/HEMEROTECA carreguen després del render. */
+    host.addEventListener('load',event=>{if(event.target?.tagName==='IMG')fitManagedListToFour(host);},true);
     fitManagedListToFour(host);
   });
   window.addEventListener('resize',refreshManagedLists,{passive:true});
+  document.fonts?.ready?.then(refreshManagedLists).catch?.(()=>{});
 }
 
 function renderDashboard(){
@@ -1197,7 +1243,7 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.37',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.38',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
