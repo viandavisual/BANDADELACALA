@@ -1,0 +1,13 @@
+BANDA DE LA CALA — v0.41
+
+APP
+- VER DRESSCODE reconfigurado para mostrar los nuevos parámetros de vestuario de forma estructurada: CAMISA, PANTALÓ/FALDILLA, MITJA/MITJÓ, AMERICANA, CALÇAT y CORBATA + PINZA, manteniendo ALTRES.
+- USER: nueva caja GÈNERE con botones MASCULÍ / FEMENÍ. La preferencia se guarda en user_metadata de Supabase, sin cambios SQL.
+- HOME: bienvenida BENVINGUT / BENVINGUDA según selección; sin selección conserva BENVINGUT/DA.
+- PLAYER: duración visible por pista mediante lectura de metadatos de audio y duración total de la playlist junto al encabezado Player.
+- DESKTOP: eliminado el bubble independiente de versión de la columna izquierda; se conservan los créditos con versión.
+
+SISTEMA
+- version.js y cache-busting actualizados a v0.41.
+- caches APP/EDITOR actualizadas a v0.41.
+- Sin cambios de manifests, IDs, scopes, start_url, SMTP, roles ni estructura de base de datos.

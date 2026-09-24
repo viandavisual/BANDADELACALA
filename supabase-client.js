@@ -128,6 +128,17 @@
     return await getMyProfile();
   }
 
+  async function updateOwnGender(gender){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const clean=String(gender||'').trim().toLowerCase();
+    if(!['male','female'].includes(clean)) throw new Error('INVALID_GENDER');
+    const currentSession=await session();
+    if(!currentSession) throw new Error('AUTH_REQUIRED');
+    const {data,error}=await c.auth.updateUser({data:{gender:clean}});
+    if(error) throw error;
+    return data?.user || null;
+  }
+
   async function updatePassword(password){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     const {data,error}=await c.auth.updateUser({password});
@@ -247,7 +258,7 @@
   }
 
   window.BandaSupabase={
-    enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updatePassword,
+    enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updateOwnGender,updatePassword,
     loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,onAuthChange,dataUrlToFile
   };
 })();

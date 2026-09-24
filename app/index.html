@@ -14,7 +14,7 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.40" />
+  <link rel="stylesheet" href="style.css?v=0.41" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -73,7 +73,6 @@
           <div>App development: Vianda Visual</div>
           <div>© 2026 · <span data-app-version></span></div>
         </div>
-        <div class="sidebar-version" data-app-version></div>
         <div class="pwa-status" id="pwaStatus">PWA preparada</div>
       </div>
     </aside>
@@ -197,7 +196,7 @@
       <section id="view-playlist" class="view" data-view="playlist">
         <div class="section-grid playlist-layout">
           <div class="panel">
-            <div class="panel-head"><div><span class="eyebrow">ÀUDIO</span><h3>Player</h3></div><span class="count-badge" id="trackCount">0 pistes</span></div>
+            <div class="panel-head playlist-panel-head"><div><span class="eyebrow">ÀUDIO</span><h3>Player</h3></div><div class="playlist-summary"><span class="count-badge" id="trackCount">0 pistes</span><strong id="playlistTotalDuration">DURADA TOTAL · --:--</strong></div></div>
             <div id="trackList" class="track-list"></div>
           </div>
           <div class="panel player-card">
@@ -274,6 +273,15 @@
               <small id="nameProfileStatus" class="user-auth-status"></small>
             </form>
 
+            <div id="genderProfileBox" class="user-settings-box user-gender-box">
+              <div class="user-settings-title"><span class="eyebrow">GÈNERE</span><h4>Tractament de benvinguda</h4></div>
+              <div class="gender-choice-row" role="group" aria-label="Gènere">
+                <button class="gender-choice-btn" type="button" data-profile-gender="male" aria-pressed="false"><span aria-hidden="true">♂</span><strong>MASCULÍ</strong></button>
+                <button class="gender-choice-btn" type="button" data-profile-gender="female" aria-pressed="false"><span aria-hidden="true">♀</span><strong>FEMENÍ</strong></button>
+              </div>
+              <small id="genderProfileStatus" class="user-auth-status"></small>
+            </div>
+
             <details id="passwordDetails" class="user-settings-box user-password-details">
               <summary><span><span class="eyebrow">CONTRASENYA</span><strong>Definir / canviar contrasenya</strong></span><span class="details-chevron" aria-hidden="true">⌄</span></summary>
               <form id="changePasswordForm" class="change-password-form">
@@ -333,12 +341,12 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.40"></script>
-  <script src="config.js?v=0.40"></script>
-  <script src="data/content-published.js?v=0.40"></script>
-  <script src="content-store.js?v=0.40"></script>
+  <script src="version.js?v=0.41"></script>
+  <script src="config.js?v=0.41"></script>
+  <script src="data/content-published.js?v=0.41"></script>
+  <script src="content-store.js?v=0.41"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.40"></script>
-  <script src="app.js?v=0.40"></script>
+  <script src="supabase-client.js?v=0.41"></script>
+  <script src="app.js?v=0.41"></script>
 </body>
 </html>

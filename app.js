@@ -115,6 +115,8 @@ function currentUserDisplayName(){
   return String(state.profile?.name || state.session?.user?.email?.split('@')[0] || 'USER').trim() || 'USER';
 }
 function currentAvatarKey(){ return String(state.profile?.avatar_key || '').trim(); }
+function currentUserGender(){ const value=String(state.session?.user?.user_metadata?.gender || '').trim().toLowerCase(); return ['male','female'].includes(value)?value:''; }
+function currentWelcomeLabel(){ const gender=currentUserGender(); return gender==='male'?'BENVINGUT':gender==='female'?'BENVINGUDA':'BENVINGUT/DA'; }
 function getHistoricImages(item){
   const images=Array.isArray(item?.images) ? item.images.filter(Boolean) : [];
   if(!images.length && item?.imageSrc) images.push(item.imageSrc);
@@ -204,7 +206,7 @@ function renderNavigation(){
 
 function renderHome(){
   const welcome=$('#homeWelcomeEyebrow');
-  if(welcome) welcome.textContent=state.authenticated ? `BENVINGUT/DA ${currentUserDisplayName()}` : 'BENVINGUT/DA';
+  if(welcome) welcome.textContent=state.authenticated ? `${currentWelcomeLabel()} ${currentUserDisplayName()}` : 'BENVINGUT/DA';
   const cards = state.authenticated ? [
     { id:'calendar', icon:'calendar', title:'CALENDARI', text:'Assajos, actuacions i agenda de la banda.', status:'ACTIU' },
     { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
@@ -693,15 +695,30 @@ function applyHomeHero(){
   el.src=src;
 }
 
+const DRESSCODE_VIEW_LABELS={shirt:'CAMISA',bottom:'PANTALÓ/FALDILLA',socks:'MITJA/MITJÓ',jacket:'AMERICANA',footwear:'CALÇAT',tie:'CORBATA + PINZA'};
+const DRESSCODE_VIEW_ORDER=['shirt','bottom','socks','jacket','footwear','tie'];
+function renderDresscodeParameters(host,items,legacyText=''){
+  if(!host) return;
+  const list=Array.isArray(items)?items:[];
+  if(list.length){
+    const byKey=new Map(list.map(item=>[item.key,item]));
+    host.innerHTML=DRESSCODE_VIEW_ORDER.map(key=>{
+      const item=byKey.get(key); if(!item) return '';
+      const value=String(item.text||item.detail||'').trim(); if(!value) return '';
+      return `<div class="dresscode-param-row"><span>${esc(DRESSCODE_VIEW_LABELS[key]||key)}</span><strong>${esc(value)}</strong></div>`;
+    }).join('');
+    if(host.innerHTML.trim()) return;
+  }
+  const lines=String(legacyText||'').split(/\n+/).map(line=>line.trim()).filter(Boolean);
+  host.innerHTML=lines.map(line=>`<div class="dresscode-param-row legacy"><strong>${esc(line)}</strong></div>`).join('') || '<div class="dresscode-param-row legacy"><strong>Sense informació.</strong></div>';
+}
 function openDresscode(id){
   const item=(state.content.dresscodes||[]).find(d=>d.id===id);
   if(!item) return;
   $('#dresscodeModalTitle').textContent=item.title||'Dress code';
   $('#dresscodeModalSubtitle').textContent=item.subtitle||'';
-  const boys=item.boys || (item.boysItems||[]).map(x=>x.text).filter(Boolean).join('\n');
-  const girls=item.girls || (item.girlsItems||[]).map(x=>x.text).filter(Boolean).join('\n');
-  $('#dresscodeBoysView').textContent=boys;
-  $('#dresscodeGirlsView').textContent=girls;
+  renderDresscodeParameters($('#dresscodeBoysView'),item.boysItems,item.boys);
+  renderDresscodeParameters($('#dresscodeGirlsView'),item.girlsItems,item.girls);
   const other=String(item.other||'').trim();
   const otherBlock=$('#dresscodeOtherViewBlock');
   if(otherBlock){ otherBlock.hidden=!other; $('#dresscodeOtherView').textContent=other; }
@@ -723,12 +740,42 @@ function bindCalendar(){
 
 const audio = () => $('#audioPlayer');
 
+const TRACK_DURATION_CACHE_KEY='banda-track-durations-v041';
+const trackDurationCache=new Map();
+const trackDurationPromises=new Map();
+try{ const saved=JSON.parse(localStorage.getItem(TRACK_DURATION_CACHE_KEY)||'{}'); Object.entries(saved).forEach(([src,value])=>{ const n=Number(value); if(src&&Number.isFinite(n)&&n>0) trackDurationCache.set(src,n); }); }catch(_error){}
+function persistTrackDurations(){ try{ localStorage.setItem(TRACK_DURATION_CACHE_KEY,JSON.stringify(Object.fromEntries(trackDurationCache))); }catch(_error){} }
+function trackDuration(track){ const direct=Number(track?.duration); if(Number.isFinite(direct)&&direct>0) return direct; return Number(trackDurationCache.get(String(track?.src||'')))||0; }
+function totalTrackDuration(tracks){ return (tracks||[]).reduce((sum,track)=>sum+trackDuration(track),0); }
+function paintTrackDurations(tracks){
+  (tracks||[]).forEach((track,index)=>{ const el=document.querySelector(`#trackList [data-duration-index="${index}"]`); if(el){ const seconds=trackDuration(track); el.textContent=seconds>0?formatTime(seconds):'--:--'; } });
+  const total=$('#playlistTotalDuration');
+  if(total){ const known=(tracks||[]).filter(track=>trackDuration(track)>0).length; const seconds=totalTrackDuration(tracks); total.textContent=`DURADA TOTAL · ${tracks.length&&known===tracks.length?formatTime(seconds):'--:--'}`; }
+}
+function loadTrackDuration(track){
+  const src=String(track?.src||'').trim(); if(!src) return Promise.resolve(0);
+  const known=trackDuration(track); if(known>0) return Promise.resolve(known);
+  if(trackDurationPromises.has(src)) return trackDurationPromises.get(src);
+  const promise=new Promise(resolve=>{
+    const probe=new Audio(); probe.preload='metadata';
+    const finish=value=>{ const n=Number(value); if(Number.isFinite(n)&&n>0){ trackDurationCache.set(src,n); persistTrackDurations(); resolve(n); } else resolve(0); probe.removeAttribute('src'); try{probe.load();}catch(_error){} };
+    probe.addEventListener('loadedmetadata',()=>finish(probe.duration),{once:true});
+    probe.addEventListener('error',()=>finish(0),{once:true});
+    probe.src=src; try{probe.load();}catch(_error){ finish(0); }
+  }).finally(()=>trackDurationPromises.delete(src));
+  trackDurationPromises.set(src,promise); return promise;
+}
+function refreshTrackDurations(tracks){
+  paintTrackDurations(tracks);
+  (tracks||[]).forEach(track=>loadTrackDuration(track).then(()=>paintTrackDurations(getTracks())).catch(()=>{}));
+}
 function renderTracks(){
   const tracks = getTracks();
   if(state.currentTrack >= tracks.length) state.currentTrack = -1;
   $('#trackCount').textContent = `${tracks.length} ${tracks.length===1?'pista':'pistes'}`;
-  $('#trackList').innerHTML = tracks.length ? tracks.map((track,index) => `<button class="track-row ${index===state.currentTrack?'active':''}" data-track="${index}"><span class="track-index">${String(index+1).padStart(2,'0')}</span><span class="track-main"><strong>${esc(track.title)}</strong><small>${esc(track.meta || 'Banda de la Cala')}</small></span><span class="track-length">▶</span></button>`).join('') : '<p class="empty-copy">Encara no hi ha pistes publicades.</p>';
+  $('#trackList').innerHTML = tracks.length ? tracks.map((track,index) => `<button class="track-row ${index===state.currentTrack?'active':''}" data-track="${index}"><span class="track-index">${String(index+1).padStart(2,'0')}</span><span class="track-main"><strong>${esc(track.title)}</strong><small>${esc(track.meta || 'Banda de la Cala')}</small></span><span class="track-length" data-duration-index="${index}">--:--</span></button>`).join('') : '<p class="empty-copy">Encara no hi ha pistes publicades.</p>';
   $$('#trackList [data-track]').forEach(btn => btn.addEventListener('click', () => loadTrack(+btn.dataset.track,true)));
+  refreshTrackDurations(tracks);
 }
 
 function loadTrack(index, autoplay = false){
@@ -1022,6 +1069,8 @@ function renderUserSection(){
   $('#userProfileEmail').textContent=state.session?.user?.email || state.profile?.email || '';
   $('#userProfileRole').textContent=roleLabel(state.profile?.role);
   const nameInput=$('#profileDisplayName'); if(nameInput) nameInput.value=currentUserDisplayName();
+  const selectedGender=currentUserGender();
+  $$('[data-profile-gender]').forEach(btn=>{ const active=btn.dataset.profileGender===selectedGender; btn.classList.toggle('selected',active); btn.setAttribute('aria-pressed',active?'true':'false'); });
   renderAvatarChoices();
   renderUserAvatar();
   const needsPassword=!!state.profile?.must_change_password;
@@ -1099,6 +1148,18 @@ function bindUserAuth(){
       status.textContent='Nom actualitzat.';
     }catch(error){ console.error(error); status.textContent='No s’ha pogut actualitzar el nom.'; }
   });
+  $$('[data-profile-gender]').forEach(btn=>btn.addEventListener('click',async()=>{
+    const status=$('#genderProfileStatus');
+    const gender=btn.dataset.profileGender;
+    if(!state.authenticated || !['male','female'].includes(gender)) return;
+    if(status) status.textContent='Desant…';
+    try{
+      await BandaSupabase.updateOwnGender(gender);
+      state.session=await BandaSupabase.session();
+      renderHome(); renderUserSection();
+      if(status) status.textContent='Preferència actualitzada.';
+    }catch(error){ console.error(error); if(status) status.textContent='No s’ha pogut actualitzar la preferència.'; }
+  }));
   $('#changePasswordForm')?.addEventListener('submit',async event=>{
     event.preventDefault();
     const status=$('#changePasswordStatus');
