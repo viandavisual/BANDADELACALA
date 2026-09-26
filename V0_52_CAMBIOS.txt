@@ -1,0 +1,72 @@
+BANDA DE LA CALA · v0.52 · CAMBIOS
+==================================
+
+MINIJOCS
+--------
+- MINIJOCS pasa a ser una sección pública: puede entrar cualquier visitante.
+- Parrilla fija de 2 columnas (estructura 2×2 a medida que se añadan hasta 4 juegos).
+- Cada card de minijuego muestra:
+  · icono configurable;
+  · título configurable;
+  · descripción configurable;
+  · marcador del USER registrado.
+- Los visitantes pueden jugar, pero no se muestra marcador de puntos y no se guarda progreso.
+- La card completa es pulsable.
+
+QUINA NOTA ÉS? · v15 DEFINITIVO
+-------------------------------
+- Integrado a partir del HTML v15 definitivo aportado por el usuario.
+- Conservada su geometría musical: pentagrama, claves, nota, alteraciones y líneas adicionales.
+- Eliminado el control de desarrollo “Genera un altre exemple”.
+- Sustituido el contador ficticio del mockup por los puntos reales del USER.
+- Sustituido el reto aleatorio al recargar por el reto estable del ciclo actual.
+- Mantiene las animaciones de entrada, botones dorados, popups CORRECTE / MÈU, glow y shake.
+- Integrados QNE_intro.mp3, QNE_BGmusic.mp3, QNE_correcte.mp3 y QNE_error.mp3.
+- QNE_intro incluye el fallback MEDIA_ERR_DECODE ya validado en el PLAYER para poder iniciar el background aunque Chromium falle al final del MP3.
+
+LÓGICA DIARIA
+-------------
+- El ciclo diario de QUINA NOTA ÉS? se reinicia exactamente a las 03:00 h Europe/Madrid.
+- De 03:00 a 02:59:59 se mantiene el mismo reto.
+- USER registrado: un único intento puntuable por ciclo.
+- Acierto: +1 punto.
+- Error: +0 puntos.
+- El total es acumulativo.
+- Supabase sigue bloqueando la fila del USER durante la respuesta para impedir dobles puntos desde dos pestañas.
+- Invitado: puede jugar, pero no se guarda intento, resultado ni puntos.
+
+APP · USUARI
+------------
+- Eliminado el bloque PUNTS MUSICALS del perfil del USER.
+- Los resultados de minijuegos quedan separados de la sección USUARI.
+
+EDITOR · MINIJOCS
+-----------------
+- QUINA NOTA ÉS? mantiene ACTIU/INACTIU.
+- Se puede cargar la imagen del icono desde el EDITOR.
+- Se puede restaurar el icono por defecto.
+- Título visible editable.
+- Descripción visible editable.
+- Preview del icono/título/descripción.
+- La imagen se guarda en app-images/minigames/quina-nota-es cuando Supabase está activo.
+
+EDITOR · USERS
+--------------
+- Se mantiene el formato de tiras compactas de v0.51:
+  NOMBRE + TIPO USER + EMAIL.
+- La X de eliminar sigue a la derecha según los permisos actuales.
+- La bubble PENDENT DE CONFIGURAR se mantiene a la izquierda de la X.
+- Se retira la bubble de puntos para mantener los resultados separados en MINIJOCS.
+
+SUPABASE
+--------
+- Nuevo SUPABASE_UPDATE_v0.52.sql.
+- Puede ejecutarse aunque v0.51 no se hubiera aplicado.
+- Añade/actualiza el ciclo 03:00 Europe/Madrid.
+- Añade get_quina_nota_public_challenge() para invitados, sin respuesta correcta y sin escritura.
+- Mantiene get_quina_nota_state() y submit_quina_nota_answer() para USERS registrados.
+
+PWA
+---
+- Versión/cache APP y EDITOR actualizadas a v0.52.
+- IDs, scopes y manifests PWA no cambian.

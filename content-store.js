@@ -18,6 +18,14 @@
     base.updatedAt = base.updatedAt || new Date().toISOString();
     base.settings = base.settings && typeof base.settings === 'object' ? base.settings : {};
     base.settings.homeHeroImage = typeof base.settings.homeHeroImage === 'string' ? base.settings.homeHeroImage : '';
+    base.settings.minigames = base.settings.minigames && typeof base.settings.minigames === 'object' ? base.settings.minigames : {};
+    const qne = base.settings.minigames.quinaNota && typeof base.settings.minigames.quinaNota === 'object' ? base.settings.minigames.quinaNota : {};
+    base.settings.minigames.quinaNota = {
+      active: qne.active !== false,
+      visibleName: typeof qne.visibleName === 'string' && qne.visibleName.trim() ? qne.visibleName.trim() : 'QUINA NOTA ÉS?',
+      description: typeof qne.description === 'string' && qne.description.trim() ? qne.description.trim() : 'Endevina la nota del dia i suma punts musicals.',
+      icon: typeof qne.icon === 'string' ? qne.icon : ''
+    };
     base.events = Array.isArray(base.events) ? base.events.map((event,index)=>({
       id: event.id || uid(`evt${index}`),
       date: event.date || '',

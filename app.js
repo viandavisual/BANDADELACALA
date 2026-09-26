@@ -31,6 +31,8 @@ const state = {
   collapsedPeriods: new Set(),
   historyViewer: { scale:1, maxScale:1, baseWidth:0, items:[], index:0 },
   hemerotecaType: 'cartells',
+  minigameOpen: false,
+  minigameWasPlaying: false,
   content: window.BandaStore ? (BandaStore.loadApp ? BandaStore.loadApp() : BandaStore.load()) : {events:[],tracks:[],dresscodes:[],historicItems:[],hemerotecaItems:[],settings:{}}
 };
 
@@ -39,7 +41,7 @@ const navItems = [
   { id:'calendar', label:'CALENDARI', icon:'calendar', eyebrow:'AGENDA', title:'CALENDARI', public:false },
   { id:'history', label:'HISTÒRIC', icon:'history', eyebrow:'MEMÒRIA', title:'HISTÒRIC', public:true },
   { id:'playlist', label:'PLAYER', icon:'playlist', eyebrow:'MÚSICA', title:'PLAYER', public:true },
-  { id:'games', label:'MINIJOCS', icon:'games', eyebrow:'OCI', title:'MINIJOCS', public:false },
+  { id:'games', label:'MINIJOCS', icon:'games', eyebrow:'OCI', title:'MINIJOCS', public:true },
   { id:'user', label:'USUARI', icon:'user', eyebrow:'COMPTE', title:'USUARI', public:true }
 ];
 
@@ -221,6 +223,117 @@ function renderNavigation(){
 }
 
 
+function getQuinaNotaSettings(){
+  const raw=state.content?.settings?.minigames?.quinaNota || {};
+  return {
+    active: raw.active !== false,
+    visibleName: String(raw.visibleName||'QUINA NOTA ÉS?').trim() || 'QUINA NOTA ÉS?',
+    description: String(raw.description||'Endevina la nota del dia i suma punts musicals.').trim() || 'Endevina la nota del dia i suma punts musicals.',
+    icon: String(raw.icon||'').trim()
+  };
+}
+function quinaNotaIconSvg(){
+  return `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M11 7.2v14.1" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linecap="round"/><path d="M20.8 5.1v13.1" fill="none" stroke="#8B6228" stroke-width="1.7" stroke-linecap="round"/><path d="M11 7.2l9.8-2.1v4.1L11 11.3V7.2Z" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linejoin="round"/><ellipse cx="8.6" cy="22.2" rx="3.9" ry="2.8" transform="rotate(-18 8.6 22.2)" fill="#D4AC5F"/><ellipse cx="18.4" cy="19.2" rx="3.9" ry="2.8" transform="rotate(-18 18.4 19.2)" fill="#393A86"/></svg>`;
+}
+function renderGames(){
+  const menu=$('#gamesMenu'), grid=$('#gamesGrid');
+  if(!menu||!grid) return;
+  const qne=getQuinaNotaSettings();
+  if(!qne.active){
+    grid.innerHTML='<div class="panel games-empty"><span class="eyebrow">MINIJOCS</span><p>Ara mateix no hi ha cap minijoc actiu.</p></div>';
+    return;
+  }
+  const points=state.authenticated?Number(state.profile?.quina_nota_points_total||0):null;
+  const marker=state.authenticated?`<span class="game-points-bubble">${esc(`${points} ${points===1?'PUNT':'PUNTS'}`)}</span>`:'';
+  const icon=qne.icon
+    ? `<span class="game-launch-icon game-launch-image"><img src="${esc(qne.icon)}" alt="" /></span>`
+    : `<span class="game-launch-icon">${quinaNotaIconSvg()}</span>`;
+  grid.innerHTML=`<button class="game-launch-card" type="button" data-open-minigame="QUINA_NOTA_ES">${icon}<span class="game-launch-copy"><strong>${esc(qne.visibleName)}</strong><small>${esc(qne.description)}</small>${marker}</span></button>`;
+  grid.querySelector('[data-open-minigame]')?.addEventListener('click',openQuinaNotaGame);
+}
+function sendToOpenMinigame(payload){
+  const frame=$('#gamePlayerFrame');
+  if(!state.minigameOpen||!frame?.contentWindow) return;
+  try{frame.contentWindow.postMessage(payload,'*');}catch(_error){}
+}
+async function openQuinaNotaGame(){
+  if(!getQuinaNotaSettings().active) return;
+  const menu=$('#gamesMenu'), panel=$('#gamePlayerPanel'), frame=$('#gamePlayerFrame');
+  if(!menu||!panel||!frame) return;
+  const player=audio();
+  state.minigameWasPlaying=!!(player && !player.paused && state.currentTrack>=0);
+  if(state.minigameWasPlaying){ try{player.pause();}catch(_error){} }
+  state.minigameOpen=true;
+  menu.hidden=true; panel.hidden=false;
+  frame.onload=async()=>{
+    try{
+      const daily=state.authenticated
+        ? await BandaSupabase.getQuinaNotaState()
+        : await BandaSupabase.getQuinaNotaPublicChallenge();
+      const settings=getQuinaNotaSettings();
+      sendToOpenMinigame({
+        type:'BANDA_DE_LA_CALA_MINIGAME_INIT', game:'QUINA_NOTA_ES', registered:state.authenticated,
+        user:state.authenticated?{id:state.session?.user?.id||'',name:currentUserDisplayName(),role:state.profile?.role||''}:null,
+        pointsTotal:state.authenticated?Number(daily?.pointsTotal ?? state.profile?.quina_nota_points_total ?? 0):0,
+        dailyState:daily||{}, settings, muted:state.globalMuted
+      });
+    }catch(error){
+      console.error('QUINA NOTA init',error);
+      if(!state.authenticated){
+        const settings=getQuinaNotaSettings();
+        sendToOpenMinigame({
+          type:'BANDA_DE_LA_CALA_MINIGAME_INIT', game:'QUINA_NOTA_ES', registered:false,
+          user:null, pointsTotal:0, dailyState:{}, settings, muted:state.globalMuted,
+          publicChallengeUnavailable:true
+        });
+      }else{
+        sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_INIT_ERROR',game:'QUINA_NOTA_ES',message:'No s’ha pogut carregar el repte actual. Comprova l’actualització de Supabase v0.52.'});
+      }
+    }
+  };
+  frame.src=`app/minigames/quina-nota-es/app.html?v=0.52&ts=${Date.now()}`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function closeOpenMinigame({resumePlayer=true}={}){
+  if(!state.minigameOpen) return;
+  const menu=$('#gamesMenu'), panel=$('#gamePlayerPanel'), frame=$('#gamePlayerFrame');
+  sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_STOP',game:'QUINA_NOTA_ES'});
+  state.minigameOpen=false;
+  if(menu) menu.hidden=false;
+  if(panel) panel.hidden=true;
+  if(frame){ frame.onload=null; setTimeout(()=>{ if(!state.minigameOpen) frame.src='about:blank'; },40); }
+  if(resumePlayer && state.minigameWasPlaying){
+    const player=audio();
+    if(player && state.currentTrack>=0){ const promise=player.play(); promise?.catch?.(()=>{}); }
+  }
+  state.minigameWasPlaying=false;
+  renderGames();
+}
+function bindMinigameBridge(){
+  window.addEventListener('message',async event=>{
+    const frame=$('#gamePlayerFrame');
+    if(!frame?.contentWindow || event.source!==frame.contentWindow) return;
+    const data=event.data||{};
+    if(data.game!=='QUINA_NOTA_ES' || !state.minigameOpen) return;
+    if(data.type==='BANDA_DE_LA_CALA_MINIGAME_EXIT'){
+      closeOpenMinigame({resumePlayer:true});
+      return;
+    }
+    if(data.type==='BANDA_DE_LA_CALA_MINIGAME_RESULT'){
+      if(!state.authenticated) return;
+      try{
+        const result=await BandaSupabase.submitQuinaNotaAnswer(data.answer);
+        try{state.profile=await BandaSupabase.getMyProfile();}catch(_error){}
+        renderUserSection(); renderHome(); renderNavigation(); renderGames();
+        sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_RESULT_CONFIRMED',game:'QUINA_NOTA_ES',result});
+      }catch(error){
+        console.error('QUINA NOTA result',error);
+        sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_RESULT_ERROR',game:'QUINA_NOTA_ES',message:'No s’ha pogut desar el resultat. Torna-ho a provar.'});
+      }
+    }
+  });
+}
+
 function renderHome(){
   const welcome=$('#homeWelcomeEyebrow');
   if(welcome) welcome.textContent=state.authenticated ? `${currentWelcomeLabel()} ${currentUserDisplayName()}` : 'BENVINGUT/DA';
@@ -228,16 +341,17 @@ function renderHome(){
     { id:'calendar', icon:'calendar', title:'CALENDARI', text:'Assajos, actuacions i agenda de la banda.', status:'ACTIU' },
     { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
     { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
-    { id:'games', icon:'games', title:'MINIJOCS', text:'Jocs casuals de la banda.', status:'PROPERAMENT' },
+    { id:'games', icon:'games', title:'MINIJOCS', text:getQuinaNotaSettings().active?'Jocs i reptes musicals de la banda.':'Minijocs temporalment inactius.', status:getQuinaNotaSettings().active?'JUGAR':'INACTIU' },
     { id:'user', icon:'user', title:currentUserDisplayName(), text:'Perfil i dades del teu compte.', status:'ACTIU' }
   ] : [
     { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
     { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
+    { id:'games', icon:'games', title:'MINIJOCS', text:getQuinaNotaSettings().active?'Jocs musicals oberts a tothom. Inicia sessió per guardar punts.':'Minijocs temporalment inactius.', status:getQuinaNotaSettings().active?'JUGAR':'INACTIU' },
     { id:'user', icon:'user', title:'USUARI', text:'Accés privat per als músics de la banda.', status:'ACCÉS' }
   ];
   const homeGrid=$('#homeGrid');
   homeGrid.classList.toggle('five-cards', cards.length===5);
-  homeGrid.innerHTML = cards.map(card => `<button class="home-card ${card.status==='PROPERAMENT'?'disabled':''}" data-open="${card.id}">
+  homeGrid.innerHTML = cards.map(card => `<button class="home-card" data-open="${card.id}">
     <span class="big-icon">${iconSvg(card.icon)}</span>
     <div>${card.status && card.status!=='ACTIU'?`<span class="status-pill">${card.status}</span>`:''}<h4>${card.title}</h4><p>${card.text}</p></div>
   </button>`).join('');
@@ -272,7 +386,7 @@ function animateViewEntrance(id){
     calendar:['.calendar-layout > .panel','.calendar-day','.event-card'],
     history:['.history-intro','.history-period','.history-period:not(.is-collapsed) .history-item'],
     playlist:['.playlist-layout > .panel','.track-row','.player-card .record-art','.player-card > .eyebrow','.player-card > h3','.player-card > p','.player-controls','.playback-modes','.progress-row'],
-    games:['.coming-soon','.coming-soon > *'],
+    games:['.games-intro','.game-launch-card','.game-player-panel'],
     user:['.user-auth-card','.user-auth-card > *','.user-profile-head','.temporary-password-notice','.user-settings-box','.user-logout-btn']
   };
   const nodes=[];
@@ -292,6 +406,7 @@ function animateViewEntrance(id){
 }
 
 function switchView(id, remember = true){
+  if(state.minigameOpen && id!=='games') closeOpenMinigame({resumePlayer:true});
   const target=navItems.find(item=>item.id===id);
   if(!target) id='home';
   else if(!target.public && !state.authenticated) id='user';
@@ -1183,6 +1298,7 @@ function applyGlobalMute(){
 
   }
   syncPlayerEqualizers();
+  sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_MUTE',game:'QUINA_NOTA_ES',muted:state.globalMuted});
 }
 function toggleGlobalMute(){
   state.globalMuted = !state.globalMuted;
@@ -1209,6 +1325,7 @@ function refreshContent(next){
   renderTracks();
   renderHistory();
   renderHemeroteca();
+  renderGames();
 }
 
 function bindContentUpdates(){
@@ -1516,7 +1633,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.50',root).href;
+    const swUrl=new URL('app/sw.js?v=0.52',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
@@ -1541,6 +1658,8 @@ async function init(){
   renderCalendar();
   renderHistory();
   renderHemeroteca();
+  renderGames();
+  bindMinigameBridge();
   bindHemeroteca();
   bindCalendar();
   bindDresscodeModal();

@@ -2,7 +2,15 @@ window.BANDA_PUBLISHED_CONTENT = {
   version: 3,
   updatedAt: "2026-09-22T15:34:00.000Z",
   settings: {
-    homeHeroImage: ""
+    homeHeroImage: "",
+    minigames: {
+      quinaNota: {
+        active: true,
+        visibleName: "QUINA NOTA ÉS?",
+        description: "Endevina la nota del dia i suma punts musicals.",
+        icon: ""
+      }
+    }
   },
   events: [
     { id:"evt-20260924-assaig", date:"2026-09-24", type:"ASSAIG", title:"ASSAIG GENERAL", time:"21:30", place:"LOCAL SOCIAL", notes:"Assaig complet del repertori.", dresscodeId:"" },

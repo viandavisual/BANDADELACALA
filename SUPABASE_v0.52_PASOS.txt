@@ -1,0 +1,30 @@
+BANDA DE LA CALA · v0.52 · SUPABASE
+===================================
+
+PASO ÚNICO
+-----------
+1. Entra en Supabase > SQL Editor.
+2. Abre un New query.
+3. Copia TODO el contenido de SUPABASE_UPDATE_v0.52.sql.
+4. Pulsa RUN.
+
+QUÉ HACE
+--------
+- Mantiene/crea los campos de QUINA NOTA ÉS? en profiles.
+- Cambia el ciclo diario para que se reinicie exactamente a las 03:00 h Europe/Madrid.
+- Añade un RPC público que permite a usuarios no registrados recibir el reto actual sin guardar progreso y sin revelar la respuesta.
+- Mantiene la validación privada del único intento puntuable para USERS registrados.
+- Mantiene el bloqueo atómico para impedir sumar dos puntos desde dos pestañas.
+
+NO HAY QUE TOCAR
+----------------
+- Auth.
+- SMTP.
+- Roles ADMIN / GESTOR / STANDARD.
+- Edge Function create-band-user.
+- Claves de Supabase.
+- Manifests PWA.
+
+NOTA
+----
+Este SQL puede ejecutarse tanto si ya aplicaste v0.51 como si todavía no lo hiciste.

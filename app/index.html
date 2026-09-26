@@ -14,7 +14,7 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.50" />
+  <link rel="stylesheet" href="style.css?v=0.52" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -224,7 +224,17 @@
       </section>
 
       <section id="view-games" class="view" data-view="games">
-        <div class="coming-soon panel centered-panel"><span class="coming-badge coming-only">PROPERAMENT</span></div>
+        <div id="gamesMenu" class="games-menu-wrap">
+          <div class="games-intro panel">
+            <span class="eyebrow">MINIJOCS</span>
+            <h3>Juga, practica i suma punts</h3>
+            <p>Petits reptes musicals vinculats a la Banda de la Cala.</p>
+          </div>
+          <div id="gamesGrid" class="games-grid"></div>
+        </div>
+        <section id="gamePlayerPanel" class="game-player-panel" hidden aria-label="Minijoc">
+          <iframe id="gamePlayerFrame" class="game-player-frame" title="Minijoc Banda de la Cala" allow="autoplay"></iframe>
+        </section>
       </section>
 
       <section id="view-user" class="view" data-view="user">
@@ -244,7 +254,7 @@
           <section id="userProfileCard" class="panel user-profile-card" hidden>
             <div class="user-profile-head">
               <div class="user-avatar-mark"><img id="userProfileAvatar" alt="Avatar del perfil" hidden /><span id="userProfileAvatarFallback" aria-hidden="true">●</span></div>
-              <div><span class="eyebrow" id="userProfileRole">USER</span><h3 id="userProfileName">Músic</h3><p id="userProfileEmail"></p></div>
+              <div class="user-profile-copy"><span class="eyebrow" id="userProfileRole">USER</span><h3 id="userProfileName">Músic</h3><p id="userProfileEmail"></p></div>
             </div>
             <div id="passwordSetupNotice" class="password-setup-notice" hidden><strong>COMPTE NOU</strong><span>Per completar l’alta, tria ara la contrasenya privada que vulguis utilitzar. Aquesta contrasenya només la coneixeràs tu.</span></div>
 
@@ -350,12 +360,12 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.50"></script>
-  <script src="config.js?v=0.50"></script>
-  <script src="data/content-published.js?v=0.50"></script>
-  <script src="content-store.js?v=0.50"></script>
+  <script src="version.js?v=0.52"></script>
+  <script src="config.js?v=0.52"></script>
+  <script src="data/content-published.js?v=0.52"></script>
+  <script src="content-store.js?v=0.52"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.50"></script>
-  <script src="app.js?v=0.50"></script>
+  <script src="supabase-client.js?v=0.52"></script>
+  <script src="app.js?v=0.52"></script>
 </body>
 </html>

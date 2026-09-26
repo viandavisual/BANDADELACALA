@@ -1,35 +1,38 @@
-BANDA DE LA CALA · PATCH v0.50 DESDE v0.49
+BANDA DE LA CALA · v0.52 · PATCH DESDE v0.51
+============================================
 
-OBJETIVO
-Integrar en el PLAYER de la APP el fallback de continuidad que ya fue probado correctamente en PLAYER_TEST_BANDA_v2.html.
+Este PATCH debe copiarse sobre una instalación v0.51 conservando la estructura de carpetas.
 
-SOBRESCRIBIR
-- app.js
-- version.js
-- app/index.html
-- app/sw.js
-- editor/index.html
-- editor.js
-- editor/sw.js
+CAMBIOS PRINCIPALES
+-------------------
+- QUINA NOTA ÉS? sustituido por la integración del HTML v15 definitivo.
+- Ciclo diario 03:00→03:00 Europe/Madrid.
+- MINIJOCS público para invitados.
+- Solo los USERS registrados guardan puntos y resultados.
+- Parrilla MINIJUEGOS 2×2 con marcador por card.
+- Icono + título + descripción de QUINA NOTA ÉS? editables desde EDITOR.
+- Puntos eliminados de la sección USUARI.
+- USERS del EDITOR mantienen las tiras compactas y PENDENT DE CONFIGURAR.
 
-AÑADIR
-- V0_50_CAMBIOS.txt
+SUPABASE — PASO OBLIGATORIO
+---------------------------
+Ejecutar UNA VEZ:
 
-NO TOCAR
-- manifests / IDs PWA / scopes / start_url
-- config.js
-- content-store.js
-- supabase-client.js
-- datos publicados
-- Supabase / SQL / SMTP
-- assets
-- Edge Functions
+  SUPABASE_UPDATE_v0.52.sql
 
-COMPORTAMIENTO PLAYER v0.50
-- Final normal: `ended` -> siguiente pista según el modo de reproducción.
-- Fallback validado: `MEDIA_ERR_DECODE (code 3)` -> tratar como final técnico -> misma transición.
-- Se evita el doble salto mediante lock.
+en Supabase > SQL Editor.
 
-IMPORTANTE
-Tras subir el PATCH, recarga/actualiza la PWA para que entre el nuevo Service Worker v0.50.
-No hay que ejecutar SQL ni desplegar ninguna Edge Function.
+Consulta SUPABASE_v0.52_PASOS.txt.
+
+No hay que tocar Auth, SMTP, roles ni la Edge Function create-band-user.
+
+AUDIO DEL MINIJUEGO
+-------------------
+El juego espera estos archivos en:
+
+  assets/AUDIO/QNE_intro.mp3
+  assets/AUDIO/QNE_BGmusic.mp3
+  assets/AUDIO/QNE_correcte.mp3
+  assets/AUDIO/QNE_error.mp3
+
+Si ya están en GitHub en esa ruta, no hay que cambiar nada más.

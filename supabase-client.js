@@ -44,31 +44,31 @@
     const currentSession=await session();
     if(!currentSession) return null;
     let result=await c.from('profiles')
-      .select('user_id,email,name,role,avatar_key,must_change_password,created_at')
+      .select('user_id,email,name,role,avatar_key,must_change_password,quina_nota_last_played_date,quina_nota_last_result_correct,quina_nota_points_total,created_at')
       .eq('user_id',currentSession.user.id)
       .maybeSingle();
-    if(result.error && /avatar_key/i.test(result.error.message||'')){
+    if(result.error && /(avatar_key|quina_nota_)/i.test(result.error.message||'')){
       result=await c.from('profiles')
         .select('user_id,email,name,role,must_change_password,created_at')
         .eq('user_id',currentSession.user.id)
         .maybeSingle();
     }
     if(result.error) throw result.error;
-    return result.data ? {...result.data,avatar_key:result.data.avatar_key||''} : null;
+    return result.data ? {...result.data,avatar_key:result.data.avatar_key||'',quina_nota_points_total:Number(result.data.quina_nota_points_total||0)} : null;
   }
 
   async function listProfiles(){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     let result=await c.from('profiles')
-      .select('user_id,email,name,role,avatar_key,must_change_password,created_at')
+      .select('user_id,email,name,role,avatar_key,must_change_password,quina_nota_last_played_date,quina_nota_last_result_correct,quina_nota_points_total,created_at')
       .order('created_at',{ascending:false});
-    if(result.error && /avatar_key/i.test(result.error.message||'')){
+    if(result.error && /(avatar_key|quina_nota_)/i.test(result.error.message||'')){
       result=await c.from('profiles')
         .select('user_id,email,name,role,must_change_password,created_at')
         .order('created_at',{ascending:false});
     }
     if(result.error) throw result.error;
-    return (result.data||[]).map(row=>({...row,avatar_key:row.avatar_key||''}));
+    return (result.data||[]).map(row=>({...row,avatar_key:row.avatar_key||'',quina_nota_points_total:Number(row.quina_nota_points_total||0)}));
   }
 
 
@@ -137,6 +137,33 @@
     const {data,error}=await c.auth.updateUser({data:{gender:clean}});
     if(error) throw error;
     return data?.user || null;
+  }
+
+  async function getQuinaNotaPublicChallenge(){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const {data,error}=await c.rpc('get_quina_nota_public_challenge');
+    if(error) throw error;
+    return data || null;
+  }
+
+  async function getQuinaNotaState(){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const currentSession=await session();
+    if(!currentSession) throw new Error('AUTH_REQUIRED');
+    const {data,error}=await c.rpc('get_quina_nota_state');
+    if(error) throw error;
+    return data || null;
+  }
+
+  async function submitQuinaNotaAnswer(answer){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const currentSession=await session();
+    if(!currentSession) throw new Error('AUTH_REQUIRED');
+    const clean=String(answer||'').trim().toUpperCase();
+    if(!['DO','RE','MI','FA','SOL','LA','SI'].includes(clean)) throw new Error('INVALID_NOTE');
+    const {data,error}=await c.rpc('submit_quina_nota_answer',{p_answer:clean});
+    if(error) throw error;
+    return data || null;
   }
 
   async function updatePassword(password){
@@ -258,7 +285,7 @@
   }
 
   window.BandaSupabase={
-    enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updateOwnGender,updatePassword,
+    enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updateOwnGender,getQuinaNotaPublicChallenge,getQuinaNotaState,submitQuinaNotaAnswer,updatePassword,
     loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,onAuthChange,dataUrlToFile
   };
 })();

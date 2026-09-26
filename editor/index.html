@@ -14,7 +14,7 @@
   <link rel="manifest" href="editor/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="editor/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="editor/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="editor.css?v=0.50" />
+  <link rel="stylesheet" href="editor.css?v=0.52" />
 </head>
 <body>
   <section id="editorLoginGate" class="editor-login-gate" aria-label="Accés a l'Editor">
@@ -264,7 +264,27 @@
           </div>
         </div>
       </section>
-      <section class="editor-view" data-editor-view="games"><div class="editor-card coming-card"><span class="coming-icon" aria-hidden="true">🎮</span><span class="future-pill">PROPERAMENT</span></div></section>
+      <section class="editor-view" data-editor-view="games">
+        <div class="editor-two-col minigames-editor-grid">
+          <form id="quinaNotaSettingsForm" class="editor-card form-card minigame-settings-card">
+            <div class="card-head"><div><span class="eyebrow">MINIJOC DIARI</span><h2>QUINA NOTA ÉS?</h2></div><span class="minigame-note-icon" aria-hidden="true"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M11 7.2v14.1" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linecap="round"/><path d="M20.8 5.1v13.1" fill="none" stroke="#8B6228" stroke-width="1.7" stroke-linecap="round"/><path d="M11 7.2l9.8-2.1v4.1L11 11.3V7.2Z" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linejoin="round"/><ellipse cx="8.6" cy="22.2" rx="3.9" ry="2.8" transform="rotate(-18 8.6 22.2)" fill="#D4AC5F"/><ellipse cx="18.4" cy="19.2" rx="3.9" ry="2.8" transform="rotate(-18 18.4 19.2)" fill="#393A86"/></svg></span></div>
+            <label class="minigame-toggle-row"><span><strong>VISIBILITAT</strong><small>Mostra o amaga el minijoc dins de l’APP.</small></span><input id="quinaNotaActive" type="checkbox" /></label>
+            <label>Icona del minijoc<input id="quinaNotaIconFile" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+            <small class="helper-copy">Carrega la imatge 1:1 que es mostrarà a la card de MINIJOCS.</small>
+            <div class="form-actions compact"><button id="clearQuinaNotaIcon" class="secondary-btn" type="button">RESTAURAR ICONA PER DEFECTE</button></div>
+            <label>Títol visible<input id="quinaNotaVisibleName" maxlength="80" value="QUINA NOTA ÉS?" /></label>
+            <label>Descripció visible<textarea id="quinaNotaDescription" rows="4" maxlength="240">Endevina la nota del dia i suma punts musicals.</textarea></label>
+            <div class="form-actions"><button class="primary-btn" type="submit">DESAR MINIJOC</button></div>
+          </form>
+          <div class="editor-card minigame-preview-card">
+            <span class="eyebrow">APP · PREVISUALITZACIÓ</span>
+            <div class="minigame-preview-icon" aria-hidden="true"><img id="quinaNotaPreviewIconImg" alt="" hidden /><span id="quinaNotaPreviewIconFallback"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M11 7.2v14.1" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linecap="round"/><path d="M20.8 5.1v13.1" fill="none" stroke="#8B6228" stroke-width="1.7" stroke-linecap="round"/><path d="M11 7.2l9.8-2.1v4.1L11 11.3V7.2Z" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linejoin="round"/><ellipse cx="8.6" cy="22.2" rx="3.9" ry="2.8" transform="rotate(-18 8.6 22.2)" fill="#D4AC5F"/><ellipse cx="18.4" cy="19.2" rx="3.9" ry="2.8" transform="rotate(-18 18.4 19.2)" fill="#393A86"/></svg></span></div>
+            <h2 id="quinaNotaPreviewName">QUINA NOTA ÉS?</h2>
+            <p id="quinaNotaPreviewDescription">Endevina la nota del dia i suma punts musicals.</p>
+            <span id="quinaNotaPreviewStatus" class="future-pill">ACTIU</span>
+          </div>
+        </div>
+      </section>
 
       <section class="editor-view" data-editor-view="users">
         <div class="editor-two-col users-editor-grid">
@@ -308,12 +328,12 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="version.js?v=0.50"></script>
-  <script src="config.js?v=0.50"></script>
-  <script src="data/content-published.js?v=0.50"></script>
-  <script src="content-store.js?v=0.50"></script>
+  <script src="version.js?v=0.52"></script>
+  <script src="config.js?v=0.52"></script>
+  <script src="data/content-published.js?v=0.52"></script>
+  <script src="content-store.js?v=0.52"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.50"></script>
-  <script src="editor.js?v=0.50"></script>
+  <script src="supabase-client.js?v=0.52"></script>
+  <script src="editor.js?v=0.52"></script>
 </body>
 </html>

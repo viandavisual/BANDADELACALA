@@ -283,6 +283,82 @@ function renderHomeEditor(){
   const mode=$('#homePreviewMode');
   if(mode) mode.textContent=window.matchMedia('(max-width: 780px)').matches?'MOBILE · MATEIXA COMPOSICIÓ DE L’APP':'DESKTOP · MATEIXA COMPOSICIÓ DE L’APP';
 }
+function quinaNotaEditorSettings(){
+  content.settings=content.settings||{};
+  content.settings.minigames=content.settings.minigames&&typeof content.settings.minigames==='object'?content.settings.minigames:{};
+  const current=content.settings.minigames.quinaNota&&typeof content.settings.minigames.quinaNota==='object'?content.settings.minigames.quinaNota:{};
+  content.settings.minigames.quinaNota={
+    active:current.active!==false,
+    visibleName:String(current.visibleName||'QUINA NOTA ÉS?').trim()||'QUINA NOTA ÉS?',
+    description:String(current.description||'Endevina la nota del dia i suma punts musicals.').trim()||'Endevina la nota del dia i suma punts musicals.',
+    icon:String(current.icon||'').trim()
+  };
+  return content.settings.minigames.quinaNota;
+}
+function renderQuinaNotaIconPreview(settings=quinaNotaEditorSettings()){
+  const img=$('#quinaNotaPreviewIconImg'), fallback=$('#quinaNotaPreviewIconFallback');
+  if(!img||!fallback)return;
+  if(settings.icon){
+    img.hidden=false; fallback.hidden=true; img.src=settings.icon;
+    img.onerror=()=>{img.hidden=true;fallback.hidden=false;};
+  }else{
+    img.hidden=true; img.removeAttribute('src'); fallback.hidden=false;
+  }
+}
+function renderMinigames(){
+  const settings=quinaNotaEditorSettings();
+  const active=$('#quinaNotaActive'), name=$('#quinaNotaVisibleName'), description=$('#quinaNotaDescription');
+  if(active) active.checked=settings.active;
+  if(name && document.activeElement!==name) name.value=settings.visibleName;
+  if(description && document.activeElement!==description) description.value=settings.description;
+  const previewName=$('#quinaNotaPreviewName'); if(previewName) previewName.textContent=settings.visibleName;
+  const previewDescription=$('#quinaNotaPreviewDescription'); if(previewDescription) previewDescription.textContent=settings.description;
+  const status=$('#quinaNotaPreviewStatus'); if(status){status.textContent=settings.active?'ACTIU':'INACTIU';status.classList.toggle('is-inactive',!settings.active);}
+  renderQuinaNotaIconPreview(settings);
+}
+function bindMinigames(){
+  const form=$('#quinaNotaSettingsForm'); if(!form) return;
+  const livePreview=()=>{
+    const previewName=$('#quinaNotaPreviewName'); if(previewName) previewName.textContent=$('#quinaNotaVisibleName')?.value.trim()||'QUINA NOTA ÉS?';
+    const previewDescription=$('#quinaNotaPreviewDescription'); if(previewDescription) previewDescription.textContent=$('#quinaNotaDescription')?.value.trim()||'Endevina la nota del dia i suma punts musicals.';
+    const status=$('#quinaNotaPreviewStatus'); if(status){const active=!!$('#quinaNotaActive')?.checked;status.textContent=active?'ACTIU':'INACTIU';status.classList.toggle('is-inactive',!active);}
+  };
+  $('#quinaNotaActive')?.addEventListener('change',livePreview);
+  $('#quinaNotaVisibleName')?.addEventListener('input',livePreview);
+  $('#quinaNotaDescription')?.addEventListener('input',livePreview);
+  $('#quinaNotaIconFile')?.addEventListener('change',async event=>{
+    const file=event.target.files?.[0]; if(!file)return;
+    try{
+      const compressed=await compressImage(file);
+      let imageSrc=compressed;
+      if(editorCanWrite && supabaseActive && currentSession){
+        showToast('Pujant icona del minijoc…');
+        imageSrc=(await BandaSupabase.uploadDataUrl('app-images',compressed,'minigames/quina-nota-es','quina-nota-es-icon')).url;
+      }
+      const settings=quinaNotaEditorSettings(); settings.icon=imageSrc;
+      save(content,'Icona de QUINA NOTA ÉS? actualitzada');
+    }catch(error){console.error(error);showToast('No s’ha pogut processar o pujar la icona');}
+    event.target.value='';
+  });
+  $('#clearQuinaNotaIcon')?.addEventListener('click',()=>{
+    const settings=quinaNotaEditorSettings(); settings.icon='';
+    save(content,'Icona per defecte de QUINA NOTA ÉS? restaurada');
+  });
+  form.addEventListener('submit',event=>{
+    event.preventDefault();
+    const current=quinaNotaEditorSettings();
+    content.settings=content.settings||{};
+    content.settings.minigames=content.settings.minigames||{};
+    content.settings.minigames.quinaNota={
+      active:!!$('#quinaNotaActive')?.checked,
+      visibleName:$('#quinaNotaVisibleName')?.value.trim()||'QUINA NOTA ÉS?',
+      description:$('#quinaNotaDescription')?.value.trim()||'Endevina la nota del dia i suma punts musicals.',
+      icon:current.icon||''
+    };
+    save(content,'Configuració de QUINA NOTA ÉS? desada');
+  });
+}
+
 async function compressImage(file){
   const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});
   const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=dataUrl;});
@@ -1431,10 +1507,13 @@ function renderUsers(){
   const list=$('#usersList'); if(!list) return;
   $('#usersCount').textContent=userProfiles.length;
   list.innerHTML=userProfiles.length?userProfiles.map(profile=>{
-    const deleteBtn=canDeleteUserProfile(profile)?`<button class="tiny-btn delete" data-delete-user="${esc(profile.user_id)}" title="Eliminar usuari" aria-label="Eliminar ${esc(profile.name||profile.email||'usuari')}">×</button>`:'';
-    return `<article class="list-item user-list-item"><div class="list-main"><div class="list-kicker"><span>${esc(roleEditorLabel(profile.role))}</span>${profile.must_change_password?'<span>·</span><span class="gold-note">PENDENT DE CONFIGURAR</span>':''}</div><h3>${esc(profile.name||'Sense nom')}</h3><p>${esc(profile.email||'')}</p></div>${deleteBtn?`<div class="list-actions">${deleteBtn}</div>`:''}</article>`;
+    const deleteBtn=canDeleteUserProfile(profile)?`<button class="user-strip-delete" data-delete-user="${esc(profile.user_id)}" title="Eliminar usuari" aria-label="Eliminar ${esc(profile.name||profile.email||'usuari')}">×</button>`:'';
+    const bubbles=[];
+    if(profile.must_change_password) bubbles.push('<span class="user-info-bubble pending">PENDENT DE CONFIGURAR</span>');
+    return `<article class="list-item user-list-item user-strip"><div class="user-strip-main"><strong>${esc(profile.name||'Sense nom')}</strong><span class="user-strip-role">${esc(roleEditorLabel(profile.role))}</span><span class="user-strip-email">${esc(profile.email||'')}</span></div><div class="user-strip-actions">${bubbles.join('')}${deleteBtn}</div></article>`;
   }).join(''):'<div class="empty-state">Encara no hi ha usuaris.</div>';
   $$('[data-delete-user]').forEach(btn=>btn.onclick=()=>deleteManagedUserFromEditor(btn.dataset.deleteUser));
+  fitManagedListToFour(list);
 }
 
 async function deleteManagedUserFromEditor(userId){
@@ -1496,7 +1575,7 @@ function bindUsers(){
   });
 }
 
-function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderSystem(); renderUsers(); }
+function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderMinigames(); renderSystem(); renderUsers(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{ if(supabaseActive) return; content=BandaStore.normalize(event.detail);renderAll();}); }
 
 function setEditorAccess({session=null,profile=null}={}){
@@ -1706,12 +1785,12 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.50',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.52',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindMinigames(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();
