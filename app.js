@@ -183,10 +183,9 @@ function garmentIconSvg(key,sex='boys'){
   if(key==='shirt') return `<svg ${common}><path ${stroke} d="M15 10 20 7h8l5 3 8 6-5 7-5-3v18H17V20l-5 3-5-7 8-6Z"/><path class="garment-gold" ${stroke} d="M20 7c.7 4 2 6 4 6s3.3-2 4-6"/></svg>`;
   if(key==='bottom' && sex==='girls') return `<svg ${common}><path ${stroke} d="M18 8h12l2 7 6 24H10l6-24 2-7Z"/><path class="garment-gold" ${stroke} d="M16 15h16"/></svg>`;
   if(key==='bottom') return `<svg ${common}><path ${stroke} d="M14 8h20l-2 31h-8l-1-18-1 18h-8L14 8Z"/><path class="garment-gold" ${stroke} d="M23 9v12"/></svg>`;
-  if(key==='socks' && sex==='girls') return `<svg ${common}><path ${stroke} d="M14 7h8v20l-3 13H9l5-14V7ZM28 7h8v20l3 13H29l-1-13V7Z"/><path class="garment-gold" ${stroke} d="M14 12h8M28 12h8"/></svg>`;
+  if(key==='socks' && sex==='girls') return `<svg ${common}><path ${stroke} d="M12 7h24l-2 9-4 25h-8l2-21-3-4-3 4 2 21h-8L8 16l4-9Z"/><path class="garment-gold" ${stroke} d="M10 15h24M21 16v7"/></svg>`;
   if(key==='socks') return `<svg ${common}><path ${stroke} d="M12 8h9v20l-4 10H8l4-12V8ZM27 8h9v20l4 10h-9l-4-12V8Z"/><path class="garment-gold" ${stroke} d="M12 13h9M27 13h9"/></svg>`;
   if(key==='jacket') return `<svg ${common}><path ${stroke} d="M15 9 21 6h6l6 3 6 8-5 5-3-4v21H17V18l-3 4-5-5 6-8Z"/><path class="garment-gold" ${stroke} d="m21 7 3 8 3-8M24 15v24"/></svg>`;
-  if(key==='footwear' && sex==='girls') return `<svg ${common}><path ${stroke} d="M9 29c5 1 8-2 11-8l5 2-2 8c5 1 9 3 13 7H9v-9Z"/><path class="garment-gold" ${stroke} d="M24 31h9M14 38v3"/></svg>`;
   if(key==='footwear') return `<svg ${common}><path ${stroke} d="M8 29c7 0 10-2 13-7l5 4c4 4 8 6 14 7v6H8V29Z"/><path class="garment-gold" ${stroke} d="M22 28h7M12 39v2"/></svg>`;
   return `<svg ${common}><path ${stroke} d="M20 7h8l-2 8 4 20-6 7-6-7 4-20-2-8Z"/><path class="garment-gold" ${stroke} d="M20 7l4 8 4-8"/></svg>`;
 }
@@ -714,6 +713,11 @@ function applyHomeHero(){
 }
 
 const DRESSCODE_VIEW_ORDER=['shirt','bottom','socks','jacket','footwear','tie'];
+function normalizeDresscodeDisplayText(key,value,sex='boys'){
+  let text=String(value||'').trim();
+  if(sex==='girls' && key==='socks') text=text.replace(/\bmitjons\b/gi,'Mitges');
+  return text;
+}
 function renderDresscodeParameters(host,items,legacyText='',sex='boys'){
   if(!host) return;
   const list=Array.isArray(items)?items:[];
@@ -721,7 +725,7 @@ function renderDresscodeParameters(host,items,legacyText='',sex='boys'){
     const byKey=new Map(list.map(item=>[item.key,item]));
     host.innerHTML=DRESSCODE_VIEW_ORDER.map(key=>{
       const item=byKey.get(key); if(!item) return '';
-      const value=String(item.text||item.detail||'').trim(); if(!value) return '';
+      const value=normalizeDresscodeDisplayText(key,item.text||item.detail||'',sex); if(!value) return '';
       return `<div class="dresscode-param-row"><span class="dresscode-garment-icon">${garmentIconSvg(key,sex)}</span><strong>${esc(value)}</strong></div>`;
     }).join('');
     if(host.innerHTML.trim()) return;
@@ -729,7 +733,8 @@ function renderDresscodeParameters(host,items,legacyText='',sex='boys'){
   const lines=String(legacyText||'').split(/\n+/).map(line=>line.trim()).filter(Boolean);
   host.innerHTML=lines.map((line,index)=>{
     const key=DRESSCODE_VIEW_ORDER[index]||'shirt';
-    return `<div class="dresscode-param-row legacy"><span class="dresscode-garment-icon">${garmentIconSvg(key,sex)}</span><strong>${esc(line)}</strong></div>`;
+    const value=sex==='girls'?String(line).replace(/\bmitjons\b/gi,'Mitges'):line;
+    return `<div class="dresscode-param-row legacy"><span class="dresscode-garment-icon">${garmentIconSvg(key,sex)}</span><strong>${esc(value)}</strong></div>`;
   }).join('') || '<div class="dresscode-param-row legacy"><strong>Sense informació.</strong></div>';
 }
 function openDresscode(id){
@@ -1325,7 +1330,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.38',root).href;
+    const swUrl=new URL('app/sw.js?v=0.43',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

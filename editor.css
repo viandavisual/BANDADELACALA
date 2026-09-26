@@ -701,3 +701,23 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   .event-strip-detail-grid .event-strip-notes,.dresscode-strip-wide{grid-column:auto}
   .dress-item-fields{grid-template-columns:1fr}
 }
+
+
+/* ============================================================
+   v0.43 · PLAYER scroll / AGENDA 9,5 / HISTÒRIC icon / ADMIN tech
+   ============================================================ */
+/* Tot el material tècnic marcat com admin-only queda ocult per defecte. */
+body:not(.editor-admin) [data-admin-only]{display:none!important}
+/* PLAYER: viewport real i desplaçable de 4,5 pistes. */
+.track-scroll-preview{overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable!important}
+/* CALENDARI: 9 tires completes + mitja desena com a pista visual de continuació. */
+.event-scroll-preview{overflow-y:auto!important;overflow-x:hidden!important;min-height:0!important;overscroll-behavior:contain;touch-action:pan-y!important;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable;padding-right:5px}
+.event-scroll-preview::-webkit-scrollbar{width:8px}
+.event-scroll-preview::-webkit-scrollbar-track{background:#f6eddc;border-radius:999px}
+.event-scroll-preview::-webkit-scrollbar-thumb{background:#c89b4a;border-radius:999px;border:2px solid #f6eddc}
+/* HISTÒRIC: fotografia blanca amb el mateix llenguatge de volum que HEMEROTECA. */
+.editor-photo-icon-svg{overflow:visible}
+.editor-photo-icon-svg .photo-back{fill:#fff;stroke:var(--gold-deep);stroke-width:2.2}
+.editor-photo-icon-svg .photo-front{fill:#fff;stroke:var(--blue);stroke-width:2.2}
+.editor-photo-icon-svg .photo-sun{fill:var(--gold-deep);stroke:none}
+.editor-photo-icon-svg .photo-land{fill:none;stroke:var(--blue);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}

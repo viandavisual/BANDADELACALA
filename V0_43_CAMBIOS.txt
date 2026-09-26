@@ -1,0 +1,20 @@
+BANDA DE LA CALA — v0.43
+Fecha: 26/09/2026
+
+APP
+- DRESSCODE NOIES: MITJONS se corrige a MITGES en visualización, incluidas entradas heredadas.
+- Icono MITGES redibujado como medias/pantys; CALÇAT de NOIES usa el mismo icono que NOIS.
+- USUARI: AVATAR pasa a “TRIA EL TEU AVATAR”, centrado; el valor del nombre visible también queda centrado.
+
+EDITOR
+- Eliminado el botón OBRIR APP.
+- PLAYER: reparado el scroll de la lista; conserva el viewport de 4 pistas y media y permite recorrer toda la playlist.
+- HISTÒRIC: nuevo icono de fotografía blanco, coherente con el estilo del icono de HEMEROTECA.
+- CALENDARI / AGENDA: viewport de 9 eventos completos + media tira del 10.º; a partir de ahí scroll interno.
+- SUPABASE: cualquier referencia técnica visible y sus controles específicos quedan reservados al USER ADMIN. Los USER GESTOR ven terminología funcional/genérica y no los controles técnicos de migración.
+
+PWA / QA
+- version.js y cache-busting actualizados a v0.43.
+- caches APP/EDITOR actualizadas a v0.43.
+- IDs, scopes, start_url y manifests se preservan sin cambios.
+- Sin SQL nuevo.

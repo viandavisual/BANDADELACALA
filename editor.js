@@ -39,6 +39,7 @@ let hemerotecaEditorFilter = 'all';
 const openHistoricEditorPeriods=new Set();
 const openHemerotecaEditorSections=new Set();
 let trackListResizeObserver=null;
+let eventListResizeObserver=null;
 
 const DRESS_DEFS = [
   {key:'shirt', label:'CAMISA', options:[
@@ -90,10 +91,9 @@ function garmentIconSvg(key,sex='boys'){
   if(key==='shirt') return `<svg ${common}><path ${stroke} d="M15 10 20 7h8l5 3 8 6-5 7-5-3v18H17V20l-5 3-5-7 8-6Z"/><path class="garment-gold" ${stroke} d="M20 7c.7 4 2 6 4 6s3.3-2 4-6"/></svg>`;
   if(key==='bottom' && sex==='girls') return `<svg ${common}><path ${stroke} d="M18 8h12l2 7 6 24H10l6-24 2-7Z"/><path class="garment-gold" ${stroke} d="M16 15h16"/></svg>`;
   if(key==='bottom') return `<svg ${common}><path ${stroke} d="M14 8h20l-2 31h-8l-1-18-1 18h-8L14 8Z"/><path class="garment-gold" ${stroke} d="M23 9v12"/></svg>`;
-  if(key==='socks' && sex==='girls') return `<svg ${common}><path ${stroke} d="M14 7h8v20l-3 13H9l5-14V7ZM28 7h8v20l3 13H29l-1-13V7Z"/><path class="garment-gold" ${stroke} d="M14 12h8M28 12h8"/></svg>`;
+  if(key==='socks' && sex==='girls') return `<svg ${common}><path ${stroke} d="M12 7h24l-2 9-4 25h-8l2-21-3-4-3 4 2 21h-8L8 16l4-9Z"/><path class="garment-gold" ${stroke} d="M10 15h24M21 16v7"/></svg>`;
   if(key==='socks') return `<svg ${common}><path ${stroke} d="M12 8h9v20l-4 10H8l4-12V8ZM27 8h9v20l4 10h-9l-4-12V8Z"/><path class="garment-gold" ${stroke} d="M12 13h9M27 13h9"/></svg>`;
   if(key==='jacket') return `<svg ${common}><path ${stroke} d="M15 9 21 6h6l6 3 6 8-5 5-3-4v21H17V18l-3 4-5-5 6-8Z"/><path class="garment-gold" ${stroke} d="m21 7 3 8 3-8M24 15v24"/></svg>`;
-  if(key==='footwear' && sex==='girls') return `<svg ${common}><path ${stroke} d="M9 29c5 1 8-2 11-8l5 2-2 8c5 1 9 3 13 7H9v-9Z"/><path class="garment-gold" ${stroke} d="M24 31h9M14 38v3"/></svg>`;
   if(key==='footwear') return `<svg ${common}><path ${stroke} d="M8 29c7 0 10-2 13-7l5 4c4 4 8 6 14 7v6H8V29Z"/><path class="garment-gold" ${stroke} d="M22 28h7M12 39v2"/></svg>`;
   return `<svg ${common}><path ${stroke} d="M20 7h8l-2 8 4 20-6 7-6-7 4-20-2-8Z"/><path class="garment-gold" ${stroke} d="M20 7l4 8 4-8"/></svg>`;
 }
@@ -112,14 +112,31 @@ const views = {
 
 function editorPageTitleIcon(id){
   if(id!=='history') return '';
-  return `<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="5" y="9" width="30" height="23" rx="4"/><circle class="editor-icon-gold" cx="25.5" cy="17" r="4"/><path d="m8 29 8-8 5 5 4-4 7 7"/><path class="editor-icon-gold" d="M13 9l2-3h10l2 3"/></svg>`;
+  return `<svg viewBox="0 0 40 40" aria-hidden="true" class="editor-photo-icon-svg"><rect class="photo-back" x="4" y="8" width="29" height="24" rx="5"/><rect class="photo-front" x="8" y="5" width="28" height="24" rx="5"/><circle class="photo-sun" cx="27" cy="13" r="3.2"/><path class="photo-land" d="m11 25 7-7 5 5 4-4 6 6"/></svg>`;
 }
 
+function editorIsAdmin(){ return currentProfile?.role==='admin'; }
+function cleanTechnicalUiText(message){
+  const text=String(message??'');
+  if(editorIsAdmin()) return text;
+  const exact={
+    'DESAT A SUPABASE':'DESAT',
+    'DESANT A SUPABASE…':'DESANT…',
+    'CAL MIGRAR A SUPABASE':'REVISIÓ D’ADMINISTRACIÓ PENDENT',
+    'ACTUALITZAT DES DE SUPABASE':'CONTINGUT ACTUALITZAT'
+  };
+  if(exact[text]) return exact[text];
+  return text.replace(/Supabase Storage/gi,'el núvol compartit').replace(/Supabase Auth/gi,'el sistema de comptes').replace(/Supabase/gi,'el sistema compartit');
+}
+function syncAdminOnlyUi(){
+  document.body.classList.toggle('editor-admin',editorIsAdmin());
+  $$('[data-admin-only]').forEach(el=>{el.hidden=!editorIsAdmin();});
+}
 function showToast(message){
-  const toast=$('#toast'); toast.textContent=message; toast.classList.add('show');
+  const toast=$('#toast'); toast.textContent=cleanTechnicalUiText(message); toast.classList.add('show');
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>toast.classList.remove('show'),2800);
 }
-function markSaved(text='DESAT A SUPABASE'){ $('#saveState').textContent=text; clearTimeout(markSaved.timer); }
+function markSaved(text='DESAT A SUPABASE'){ $('#saveState').textContent=cleanTechnicalUiText(text); clearTimeout(markSaved.timer); }
 function save(next=content,message='Canvis desats'){
   if(!editorCanWrite){ showToast('Mode consulta · no pots publicar canvis'); return false; }
   try{
@@ -148,7 +165,7 @@ function save(next=content,message='Canvis desats'){
     if(message) showToast(`${message} · pendent de migrar`);
     return true;
   }catch(error){
-    if(error?.message==='STORAGE_QUOTA') showToast('No hi ha prou espai local. Migra les dades a Supabase.');
+    if(error?.message==='STORAGE_QUOTA') showToast(editorIsAdmin()?'No hi ha prou espai local. Migra les dades a Supabase.':'No hi ha prou espai local. Contacta amb el USER ADMIN.');
     else showToast('No s’han pogut desar els canvis');
     return false;
   }
@@ -177,7 +194,6 @@ function animateStatCounter(element,target,duration=720){
 }
 
 const MANAGED_LISTS={
-  eventEditorList:'.event-strip',
   dresscodeList:'.dresscode-strip',
   historicEditorList:'.historic-editor-item',
   hemerotecaEditorList:'.historic-editor-item',
@@ -242,8 +258,8 @@ function initManagedListViewports(){
     host.addEventListener('load',event=>{if(event.target?.tagName==='IMG')fitManagedListToFour(host);},true);
     fitManagedListToFour(host);
   });
-  window.addEventListener('resize',()=>{refreshManagedLists();fitTrackListFourAndHalf();},{passive:true});
-  document.fonts?.ready?.then(()=>{refreshManagedLists();fitTrackListFourAndHalf();}).catch?.(()=>{});
+  window.addEventListener('resize',()=>{refreshManagedLists();fitTrackListFourAndHalf();fitEventListNineAndHalf();},{passive:true});
+  document.fonts?.ready?.then(()=>{refreshManagedLists();fitTrackListFourAndHalf();fitEventListNineAndHalf();}).catch?.(()=>{});
 }
 
 function renderDashboard(){
@@ -364,6 +380,37 @@ function eventStripDetails(event){
     ${event.notes?`<div class="event-strip-notes"><span>NOTES</span><strong>${esc(event.notes)}</strong></div>`:''}
   </div>`;
 }
+function fitEventListNineAndHalf(){
+  const host=$('#eventEditorList'); if(!host) return;
+  if(host._eventFitFrame) cancelAnimationFrame(host._eventFitFrame);
+  host._eventFitFrame=requestAnimationFrame(()=>{
+    host._eventFitFrame=0;
+    const items=[...host.children].filter(el=>el.matches?.('.event-strip'));
+    if(eventListResizeObserver){eventListResizeObserver.disconnect();eventListResizeObserver=null;}
+    const previousScroll=host.scrollTop;
+    if(items.length<10){
+      host.style.height='';
+      host.style.maxHeight='';
+      host.classList.remove('event-scroll-preview');
+      return;
+    }
+    host.classList.add('event-scroll-preview');
+    host.style.height='auto'; host.style.maxHeight='none';
+    void host.offsetWidth;
+    const hostRect=host.getBoundingClientRect();
+    const ninthRect=items[8].getBoundingClientRect();
+    const tenthRect=items[9].getBoundingClientRect();
+    const gap=Math.max(0,tenthRect.top-ninthRect.bottom);
+    const visibleHeight=(ninthRect.bottom-hostRect.top+previousScroll)+gap+(tenthRect.height*.5);
+    host.style.height=`${Math.ceil(visibleHeight)}px`;
+    host.style.maxHeight=`${Math.ceil(visibleHeight)}px`;
+    host.scrollTop=Math.min(previousScroll,Math.max(0,host.scrollHeight-host.clientHeight));
+    if('ResizeObserver' in window){
+      eventListResizeObserver=new ResizeObserver(()=>fitEventListNineAndHalf());
+      items.slice(0,10).forEach(item=>eventListResizeObserver.observe(item));
+    }
+  });
+}
 function renderEvents(){
   const list=[...(content.events||[])].sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   $('#eventCount').textContent=list.length;
@@ -389,9 +436,11 @@ function renderEvents(){
     details.hidden=!open;
     article.classList.toggle('is-open',open);
     btn.setAttribute('aria-expanded',open?'true':'false');
+    fitEventListNineAndHalf();
   });
   $$('[data-edit-event]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();editEvent(btn.dataset.editEvent);});
   $$('[data-delete-event]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();deleteEvent(btn.dataset.deleteEvent);});
+  fitEventListNineAndHalf();
 }
 function bindEventForm(){
   $('#eventForm').addEventListener('submit',event=>{
@@ -614,20 +663,25 @@ function fitTrackListFourAndHalf(){
     host._trackFitFrame=0;
     const items=[...host.children].filter(el=>el.matches?.('.track-list-item'));
     if(trackListResizeObserver){trackListResizeObserver.disconnect();trackListResizeObserver=null;}
+    const previousScroll=host.scrollTop;
     if(items.length<5){
+      host.style.height='';
       host.style.maxHeight='';
       host.classList.remove('track-scroll-preview');
       return;
     }
     host.classList.add('track-scroll-preview');
+    host.style.height='auto';
     host.style.maxHeight='none';
     void host.offsetWidth;
     const hostRect=host.getBoundingClientRect();
     const fourthRect=items[3].getBoundingClientRect();
     const fifthRect=items[4].getBoundingClientRect();
     const gap=Math.max(0,fifthRect.top-fourthRect.bottom);
-    const visibleHeight=(fourthRect.bottom-hostRect.top+host.scrollTop)+gap+(fifthRect.height*.5);
+    const visibleHeight=(fourthRect.bottom-hostRect.top+previousScroll)+gap+(fifthRect.height*.5);
+    host.style.height=`${Math.ceil(visibleHeight)}px`;
     host.style.maxHeight=`${Math.ceil(visibleHeight)}px`;
+    host.scrollTop=Math.min(previousScroll,Math.max(0,host.scrollHeight-host.clientHeight));
     if('ResizeObserver' in window){
       trackListResizeObserver=new ResizeObserver(()=>fitTrackListFourAndHalf());
       items.slice(0,5).forEach(item=>trackListResizeObserver.observe(item));
@@ -707,9 +761,9 @@ async function refreshAudioDirectory(){
       window.BandaSupabase?.enabled ? BandaSupabase.listPublicFiles('player-audio').catch(()=>[]) : Promise.resolve([]),
       fetchGitHubAudioFiles().catch(()=>[])
     ]);
-    const remoteItems=remote.map(item=>({name:item.name,url:item.url,source:'SUPABASE'}));
+    const remoteItems=remote.map(item=>({name:item.name,url:item.url,source:'NÚVOL'}));
     renderAudioLibrary([...remoteItems,...github]);
-    showToast(`${remoteItems.length} àudios a Supabase · ${github.length} a GitHub`);
+    showToast(`${remoteItems.length} àudios al núvol · ${github.length} a la biblioteca antiga`);
   }catch(error){
     console.error(error);
     renderAudioLibrary([]);
@@ -738,7 +792,7 @@ function bindAudioLibrary(){
     if(!file)return;
     try{
       if(!(editorCanWrite && supabaseActive && currentSession)){
-        showToast('Cal tenir permisos de gestor per pujar àudio a Supabase');
+        showToast('Cal tenir permisos de gestor per pujar àudio');
         return;
       }
       $('#uploadMp3Btn').disabled=true;
@@ -748,7 +802,7 @@ function bindAudioLibrary(){
       if(!$('#trackTitle').value.trim()) $('#trackTitle').value=file.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');
       updateTrackPreview();
       await refreshAudioDirectory();
-      showToast('MP3 pujat a Supabase');
+      showToast('MP3 pujat correctament');
     }catch(error){ console.error(error); showToast('No s’ha pogut pujar l’àudio'); }
     finally{ $('#uploadMp3Btn').disabled=false; event.target.value=''; }
   });
@@ -853,7 +907,7 @@ async function removeHistoricSavedPhoto(index){
   if(!confirm(question)) return;
   try{
     if(supabaseActive && currentSession && window.BandaSupabase?.deletePublicFile){
-      showToast('Eliminant fotografia de Supabase…');
+      showToast('Eliminant fotografia del núvol…');
       await BandaSupabase.deletePublicFile('historic-media',src);
     }
   }catch(error){
@@ -1047,7 +1101,7 @@ function bindHistoric(){
         for(let i=0;i<pendingHistoricImages.length;i++){
           let src=pendingHistoricImages[i];
           if(editorCanWrite && supabaseActive && currentSession){
-            showToast(`Pujant fotografia ${i+1}/${pendingHistoricImages.length} a Supabase…`);
+            showToast(`Pujant fotografia ${i+1}/${pendingHistoricImages.length} al núvol…`);
             src=(await BandaSupabase.uploadDataUrl('historic-media',src,String(year),`historic-${year}-${images.length+i+1}`)).url;
           }
           images.push(src);
@@ -1213,8 +1267,12 @@ function renderSystem(){
   $('#systemTracks').textContent=(content.tracks||[]).length;
   $('#systemHistoric').textContent=(content.historicItems||[]).length;
   $('#systemHemeroteca').textContent=(content.hemerotecaItems||[]).length;
-  $('#systemProtocol').textContent=supabaseActive?'SUPABASE · sincronització central':(migrationPending?'DADES LOCALS · pendent de migrar':'CONNECTANT…');
-  $('#storageBadge').textContent=supabaseActive?'SUPABASE ACTIU':(migrationPending?'MIGRACIÓ PENDENT':'SUPABASE');
+  $('#systemProtocol').textContent=editorIsAdmin()
+    ? (supabaseActive?'SUPABASE · sincronització central':(migrationPending?'DADES LOCALS · pendent de migrar':'CONNECTANT…'))
+    : (supabaseActive?'SINCRONITZACIÓ CENTRAL ACTIVA':(migrationPending?'REVISIÓ D’ADMINISTRACIÓ PENDENT':'CONNECTANT…'));
+  const storageBadge=$('#storageBadge');
+  if(storageBadge) storageBadge.textContent=supabaseActive?'SUPABASE ACTIU':(migrationPending?'MIGRACIÓ PENDENT':'SUPABASE');
+  syncAdminOnlyUi();
   const migrationBtn=$('#migrateToSupabaseBtn');
   if(migrationBtn) migrationBtn.disabled=!editorCanWrite || (supabaseActive && !migrationPending);
   const text=$('#supabaseMigrationText');
@@ -1238,7 +1296,8 @@ async function savePublishedFile(){
 }
 
 async function migrateCurrentContentToSupabase(){
-  if(!currentSession || !editorCanWrite){ showToast('Cal iniciar sessió amb permisos de gestor'); return; }
+  if(!editorIsAdmin()){ showToast('Aquesta configuració està reservada al USER ADMIN'); return; }
+  if(!currentSession || !editorCanWrite){ showToast('Cal iniciar sessió amb permisos d’administració'); return; }
   const btn=$('#migrateToSupabaseBtn');
   if(btn) btn.disabled=true;
   try{
@@ -1286,6 +1345,7 @@ async function migrateCurrentContentToSupabase(){
 }
 
 async function reloadSupabaseContent(){
+  if(!editorIsAdmin()){ showToast('Aquesta configuració està reservada al USER ADMIN'); return; }
   try{
     const remote=await BandaSupabase.loadContent();
     if(remote && contentHasUsefulData(remote)){
@@ -1311,7 +1371,7 @@ function bindSystem(){
   $('#migrateToSupabaseBtn').onclick=migrateCurrentContentToSupabase;
   $('#reloadSupabaseBtn').onclick=reloadSupabaseContent;
   $('#resetLocalBtn').onclick=()=>{
-    if(!confirm('Vols netejar l’antic esborrany local d’aquest navegador? Les dades de Supabase no es tocaran.'))return;
+    if(!confirm('Vols netejar l’antic esborrany local d’aquest navegador? El contingut compartit no es tocarà.'))return;
     BandaStore.clearLocal();
     showToast('Memòria local netejada');
   };
@@ -1344,7 +1404,7 @@ async function deleteManagedUserFromEditor(userId){
   const profile=userProfiles.find(row=>row.user_id===userId);
   if(!profile || !canDeleteUserProfile(profile)) return;
   const label=profile.name||profile.email||'aquest usuari';
-  const ok=confirm(`Vols eliminar completament ${label}?\n\nS'esborrarà el seu accés de Supabase Auth i el seu perfil. Aquesta acció no es pot desfer.`);
+  const ok=confirm(`Vols eliminar completament ${label}?\n\nS'esborrarà el seu accés i el seu perfil. Aquesta acció no es pot desfer.`);
   if(!ok) return;
   try{
     showToast('Eliminant usuari…');
@@ -1389,9 +1449,9 @@ function bindUsers(){
     }catch(error){
       console.error(error);
       const message=String(error?.message||'No s’ha pogut crear l’usuari.');
-      if(/rate|limit/i.test(message)) status.textContent='Límit temporal d’emails de Supabase. No s’ha creat el compte; torna-ho a provar més tard o configura SMTP propi.';
+      if(/rate|limit/i.test(message)) status.textContent='Límit temporal d’enviament d’emails. No s’ha creat el compte; torna-ho a provar més tard.';
       else if(/EMAIL_ALREADY_REGISTERED|already registered/i.test(message)) status.textContent='Aquest email ja correspon a un usuari confirmat. Revisa el compte existent.';
-      else if(/already|exists/i.test(message)) status.textContent='Aquest email ja existeix a Supabase Auth. Revisa l’usuari existent.';
+      else if(/already|exists/i.test(message)) status.textContent='Aquest email ja existeix al sistema de comptes. Revisa l’usuari existent.';
       else if(/function|404|not found/i.test(message)) status.textContent='La funció create-band-user no està desplegada/actualitzada. Desplega la versió v0.29 inclosa al paquet.';
       else status.textContent=`ERROR: ${message}`;
     }finally{btn.disabled=false;}
@@ -1415,6 +1475,7 @@ function setEditorAccess({session=null,profile=null}={}){
     if(shell){shell.setAttribute('aria-hidden','true');shell.classList.remove('is-ready','editor-readonly');}
   }
   $('#editorUserEmail').textContent=currentSession?.user?.email || 'Sense sessió';
+  syncAdminOnlyUi();
   const badge=$('#editorAccessBadge');
   if(badge){badge.textContent=editorCanWrite?`GESTIÓ · ${String(currentProfile?.role||'').toUpperCase()}`:'—';badge.classList.toggle('write',editorCanWrite);badge.classList.remove('readonly');}
 }
@@ -1425,14 +1486,16 @@ function showEditorGate(status='Introdueix les teves credencials de gestió.'){
   gate?.classList.remove('is-hidden');
   if(shell){shell.setAttribute('aria-hidden','true');shell.classList.remove('is-ready','editor-readonly');}
   $('#editorUserEmail').textContent='Sense sessió';
-  if($('#loginStatus')) $('#loginStatus').textContent=status;
+  syncAdminOnlyUi();
+  if($('#loginStatus')) $('#loginStatus').textContent=cleanTechnicalUiText(status);
 }
 
 function updatePermissionUi(){
   if(!editorCanWrite) return;
   const saveState=$('#saveState'); if(saveState && saveState.textContent==='PENDENT D’AUTORITZACIÓ') saveState.textContent='DADES CARREGADES';
   const storageBadge=$('#storageBadge'); if(storageBadge) storageBadge.textContent='SUPABASE';
-  const systemProtocol=$('#systemProtocol'); if(systemProtocol) systemProtocol.textContent='SUPABASE · gestió autenticada';
+  const systemProtocol=$('#systemProtocol'); if(systemProtocol) systemProtocol.textContent=editorIsAdmin()?'SUPABASE · gestió autenticada':'SINCRONITZACIÓ CENTRAL · gestió autenticada';
+  syncAdminOnlyUi();
 }
 
 async function activateSupabaseEditor(session){
@@ -1452,11 +1515,19 @@ async function activateSupabaseEditor(session){
       supabaseActive=true; migrationPending=false;
       markSaved('DESAT A SUPABASE');
     }else if(contentHasUsefulData(legacyLocalContent)){
+      if(!editorIsAdmin()){
+        showEditorGate('Cal que el USER ADMIN prepari el contingut compartit abans que un USER GESTOR pugui editar.');
+        return;
+      }
       content=BandaStore.normalize(legacyLocalContent);
       supabaseActive=false; migrationPending=true;
       markSaved('CAL MIGRAR A SUPABASE');
       showToast('Supabase està buit · migra les dades actuals des de SISTEMA');
     }else{
+      if(!editorIsAdmin()){
+        showEditorGate('Cal que el USER ADMIN inicialitzi el contingut compartit abans que un USER GESTOR pugui editar.');
+        return;
+      }
       content=BandaStore.normalize(remote||BandaStore.defaults());
       content.settings=content.settings||{};
       content.settings.supabaseInitialized=true;
@@ -1496,12 +1567,12 @@ function bindEditorAuth(){
 }
 
 async function initEditorBackend(){
-  if(!window.BandaSupabase?.enabled){showEditorGate('Supabase no està configurat. L’EDITOR necessita connexió autenticada.');return;}
+  if(!window.BandaSupabase?.enabled){showEditorGate('El servei de dades no està configurat. L’EDITOR necessita connexió autenticada.');return;}
   try{
     const session=await BandaSupabase.session();
     if(session) await activateSupabaseEditor(session);
     else showEditorGate('Introdueix les teves credencials de gestió.');
-  }catch(error){console.error(error);showEditorGate('No s’ha pogut connectar amb Supabase.');}
+  }catch(error){console.error(error);showEditorGate('No s’ha pogut connectar amb el servei de dades.');}
 }
 
 function editorIsStandalone(){
@@ -1597,7 +1668,7 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.38',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.43',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

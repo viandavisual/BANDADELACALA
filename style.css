@@ -1505,3 +1505,15 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 @media(prefers-reduced-motion:reduce){
   .user-drive-box::after{animation:none!important;display:none!important}
 }
+
+
+/* ============================================================
+   v0.43 · USUARI / DRESSCODE refinaments
+   ============================================================ */
+/* Selector d'avatar: text centrat amb el chevron independent a la dreta. */
+.avatar-profile-details>summary{position:relative!important;justify-content:center!important;text-align:center!important}
+.avatar-profile-details>summary strong{display:block!important;width:100%!important;text-align:center!important}
+.avatar-profile-details>summary .details-chevron{position:absolute!important;right:18px!important;top:50%!important;transform:translateY(-50%)!important}
+.avatar-profile-details[open]>summary .details-chevron{transform:translateY(-50%) rotate(180deg)!important}
+/* NOM: el valor escrit pel USER queda visualment centrat. */
+.user-name-form input{text-align:center!important}
