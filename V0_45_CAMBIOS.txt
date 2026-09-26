@@ -1,0 +1,35 @@
+BANDA DE LA CALA · v0.45
+
+EDITOR · CALENDARI
+- AGENDA mostra només esdeveniments que encara no han vençut.
+- En superar data + hora, l’esdeveniment passa automàticament a ARXIU D’ESDEVENIMENTS PASSATS.
+- Sense hora definida, l’esdeveniment es considera vigent fins al final del dia.
+- AGENDA: pròxims esdeveniments primer.
+- ARXIU: esdeveniments passats més recents primer.
+- Els esdeveniments caducats es mostren amb tractament gris.
+- Ambdues llistes mantenen viewport de 9 esdeveniments + mitja desena quan hi ha prou material.
+
+EDITOR · PLAYER
+- Corregit el viewport d’ORDRE: altura fixa calculada a 4 pistes + mitja cinquena.
+- El scroll mou només el contingut intern; el panell ja no creix mentre es desplaça.
+
+EDITOR · USUARIS
+- Eliminats els textos sobre assignació/protecció/propietat del rol ADMIN sol·licitats.
+
+APP · NAVEGACIÓ
+- Cada pulsació al menú lateral desktop o footer mobile porta a l’inici de la secció, també si ja era la secció activa.
+
+APP · USUARI
+- PARTITURES manté el títol principal.
+- Subtítol: “Ja no hi ha excusa”.
+- Botó: “ENTRA AQUÍ”.
+
+APP · HISTÒRIC
+- Pere Bono mostra un únic any: 2000.
+- Noms dels directors sense negreta.
+- Compactació dinàmica del timeline en desktop: els blocs alterns pugen aprofitant l’espai lliure del carril contrari.
+- Mobile conserva l’ordre vertical sense compactació solapada.
+
+PWA / SISTEMA
+- version.js, cache-busting i Service Workers actualitzats a v0.45.
+- Sense canvis de manifests, IDs PWA, scopes, start_url, Supabase, SMTP, rols o SQL.

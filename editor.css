@@ -721,3 +721,35 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .editor-photo-icon-svg .photo-front{fill:#fff;stroke:var(--blue);stroke-width:2.2}
 .editor-photo-icon-svg .photo-sun{fill:var(--gold-deep);stroke:none}
 .editor-photo-icon-svg .photo-land{fill:none;stroke:var(--blue);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ============================================================
+   v0.45 · ARXIU CALENDARI + scroll PLAYER estable
+   ============================================================ */
+.calendar-lists-stack{display:grid;gap:18px;min-width:0}
+.past-events-card{background:linear-gradient(145deg,#fbfbfb,#f4f4f4)}
+.past-events-card .eyebrow{color:#6f7378}
+.past-events-card .count-pill{background:#e3e4e6;color:#64686e}
+.event-strip-expired{
+  --event-accent:#8b8f95!important;
+  background:linear-gradient(145deg,#f3f3f3,#e9eaec)!important;
+  border-color:#d8dadd!important;
+  filter:saturate(.28);
+}
+.event-strip-expired .event-strip-summary{color:#676b70}
+.event-strip-expired .event-strip-date{color:#7a7e84}
+.event-strip-expired .event-strip-details{background:#f1f2f3;border-top-color:#d7d9dc}
+.event-strip-expired .event-strip-detail-grid>div{background:#f7f7f7;border-color:#dfe1e3}
+.event-strip-expired .event-strip-detail-grid span{color:#74787d}
+.event-scroll-preview,.track-scroll-preview{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch!important;
+  scrollbar-gutter:stable!important;
+  align-content:start!important;
+  overflow-anchor:none!important;
+}
+.track-editor-list.track-scroll-preview{position:relative;contain:layout paint}
+
+@media(max-width:1180px){.calendar-lists-stack{gap:12px}}

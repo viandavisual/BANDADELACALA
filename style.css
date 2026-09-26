@@ -1708,3 +1708,16 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   .history-period:not(.is-collapsed) .history-period-items::before{animation:none!important}
   .history-card,.history-image-hero img{transition:none!important}
 }
+
+/* ============================================================
+   v0.45 · HISTÒRIC més compacte + petits ajustos APP
+   ============================================================ */
+/* Els noms dels directors deixen d'anar en negreta. */
+.history-period-head .history-period-director{font-weight:500!important}
+
+/* En desktop aprofitem l'espai buit entre carrils alterns del timeline. */
+@media(min-width:781px){
+  .history-period-items{gap:0!important}
+  .history-item{transition:margin-top .18s ease}
+  .history-next-period{margin-top:18px!important}
+}

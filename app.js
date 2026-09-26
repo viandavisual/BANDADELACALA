@@ -295,7 +295,7 @@ function switchView(id, remember = true){
   const target=navItems.find(item=>item.id===id);
   if(!target) id='home';
   else if(!target.public && !state.authenticated) id='user';
-  if(id === state.currentView){ updateHeader(id); requestAnimationFrame(()=>animateViewEntrance(id)); return; }
+  if(id === state.currentView){ updateHeader(id); window.scrollTo({top:0,behavior:'smooth'}); requestAnimationFrame(()=>animateViewEntrance(id)); return; }
   if(remember && state.currentView) state.viewHistory.push(state.currentView);
   state.currentView = id;
   $$('.view').forEach(view => view.classList.toggle('active', view.dataset.view === id));
@@ -443,6 +443,23 @@ function historyMediaMarkup(periodId){
     return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><div class="history-moment-meta"><span class="history-year">${esc(item.year)}</span>${images.length?`<span class="history-entry-photo-count">${images.length} ${images.length===1?'FOTO':'FOTOS'}</span>`:''}</div>${title}${desc}</div></div></article>`;
   }).join('');
 }
+function compactHistoryTimeline(root=document){
+  const mobile=window.matchMedia?.('(max-width: 780px)')?.matches;
+  root.querySelectorAll?.('.history-period-items').forEach(host=>{
+    const items=[...host.children].filter(el=>el.classList?.contains('history-item'));
+    items.forEach(item=>item.style.marginTop='');
+    if(mobile) return;
+    for(let i=1;i<items.length;i++){
+      const prev=items[i-1], item=items[i];
+      const sameSide=prev.classList.contains('left')===item.classList.contains('left');
+      if(sameSide) continue;
+      const prevHeight=prev.getBoundingClientRect().height||0;
+      const lift=Math.min(128,Math.max(34,Math.round(prevHeight*.30)));
+      item.style.marginTop=`-${lift}px`;
+    }
+  });
+}
+
 function bindHistoryImagesWithin(root=document){
   root.querySelectorAll?.('[data-history-image-id]').forEach(btn=>{
     if(btn.dataset.historyBound==='1') return;
@@ -457,6 +474,8 @@ function loadHistoryPeriod(periodId){
   itemsHost.insertAdjacentHTML('afterbegin',historyMediaMarkup(periodId));
   itemsHost.dataset.loaded='1';
   bindHistoryImagesWithin(itemsHost);
+  requestAnimationFrame(()=>compactHistoryTimeline(section));
+  itemsHost.querySelectorAll('img').forEach(img=>{if(!img.complete)img.addEventListener('load',()=>compactHistoryTimeline(section),{once:true});});
 }
 function setHistoryPeriodOpen(periodId,open,{scroll=false,closeOthers=false}={}){
   const section=$$('.history-period').find(el=>el.dataset.period===periodId);
@@ -477,6 +496,7 @@ function setHistoryPeriodOpen(periodId,open,{scroll=false,closeOthers=false}={})
     if(head) head.setAttribute('aria-expanded','true');
     loadHistoryPeriod(periodId);
     const host=section.querySelector('.history-period-items');
+    requestAnimationFrame(()=>compactHistoryTimeline(section));
     if(host && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
       const moments=[...host.querySelectorAll('.history-item,.history-period-empty,.history-next-period')];
       moments.forEach((moment,index)=>moment.animate([{opacity:0,transform:'translateY(-10px)'},{opacity:1,transform:'translateY(0)'}],{duration:300,delay:Math.min(index*45,220),easing:'cubic-bezier(.22,.8,.28,1)',fill:'backwards'}));
@@ -511,14 +531,21 @@ function renderHistory(){
     const isCurrent=period.end==null || /actualitat/i.test(period.years||'');
     const startLabel=period.start ?? String(period.years||'').split(/\s*[-–]\s*/)[0] ?? '';
     const endLabel=period.end ?? 'ACTUALITAT';
+    const sameYear=period.end!=null && String(period.start)===String(period.end);
+    const endMarkup=sameYear?'':`<span class="history-period-year history-period-end">${esc(endLabel)}</span>`;
     const nextPeriod=displayPeriods[displayIndex+1];
     const nextButton=nextPeriod?`<button class="history-next-period" type="button" data-next-period="${esc(nextPeriod.id)}"><span>SEGÜENT PERÍODE</span><strong>↓</strong></button>`:'';
-    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-dot" aria-hidden="true"></span><div class="history-period-inline"><span class="history-period-year history-period-start">${esc(startLabel)}</span><span class="history-period-year history-period-end">${esc(endLabel)}</span><strong class="history-period-director">${esc(period.director)}</strong>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
+    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-dot" aria-hidden="true"></span><div class="history-period-inline"><span class="history-period-year history-period-start">${esc(startLabel)}</span>${endMarkup}<span class="history-period-director">${esc(period.director)}</span>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
   }).join('');
   $$('[data-toggle-period]').forEach(btn=>btn.addEventListener('click',()=>toggleHistoryPeriod(btn.dataset.togglePeriod)));
   $$('[data-next-period]').forEach(btn=>btn.addEventListener('click',()=>setHistoryPeriodOpen(btn.dataset.nextPeriod,true,{scroll:true,closeOthers:true})));
   bindHistoryImagesWithin(host);
+  requestAnimationFrame(()=>compactHistoryTimeline(host));
+  host.querySelectorAll('img').forEach(img=>{if(!img.complete)img.addEventListener('load',()=>compactHistoryTimeline(host),{once:true});});
 }
+
+window.addEventListener('resize',()=>requestAnimationFrame(()=>compactHistoryTimeline($('#historyTimeline')||document)),{passive:true});
+
 function restoreHistoryCollapsed(){
   const periods=getHistoricPeriods();
   const current=periods.find(period=>period.end==null || /actualitat/i.test(period.years||'')) || periods[periods.length-1];
@@ -1368,7 +1395,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.44',root).href;
+    const swUrl=new URL('app/sw.js?v=0.45',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

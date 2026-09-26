@@ -39,7 +39,8 @@ let hemerotecaEditorFilter = 'all';
 const openHistoricEditorPeriods=new Set();
 const openHemerotecaEditorSections=new Set();
 let trackListResizeObserver=null;
-let eventListResizeObserver=null;
+const eventListResizeObservers=new Map();
+let eventExpiryTimer=null;
 
 const DRESS_DEFS = [
   {key:'shirt', label:'CAMISA', options:[
@@ -258,8 +259,8 @@ function initManagedListViewports(){
     host.addEventListener('load',event=>{if(event.target?.tagName==='IMG')fitManagedListToFour(host);},true);
     fitManagedListToFour(host);
   });
-  window.addEventListener('resize',()=>{refreshManagedLists();fitTrackListFourAndHalf();fitEventListNineAndHalf();},{passive:true});
-  document.fonts?.ready?.then(()=>{refreshManagedLists();fitTrackListFourAndHalf();fitEventListNineAndHalf();}).catch?.(()=>{});
+  window.addEventListener('resize',()=>{refreshManagedLists();fitTrackListFourAndHalf();fitEventListNineAndHalf('#eventEditorList');fitEventListNineAndHalf('#pastEventEditorList');},{passive:true});
+  document.fonts?.ready?.then(()=>{refreshManagedLists();fitTrackListFourAndHalf();fitEventListNineAndHalf('#eventEditorList');fitEventListNineAndHalf('#pastEventEditorList');}).catch?.(()=>{});
 }
 
 function renderDashboard(){
@@ -380,13 +381,41 @@ function eventStripDetails(event){
     ${event.notes?`<div class="event-strip-notes"><span>NOTES</span><strong>${esc(event.notes)}</strong></div>`:''}
   </div>`;
 }
-function fitEventListNineAndHalf(){
-  const host=$('#eventEditorList'); if(!host) return;
+function eventDateTimeMs(event){
+  const date=String(event?.date||'').trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return Number.POSITIVE_INFINITY;
+  const rawTime=String(event?.time||'').trim();
+  const time=/^\d{2}:\d{2}$/.test(rawTime)?`${rawTime}:00`:'23:59:59';
+  const value=new Date(`${date}T${time}`).getTime();
+  return Number.isFinite(value)?value:Number.POSITIVE_INFINITY;
+}
+function splitEventsByStatus(){
+  const now=Date.now();
+  const all=[...(content.events||[])];
+  const agenda=all.filter(event=>eventDateTimeMs(event)>=now)
+    .sort((a,b)=>eventDateTimeMs(a)-eventDateTimeMs(b) || String(a.title||'').localeCompare(String(b.title||''),'ca'));
+  const past=all.filter(event=>eventDateTimeMs(event)<now)
+    .sort((a,b)=>eventDateTimeMs(b)-eventDateTimeMs(a) || String(b.title||'').localeCompare(String(a.title||''),'ca'));
+  return {agenda,past};
+}
+function scheduleNextEventExpiry(){
+  if(eventExpiryTimer){clearTimeout(eventExpiryTimer);eventExpiryTimer=null;}
+  const now=Date.now();
+  const next=[...(content.events||[])].map(eventDateTimeMs).filter(value=>Number.isFinite(value)&&value>=now).sort((a,b)=>a-b)[0];
+  if(!Number.isFinite(next)) return;
+  const MAX_DELAY=2147480000;
+  const delay=Math.min(MAX_DELAY,Math.max(1000,next-now+1100));
+  eventExpiryTimer=setTimeout(()=>{renderEvents();renderDashboard();},delay);
+}
+function fitEventListNineAndHalf(hostOrSelector='#eventEditorList'){
+  const host=typeof hostOrSelector==='string'?$(hostOrSelector):hostOrSelector;
+  if(!host) return;
   if(host._eventFitFrame) cancelAnimationFrame(host._eventFitFrame);
   host._eventFitFrame=requestAnimationFrame(()=>{
     host._eventFitFrame=0;
     const items=[...host.children].filter(el=>el.matches?.('.event-strip'));
-    if(eventListResizeObserver){eventListResizeObserver.disconnect();eventListResizeObserver=null;}
+    const oldObserver=eventListResizeObservers.get(host);
+    if(oldObserver){oldObserver.disconnect();eventListResizeObservers.delete(host);}
     const previousScroll=host.scrollTop;
     if(items.length<10){
       host.style.height='';
@@ -395,52 +424,56 @@ function fitEventListNineAndHalf(){
       return;
     }
     host.classList.add('event-scroll-preview');
-    host.style.height='auto'; host.style.maxHeight='none';
-    void host.offsetWidth;
-    const hostRect=host.getBoundingClientRect();
-    const ninthRect=items[8].getBoundingClientRect();
-    const tenthRect=items[9].getBoundingClientRect();
-    const gap=Math.max(0,tenthRect.top-ninthRect.bottom);
-    const visibleHeight=(ninthRect.bottom-hostRect.top+previousScroll)+gap+(tenthRect.height*.5);
-    host.style.height=`${Math.ceil(visibleHeight)}px`;
-    host.style.maxHeight=`${Math.ceil(visibleHeight)}px`;
+    const gap=parseFloat(getComputedStyle(host).rowGap||getComputedStyle(host).gap)||0;
+    const heights=items.slice(0,10).map(item=>item.getBoundingClientRect().height);
+    const visibleHeight=heights.slice(0,9).reduce((sum,h)=>sum+h,0)+(gap*9)+(heights[9]*.5);
+    const px=`${Math.ceil(visibleHeight)}px`;
+    host.style.height=px;
+    host.style.maxHeight=px;
     host.scrollTop=Math.min(previousScroll,Math.max(0,host.scrollHeight-host.clientHeight));
     if('ResizeObserver' in window){
-      eventListResizeObserver=new ResizeObserver(()=>fitEventListNineAndHalf());
-      items.slice(0,10).forEach(item=>eventListResizeObserver.observe(item));
+      const observer=new ResizeObserver(()=>fitEventListNineAndHalf(host));
+      eventListResizeObservers.set(host,observer);
+      items.slice(0,10).forEach(item=>observer.observe(item));
     }
   });
 }
+function eventStripMarkup(event,{expired=false}={}){
+  const rehearsal=String(event.type||'').toUpperCase()==='ASSAIG';
+  return `<article class="event-strip ${rehearsal?'event-strip-rehearsal':'event-strip-featured'} ${expired?'event-strip-expired':''}" data-event-strip="${esc(event.id)}">
+    <button type="button" class="event-strip-summary" data-toggle-event="${esc(event.id)}" aria-expanded="false">
+      <span class="event-strip-title">${esc(event.title)}</span>
+      <span class="event-strip-date">${esc(formatDateNumeric(event.date))}${event.time?` · ${esc(event.time)}`:''}</span>
+      <span class="event-strip-chevron" aria-hidden="true">⌄</span>
+    </button>
+    <div class="list-actions event-strip-actions">
+      <button class="tiny-btn" data-edit-event="${esc(event.id)}" title="Editar">✎</button>
+      <button class="tiny-btn delete" data-delete-event="${esc(event.id)}" title="Eliminar">×</button>
+    </div>
+    <div class="event-strip-details" hidden>${eventStripDetails(event)}</div>
+  </article>`;
+}
 function renderEvents(){
-  const list=[...(content.events||[])].sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
-  $('#eventCount').textContent=list.length;
-  const host=$('#eventEditorList');
-  host.innerHTML=list.length?list.map(event=>{
-    const rehearsal=String(event.type||'').toUpperCase()==='ASSAIG';
-    return `<article class="event-strip ${rehearsal?'event-strip-rehearsal':'event-strip-featured'}" data-event-strip="${esc(event.id)}">
-      <button type="button" class="event-strip-summary" data-toggle-event="${esc(event.id)}" aria-expanded="false">
-        <span class="event-strip-title">${esc(event.title)}</span>
-        <span class="event-strip-date">${esc(formatDateNumeric(event.date))}${event.time?` · ${esc(event.time)}`:''}</span>
-        <span class="event-strip-chevron" aria-hidden="true">⌄</span>
-      </button>
-      <div class="list-actions event-strip-actions">
-        <button class="tiny-btn" data-edit-event="${esc(event.id)}" title="Editar">✎</button>
-        <button class="tiny-btn delete" data-delete-event="${esc(event.id)}" title="Eliminar">×</button>
-      </div>
-      <div class="event-strip-details" hidden>${eventStripDetails(event)}</div>
-    </article>`;
-  }).join(''):'<div class="empty-state">Encara no hi ha cap esdeveniment.</div>';
+  const {agenda,past}=splitEventsByStatus();
+  $('#eventCount').textContent=agenda.length;
+  const pastCount=$('#pastEventCount'); if(pastCount) pastCount.textContent=past.length;
+  const agendaHost=$('#eventEditorList');
+  const pastHost=$('#pastEventEditorList');
+  if(agendaHost) agendaHost.innerHTML=agenda.length?agenda.map(event=>eventStripMarkup(event)).join(''):'<div class="empty-state">No hi ha cap esdeveniment pendent.</div>';
+  if(pastHost) pastHost.innerHTML=past.length?past.map(event=>eventStripMarkup(event,{expired:true})).join(''):'<div class="empty-state">Encara no hi ha esdeveniments passats.</div>';
   $$('[data-toggle-event]').forEach(btn=>btn.onclick=()=>{
     const article=btn.closest('[data-event-strip]'); const details=article?.querySelector('.event-strip-details'); if(!details)return;
     const open=details.hidden;
     details.hidden=!open;
     article.classList.toggle('is-open',open);
     btn.setAttribute('aria-expanded',open?'true':'false');
-    fitEventListNineAndHalf();
+    fitEventListNineAndHalf(article.closest('.editor-list'));
   });
   $$('[data-edit-event]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();editEvent(btn.dataset.editEvent);});
   $$('[data-delete-event]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();deleteEvent(btn.dataset.deleteEvent);});
-  fitEventListNineAndHalf();
+  fitEventListNineAndHalf(agendaHost);
+  fitEventListNineAndHalf(pastHost);
+  scheduleNextEventExpiry();
 }
 function bindEventForm(){
   $('#eventForm').addEventListener('submit',event=>{
@@ -671,16 +704,12 @@ function fitTrackListFourAndHalf(){
       return;
     }
     host.classList.add('track-scroll-preview');
-    host.style.height='auto';
-    host.style.maxHeight='none';
-    void host.offsetWidth;
-    const hostRect=host.getBoundingClientRect();
-    const fourthRect=items[3].getBoundingClientRect();
-    const fifthRect=items[4].getBoundingClientRect();
-    const gap=Math.max(0,fifthRect.top-fourthRect.bottom);
-    const visibleHeight=(fourthRect.bottom-hostRect.top+previousScroll)+gap+(fifthRect.height*.5);
-    host.style.height=`${Math.ceil(visibleHeight)}px`;
-    host.style.maxHeight=`${Math.ceil(visibleHeight)}px`;
+    const gap=parseFloat(getComputedStyle(host).rowGap||getComputedStyle(host).gap)||0;
+    const heights=items.slice(0,5).map(item=>item.getBoundingClientRect().height);
+    const visibleHeight=heights.slice(0,4).reduce((sum,h)=>sum+h,0)+(gap*4)+(heights[4]*.5);
+    const px=`${Math.ceil(visibleHeight)}px`;
+    host.style.height=px;
+    host.style.maxHeight=px;
     host.scrollTop=Math.min(previousScroll,Math.max(0,host.scrollHeight-host.clientHeight));
     if('ResizeObserver' in window){
       trackListResizeObserver=new ResizeObserver(()=>fitTrackListFourAndHalf());
@@ -1668,12 +1697,12 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.44',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.45',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();
