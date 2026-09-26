@@ -434,9 +434,13 @@ function historyMediaMarkup(periodId){
     const title=item.title ? `<h4>${esc(item.title)}</h4>` : '';
     const desc=item.description ? `<p>${esc(item.description)}</p>` : '';
     const images=getHistoricImages(item);
-    const cols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
-    const gallery=images.length ? `<div class="history-media-grid ${images.length===1?'single':''}" style="--history-cols:${cols}">${images.map((src,index)=>`<button class="history-image-button" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${index}" aria-label="Ampliar fotografia ${index+1} de ${esc(item.year)}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" /></button>`).join('')}</div>` : '';
-    return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><span class="history-year">${esc(item.year)}</span>${title}${desc}</div></div></article>`;
+    let gallery='';
+    if(images.length){
+      const hero=`<button class="history-image-button history-image-hero" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="0" aria-label="Ampliar fotografia 1 de ${esc(item.year)}"><img loading="lazy" decoding="async" src="${esc(images[0])}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${images.length>1?`<span class="history-photo-count">${images.length} FOTOS</span>`:''}</button>`;
+      const strip=images.length>1?`<div class="history-media-strip" aria-label="Més fotografies">${images.slice(1).map((src,index)=>`<button class="history-image-button history-image-thumb" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${index+1}" aria-label="Ampliar fotografia ${index+2} de ${esc(item.year)}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" /></button>`).join('')}</div>`:'';
+      gallery=`<div class="history-media-showcase ${images.length===1?'single':''}">${hero}${strip}</div>`;
+    }
+    return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><div class="history-moment-meta"><span class="history-year">${esc(item.year)}</span>${images.length?`<span class="history-entry-photo-count">${images.length} ${images.length===1?'FOTO':'FOTOS'}</span>`:''}</div>${title}${desc}</div></div></article>`;
   }).join('');
 }
 function bindHistoryImagesWithin(root=document){
@@ -450,24 +454,34 @@ function loadHistoryPeriod(periodId){
   const section=$$('.history-period').find(el=>el.dataset.period===periodId);
   const itemsHost=section?.querySelector('.history-period-items');
   if(!itemsHost || itemsHost.dataset.loaded==='1') return;
-  itemsHost.innerHTML=historyMediaMarkup(periodId);
+  itemsHost.insertAdjacentHTML('afterbegin',historyMediaMarkup(periodId));
   itemsHost.dataset.loaded='1';
   bindHistoryImagesWithin(itemsHost);
 }
-function toggleHistoryPeriod(periodId){
+function setHistoryPeriodOpen(periodId,open,{scroll=false,closeOthers=false}={}){
   const section=$$('.history-period').find(el=>el.dataset.period===periodId);
   if(!section) return;
+  if(open && closeOthers){
+    $$('.history-period').forEach(other=>{
+      if(other===section) return;
+      const otherId=other.dataset.period;
+      state.collapsedPeriods.add(otherId);
+      other.classList.add('is-collapsed');
+      other.querySelector('[data-toggle-period]')?.setAttribute('aria-expanded','false');
+    });
+  }
   const head=section.querySelector('[data-toggle-period]');
-  const opening=section.classList.contains('is-collapsed');
-  if(opening){
+  if(open){
     state.collapsedPeriods.delete(periodId);
     section.classList.remove('is-collapsed');
     if(head) head.setAttribute('aria-expanded','true');
     loadHistoryPeriod(periodId);
     const host=section.querySelector('.history-period-items');
     if(host && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
-      host.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'translateY(0)'}],{duration:220,easing:'ease-out'});
+      const moments=[...host.querySelectorAll('.history-item,.history-period-empty,.history-next-period')];
+      moments.forEach((moment,index)=>moment.animate([{opacity:0,transform:'translateY(-10px)'},{opacity:1,transform:'translateY(0)'}],{duration:300,delay:Math.min(index*45,220),easing:'cubic-bezier(.22,.8,.28,1)',fill:'backwards'}));
     }
+    if(scroll) requestAnimationFrame(()=>section.scrollIntoView({behavior:'smooth',block:'start'}));
   }else{
     state.collapsedPeriods.add(periodId);
     section.classList.add('is-collapsed');
@@ -475,21 +489,34 @@ function toggleHistoryPeriod(periodId){
   }
   try{localStorage.setItem('banda-history-collapsed-v021',JSON.stringify([...state.collapsedPeriods]));}catch(_error){}
 }
+function toggleHistoryPeriod(periodId){
+  const section=$$('.history-period').find(el=>el.dataset.period===periodId);
+  if(!section) return;
+  const opening=section.classList.contains('is-collapsed');
+  const mobile=!!window.matchMedia?.('(max-width: 780px)').matches;
+  setHistoryPeriodOpen(periodId,opening,{closeOthers:opening&&mobile});
+}
 function renderHistory(){
   const host=$('#historyTimeline');
   if(!host) return;
   const periods=getHistoricPeriods();
   if(!periods.length){host.innerHTML='<div class="history-empty panel">No hi ha períodes configurats.</div>';return;}
   const displayPeriods=[...periods].reverse();
-  host.innerHTML=displayPeriods.map(period=>{
+  host.innerHTML=displayPeriods.map((period,displayIndex)=>{
     const originalIndex=periods.findIndex(p=>p.id===period.id);
     const collapsed=state.collapsedPeriods.has(period.id);
     const periodColor=period.color||'#393a86';
     const periodText=period.textColor||'#ffffff';
     const initialMedia=collapsed?'':historyMediaMarkup(period.id);
-    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-dot" aria-hidden="true"></span><div><strong>${esc(period.years)}</strong><span>${esc(period.director)}</span></div><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}</div></section>`;
+    const isCurrent=period.end==null || /actualitat/i.test(period.years||'');
+    const startLabel=period.start ?? String(period.years||'').split(/\s*[-–]\s*/)[0] ?? '';
+    const endLabel=period.end ?? 'ACTUALITAT';
+    const nextPeriod=displayPeriods[displayIndex+1];
+    const nextButton=nextPeriod?`<button class="history-next-period" type="button" data-next-period="${esc(nextPeriod.id)}"><span>SEGÜENT PERÍODE</span><strong>↓</strong></button>`:'';
+    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-dot" aria-hidden="true"></span><div class="history-period-inline"><span class="history-period-year history-period-start">${esc(startLabel)}</span><span class="history-period-year history-period-end">${esc(endLabel)}</span><strong class="history-period-director">${esc(period.director)}</strong>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
   }).join('');
   $$('[data-toggle-period]').forEach(btn=>btn.addEventListener('click',()=>toggleHistoryPeriod(btn.dataset.togglePeriod)));
+  $$('[data-next-period]').forEach(btn=>btn.addEventListener('click',()=>setHistoryPeriodOpen(btn.dataset.nextPeriod,true,{scroll:true,closeOthers:true})));
   bindHistoryImagesWithin(host);
 }
 function restoreHistoryCollapsed(){
@@ -532,8 +559,9 @@ function historyViewerReset(){
   });
 }
 function updateViewerNav(){
-  const prev=$('#historyImagePrev'), next=$('#historyImageNext');
+  const prev=$('#historyImagePrev'), next=$('#historyImageNext'), counter=$('#historyImageCounter');
   const count=state.historyViewer.items.length;
+  if(counter) counter.textContent=count?`${state.historyViewer.index+1} / ${count}`:'0 / 0';
   const show=count>1;
   if(prev){prev.hidden=!show;prev.disabled=!show;}
   if(next){next.hidden=!show;next.disabled=!show;}
@@ -544,6 +572,7 @@ function renderViewerItem(index){
   const count=items.length;
   const safeIndex=((Number(index)||0)%count+count)%count;
   state.historyViewer.index=safeIndex;
+  const counter=$('#historyImageCounter'); if(counter) counter.textContent=`${safeIndex+1} / ${count}`;
   const item=items[safeIndex];
   const img=$('#historyImageLarge');
   $('#historyImageTitle').textContent=item.title||'';
@@ -568,28 +597,23 @@ function stepHistoryViewer(delta){
   if((state.historyViewer.items||[]).length<2)return;
   renderViewerItem(state.historyViewer.index+delta);
 }
-function historicViewerItems(){
-  const out=[];
-  for(const item of getHistoricItems()){
-    const images=getHistoricImages(item);
-    images.forEach((src,imageIndex)=>{
-      const photoInfo=images.length>1?` · Foto ${imageIndex+1}/${images.length}`:'';
-      out.push({
-        id:String(item.id||item.imageSrc),
-        imageIndex,
-        src,
-        title:item.title||String(item.year||''),
-        caption:item.description || (item.title ? `${item.year||''}${photoInfo}` : (photoInfo?photoInfo.replace(/^ · /,''):String(item.year||''))),
-        alt:item.title||`Fotografia de ${item.year||''}`
-      });
-    });
-  }
-  return out;
+function historicViewerItemsForEntry(id){
+  const item=getHistoricItems().find(entry=>String(entry.id||entry.imageSrc)===String(id));
+  if(!item) return [];
+  const images=getHistoricImages(item);
+  return images.map((src,imageIndex)=>({
+    id:String(item.id||item.imageSrc),
+    imageIndex,
+    src,
+    title:item.title||String(item.year||''),
+    caption:[String(item.year||''),item.description].filter(Boolean).join(' · '),
+    alt:item.title||`Fotografia de ${item.year||''}`
+  }));
 }
 function openHistoryImage(id,index=0){
-  const items=historicViewerItems();
-  const target=items.findIndex(entry=>entry.id===String(id)&&entry.imageIndex===Number(index||0));
-  if(target<0)return;
+  const items=historicViewerItemsForEntry(id);
+  if(!items.length)return;
+  const target=Math.max(0,Math.min(items.length-1,Number(index)||0));
   openImageViewer({items,index:target});
 }
 function closeHistoryImage(){
@@ -613,6 +637,20 @@ function bindHistoryImageModal(){
       historyViewerApply();
     }
   },{passive:false});
+  const viewport=$('#historyImageViewport');
+  if(viewport){
+    let touchStartX=0,touchStartY=0;
+    viewport.addEventListener('touchstart',event=>{
+      const touch=event.touches?.[0]; if(!touch) return;
+      touchStartX=touch.clientX; touchStartY=touch.clientY;
+    },{passive:true});
+    viewport.addEventListener('touchend',event=>{
+      if(state.historyViewer.scale>1.05) return;
+      const touch=event.changedTouches?.[0]; if(!touch) return;
+      const dx=touch.clientX-touchStartX, dy=touch.clientY-touchStartY;
+      if(Math.abs(dx)>=52 && Math.abs(dx)>Math.abs(dy)*1.15) stepHistoryViewer(dx<0?1:-1);
+    },{passive:true});
+  }
   document.addEventListener('keydown',event=>{
     if($('#historyImageModal')?.hidden)return;
     if(event.key==='Escape') closeHistoryImage();
@@ -1330,7 +1368,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.43',root).href;
+    const swUrl=new URL('app/sw.js?v=0.44',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

@@ -1,25 +1,29 @@
-BANDA DE LA CALA · PATCH v0.43 DESDE v0.42
+BANDA DE LA CALA — PATCH v0.44 desde v0.43
 
 SOBRESCRIBIR:
 - app/index.html
-- app/sw.js
 - app.js
 - style.css
-- editor/index.html
-- editor/sw.js
-- editor.js
-- editor.css
 - version.js
-- config.js
+- app/sw.js
+- editor/index.html
+- editor.js
+- editor/sw.js
 
 AÑADIR:
-- V0_43_CAMBIOS.txt
+- V0_44_CAMBIOS.txt
 
 NO TOCAR:
-- manifests de APP/EDITOR
-- IDs, scopes ni start_url PWA
-- Supabase SQL / Edge Functions
-- SMTP
-- assets existentes
+- app/manifest.webmanifest
+- editor/manifest.webmanifest
+- manifest.webmanifest
+- config.js
+- content-store.js
+- supabase-client.js
+- data/content-published.js
+- assets/
+- Supabase / Edge Functions / SMTP
 
-No hay SQL nuevo que ejecutar.
+NO HAY SQL NUEVO.
+
+Tras subir el PATCH, recargar APP y EDITOR. Los Service Workers usarán caches v0.44.

@@ -1,0 +1,43 @@
+BANDA DE LA CALA — v0.44
+Fecha: 26/09/2026
+
+CAMBIOS APP
+
+1. USUARI · NOM
+- Se mantiene únicamente el título superior NOM.
+- Eliminado el texto/label visible “Nom visible”.
+- “Canviar nom” pasa a “Canvia'l aquí”.
+- El nombre introducido por el USER se muestra centrado y a una escala aproximada x3.
+- Se mantiene el botón DESAR NOM debajo.
+
+2. HISTÒRIC · CABECERAS DE PERIODOS
+- Cada franja muestra, de izquierda a derecha: círculo + año inicial + año final + director.
+- La flecha de desplegado permanece en el extremo derecho.
+- El periodo actual incorpora un badge discreto ACTUAL.
+- Se mantiene la cronología vertical y los colores propios de cada periodo.
+
+3. HISTÒRIC · APERTURA Y NAVEGACIÓN
+- Apertura animada más suave, con entrada escalonada de los momentos.
+- El círculo del periodo abierto tiene una animación sutil y el tramo activo de la línea cronológica se ilumina/crece.
+- En MOBILE solo queda un periodo abierto al abrir otro.
+- Al final de cada periodo (salvo el último) aparece SEGÜENT PERÍODE ↓: cierra los demás, abre el siguiente y hace scroll hasta él.
+
+4. HISTÒRIC · FOTOGRAFÍAS
+- La primera fotografía de cada entrada se convierte en imagen protagonista.
+- Las fotografías adicionales aparecen en una tira horizontal navegable.
+- Se muestra el número total de fotos de la entrada.
+- Las tarjetas reciben una interacción visual más moderna sin alterar el contenido.
+
+5. VISOR DE FOTOGRAFÍAS
+- El visor de una entrada de HISTÒRIC recorre únicamente las fotografías de esa entrada.
+- Se añade contador visible 1 / N.
+- En MOBILE se puede cambiar de fotografía mediante swipe horizontal cuando el zoom está al 100 %.
+- Se conservan flechas, zoom, teclado y cierre existentes.
+
+PWA / SISTEMA
+- version.js -> v0.44.
+- Cache-busting actualizado a v0.44.
+- Service Workers APP/EDITOR actualizados a caches v0.44.
+- Manifests, IDs PWA, scopes y start_url sin cambios.
+- Sin cambios de Supabase, SMTP, roles, base de datos ni SQL.
+- HISTÒRIC del EDITOR y HEMEROTECA de la APP no se modifican en esta release.

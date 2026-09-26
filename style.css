@@ -1517,3 +1517,194 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 .avatar-profile-details[open]>summary .details-chevron{transform:translateY(-50%) rotate(180deg)!important}
 /* NOM: el valor escrit pel USER queda visualment centrat. */
 .user-name-form input{text-align:center!important}
+
+/* ============================================================
+   v0.44 · USUARI NOM + HISTÒRIC dinàmic
+   ============================================================ */
+
+/* USUARI · NOM simplificat i valor principal x3. */
+.user-name-form{gap:14px!important;text-align:center!important}
+.user-name-form>.user-settings-title{display:grid!important;gap:5px!important;text-align:center!important}
+.user-name-form>#profileDisplayName{
+  width:100%!important;
+  min-height:82px!important;
+  padding:8px 14px!important;
+  text-align:center!important;
+  font-size:3rem!important;
+  font-weight:850!important;
+  line-height:1!important;
+  letter-spacing:-.035em!important;
+  color:var(--blue-deep)!important;
+  border-radius:17px!important;
+}
+
+/* HISTÒRIC · capçaleres lineals: cercle + inici + final + director + fletxa. */
+.history-period-head{
+  min-height:66px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:13px!important;
+  cursor:pointer!important;
+}
+.history-period-inline{
+  min-width:0!important;
+  flex:1 1 auto!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+}
+.history-period-head .history-period-inline>span,
+.history-period-head .history-period-inline>strong{margin:0!important;display:inline-flex!important;align-items:center!important;line-height:1!important}
+.history-period-head .history-period-year{
+  flex:0 0 auto!important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+  font-size:.82rem!important;
+  font-weight:850!important;
+  font-style:normal!important;
+  letter-spacing:.06em!important;
+  color:var(--period-text)!important;
+  opacity:.9!important;
+}
+.history-period-head .history-period-separator{
+  flex:0 0 auto!important;
+  font-size:.95rem!important;
+  font-style:normal!important;
+  color:var(--period-text)!important;
+  opacity:.64!important;
+}
+.history-period-head .history-period-director{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+  font-size:1rem!important;
+  font-weight:900!important;
+  font-style:normal!important;
+  letter-spacing:0!important;
+  color:var(--period-text)!important;
+}
+.history-period-head .history-current-badge{
+  flex:0 0 auto!important;
+  min-height:23px!important;
+  padding:0 8px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(255,255,255,.32)!important;
+  background:rgba(255,255,255,.16)!important;
+  color:var(--period-text)!important;
+  font-size:.56rem!important;
+  font-weight:950!important;
+  font-style:normal!important;
+  letter-spacing:.09em!important;
+}
+.history-period-chevron{flex:0 0 auto!important;margin-left:auto!important}
+
+/* Període obert: el node respira i la línia del tram “neix” des de la capçalera. */
+.history-period-items{position:relative!important;isolation:isolate}
+.history-period:not(.is-collapsed) .history-period-dot{animation:historyPeriodDotV044 1.8s ease-in-out infinite}
+.history-period:not(.is-collapsed) .history-period-items::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  left:50%;
+  top:-24px;
+  bottom:18px;
+  width:4px;
+  transform:translateX(-50%);
+  transform-origin:top;
+  border-radius:999px;
+  background:linear-gradient(180deg,var(--period-color),color-mix(in srgb,var(--period-color) 34%, transparent));
+  opacity:.55;
+  animation:historyLineGrowV044 .44s cubic-bezier(.22,.8,.28,1) both;
+}
+.history-period-items>.history-item,.history-period-items>.history-period-empty,.history-period-items>.history-next-period{position:relative;z-index:1}
+@keyframes historyPeriodDotV044{0%,100%{box-shadow:0 0 0 4px rgba(255,255,255,.16)}50%{box-shadow:0 0 0 9px rgba(255,255,255,.08)}}
+@keyframes historyLineGrowV044{from{transform:translateX(-50%) scaleY(0);opacity:0}to{transform:translateX(-50%) scaleY(1);opacity:.55}}
+
+/* Entrades com a “moments”: fotografia principal + tira navegable. */
+.history-card{transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.history-card:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(57,58,134,.13);border-color:rgba(57,58,134,.18)}
+.history-media-showcase{width:100%;background:#fff;overflow:hidden}
+.history-image-button{appearance:none;border:0;padding:0;background:#fff;cursor:zoom-in;overflow:hidden}
+.history-image-hero{position:relative;display:block;width:100%;height:300px}
+.history-image-hero img{width:100%!important;height:100%!important;max-height:none!important;object-fit:cover!important;transition:transform .28s ease}
+.history-image-hero:hover img{transform:scale(1.025)}
+.history-photo-count{
+  position:absolute;right:12px;bottom:12px;
+  min-height:28px;padding:0 10px;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(20,20,24,.74);backdrop-filter:blur(7px);
+  color:#fff;font-size:.64rem;font-weight:950;letter-spacing:.08em;
+  box-shadow:0 5px 16px rgba(0,0,0,.18)
+}
+.history-media-strip{
+  display:flex;gap:5px;overflow-x:auto;overscroll-behavior-inline:contain;
+  padding:5px;background:#f6f4ef;scrollbar-width:thin;scroll-snap-type:x proximity
+}
+.history-image-thumb{flex:0 0 92px;height:70px;border-radius:9px;scroll-snap-align:start}
+.history-image-thumb img{display:block;width:100%!important;height:100%!important;max-height:none!important;object-fit:cover!important;transition:transform .2s ease}
+.history-image-thumb:hover img{transform:scale(1.05)}
+.history-moment-meta{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.history-entry-photo-count{font-size:.61rem;font-weight:900;letter-spacing:.07em;color:var(--muted);white-space:nowrap}
+
+/* Navegació guiada cap al següent període. */
+.history-next-period{
+  justify-self:center;
+  min-height:42px;
+  margin:1px auto 4px;
+  padding:0 15px;
+  border:1px solid color-mix(in srgb,var(--period-color) 32%, #ddd);
+  border-radius:999px;
+  background:#fff;
+  color:var(--period-color);
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:.62rem;font-weight:950;letter-spacing:.08em;
+  box-shadow:var(--shadow-soft);
+  transition:transform .18s ease,background .18s ease
+}
+.history-next-period strong{font-size:1rem;line-height:1}
+.history-next-period:hover{transform:translateY(2px);background:#fafafa}
+
+/* Visor · contador explícit i swipe horitzontal quan la imatge no està ampliada. */
+.history-image-counter{
+  min-width:62px!important;
+  padding:0 8px!important;
+  height:30px!important;
+  border-radius:999px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#292930!important;
+  color:#fff!important;
+  font-variant-numeric:tabular-nums!important;
+  letter-spacing:.04em!important;
+}
+.history-image-viewport{touch-action:pan-y pinch-zoom}
+
+@media(max-width:780px){
+  .user-name-form>#profileDisplayName{font-size:3rem!important;min-height:78px!important}
+  .history-period-head{min-height:62px!important;gap:9px!important;padding-left:14px!important;padding-right:14px!important}
+  .history-period-inline{gap:7px!important}
+  .history-period-head .history-period-year{font-size:.7rem!important;letter-spacing:.035em!important}
+  .history-period-head .history-period-director{font-size:.86rem!important}
+  .history-period-head .history-current-badge{font-size:.5rem!important;padding:0 6px!important;min-height:21px!important}
+  .history-period:not(.is-collapsed) .history-period-items::before{left:16px;transform:none;width:3px}
+  @keyframes historyLineGrowV044{from{transform:scaleY(0);opacity:0}to{transform:scaleY(1);opacity:.55}}
+  .history-image-hero{height:auto;aspect-ratio:4/3}
+  .history-image-hero img{object-fit:contain!important;background:#fff}
+  .history-image-thumb{flex-basis:78px;height:60px}
+  .history-card:hover{transform:none}
+  .history-next-period{margin-left:40px}
+}
+@media(max-width:440px){
+  .history-period-inline{gap:5px!important}
+  .history-period-head .history-period-year{font-size:.62rem!important}
+  .history-period-head .history-period-director{font-size:.78rem!important}
+  .history-current-badge{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .history-period:not(.is-collapsed) .history-period-dot,
+  .history-period:not(.is-collapsed) .history-period-items::before{animation:none!important}
+  .history-card,.history-image-hero img{transition:none!important}
+}
