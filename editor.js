@@ -291,7 +291,8 @@ function quinaNotaEditorSettings(){
     active:current.active!==false,
     visibleName:String(current.visibleName||'QUINA NOTA ÉS?').trim()||'QUINA NOTA ÉS?',
     description:String(current.description||'Endevina la nota del dia i suma punts musicals.').trim()||'Endevina la nota del dia i suma punts musicals.',
-    icon:String(current.icon||'').trim()
+    icon:String(current.icon||'').trim(),
+    titleImage:String(current.titleImage||'').trim()
   };
   return content.settings.minigames.quinaNota;
 }
@@ -305,6 +306,12 @@ function renderQuinaNotaIconPreview(settings=quinaNotaEditorSettings()){
     img.hidden=true; img.removeAttribute('src'); fallback.hidden=false;
   }
 }
+function renderQuinaNotaTitlePreview(settings=quinaNotaEditorSettings()){
+  const img=$('#quinaNotaPreviewTitleImage'), text=$('#quinaNotaPreviewName');
+  if(!img||!text)return;
+  if(settings.titleImage){img.hidden=false;img.src=settings.titleImage;text.hidden=true;img.onerror=()=>{img.hidden=true;text.hidden=false;};}
+  else{img.hidden=true;img.removeAttribute('src');text.hidden=false;}
+}
 function renderMinigames(){
   const settings=quinaNotaEditorSettings();
   const active=$('#quinaNotaActive'), name=$('#quinaNotaVisibleName'), description=$('#quinaNotaDescription');
@@ -315,6 +322,7 @@ function renderMinigames(){
   const previewDescription=$('#quinaNotaPreviewDescription'); if(previewDescription) previewDescription.textContent=settings.description;
   const status=$('#quinaNotaPreviewStatus'); if(status){status.textContent=settings.active?'ACTIU':'INACTIU';status.classList.toggle('is-inactive',!settings.active);}
   renderQuinaNotaIconPreview(settings);
+  renderQuinaNotaTitlePreview(settings);
 }
 function bindMinigames(){
   const form=$('#quinaNotaSettingsForm'); if(!form) return;
@@ -329,7 +337,7 @@ function bindMinigames(){
   $('#quinaNotaIconFile')?.addEventListener('change',async event=>{
     const file=event.target.files?.[0]; if(!file)return;
     try{
-      const compressed=await compressImage(file);
+      const compressed=await compressImage(file,true);
       let imageSrc=compressed;
       if(editorCanWrite && supabaseActive && currentSession){
         showToast('Pujant icona del minijoc…');
@@ -339,6 +347,24 @@ function bindMinigames(){
       save(content,'Icona de QUINA NOTA ÉS? actualitzada');
     }catch(error){console.error(error);showToast('No s’ha pogut processar o pujar la icona');}
     event.target.value='';
+  });
+  $('#quinaNotaTitleImageFile')?.addEventListener('change',async event=>{
+    const file=event.target.files?.[0]; if(!file)return;
+    try{
+      const compressed=await compressImage(file,true);
+      let imageSrc=compressed;
+      if(editorCanWrite && supabaseActive && currentSession){
+        showToast('Pujant imatge del títol…');
+        imageSrc=(await BandaSupabase.uploadDataUrl('app-images',compressed,'minigames/quina-nota-es','quina-nota-es-title')).url;
+      }
+      const settings=quinaNotaEditorSettings(); settings.titleImage=imageSrc;
+      save(content,'Imatge del títol de QUINA NOTA ÉS? actualitzada');
+    }catch(error){console.error(error);showToast('No s’ha pogut processar o pujar la imatge del títol');}
+    event.target.value='';
+  });
+  $('#clearQuinaNotaTitleImage')?.addEventListener('click',()=>{
+    const settings=quinaNotaEditorSettings(); settings.titleImage='';
+    save(content,'Imatge del títol de QUINA NOTA ÉS? eliminada');
   });
   $('#clearQuinaNotaIcon')?.addEventListener('click',()=>{
     const settings=quinaNotaEditorSettings(); settings.icon='';
@@ -353,17 +379,18 @@ function bindMinigames(){
       active:!!$('#quinaNotaActive')?.checked,
       visibleName:$('#quinaNotaVisibleName')?.value.trim()||'QUINA NOTA ÉS?',
       description:$('#quinaNotaDescription')?.value.trim()||'Endevina la nota del dia i suma punts musicals.',
-      icon:current.icon||''
+      icon:current.icon||'',
+      titleImage:current.titleImage||''
     };
     save(content,'Configuració de QUINA NOTA ÉS? desada');
   });
 }
 
-async function compressImage(file){
+async function compressImage(file,preserveAlpha=false){
   const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});
   const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=reject;i.src=dataUrl;});
   const maxW=1600,maxH=1000,scale=Math.min(1,maxW/img.width,maxH/img.height); const canvas=document.createElement('canvas'); canvas.width=Math.max(1,Math.round(img.width*scale)); canvas.height=Math.max(1,Math.round(img.height*scale));
-  canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height); return canvas.toDataURL('image/jpeg',0.84);
+  canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height); return preserveAlpha?canvas.toDataURL('image/png'):canvas.toDataURL('image/jpeg',0.84);
 }
 function bindHomeEditor(){
   try{
@@ -1785,7 +1812,7 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.52',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.53',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

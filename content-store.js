@@ -24,7 +24,8 @@
       active: qne.active !== false,
       visibleName: typeof qne.visibleName === 'string' && qne.visibleName.trim() ? qne.visibleName.trim() : 'QUINA NOTA ÉS?',
       description: typeof qne.description === 'string' && qne.description.trim() ? qne.description.trim() : 'Endevina la nota del dia i suma punts musicals.',
-      icon: typeof qne.icon === 'string' ? qne.icon : ''
+      icon: typeof qne.icon === 'string' ? qne.icon : '',
+      titleImage: typeof qne.titleImage === 'string' ? qne.titleImage : ''
     };
     base.events = Array.isArray(base.events) ? base.events.map((event,index)=>({
       id: event.id || uid(`evt${index}`),

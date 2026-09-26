@@ -763,3 +763,6 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 
 /* v0.52 · MINIJOCS · icona editable */
 .minigame-preview-icon{overflow:hidden}.minigame-preview-icon img{width:100%;height:100%;object-fit:cover;display:block}.minigame-preview-icon>span{width:100%;height:100%;display:grid;place-items:center}.minigame-settings-card .form-actions.compact{margin-top:-6px}.minigame-settings-card input[type="file"]{font-size:.78rem}
+
+/* v0.53 · títol gràfic de minijoc */
+.minigame-preview-title-image{display:block;max-width:min(100%,420px);max-height:110px;object-fit:contain;margin:0 0 12px}.minigame-settings-card input[type="file"]{width:100%}

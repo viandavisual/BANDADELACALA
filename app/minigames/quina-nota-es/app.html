@@ -578,7 +578,18 @@
       .reveal { opacity: 1 !important; transform: none !important; }
       .note-btn { opacity: 1 !important; transform: none !important; }
     }
-  </style>
+  
+    /* v0.53 · capçalera del joc */
+    .game-logo-icon{width:96px;height:96px;border-radius:24px}.game-logo-icon svg{width:60px;height:60px}
+    .game-title-image[hidden]{display:none!important}.game-title-image{display:block;max-width:min(100%,420px);max-height:98px;object-fit:contain;object-position:left center}
+    .points-box{color:var(--banda-blue-deep)}
+    .points-phrase{display:flex;align-items:baseline;justify-content:center;gap:5px;flex-wrap:wrap;font-size:13px;line-height:1.1;font-weight:800}
+    .points-phrase .points-number{font-size:48px;line-height:.9;color:var(--banda-gold-deep);min-height:0}
+    .exit-box{background:var(--banda-danger)!important;border-color:var(--banda-danger)!important;color:#fff!important;box-shadow:0 8px 20px rgba(166,79,69,.22)}
+    .exit-box:hover{background:#873e36!important;border-color:#873e36!important;color:#fff!important}
+    @media(max-width:560px){.game-logo-icon{width:80px;height:80px;border-radius:20px}.game-logo-icon svg{width:50px;height:50px}.game-title-image{max-height:72px}.points-phrase{font-size:10px;gap:3px}.points-phrase .points-number{font-size:36px}}
+    @media(max-width:370px){.game-logo-icon{width:72px;height:72px}.game-logo-icon svg{width:45px;height:45px}.game-title-image{max-height:64px}}
+</style>
 </head>
 <body>
 <main class="screen">
@@ -596,7 +607,7 @@
               <ellipse cx="18.4" cy="19.2" rx="3.9" ry="2.8" transform="rotate(-18 18.4 19.2)" fill="#393A86"/>
             </svg>
           </div>
-          <h1 id="titleText"></h1>
+          <img id="titleImage" class="game-title-image" alt="QUINA NOTA ÉS?" hidden /><h1 id="titleText"></h1>
         </div>
         <div class="hero-copy">
           <div class="hero-sub-main" id="heroSubMain"></div>
@@ -604,8 +615,8 @@
       </div>
       <aside class="hero-side" aria-label="Puntuació i sortida">
         <div class="points-box">
-          <div class="points-number" id="pointsNumber">0</div>
-          <div class="points-label" id="pointsLabel"></div>
+          <div class="points-phrase">TENS <span class="points-number" id="pointsNumber">0</span> PUNTS</div>
+          <div class="points-label" id="pointsLabel" hidden></div>
         </div>
         <button class="exit-box" id="exitGame" type="button"></button>
       </aside>
@@ -661,6 +672,7 @@
 
   const brandText = document.getElementById("brandText");
   const titleText = document.getElementById("titleText");
+  const titleImage = document.getElementById("titleImage");
   const heroSubMain = document.getElementById("heroSubMain");
   const pointsBox = document.querySelector(".points-box");
   const pointsNumber = document.getElementById("pointsNumber");
@@ -686,10 +698,10 @@
   const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
   let initData=null, challenge=null, registeredUser=false, pointsTotal=0, answerLocked=true, selectedAnswer='', entryComplete=false;
 
-  const audioIntro=new Audio('assets/AUDIO/QNE_intro.mp3');
-  const audioBg=new Audio('assets/AUDIO/QNE_BGmusic.mp3');
-  const audioCorrect=new Audio('assets/AUDIO/QNE_correcte.mp3');
-  const audioError=new Audio('assets/AUDIO/QNE_error.mp3');
+  const audioIntro=new Audio('../../../assets/AUDIO/QNE_intro.mp3');
+  const audioBg=new Audio('../../../assets/AUDIO/QNE_BGmusic.mp3');
+  const audioCorrect=new Audio('../../../assets/AUDIO/QNE_correcte.mp3');
+  const audioError=new Audio('../../../assets/AUDIO/QNE_error.mp3');
   audioBg.loop=true;
   [audioIntro,audioBg,audioCorrect,audioError].forEach(a=>{a.preload='auto';a.volume=1;});
   let audioUnlockPending=false,introFinished=false;
@@ -776,13 +788,12 @@
   async function introTexts() {
     typeText(brandText, "BANDA DE LA CALA · MINIJOC DIARI", 16, true);
     await sleep(130);
-    typeText(titleText, "QUINA NOTA ÉS?", 26, true);
+    if(!titleText.hidden) typeText(titleText, "QUINA NOTA ÉS?", 26, true);
     await sleep(180);
     typeText(heroSubMain, "Observa el pentagrama, identifica la nota i tria la resposta correcta. Tens un únic intent. Si l’encertes, guanyes +1 punt.", 14, true);
     await sleep(100);
     if(pointsBox) pointsBox.hidden=!registeredUser;
     if(registeredUser){
-      typeText(pointsLabel, "PUNTS MUSICALS", 18, true);
       animateCounter(pointsNumber, 0, pointsTotal, 1300);
     }else{
       pointsNumber.textContent="";
@@ -1032,6 +1043,9 @@
     registeredUser=!!payload?.registered;
     setMuted(!!payload?.muted);
     pointsTotal=registeredUser?Number(payload?.pointsTotal??payload?.dailyState?.pointsTotal??0):0;
+    const configuredTitleImage=String(payload?.settings?.titleImage||'').trim();
+    if(titleImage && configuredTitleImage){titleImage.hidden=false;titleImage.src=configuredTitleImage;titleText.hidden=true;titleImage.onerror=()=>{titleImage.hidden=true;titleText.hidden=false;};}
+    else if(titleImage){titleImage.hidden=true;titleText.hidden=false;}
     challenge=payload?.dailyState?.challenge||standaloneChallenge(madridCycleDate());
     const chosen=drawChallenge(challenge);
     startAudioSequence();
