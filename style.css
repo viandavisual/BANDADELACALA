@@ -1721,3 +1721,69 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
   .history-item{transition:margin-top .18s ease}
   .history-next-period{margin-top:18px!important}
 }
+
+
+/* ============================================================
+   v0.46 · HISTÒRIC proporcions reals + anys x2
+   ============================================================ */
+/* Els nodes de període són sempre blancs, també sobre el període daurat de Pere Bono. */
+.history-period-dot{background:#fff!important}
+
+/* Anys de les capçaleres de període al doble de l'escala v0.45. */
+.history-period-head .history-period-year{
+  font-size:1.64rem!important;
+  line-height:.92!important;
+  letter-spacing:.035em!important;
+}
+/* També destaquem al doble l'any de cada moment de la cronologia. */
+.history-year{
+  min-height:42px!important;
+  padding:0 13px!important;
+  font-size:1.44rem!important;
+  line-height:1!important;
+}
+
+/* Les fotografies de HISTÒRIC respecten la proporció real de cada fitxer, sense crop. */
+.history-image-hero{
+  height:auto!important;
+  aspect-ratio:auto!important;
+  line-height:0!important;
+}
+.history-image-hero img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  background:#fff!important;
+}
+.history-media-strip{
+  align-items:flex-start!important;
+}
+.history-image-thumb{
+  flex:0 0 auto!important;
+  width:auto!important;
+  height:auto!important;
+  max-width:180px!important;
+  border-radius:9px!important;
+  line-height:0!important;
+}
+.history-image-thumb img{
+  display:block!important;
+  width:auto!important;
+  height:auto!important;
+  max-width:180px!important;
+  max-height:120px!important;
+  object-fit:contain!important;
+  background:#fff!important;
+}
+
+@media(max-width:780px){
+  .history-period-head .history-period-year{font-size:1.4rem!important;letter-spacing:.02em!important}
+  .history-year{font-size:1.44rem!important}
+  .history-image-thumb{max-width:138px!important}
+  .history-image-thumb img{max-width:138px!important;max-height:96px!important}
+}
+@media(max-width:440px){
+  .history-period-head .history-period-year{font-size:1.24rem!important}
+}

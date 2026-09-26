@@ -1,0 +1,14 @@
+BANDA DE LA CALA · v0.46
+
+APP
+- Navegació: prémer HISTÒRIC des del menú lateral o inferior restableix sempre la vista principal de HISTÒRIC, encara que el USER estigués dins HEMEROTECA.
+- USUARI / PARTITURES: el text del botó passa a “PARTITURES ENTRA AQUÍ”.
+- HISTÒRIC: anys de les capçaleres de període al doble d’escala.
+- HISTÒRIC: any de cada moment també reforçat visualment.
+- HISTÒRIC: les fotografies respecten la proporció real del fitxer i deixen de retallar-se dins caixes de proporció forçada.
+- HISTÒRIC: el cercle interior de tots els períodes, inclòs Pere Bono, és blanc.
+- PLAYER: quan acaba una pista, si existeix una pista immediatament posterior, comença automàticament.
+
+SISTEMA
+- version.js, cache-busting i Service Workers actualitzats a v0.46.
+- Sense canvis de Supabase, SMTP, rols, manifests, IDs PWA, scopes ni start_url.

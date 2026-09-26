@@ -295,6 +295,15 @@ function switchView(id, remember = true){
   const target=navItems.find(item=>item.id===id);
   if(!target) id='home';
   else if(!target.public && !state.authenticated) id='user';
+  // v0.46: qualsevol accés explícit a HISTÒRIC torna sempre a l'arrel de la secció.
+  // Això evita quedar-se dins HEMEROTECA quan el USER torna a prémer HISTÒRIC.
+  if(id==='history'){
+    const historyMain=$('#historyMainContent');
+    const hemerotecaPanel=$('#hemerotecaPanel');
+    if(historyMain) historyMain.hidden=false;
+    if(hemerotecaPanel) hemerotecaPanel.hidden=true;
+    state.hemerotecaType='cartells';
+  }
   if(id === state.currentView){ updateHeader(id); window.scrollTo({top:0,behavior:'smooth'}); requestAnimationFrame(()=>animateViewEntrance(id)); return; }
   if(remember && state.currentView) state.viewHistory.push(state.currentView);
   state.currentView = id;
@@ -1040,7 +1049,18 @@ function bindPlayer(){
   player.addEventListener('volumechange',()=>{ syncPlayerEqualizers(); });
   player.addEventListener('emptied',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
   player.addEventListener('error',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
-  player.addEventListener('ended',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); playNextFromMode(); });
+  player.addEventListener('ended',()=>{
+    state.playlistAudioPlaying=false;
+    syncPlayerEqualizers(false);
+    // v0.46: si existeix una pista immediatament posterior, sempre continua amb ella.
+    // Només quan ja som a l'última pista entren en joc els modes de final de llista.
+    const tracks=getTracks();
+    if(state.currentTrack>=0 && state.currentTrack<tracks.length-1){
+      loadTrack(state.currentTrack+1,true);
+      return;
+    }
+    playNextFromMode();
+  });
   player.addEventListener('loadedmetadata',() => { $('#durationTime').textContent = formatTime(player.duration); });
   player.addEventListener('timeupdate',() => {
     const progress = player.duration ? (player.currentTime/player.duration)*100 : 0;
@@ -1395,7 +1415,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.45',root).href;
+    const swUrl=new URL('app/sw.js?v=0.46',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
