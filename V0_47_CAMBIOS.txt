@@ -1,0 +1,22 @@
+BANDA DE LA CALA · v0.47
+Fecha: 26/09/2026
+
+APP · HISTÒRIC
+- El període de Pere Bono (2000) usa un to daurat més profund perquè l'any, el nom i el node puguin ser blancs, com la resta de períodes.
+- SEGÜENT PERÍODE calcula l'alçada real del header sticky i situa la capçalera del període just a sota, evitant que quedi tapada.
+
+APP · PLAYER
+- Reforçada la continuïtat automàtica entre pistes consecutives.
+- En acabar una pista, si existeix la següent, es carrega immediatament amb reproducció pendent.
+- Si el navegador encara no ha pogut iniciar el nou fitxer en el canvi de src, l'esdeveniment canplay torna a activar la reproducció.
+- El mecanisme s'ha verificat en Chromium amb dos àudios consecutius: la segona pista inicia reproducció automàticament després de la primera.
+
+APP · USUARI
+- AVATAR, NOM, GÈNERE i CONTRASENYA passen a quatre caixes equivalents en una graella 2x2.
+- Les quatre caixes estan col·lapsades per defecte i s'obren tocant la seva capçalera.
+- Es conserven els controls i funcionalitats existents dins de cada caixa.
+- En comptes nous, CONTRASENYA continua obrint-se automàticament quan cal completar l'alta.
+
+SISTEMA
+- version.js, cache-busting i Service Workers actualitzats a v0.47.
+- Sense canvis en Supabase, SMTP, rols, SQL, manifests, ids PWA, scopes o start_url.

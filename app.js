@@ -295,7 +295,7 @@ function switchView(id, remember = true){
   const target=navItems.find(item=>item.id===id);
   if(!target) id='home';
   else if(!target.public && !state.authenticated) id='user';
-  // v0.46: qualsevol accés explícit a HISTÒRIC torna sempre a l'arrel de la secció.
+  // v0.47: qualsevol accés explícit a HISTÒRIC torna sempre a l'arrel de la secció.
   // Això evita quedar-se dins HEMEROTECA quan el USER torna a prémer HISTÒRIC.
   if(id==='history'){
     const historyMain=$('#historyMainContent');
@@ -486,6 +486,13 @@ function loadHistoryPeriod(periodId){
   requestAnimationFrame(()=>compactHistoryTimeline(section));
   itemsHost.querySelectorAll('img').forEach(img=>{if(!img.complete)img.addEventListener('load',()=>compactHistoryTimeline(section),{once:true});});
 }
+function scrollHistoryPeriodBelowHeader(section){
+  if(!section) return;
+  const topbar=document.querySelector('.topbar');
+  const offset=(topbar?.getBoundingClientRect().height||0)+8;
+  const target=Math.max(0,window.scrollY+section.getBoundingClientRect().top-offset);
+  window.scrollTo({top:target,behavior:'smooth'});
+}
 function setHistoryPeriodOpen(periodId,open,{scroll=false,closeOthers=false}={}){
   const section=$$('.history-period').find(el=>el.dataset.period===periodId);
   if(!section) return;
@@ -510,7 +517,7 @@ function setHistoryPeriodOpen(periodId,open,{scroll=false,closeOthers=false}={})
       const moments=[...host.querySelectorAll('.history-item,.history-period-empty,.history-next-period')];
       moments.forEach((moment,index)=>moment.animate([{opacity:0,transform:'translateY(-10px)'},{opacity:1,transform:'translateY(0)'}],{duration:300,delay:Math.min(index*45,220),easing:'cubic-bezier(.22,.8,.28,1)',fill:'backwards'}));
     }
-    if(scroll) requestAnimationFrame(()=>section.scrollIntoView({behavior:'smooth',block:'start'}));
+    if(scroll) requestAnimationFrame(()=>scrollHistoryPeriodBelowHeader(section));
   }else{
     state.collapsedPeriods.add(periodId);
     section.classList.add('is-collapsed');
@@ -885,7 +892,10 @@ function loadTrack(index, autoplay = false){
   const player = audio();
   state.playlistAudioPlaying=false;
   player.dataset.playlistTrack='1';
+  player.dataset.autoplayRequested=autoplay?'1':'0';
+  player.autoplay=!!autoplay;
   player.src = track.src;
+  try{ player.load(); }catch(_error){}
   syncPlayerEqualizers(false);
   $('#nowPlayingTitle').textContent = track.title;
   $('#nowPlayingMeta').textContent = track.meta || 'Banda de la Cala';
@@ -895,7 +905,9 @@ function loadTrack(index, autoplay = false){
   $('#miniPlayer').hidden = false;
   $('#appShell')?.classList.add('has-mini-player');
   renderTracks();
-  if(autoplay) player.play().catch(()=>{});
+  if(autoplay){
+    player.play().catch(()=>{});
+  }
 }
 
 function playlistAudioIsAudible(){
@@ -1028,7 +1040,8 @@ function bindPlayer(){
     const tracks = getTracks();
     if(!tracks.length) return;
     if(state.currentTrack < 0) loadTrack(0,false);
-    player.paused ? player.play().catch(()=>{}) : player.pause();
+    if(player.paused){ player.dataset.autoplayRequested='1'; player.play().catch(()=>{}); }
+    else{ player.dataset.autoplayRequested='0'; player.pause(); }
   };
   $('#playPause').onclick = toggle;
   $('#miniPlay').onclick = toggle;
@@ -1040,11 +1053,18 @@ function bindPlayer(){
   updatePlaybackModeButtons();
   setPlayIcon();
   player.addEventListener('play',()=>{ syncPlayerEqualizers(); setPlayIcon(); });
-  player.addEventListener('playing',()=>{ state.playlistAudioPlaying=true; syncPlayerEqualizers(); setPlayIcon(); });
+  player.addEventListener('playing',()=>{ player.dataset.autoplayRequested='0'; state.playlistAudioPlaying=true; syncPlayerEqualizers(); setPlayIcon(); });
   player.addEventListener('pause',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); setPlayIcon(); });
   player.addEventListener('waiting',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
   player.addEventListener('stalled',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
-  player.addEventListener('canplay',()=>{ syncPlayerEqualizers(); });
+  player.addEventListener('canplay',()=>{
+    syncPlayerEqualizers();
+    // v0.47: si el canvi de pista demanava reproducció automàtica i el navegador
+    // encara l'ha deixada en pausa mentre carregava el nou fitxer, la reprenem aquí.
+    if(player.dataset.autoplayRequested==='1' && player.paused && state.currentTrack>=0){
+      player.play().catch(()=>{});
+    }
+  });
   player.addEventListener('seeked',()=>{ syncPlayerEqualizers(); });
   player.addEventListener('volumechange',()=>{ syncPlayerEqualizers(); });
   player.addEventListener('emptied',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
@@ -1052,11 +1072,12 @@ function bindPlayer(){
   player.addEventListener('ended',()=>{
     state.playlistAudioPlaying=false;
     syncPlayerEqualizers(false);
-    // v0.46: si existeix una pista immediatament posterior, sempre continua amb ella.
-    // Només quan ja som a l'última pista entren en joc els modes de final de llista.
+    // v0.47: continuïtat seqüencial garantida. Si hi ha una pista posterior,
+    // es carrega amb reproducció pendent i el canplay la reprèn si cal.
     const tracks=getTracks();
     if(state.currentTrack>=0 && state.currentTrack<tracks.length-1){
-      loadTrack(state.currentTrack+1,true);
+      const nextIndex=state.currentTrack+1;
+      loadTrack(nextIndex,true);
       return;
     }
     playNextFromMode();
@@ -1415,7 +1436,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.46',root).href;
+    const swUrl=new URL('app/sw.js?v=0.47',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

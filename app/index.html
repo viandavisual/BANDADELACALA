@@ -14,7 +14,7 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.46" />
+  <link rel="stylesheet" href="style.css?v=0.47" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -259,42 +259,47 @@
               </a>
             </div>
 
-            <form id="avatarProfileForm" class="user-settings-box user-avatar-form">
-              <details id="avatarProfileDetails" class="avatar-profile-details">
-                <summary><strong>TRIA EL TEU AVATAR</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
-                <div class="avatar-profile-body">
+            <div class="user-settings-grid" aria-label="Configuració del perfil">
+              <details id="avatarProfileDetails" class="user-settings-box user-profile-tile user-avatar-form">
+                <summary><strong>AVATAR</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+                <form id="avatarProfileForm" class="avatar-profile-body">
                   <div id="avatarChoices" class="avatar-choices"></div>
                   <button class="user-password-btn" type="submit">DESAR AVATAR</button>
                   <small id="avatarProfileStatus" class="user-auth-status"></small>
+                </form>
+              </details>
+
+              <details id="nameProfileDetails" class="user-settings-box user-profile-tile user-name-form">
+                <summary><strong>NOM</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+                <form id="nameProfileForm" class="user-profile-tile-body">
+                  <h4>Canvia'l aquí</h4>
+                  <input id="profileDisplayName" type="text" maxlength="120" required aria-label="Nom" />
+                  <button class="user-password-btn" type="submit">DESAR NOM</button>
+                  <small id="nameProfileStatus" class="user-auth-status"></small>
+                </form>
+              </details>
+
+              <details id="genderProfileDetails" class="user-settings-box user-profile-tile user-gender-box">
+                <summary><strong>GÈNERE</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+                <div id="genderProfileBox" class="user-profile-tile-body">
+                  <div class="gender-choice-row" role="group" aria-label="Gènere">
+                    <button class="gender-choice-btn" type="button" data-profile-gender="male" aria-pressed="false"><span aria-hidden="true">♂</span><strong>MASCULÍ</strong></button>
+                    <button class="gender-choice-btn" type="button" data-profile-gender="female" aria-pressed="false"><span aria-hidden="true">♀</span><strong>FEMENÍ</strong></button>
+                  </div>
+                  <small id="genderProfileStatus" class="user-auth-status"></small>
                 </div>
               </details>
-            </form>
 
-            <form id="nameProfileForm" class="user-settings-box user-name-form">
-              <div class="user-settings-title"><span class="eyebrow">NOM</span><h4>Canvia'l aquí</h4></div>
-              <input id="profileDisplayName" type="text" maxlength="120" required aria-label="Nom visible" />
-              <button class="user-password-btn" type="submit">DESAR NOM</button>
-              <small id="nameProfileStatus" class="user-auth-status"></small>
-            </form>
-
-            <div id="genderProfileBox" class="user-settings-box user-gender-box">
-              <div class="user-settings-title"><span class="eyebrow">GÈNERE</span><h4>Tractament de benvinguda</h4></div>
-              <div class="gender-choice-row" role="group" aria-label="Gènere">
-                <button class="gender-choice-btn" type="button" data-profile-gender="male" aria-pressed="false"><span aria-hidden="true">♂</span><strong>MASCULÍ</strong></button>
-                <button class="gender-choice-btn" type="button" data-profile-gender="female" aria-pressed="false"><span aria-hidden="true">♀</span><strong>FEMENÍ</strong></button>
-              </div>
-              <small id="genderProfileStatus" class="user-auth-status"></small>
+              <details id="passwordDetails" class="user-settings-box user-profile-tile user-password-details">
+                <summary><strong>CONTRASENYA</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+                <form id="changePasswordForm" class="change-password-form user-profile-tile-body">
+                  <label>Nova contrasenya<input id="newUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+                  <label>Repetir contrasenya<input id="repeatUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+                  <button class="user-password-btn" type="submit">DESAR CONTRASENYA</button>
+                  <small id="changePasswordStatus" class="user-auth-status"></small>
+                </form>
+              </details>
             </div>
-
-            <details id="passwordDetails" class="user-settings-box user-password-details">
-              <summary><span><span class="eyebrow">CONTRASENYA</span><strong>Definir / canviar contrasenya</strong></span><span class="details-chevron" aria-hidden="true">⌄</span></summary>
-              <form id="changePasswordForm" class="change-password-form">
-                <label>Nova contrasenya<input id="newUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
-                <label>Repetir contrasenya<input id="repeatUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
-                <button class="user-password-btn" type="submit">DESAR CONTRASENYA</button>
-                <small id="changePasswordStatus" class="user-auth-status"></small>
-              </form>
-            </details>
             <div class="band-logo-block user-band-logo" aria-label="Logo de la Banda de la Cala"><img src="assets/bandalogo.jpg" alt="Banda de la Cala" /></div>
             <button id="userLogoutBtn" class="user-logout-btn" type="button">TANCAR SESSIÓ</button>
           </section>
@@ -346,12 +351,12 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.46"></script>
-  <script src="config.js?v=0.46"></script>
-  <script src="data/content-published.js?v=0.46"></script>
-  <script src="content-store.js?v=0.46"></script>
+  <script src="version.js?v=0.47"></script>
+  <script src="config.js?v=0.47"></script>
+  <script src="data/content-published.js?v=0.47"></script>
+  <script src="content-store.js?v=0.47"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.46"></script>
-  <script src="app.js?v=0.46"></script>
+  <script src="supabase-client.js?v=0.47"></script>
+  <script src="app.js?v=0.47"></script>
 </body>
 </html>
