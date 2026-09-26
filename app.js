@@ -40,7 +40,7 @@ const navItems = [
   { id:'history', label:'HISTÒRIC', icon:'history', eyebrow:'MEMÒRIA', title:'HISTÒRIC', public:true },
   { id:'playlist', label:'PLAYER', icon:'playlist', eyebrow:'MÚSICA', title:'PLAYER', public:true },
   { id:'games', label:'MINIJOCS', icon:'games', eyebrow:'OCI', title:'MINIJOCS', public:false },
-  { id:'user', label:'USER', icon:'user', eyebrow:'COMPTE', title:'USER', public:true }
+  { id:'user', label:'USUARI', icon:'user', eyebrow:'COMPTE', title:'USUARI', public:true }
 ];
 
 const $ = selector => document.querySelector(selector);
@@ -177,6 +177,24 @@ function dresscodeClothesIcon(){
   return `<span class="dresscode-clothes-icon" aria-hidden="true"><svg viewBox="0 0 32 32" role="presentation"><g class="dress-shirt"><path class="dress-blue" d="M11.1 7.5 14 6h4l2.9 1.5 5.1 4.2-3.2 4.1-2.4-1.8v11H11.6V14l-2.4 1.8L6 11.7Z"/><path class="dress-gold" d="M13.8 6.4c.4 1.6 1.1 2.5 2.2 2.5s1.8-.9 2.2-2.5"/></g><path class="dress-hanger" d="M13.8 4.1c0-1.1.8-1.8 2-1.8 1 0 1.8.6 1.8 1.5 0 1.7-2.1 1.7-2.1 3.3M15.5 7.1 8.3 11h15.4Z"/></svg></span>`;
 }
 
+function garmentIconSvg(key,sex='boys'){
+  const common='viewBox="0 0 48 48" class="garment-icon-svg" aria-hidden="true"';
+  const stroke='fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
+  if(key==='shirt') return `<svg ${common}><path ${stroke} d="M15 10 20 7h8l5 3 8 6-5 7-5-3v18H17V20l-5 3-5-7 8-6Z"/><path class="garment-gold" ${stroke} d="M20 7c.7 4 2 6 4 6s3.3-2 4-6"/></svg>`;
+  if(key==='bottom' && sex==='girls') return `<svg ${common}><path ${stroke} d="M18 8h12l2 7 6 24H10l6-24 2-7Z"/><path class="garment-gold" ${stroke} d="M16 15h16"/></svg>`;
+  if(key==='bottom') return `<svg ${common}><path ${stroke} d="M14 8h20l-2 31h-8l-1-18-1 18h-8L14 8Z"/><path class="garment-gold" ${stroke} d="M23 9v12"/></svg>`;
+  if(key==='socks' && sex==='girls') return `<svg ${common}><path ${stroke} d="M14 7h8v20l-3 13H9l5-14V7ZM28 7h8v20l3 13H29l-1-13V7Z"/><path class="garment-gold" ${stroke} d="M14 12h8M28 12h8"/></svg>`;
+  if(key==='socks') return `<svg ${common}><path ${stroke} d="M12 8h9v20l-4 10H8l4-12V8ZM27 8h9v20l4 10h-9l-4-12V8Z"/><path class="garment-gold" ${stroke} d="M12 13h9M27 13h9"/></svg>`;
+  if(key==='jacket') return `<svg ${common}><path ${stroke} d="M15 9 21 6h6l6 3 6 8-5 5-3-4v21H17V18l-3 4-5-5 6-8Z"/><path class="garment-gold" ${stroke} d="m21 7 3 8 3-8M24 15v24"/></svg>`;
+  if(key==='footwear' && sex==='girls') return `<svg ${common}><path ${stroke} d="M9 29c5 1 8-2 11-8l5 2-2 8c5 1 9 3 13 7H9v-9Z"/><path class="garment-gold" ${stroke} d="M24 31h9M14 38v3"/></svg>`;
+  if(key==='footwear') return `<svg ${common}><path ${stroke} d="M8 29c7 0 10-2 13-7l5 4c4 4 8 6 14 7v6H8V29Z"/><path class="garment-gold" ${stroke} d="M22 28h7M12 39v2"/></svg>`;
+  return `<svg ${common}><path ${stroke} d="M20 7h8l-2 8 4 20-6 7-6-7 4-20-2-8Z"/><path class="garment-gold" ${stroke} d="M20 7l4 8 4-8"/></svg>`;
+}
+function eventMetaIcon(type){
+  if(type==='place') return `<svg class="event-meta-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.6 6-12a6 6 0 1 0-12 0c0 6.4 6 12 6 12Z"/><circle cx="12" cy="9" r="2.2"/></svg>`;
+  return `<svg class="event-meta-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.3v5.1l3.4 2"/></svg>`;
+}
+
 function bootIdentity(){
   $$('[data-app-name]').forEach(el => el.textContent = CFG.appName || 'BANDA DE LA CALA');
   $$('[data-app-subtitle]').forEach(el => el.textContent = CFG.subtitle || 'L’Ametlla de Mar');
@@ -216,7 +234,7 @@ function renderHome(){
   ] : [
     { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
     { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
-    { id:'user', icon:'user', title:'USER', text:'Accés privat per als músics de la banda.', status:'ACCÉS' }
+    { id:'user', icon:'user', title:'USUARI', text:'Accés privat per als músics de la banda.', status:'ACCÉS' }
   ];
   const homeGrid=$('#homeGrid');
   homeGrid.classList.toggle('five-cards', cards.length===5);
@@ -387,7 +405,7 @@ function selectDate(date){
   $('#eventList').innerHTML = list.length ? list.map(event => {
     const dresscodeAllowed=['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase());
     const dresscode=dresscodeAllowed?(state.content.dresscodes||[]).find(item=>item.id===event.dresscodeId):null;
-    return `<article class="event-card"><span class="event-type">${esc(event.type)}</span><h4>${esc(event.title)}</h4>${event.time?`<p>🕒 ${esc(event.time)}</p>`:''}${event.place?`<p>⌖ ${esc(event.place)}</p>`:''}${event.notes?`<p>${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
+    return `<article class="event-card"><span class="event-type">${esc(event.type)}</span><h4>${esc(event.title)}</h4>${event.time?`<p class="event-meta-line">${eventMetaIcon('time')}<span>${esc(event.time)}</span></p>`:''}${event.place?`<p class="event-meta-line">${eventMetaIcon('place')}<span>${esc(event.place)}</span></p>`:''}${event.notes?`<p>${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
   }).join('') : '<p class="empty-copy">No hi ha cap activitat prevista per aquest dia.</p>';
   $$('[data-dresscode]').forEach(btn=>btn.addEventListener('click',()=>openDresscode(btn.dataset.dresscode)));
 }
@@ -695,9 +713,8 @@ function applyHomeHero(){
   el.src=src;
 }
 
-const DRESSCODE_VIEW_LABELS={shirt:'CAMISA',bottom:'PANTALÓ/FALDILLA',socks:'MITJA/MITJÓ',jacket:'AMERICANA',footwear:'CALÇAT',tie:'CORBATA + PINZA'};
 const DRESSCODE_VIEW_ORDER=['shirt','bottom','socks','jacket','footwear','tie'];
-function renderDresscodeParameters(host,items,legacyText=''){
+function renderDresscodeParameters(host,items,legacyText='',sex='boys'){
   if(!host) return;
   const list=Array.isArray(items)?items:[];
   if(list.length){
@@ -705,20 +722,23 @@ function renderDresscodeParameters(host,items,legacyText=''){
     host.innerHTML=DRESSCODE_VIEW_ORDER.map(key=>{
       const item=byKey.get(key); if(!item) return '';
       const value=String(item.text||item.detail||'').trim(); if(!value) return '';
-      return `<div class="dresscode-param-row"><span>${esc(DRESSCODE_VIEW_LABELS[key]||key)}</span><strong>${esc(value)}</strong></div>`;
+      return `<div class="dresscode-param-row"><span class="dresscode-garment-icon">${garmentIconSvg(key,sex)}</span><strong>${esc(value)}</strong></div>`;
     }).join('');
     if(host.innerHTML.trim()) return;
   }
   const lines=String(legacyText||'').split(/\n+/).map(line=>line.trim()).filter(Boolean);
-  host.innerHTML=lines.map(line=>`<div class="dresscode-param-row legacy"><strong>${esc(line)}</strong></div>`).join('') || '<div class="dresscode-param-row legacy"><strong>Sense informació.</strong></div>';
+  host.innerHTML=lines.map((line,index)=>{
+    const key=DRESSCODE_VIEW_ORDER[index]||'shirt';
+    return `<div class="dresscode-param-row legacy"><span class="dresscode-garment-icon">${garmentIconSvg(key,sex)}</span><strong>${esc(line)}</strong></div>`;
+  }).join('') || '<div class="dresscode-param-row legacy"><strong>Sense informació.</strong></div>';
 }
 function openDresscode(id){
   const item=(state.content.dresscodes||[]).find(d=>d.id===id);
   if(!item) return;
   $('#dresscodeModalTitle').textContent=item.title||'Dress code';
   $('#dresscodeModalSubtitle').textContent=item.subtitle||'';
-  renderDresscodeParameters($('#dresscodeBoysView'),item.boysItems,item.boys);
-  renderDresscodeParameters($('#dresscodeGirlsView'),item.girlsItems,item.girls);
+  renderDresscodeParameters($('#dresscodeBoysView'),item.boysItems,item.boys,'boys');
+  renderDresscodeParameters($('#dresscodeGirlsView'),item.girlsItems,item.girls,'girls');
   const other=String(item.other||'').trim();
   const otherBlock=$('#dresscodeOtherViewBlock');
   if(otherBlock){ otherBlock.hidden=!other; $('#dresscodeOtherView').textContent=other; }
@@ -1133,6 +1153,7 @@ function bindUserAuth(){
     try{
       state.profile=await BandaSupabase.updateOwnProfile({name:currentUserDisplayName(),avatarKey});
       renderNavigation(); renderHome(); renderUserSection(); updateHeader(state.currentView);
+      const avatarDetails=$('#avatarProfileDetails'); if(avatarDetails) avatarDetails.open=false;
       status.textContent='Avatar actualitzat.';
     }catch(error){ console.error(error); status.textContent='No s’ha pogut actualitzar l’avatar.'; }
   });

@@ -1,0 +1,56 @@
+BANDA DE LA CALA — v0.42
+
+EDITOR · CALENDARI
+- La llista d’esdeveniments programats passa a format de tires compactes tipus playlist.
+- Cada tira mostra TÍTOL + DD/MM/AAAA + HORA i queda col·lapsada per defecte.
+- Toc/clic sobre la tira desplega o torna a col·lapsar tota la informació de l’esdeveniment.
+- EDITAR i ELIMINAR es mantenen sempre visibles a la dreta.
+- ASSAIG utilitza accent blau; CONCERT / ACTUACIÓ / ALTRES utilitzen accent daurat.
+- El formulari d’esdeveniment s’ha compactat moderadament.
+- CONCERT i ACTUACIÓ poden seleccionar un dresscode ja configurat de la biblioteca.
+- Eliminar un esdeveniment ja NO elimina el dresscode reutilitzable.
+
+EDITOR · DRESSCODE
+- DRESSCODE passa a funcionar com una biblioteca independent i reutilitzable, sense obligació d’associar-lo a un esdeveniment en crear-lo.
+- El botó NOU passa a l’esquerra.
+- Cada prenda de NOIS / NOIES incorpora una icona visual pròpia.
+- Selector i TEXT FINAL ocupen conjuntament tot l’ample útil de cada prenda i tenen la mateixa escala visual.
+- Tots els selectors incorporen l’opció ALTRES.
+- En ALTRES, el USER GESTOR escriu directament el contingut concret a TEXT FINAL.
+- MITJA/MITJÓ elimina l’antic ALTRES (ESPECIFICA) i la seva caixa ESPECIFICA.
+- La llista de dresscodes configurats passa a tires col·lapsables tipus playlist amb EDITAR / ELIMINAR visibles.
+- En desplegar un dresscode es mostra el seu contingut i els esdeveniments on s’està reutilitzant.
+
+EDITOR · PLAYER
+- La caixa ORDRE DEL PLAYER mostra 4 pistes completes + la meitat de la cinquena.
+- A partir d’aquí s’utilitza scroll intern, deixant visualment clar que hi ha més pistes disponibles.
+
+EDITOR · HISTÒRIC / HEMEROTECA
+- CRONOLOGIA agrupa les entrades per època/període i totes apareixen col·lapsades per defecte.
+- En prémer una època es despleguen totes les fotos/entrades d’aquell període.
+- HEMEROTECA agrupa els documents en CARTELLS / NOTÍCIES / ENTREVISTES, col·lapsats per defecte.
+- HISTÒRIC incorpora una icona de fotografia al títol principal.
+- HEMEROTECA incorpora una icona de documents al seu títol.
+
+APP · HOME / CRÈDITS
+- Les 5 cards principals centren el bloc de contingut verticalment i horitzontalment.
+- BENVINGUT / BENVINGUDA / BENVINGUT/DA + nom passa al doble de mida.
+- Vianda Visual passa a ser enllaç a https://www.viandavisual.com tant al footer com al menú lateral DESKTOP.
+
+APP · CALENDARI / DRESSCODE
+- El lloc d’un esdeveniment utilitza ara una icona de chincheta de mapa, amb la mateixa escala que la icona de l’hora.
+- VEURE DRESSCODE es simplifica: cada prenda mostra només la seva icona + el contingut de TEXT FINAL.
+- Les icones coincideixen amb les del configurador del DRESSCODE de l’EDITOR.
+
+APP · USUARI
+- El títol de la secció passa de USER a USUARI.
+- El bloc superior avatar + rol + nom + email és considerablement més gran.
+- La caixa AVATAR queda col·lapsada per defecte i mostra només AVATAR + fletxa fins que s’obre.
+- DRIVE PARTITURES passa a una jerarquia visual daurada destacada.
+- DRIVE PARTITURES incorpora un barrido lluminós animat en loop d’esquerra a dreta.
+
+SISTEMA
+- version.js i cache-busting actualitzats a v0.42.
+- caches APP/EDITOR actualitzades a v0.42.
+- Sense canvis de manifests, IDs PWA, scopes, start_url, SMTP, rols ni estructura SQL.
+- No cal executar SQL ni actualitzar Edge Functions.

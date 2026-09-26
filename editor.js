@@ -36,44 +36,67 @@ let editingHistoricImages = [];
 let pendingHemerotecaImages = [];
 let editingHemerotecaImages = [];
 let hemerotecaEditorFilter = 'all';
+const openHistoricEditorPeriods=new Set();
+const openHemerotecaEditorSections=new Set();
+let trackListResizeObserver=null;
 
 const DRESS_DEFS = [
   {key:'shirt', label:'CAMISA', options:[
     {id:'white_long',label:'MÀNIGA LLARGA · BLANCA',text:'Camisa blanca de màniga llarga'},
     {id:'black_long',label:'MÀNIGA LLARGA · NEGRA',text:'Camisa negra de màniga llarga'},
     {id:'white_short',label:'MÀNIGA CURTA · BLANCA',text:'Camisa blanca de màniga curta'},
-    {id:'black_short',label:'MÀNIGA CURTA · NEGRA',text:'Camisa negra de màniga curta'}
+    {id:'black_short',label:'MÀNIGA CURTA · NEGRA',text:'Camisa negra de màniga curta'},
+    {id:'other',label:'ALTRES',text:''}
   ]},
   {key:'bottom', label:'PANTALÓ/FALDILLA', optionsBySex:{
     boys:[
       {id:'suit_trousers',label:'PANTALONS DEL TRATGE (NEGRE)',text:'Pantalons del tratge (negre)'},
-      {id:'jeans',label:'TEXANS (NORMALS)',text:'Texans (normals)'}
+      {id:'jeans',label:'TEXANS (NORMALS)',text:'Texans (normals)'},
+      {id:'other',label:'ALTRES',text:''}
     ],
     girls:[
       {id:'skirt',label:'FALDILLA DEL TRATGE',text:'Faldilla del tratge'},
-      {id:'denim_bottom',label:'FALDILLA O PANTALÓ TEXÀ (NORMAL)',text:'Faldilla o pantaló texà (normal)'}
+      {id:'denim_bottom',label:'FALDILLA O PANTALÓ TEXÀ (NORMAL)',text:'Faldilla o pantaló texà (normal)'},
+      {id:'other',label:'ALTRES',text:''}
     ]
   }},
-  {key:'socks', label:'MITJA/MITJÓ', customPreset:'other', options:[
+  {key:'socks', label:'MITJA/MITJÓ', options:[
     {id:'black',label:'NEGRES',textBySex:{boys:'Mitjons negres',girls:'Mitges negres'}},
-    {id:'other',label:'ALTRES (ESPECIFICA)',textBySex:{boys:'Altres mitjons',girls:'Altres mitges'}}
+    {id:'other',label:'ALTRES',text:''}
   ]},
   {key:'jacket', label:'AMERICANA', options:[
     {id:'yes',label:'SÍ',text:'Americana: sí'},
-    {id:'no',label:'NO',text:'Americana: no'}
+    {id:'no',label:'NO',text:'Americana: no'},
+    {id:'other',label:'ALTRES',text:''}
   ]},
   {key:'footwear', label:'CALÇAT', options:[
-    {id:'black',label:'CALÇAT NEGRE (NO ES PERMET ESPORTIU NI CONVERSE)',text:'Calçat negre (no es permet esportiu ni Converse)'}
+    {id:'black',label:'CALÇAT NEGRE (NO ES PERMET ESPORTIU NI CONVERSE)',text:'Calçat negre (no es permet esportiu ni Converse)'},
+    {id:'other',label:'ALTRES',text:''}
   ]},
   {key:'tie', label:'CORBATA + PINZA', options:[
     {id:'yes',label:'SÍ',text:'Corbata + pinza: sí'},
-    {id:'no',label:'NO',text:'Corbata + pinza: no'}
+    {id:'no',label:'NO',text:'Corbata + pinza: no'},
+    {id:'other',label:'ALTRES',text:''}
   ]}
 ];
 const DEFAULT_DRESS_PRESETS = {
   boys:{shirt:'white_short',bottom:'suit_trousers',socks:'black',jacket:'no',footwear:'black',tie:'yes'},
   girls:{shirt:'white_short',bottom:'skirt',socks:'black',jacket:'no',footwear:'black',tie:'yes'}
 };
+
+function garmentIconSvg(key,sex='boys'){
+  const common='viewBox="0 0 48 48" class="garment-icon-svg" aria-hidden="true"';
+  const stroke='fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
+  if(key==='shirt') return `<svg ${common}><path ${stroke} d="M15 10 20 7h8l5 3 8 6-5 7-5-3v18H17V20l-5 3-5-7 8-6Z"/><path class="garment-gold" ${stroke} d="M20 7c.7 4 2 6 4 6s3.3-2 4-6"/></svg>`;
+  if(key==='bottom' && sex==='girls') return `<svg ${common}><path ${stroke} d="M18 8h12l2 7 6 24H10l6-24 2-7Z"/><path class="garment-gold" ${stroke} d="M16 15h16"/></svg>`;
+  if(key==='bottom') return `<svg ${common}><path ${stroke} d="M14 8h20l-2 31h-8l-1-18-1 18h-8L14 8Z"/><path class="garment-gold" ${stroke} d="M23 9v12"/></svg>`;
+  if(key==='socks' && sex==='girls') return `<svg ${common}><path ${stroke} d="M14 7h8v20l-3 13H9l5-14V7ZM28 7h8v20l3 13H29l-1-13V7Z"/><path class="garment-gold" ${stroke} d="M14 12h8M28 12h8"/></svg>`;
+  if(key==='socks') return `<svg ${common}><path ${stroke} d="M12 8h9v20l-4 10H8l4-12V8ZM27 8h9v20l4 10h-9l-4-12V8Z"/><path class="garment-gold" ${stroke} d="M12 13h9M27 13h9"/></svg>`;
+  if(key==='jacket') return `<svg ${common}><path ${stroke} d="M15 9 21 6h6l6 3 6 8-5 5-3-4v21H17V18l-3 4-5-5 6-8Z"/><path class="garment-gold" ${stroke} d="m21 7 3 8 3-8M24 15v24"/></svg>`;
+  if(key==='footwear' && sex==='girls') return `<svg ${common}><path ${stroke} d="M9 29c5 1 8-2 11-8l5 2-2 8c5 1 9 3 13 7H9v-9Z"/><path class="garment-gold" ${stroke} d="M24 31h9M14 38v3"/></svg>`;
+  if(key==='footwear') return `<svg ${common}><path ${stroke} d="M8 29c7 0 10-2 13-7l5 4c4 4 8 6 14 7v6H8V29Z"/><path class="garment-gold" ${stroke} d="M22 28h7M12 39v2"/></svg>`;
+  return `<svg ${common}><path ${stroke} d="M20 7h8l-2 8 4 20-6 7-6-7 4-20-2-8Z"/><path class="garment-gold" ${stroke} d="M20 7l4 8 4-8"/></svg>`;
+}
 
 const views = {
   dashboard:{eyebrow:'CONTROL',title:'RESUM'},
@@ -86,6 +109,11 @@ const views = {
   users:{eyebrow:'GESTIÓ',title:'USUARIS'},
   system:{eyebrow:'CONFIGURACIÓ',title:'SISTEMA'}
 };
+
+function editorPageTitleIcon(id){
+  if(id!=='history') return '';
+  return `<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="5" y="9" width="30" height="23" rx="4"/><circle class="editor-icon-gold" cx="25.5" cy="17" r="4"/><path d="m8 29 8-8 5 5 4-4 7 7"/><path class="editor-icon-gold" d="M13 9l2-3h10l2 3"/></svg>`;
+}
 
 function showToast(message){
   const toast=$('#toast'); toast.textContent=message; toast.classList.add('show');
@@ -126,9 +154,10 @@ function save(next=content,message='Canvis desats'){
   }
 }
 function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.26'); }
-function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); window.scrollTo({top:0,behavior:'smooth'}); }
+function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const titleIcon=$('#editorTitleIcon'); if(titleIcon){titleIcon.innerHTML=editorPageTitleIcon(id);titleIcon.hidden=id!=='history';} const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
+function formatDateNumeric(date){ if(!date) return '—'; const [y,m,d]=String(date).split('-'); return y&&m&&d?`${d}/${m}/${y}`:String(date); }
 
 function animateStatCounter(element,target,duration=720){
   if(!element) return;
@@ -148,9 +177,8 @@ function animateStatCounter(element,target,duration=720){
 }
 
 const MANAGED_LISTS={
-  eventEditorList:'.list-item',
-  dresscodeList:'.list-item',
-  trackEditorList:'.list-item',
+  eventEditorList:'.event-strip',
+  dresscodeList:'.dresscode-strip',
   historicEditorList:'.historic-editor-item',
   hemerotecaEditorList:'.historic-editor-item',
   usersList:'.list-item'
@@ -214,8 +242,8 @@ function initManagedListViewports(){
     host.addEventListener('load',event=>{if(event.target?.tagName==='IMG')fitManagedListToFour(host);},true);
     fitManagedListToFour(host);
   });
-  window.addEventListener('resize',refreshManagedLists,{passive:true});
-  document.fonts?.ready?.then(refreshManagedLists).catch?.(()=>{});
+  window.addEventListener('resize',()=>{refreshManagedLists();fitTrackListFourAndHalf();},{passive:true});
+  document.fonts?.ready?.then(()=>{refreshManagedLists();fitTrackListFourAndHalf();}).catch?.(()=>{});
 }
 
 function renderDashboard(){
@@ -261,61 +289,152 @@ function bindHomeEditor(){
   $('#clearHomeHero').onclick=()=>{ content.settings=content.settings||{}; content.settings.homeHeroImage=''; save(content,'Imatge per defecte restaurada'); };
 }
 
+function renderEventDresscodeOptions(selected=''){
+  const select=$('#eventDresscode'); if(!select) return;
+  const items=[...(content.dresscodes||[])].sort((a,b)=>String(a.title||'').localeCompare(String(b.title||''),'ca'));
+  select.innerHTML='<option value="">SENSE DRESSCODE</option>'+items.map(d=>`<option value="${esc(d.id)}">${esc(d.title||'Dresscode')}</option>`).join('');
+  if(selected && items.some(d=>d.id===selected)) select.value=selected;
+}
 function syncEventFormVisibility(){
-  const isRehearsal=$('#eventType').value==='ASSAIG'; $('#rehearsalTitleWrap').hidden=!isRehearsal; $('#freeTitleWrap').hidden=isRehearsal;
+  const isRehearsal=$('#eventType').value==='ASSAIG';
+  $('#rehearsalTitleWrap').hidden=!isRehearsal;
+  $('#freeTitleWrap').hidden=isRehearsal;
   $('#eventTitleDetailWrap').hidden=!isRehearsal || $('#eventTitlePreset').value!=='ASSAIG PARCIAL CONCRET';
   $('#eventPlaceDetailWrap').hidden=$('#eventPlacePreset').value!=='ALTRES';
+  const canDresscode=['CONCERT','ACTUACIÓ'].includes(String($('#eventType').value||'').toUpperCase());
+  const dressWrap=$('#eventDresscodeWrap');
+  if(dressWrap) dressWrap.hidden=!canDresscode;
+  if(!canDresscode && $('#eventDresscode')) $('#eventDresscode').value='';
 }
 function resetEventForm(){
-  $('#eventForm').reset(); $('#eventId').value=''; $('#eventType').value='ASSAIG'; $('#eventTitlePreset').value='ASSAIG GENERAL'; $('#eventTime').value='21:30'; $('#eventPlacePreset').value='LOCAL SOCIAL'; $('#eventFormTitle').textContent='Nou esdeveniment'; syncEventFormVisibility();
+  $('#eventForm').reset();
+  $('#eventId').value='';
+  $('#eventType').value='ASSAIG';
+  $('#eventTitlePreset').value='ASSAIG GENERAL';
+  $('#eventTime').value='21:30';
+  $('#eventPlacePreset').value='LOCAL SOCIAL';
+  $('#eventFormTitle').textContent='Nou esdeveniment';
+  renderEventDresscodeOptions('');
+  syncEventFormVisibility();
 }
 function eventTitleFromForm(){
   if($('#eventType').value!=='ASSAIG') return $('#eventFreeTitle').value.trim();
-  const preset=$('#eventTitlePreset').value; if(preset==='ASSAIG PARCIAL CONCRET'){ const detail=$('#eventTitleDetail').value.trim(); return detail?`${preset} · ${detail}`:preset; } return preset;
+  const preset=$('#eventTitlePreset').value;
+  if(preset==='ASSAIG PARCIAL CONCRET'){
+    const detail=$('#eventTitleDetail').value.trim();
+    return detail?`${preset} · ${detail}`:preset;
+  }
+  return preset;
 }
 function eventPlaceFromForm(){ return $('#eventPlacePreset').value==='ALTRES' ? $('#eventPlaceDetail').value.trim() : 'LOCAL SOCIAL'; }
 function editEvent(id){
   const event=(content.events||[]).find(item=>item.id===id); if(!event) return;
-  $('#eventId').value=event.id; $('#eventType').value=event.type||'ASSAIG'; $('#eventDate').value=event.date||''; $('#eventTime').value=event.time||''; $('#eventNotes').value=event.notes||'';
+  $('#eventId').value=event.id;
+  $('#eventType').value=event.type||'ASSAIG';
+  $('#eventDate').value=event.date||'';
+  $('#eventTime').value=event.time||'';
+  $('#eventNotes').value=event.notes||'';
   if((event.type||'ASSAIG')==='ASSAIG'){
     const presets=['ASSAIG GENERAL','ASSAIG PARCIAL FUSTA','ASSAIG PARCIAL PERCUSIÓ','ASSAIG PARCIAL METALL'];
     const upper=String(event.title||'').toUpperCase();
     if(upper.startsWith('ASSAIG PARCIAL CONCRET')){ $('#eventTitlePreset').value='ASSAIG PARCIAL CONCRET'; $('#eventTitleDetail').value=String(event.title).split('·').slice(1).join('·').trim(); }
     else if(presets.includes(upper)){ $('#eventTitlePreset').value=upper; $('#eventTitleDetail').value=''; }
     else { $('#eventTitlePreset').value='ASSAIG PARCIAL CONCRET'; $('#eventTitleDetail').value=event.title||''; }
-  } else $('#eventFreeTitle').value=event.title||'';
-  if(String(event.place||'').toUpperCase()==='LOCAL SOCIAL'){ $('#eventPlacePreset').value='LOCAL SOCIAL'; $('#eventPlaceDetail').value=''; } else { $('#eventPlacePreset').value='ALTRES'; $('#eventPlaceDetail').value=event.place||''; }
-  $('#eventFormTitle').textContent='Editar esdeveniment'; syncEventFormVisibility(); $('#eventForm').scrollIntoView({behavior:'smooth',block:'start'});
+  }else $('#eventFreeTitle').value=event.title||'';
+  if(String(event.place||'').toUpperCase()==='LOCAL SOCIAL'){ $('#eventPlacePreset').value='LOCAL SOCIAL'; $('#eventPlaceDetail').value=''; }
+  else { $('#eventPlacePreset').value='ALTRES'; $('#eventPlaceDetail').value=event.place||''; }
+  renderEventDresscodeOptions(event.dresscodeId||'');
+  $('#eventFormTitle').textContent='Editar esdeveniment';
+  syncEventFormVisibility();
+  $('#eventForm').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function deleteEvent(id){ const event=(content.events||[]).find(item=>item.id===id); if(!event) return; if(!confirm(`Vols eliminar “${event.title}”?`)) return; const linked=(content.dresscodes||[]).filter(d=>d.eventId===id).map(d=>d.id); content.dresscodes=(content.dresscodes||[]).filter(d=>d.eventId!==id); content.events=content.events.filter(item=>item.id!==id && !linked.includes(item.dresscodeId)); save(content,'Esdeveniment eliminat'); resetEventForm(); resetDresscodeForm(); }
+function deleteEvent(id){
+  const event=(content.events||[]).find(item=>item.id===id); if(!event) return;
+  if(!confirm(`Vols eliminar “${event.title}”?`)) return;
+  content.events=content.events.filter(item=>item.id!==id);
+  save(content,'Esdeveniment eliminat');
+  resetEventForm();
+}
+function eventStripDetails(event){
+  const dress=(content.dresscodes||[]).find(d=>d.id===event.dresscodeId);
+  return `<div class="event-strip-detail-grid">
+    <div><span>TIPUS</span><strong>${esc(event.type||'—')}</strong></div>
+    ${event.place?`<div><span>LLOC</span><strong>${esc(event.place)}</strong></div>`:''}
+    ${dress?`<div><span>DRESSCODE</span><strong>${esc(dress.title||'Dresscode')}</strong></div>`:''}
+    ${event.notes?`<div class="event-strip-notes"><span>NOTES</span><strong>${esc(event.notes)}</strong></div>`:''}
+  </div>`;
+}
 function renderEvents(){
-  const list=[...(content.events||[])].sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)); $('#eventCount').textContent=list.length;
-  $('#eventEditorList').innerHTML=list.length?list.map(event=>`<article class="list-item"><div class="list-main"><div class="list-kicker"><span>${esc(event.type)}</span><span>·</span><span>${esc(formatDate(event.date))}${event.time?` · ${esc(event.time)}`:''}</span></div><h3>${esc(event.title)}</h3>${event.place?`<p>⌖ ${esc(event.place)}</p>`:''}${event.dresscodeId?'<p class="gold-note">Dresscode vinculat</p>':''}${event.notes?`<p>${esc(event.notes)}</p>`:''}</div><div class="list-actions"><button class="tiny-btn" data-edit-event="${event.id}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-event="${event.id}" title="Eliminar">×</button></div></article>`).join(''):'<div class="empty-state">Encara no hi ha cap esdeveniment.</div>';
-  $$('[data-edit-event]').forEach(btn=>btn.onclick=()=>editEvent(btn.dataset.editEvent)); $$('[data-delete-event]').forEach(btn=>btn.onclick=()=>deleteEvent(btn.dataset.deleteEvent));
+  const list=[...(content.events||[])].sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+  $('#eventCount').textContent=list.length;
+  const host=$('#eventEditorList');
+  host.innerHTML=list.length?list.map(event=>{
+    const rehearsal=String(event.type||'').toUpperCase()==='ASSAIG';
+    return `<article class="event-strip ${rehearsal?'event-strip-rehearsal':'event-strip-featured'}" data-event-strip="${esc(event.id)}">
+      <button type="button" class="event-strip-summary" data-toggle-event="${esc(event.id)}" aria-expanded="false">
+        <span class="event-strip-title">${esc(event.title)}</span>
+        <span class="event-strip-date">${esc(formatDateNumeric(event.date))}${event.time?` · ${esc(event.time)}`:''}</span>
+        <span class="event-strip-chevron" aria-hidden="true">⌄</span>
+      </button>
+      <div class="list-actions event-strip-actions">
+        <button class="tiny-btn" data-edit-event="${esc(event.id)}" title="Editar">✎</button>
+        <button class="tiny-btn delete" data-delete-event="${esc(event.id)}" title="Eliminar">×</button>
+      </div>
+      <div class="event-strip-details" hidden>${eventStripDetails(event)}</div>
+    </article>`;
+  }).join(''):'<div class="empty-state">Encara no hi ha cap esdeveniment.</div>';
+  $$('[data-toggle-event]').forEach(btn=>btn.onclick=()=>{
+    const article=btn.closest('[data-event-strip]'); const details=article?.querySelector('.event-strip-details'); if(!details)return;
+    const open=details.hidden;
+    details.hidden=!open;
+    article.classList.toggle('is-open',open);
+    btn.setAttribute('aria-expanded',open?'true':'false');
+  });
+  $$('[data-edit-event]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();editEvent(btn.dataset.editEvent);});
+  $$('[data-delete-event]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();deleteEvent(btn.dataset.deleteEvent);});
 }
 function bindEventForm(){
-  $('#eventForm').addEventListener('submit',event=>{ event.preventDefault(); const id=$('#eventId').value||BandaStore.uid('evt'); const old=(content.events||[]).find(e=>e.id===id); const item={id,type:$('#eventType').value,title:eventTitleFromForm(),date:$('#eventDate').value,time:$('#eventTime').value,place:eventPlaceFromForm(),notes:$('#eventNotes').value.trim(),dresscodeId:old?.dresscodeId||''}; if(!item.title||!item.date){showToast('Cal indicar títol i data');return;} if($('#eventPlacePreset').value==='ALTRES'&&!item.place){showToast('Cal especificar el lloc');return;} const index=content.events.findIndex(e=>e.id===id); if(index>=0) content.events[index]=item; else content.events.push(item); save(content,index>=0?'Esdeveniment actualitzat':'Esdeveniment afegit'); resetEventForm(); });
-  $('#newEventBtn').onclick=resetEventForm; $('#cancelEventEdit').onclick=resetEventForm;
-  $('#eventType').addEventListener('change',()=>{ if($('#eventType').value==='ASSAIG'&&!$('#eventTime').value){$('#eventTime').value='21:30';$('#eventPlacePreset').value='LOCAL SOCIAL';} syncEventFormVisibility(); });
-  $('#eventTitlePreset').addEventListener('change',()=>{ if($('#eventTitlePreset').value==='ASSAIG GENERAL'){ $('#eventTime').value='21:30'; $('#eventPlacePreset').value='LOCAL SOCIAL'; $('#eventPlaceDetail').value=''; } syncEventFormVisibility(); });
+  $('#eventForm').addEventListener('submit',event=>{
+    event.preventDefault();
+    const id=$('#eventId').value||BandaStore.uid('evt');
+    const type=$('#eventType').value;
+    const canDresscode=['CONCERT','ACTUACIÓ'].includes(String(type||'').toUpperCase());
+    const item={
+      id,
+      type,
+      title:eventTitleFromForm(),
+      date:$('#eventDate').value,
+      time:$('#eventTime').value,
+      place:eventPlaceFromForm(),
+      notes:$('#eventNotes').value.trim(),
+      dresscodeId:canDresscode?($('#eventDresscode')?.value||''):''
+    };
+    if(!item.title||!item.date){showToast('Cal indicar títol i data');return;}
+    if($('#eventPlacePreset').value==='ALTRES'&&!item.place){showToast('Cal especificar el lloc');return;}
+    const index=content.events.findIndex(e=>e.id===id);
+    if(index>=0) content.events[index]=item; else content.events.push(item);
+    save(content,index>=0?'Esdeveniment actualitzat':'Esdeveniment afegit');
+    resetEventForm();
+  });
+  $('#newEventBtn').onclick=resetEventForm;
+  $('#cancelEventEdit').onclick=resetEventForm;
+  $('#eventType').addEventListener('change',()=>{
+    if($('#eventType').value==='ASSAIG'&&!$('#eventTime').value){$('#eventTime').value='21:30';$('#eventPlacePreset').value='LOCAL SOCIAL';}
+    syncEventFormVisibility();
+  });
+  $('#eventTitlePreset').addEventListener('change',()=>{
+    if($('#eventTitlePreset').value==='ASSAIG GENERAL'){ $('#eventTime').value='21:30'; $('#eventPlacePreset').value='LOCAL SOCIAL'; $('#eventPlaceDetail').value=''; }
+    syncEventFormVisibility();
+  });
   $('#eventPlacePreset').addEventListener('change',syncEventFormVisibility);
 }
 
-function renderDresscodeEventOptions(){
-  const events=[...(content.events||[])].filter(e=>['CONCERT','ACTUACIÓ'].includes(String(e.type||'').toUpperCase())).sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
-  const current=$('#dresscodeEvent')?.value;
-  $('#dresscodeEvent').innerHTML='<option value="">— Selecciona CONCERT o ACTUACIÓ —</option>'+events.map(e=>`<option value="${e.id}">${esc(formatDate(e.date))} · ${esc(e.title)}</option>`).join('');
-  if(current && events.some(e=>e.id===current)) $('#dresscodeEvent').value=current;
-}
 function dressDef(key){ return DRESS_DEFS.find(def=>def.key===key); }
 function dressOptions(def,sex){ return def?.optionsBySex?.[sex] || def?.options || []; }
 function dressOption(def,preset,sex){ const options=dressOptions(def,sex); return options.find(opt=>opt.id===preset) || options[0]; }
-function optionText(def,preset,sex,detail=''){
+function optionText(def,preset,sex){
   const option=dressOption(def,preset,sex); if(!option) return '';
-  if(def.customPreset && preset===def.customPreset){
-    const clean=String(detail||'').trim();
-    if(clean) return sex==='girls' ? `Mitges: ${clean}` : `Mitjons: ${clean}`;
-  }
+  if(preset==='other') return '';
   return option.textBySex?.[sex] ?? option.text ?? '';
 }
 function normalizeDressItems(items,sex,legacyText=''){
@@ -325,61 +444,161 @@ function normalizeDressItems(items,sex,legacyText=''){
     const found=incoming.find(item=>item.key===def.key);
     const options=dressOptions(def,sex);
     let preset=found?.preset || DEFAULT_DRESS_PRESETS[sex][def.key] || options[0]?.id || '';
-    // Compatibilitat amb presets antics.
     const legacyPresetMap={white_short:'white_short',white_long:'white_long',black:'black_long',tie:'yes',none:'no'};
     if(def.key==='bottom' && sex==='girls' && preset==='jeans') preset='denim_bottom';
     if(!options.some(opt=>opt.id===preset) && legacyPresetMap[preset] && options.some(opt=>opt.id===legacyPresetMap[preset])) preset=legacyPresetMap[preset];
     if(!options.some(opt=>opt.id===preset)) preset=options[0]?.id||'';
-    const detail=typeof found?.detail==='string'?found.detail:'';
-    let text=typeof found?.text==='string'&&found.text.trim()?found.text:optionText(def,preset,sex,detail);
+    const legacyDetail=typeof found?.detail==='string'?found.detail.trim():'';
+    let text=typeof found?.text==='string'&&found.text.trim()?found.text.trim():optionText(def,preset,sex);
+    if(preset==='other' && !text && legacyDetail) text=legacyDetail;
     if(!incoming.length && legacyLines.length){
       const legacyMap=sex==='girls'&&legacyLines.length===4?{shirt:0,bottom:1,footwear:2,tie:3}:{shirt:0,bottom:1,footwear:2,socks:3,tie:4};
       const legacyIndex=legacyMap[def.key]; if(Number.isInteger(legacyIndex)&&legacyLines[legacyIndex]) text=legacyLines[legacyIndex];
     }
-    return {key:def.key,preset,text,detail};
+    return {key:def.key,preset,text,detail:''};
   });
 }
-function syncDressCustomRow(row,sex,{forceText=false}={}){
+function syncDressRow(row,sex,{forceText=false}={}){
   if(!row) return;
-  const def=dressDef(row.dataset.key); const select=row.querySelector('.dress-preset'); const detailWrap=row.querySelector('.dress-detail-wrap'); const detailInput=row.querySelector('.dress-detail'); const finalInput=row.querySelector('.dress-final-text');
-  const isCustom=!!def?.customPreset && select?.value===def.customPreset;
-  if(detailWrap) detailWrap.hidden=!isCustom;
-  if(isCustom && detailInput){ detailInput.required=true; }
-  else if(detailInput){ detailInput.required=false; }
-  if(finalInput && (forceText || !finalInput.value.trim())) finalInput.value=optionText(def,select?.value,sex,detailInput?.value||'');
+  const def=dressDef(row.dataset.key);
+  const select=row.querySelector('.dress-preset');
+  const finalInput=row.querySelector('.dress-final-text');
+  if(!select||!finalInput) return;
+  if(forceText){
+    const generated=optionText(def,select.value,sex);
+    finalInput.value=select.value==='other'?'':generated;
+    if(select.value==='other') finalInput.focus();
+  }else if(!finalInput.value.trim() && select.value!=='other'){
+    finalInput.value=optionText(def,select.value,sex);
+  }
 }
 function renderDressItems(sex,items){
   const target=$(`#${sex}DressItems`); if(!target) return;
   target.innerHTML=normalizeDressItems(items,sex).map(item=>{
-    const def=dressDef(item.key); const options=dressOptions(def,sex); const opts=options.map(opt=>`<option value="${esc(opt.id)}" ${opt.id===item.preset?'selected':''}>${esc(opt.label)}</option>`).join('');
-    const detailField=def.customPreset?`<label class="dress-detail-wrap" ${item.preset===def.customPreset?'':'hidden'}>ESPECIFICA<input class="dress-detail" maxlength="120" value="${esc(item.detail||'')}" placeholder="Indica color / tipus" /></label>`:'';
-    return `<div class="dress-item-row" data-dress-row="${sex}" data-key="${esc(item.key)}"><label>${esc(def.label)}<select class="dress-preset">${opts}</select></label>${detailField}<label>TEXT FINAL<input class="dress-final-text" maxlength="180" value="${esc(item.text)}" placeholder="Text que veuran els músics" /></label></div>`;
+    const def=dressDef(item.key);
+    const options=dressOptions(def,sex);
+    const opts=options.map(opt=>`<option value="${esc(opt.id)}" ${opt.id===item.preset?'selected':''}>${esc(opt.label)}</option>`).join('');
+    return `<div class="dress-item-row" data-dress-row="${sex}" data-key="${esc(item.key)}">
+      <span class="dress-item-icon" aria-hidden="true">${garmentIconSvg(item.key,sex)}</span>
+      <div class="dress-item-content">
+        <strong class="dress-item-name">${esc(def.label)}</strong>
+        <div class="dress-item-fields">
+          <label>OPCIÓ<select class="dress-preset">${opts}</select></label>
+          <label>TEXT FINAL<input class="dress-final-text" maxlength="180" value="${esc(item.text)}" placeholder="${item.preset==='other'?'Escriu aquí quin és l’altre vestuari':'Text que veuran els músics'}" /></label>
+        </div>
+      </div>
+    </div>`;
   }).join('');
   target.querySelectorAll('[data-dress-row]').forEach(row=>{
-    const select=row.querySelector('.dress-preset'); const detail=row.querySelector('.dress-detail');
-    select?.addEventListener('change',()=>syncDressCustomRow(row,sex,{forceText:true}));
-    detail?.addEventListener('input',()=>syncDressCustomRow(row,sex,{forceText:true}));
-    syncDressCustomRow(row,sex);
+    const select=row.querySelector('.dress-preset');
+    select?.addEventListener('change',()=>syncDressRow(row,sex,{forceText:true}));
+    syncDressRow(row,sex);
   });
 }
 function collectDressItems(sex){
-  return [...document.querySelectorAll(`[data-dress-row="${sex}"]`)].map(row=>({key:row.dataset.key,preset:row.querySelector('.dress-preset').value,text:row.querySelector('.dress-final-text').value.trim(),detail:row.querySelector('.dress-detail')?.value.trim()||''}));
+  return [...document.querySelectorAll(`[data-dress-row="${sex}"]`)].map(row=>({
+    key:row.dataset.key,
+    preset:row.querySelector('.dress-preset').value,
+    text:row.querySelector('.dress-final-text').value.trim(),
+    detail:''
+  }));
 }
 function itemsToText(items){ return (items||[]).map(item=>item.text?.trim()).filter(Boolean).join('\n'); }
 function resetDresscodeForm(){
-  $('#dresscodeForm').reset(); $('#dresscodeId').value=''; $('#dresscodeFormTitle').textContent='Nou dresscode'; $('#dresscodeTitle').value='Dress code - diada'; $('#dresscodeSubtitle').value='Uniforme de banda'; $('#dresscodeOther').value='';
-  renderDressItems('boys',normalizeDressItems([], 'boys')); renderDressItems('girls',normalizeDressItems([], 'girls')); renderDresscodeEventOptions();
+  $('#dresscodeForm').reset();
+  $('#dresscodeId').value='';
+  $('#dresscodeFormTitle').textContent='Nou dresscode';
+  $('#dresscodeTitle').value='Dress code - diada';
+  $('#dresscodeSubtitle').value='Uniforme de banda';
+  $('#dresscodeOther').value='';
+  renderDressItems('boys',normalizeDressItems([], 'boys'));
+  renderDressItems('girls',normalizeDressItems([], 'girls'));
 }
 function editDresscode(id){
-  const d=(content.dresscodes||[]).find(x=>x.id===id); if(!d) return; $('#dresscodeId').value=d.id; renderDresscodeEventOptions(); $('#dresscodeEvent').value=d.eventId||''; $('#dresscodeTitle').value=d.title||''; $('#dresscodeSubtitle').value=d.subtitle||''; $('#dresscodeOther').value=d.other||'';
-  renderDressItems('boys',normalizeDressItems(d.boysItems,'boys',d.boys)); renderDressItems('girls',normalizeDressItems(d.girlsItems,'girls',d.girls)); $('#dresscodeFormTitle').textContent='Editar dresscode'; $('#dresscodeForm').scrollIntoView({behavior:'smooth',block:'start'});
+  const d=(content.dresscodes||[]).find(x=>x.id===id); if(!d) return;
+  $('#dresscodeId').value=d.id;
+  $('#dresscodeTitle').value=d.title||'';
+  $('#dresscodeSubtitle').value=d.subtitle||'';
+  $('#dresscodeOther').value=d.other||'';
+  renderDressItems('boys',normalizeDressItems(d.boysItems,'boys',d.boys));
+  renderDressItems('girls',normalizeDressItems(d.girlsItems,'girls',d.girls));
+  $('#dresscodeFormTitle').textContent='Editar dresscode';
+  $('#dresscodeForm').scrollIntoView({behavior:'smooth',block:'start'});
 }
-function deleteDresscode(id){ const d=(content.dresscodes||[]).find(x=>x.id===id); if(!d) return; if(!confirm(`Vols eliminar “${d.title}”?`)) return; content.dresscodes=content.dresscodes.filter(x=>x.id!==id); content.events.forEach(e=>{if(e.dresscodeId===id)e.dresscodeId='';}); save(content,'Dresscode eliminat'); resetDresscodeForm(); }
-function renderDresscodes(){ const list=content.dresscodes||[]; $('#dresscodeCount').textContent=list.length; $('#dresscodeList').innerHTML=list.length?list.map(d=>{const e=(content.events||[]).find(x=>x.id===d.eventId);return `<article class="list-item"><div class="list-main"><div class="list-kicker"><span>DRESSCODE</span><span>·</span><span>${e?esc(formatDate(e.date)):'Sense esdeveniment'}</span></div><h3>${esc(d.title)}</h3><p>${e?esc(e.title):'Esdeveniment eliminat'}</p><p>${esc(d.subtitle)}</p></div><div class="list-actions"><button class="tiny-btn" data-edit-dress="${d.id}">✎</button><button class="tiny-btn delete" data-delete-dress="${d.id}">×</button></div></article>`;}).join(''):'<div class="empty-state">Encara no hi ha cap dresscode.</div>'; $$('[data-edit-dress]').forEach(btn=>btn.onclick=()=>editDresscode(btn.dataset.editDress)); $$('[data-delete-dress]').forEach(btn=>btn.onclick=()=>deleteDresscode(btn.dataset.deleteDress)); }
+function deleteDresscode(id){
+  const d=(content.dresscodes||[]).find(x=>x.id===id); if(!d) return;
+  if(!confirm(`Vols eliminar “${d.title}”?`)) return;
+  content.dresscodes=content.dresscodes.filter(x=>x.id!==id);
+  content.events.forEach(e=>{if(e.dresscodeId===id)e.dresscodeId='';});
+  save(content,'Dresscode eliminat');
+  resetDresscodeForm();
+}
+function dresscodeListDetail(d){
+  const linked=(content.events||[]).filter(e=>e.dresscodeId===d.id);
+  const boys=normalizeDressItems(d.boysItems,'boys',d.boys).map(i=>i.text).filter(Boolean);
+  const girls=normalizeDressItems(d.girlsItems,'girls',d.girls).map(i=>i.text).filter(Boolean);
+  return `<div class="dresscode-strip-detail-grid">
+    ${d.subtitle?`<div class="dresscode-strip-wide"><span>SUBTÍTOL</span><strong>${esc(d.subtitle)}</strong></div>`:''}
+    <div><span>NOIS</span><strong>${boys.length?boys.map(esc).join(' · '):'Sense indicacions'}</strong></div>
+    <div><span>NOIES</span><strong>${girls.length?girls.map(esc).join(' · '):'Sense indicacions'}</strong></div>
+    ${d.other?`<div class="dresscode-strip-wide"><span>ALTRES</span><strong>${esc(d.other)}</strong></div>`:''}
+    <div class="dresscode-strip-wide"><span>VINCULAT A</span><strong>${linked.length?linked.map(e=>`${esc(e.title)} · ${esc(formatDateNumeric(e.date))}`).join('<br>'):'Cap esdeveniment encara'}</strong></div>
+  </div>`;
+}
+function renderDresscodes(){
+  const list=[...(content.dresscodes||[])].sort((a,b)=>String(a.title||'').localeCompare(String(b.title||''),'ca'));
+  $('#dresscodeCount').textContent=list.length;
+  const host=$('#dresscodeList');
+  host.innerHTML=list.length?list.map(d=>{
+    const linked=(content.events||[]).filter(e=>e.dresscodeId===d.id).length;
+    return `<article class="dresscode-strip" data-dresscode-strip="${esc(d.id)}">
+      <button type="button" class="dresscode-strip-summary" data-toggle-dress="${esc(d.id)}" aria-expanded="false">
+        <span class="dresscode-strip-title">${esc(d.title||'Dresscode')}</span>
+        <span class="dresscode-strip-meta">${linked?`${linked} ${linked===1?'ESDEVENIMENT':'ESDEVENIMENTS'}`:'DISPONIBLE'}</span>
+        <span class="dresscode-strip-chevron" aria-hidden="true">⌄</span>
+      </button>
+      <div class="list-actions dresscode-strip-actions">
+        <button class="tiny-btn" data-edit-dress="${esc(d.id)}" title="Editar">✎</button>
+        <button class="tiny-btn delete" data-delete-dress="${esc(d.id)}" title="Eliminar">×</button>
+      </div>
+      <div class="dresscode-strip-details" hidden>${dresscodeListDetail(d)}</div>
+    </article>`;
+  }).join(''):'<div class="empty-state">Encara no hi ha cap dresscode.</div>';
+  $$('[data-toggle-dress]').forEach(btn=>btn.onclick=()=>{
+    const article=btn.closest('[data-dresscode-strip]'); const details=article?.querySelector('.dresscode-strip-details'); if(!details)return;
+    const open=details.hidden;
+    details.hidden=!open;
+    article.classList.toggle('is-open',open);
+    btn.setAttribute('aria-expanded',open?'true':'false');
+  });
+  $$('[data-edit-dress]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();editDresscode(btn.dataset.editDress);});
+  $$('[data-delete-dress]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();deleteDresscode(btn.dataset.deleteDress);});
+}
 function bindDresscodes(){
-  $('#dresscodeForm').addEventListener('submit',event=>{ event.preventDefault(); const eventId=$('#dresscodeEvent').value; if(!eventId){showToast('Selecciona un CONCERT o una ACTUACIÓ');return;} const linkedEvent=(content.events||[]).find(e=>e.id===eventId); if(!linkedEvent || !['CONCERT','ACTUACIÓ'].includes(String(linkedEvent.type||'').toUpperCase())){showToast('El dresscode només es pot aplicar a CONCERTS o ACTUACIONS');return;} const id=$('#dresscodeId').value||BandaStore.uid('dress'); const boysItems=collectDressItems('boys'), girlsItems=collectDressItems('girls'); const item={id,eventId,title:$('#dresscodeTitle').value.trim()||'Dress code',subtitle:$('#dresscodeSubtitle').value.trim()||'Uniforme de banda',boysItems,girlsItems,boys:itemsToText(boysItems),girls:itemsToText(girlsItems),other:$('#dresscodeOther').value.trim()}; const previous=(content.dresscodes||[]).find(d=>d.id===id); if(previous && previous.eventId!==eventId){ const oldEvent=content.events.find(e=>e.id===previous.eventId); if(oldEvent&&oldEvent.dresscodeId===id) oldEvent.dresscodeId=''; }
-    const existingForEvent=(content.dresscodes||[]).find(d=>d.eventId===eventId&&d.id!==id); if(existingForEvent){ content.dresscodes=content.dresscodes.filter(d=>d.id!==existingForEvent.id); }
-    const index=content.dresscodes.findIndex(d=>d.id===id); if(index>=0) content.dresscodes[index]=item; else content.dresscodes.push(item); const ev=content.events.find(e=>e.id===eventId); if(ev) ev.dresscodeId=id; save(content,index>=0?'Dresscode actualitzat':'Dresscode afegit'); resetDresscodeForm(); }); $('#newDresscodeBtn').onclick=resetDresscodeForm; $('#cancelDresscodeEdit').onclick=resetDresscodeForm;
+  $('#dresscodeForm').addEventListener('submit',event=>{
+    event.preventDefault();
+    const id=$('#dresscodeId').value||BandaStore.uid('dress');
+    const boysItems=collectDressItems('boys'), girlsItems=collectDressItems('girls');
+    const previous=(content.dresscodes||[]).find(d=>d.id===id);
+    const item={
+      id,
+      eventId:'',
+      title:$('#dresscodeTitle').value.trim()||'Dress code',
+      subtitle:$('#dresscodeSubtitle').value.trim()||'Uniforme de banda',
+      boysItems,
+      girlsItems,
+      boys:itemsToText(boysItems),
+      girls:itemsToText(girlsItems),
+      other:$('#dresscodeOther').value.trim(),
+      createdAt:previous?.createdAt||new Date().toISOString()
+    };
+    const index=content.dresscodes.findIndex(d=>d.id===id);
+    if(index>=0) content.dresscodes[index]=item; else content.dresscodes.push(item);
+    save(content,index>=0?'Dresscode actualitzat':'Dresscode afegit');
+    resetDresscodeForm();
+  });
+  $('#newDresscodeBtn').onclick=resetDresscodeForm;
+  $('#cancelDresscodeEdit').onclick=resetDresscodeForm;
 }
 
 function resetTrackForm(){ $('#trackForm').reset(); $('#trackId').value=''; $('#trackVisible').checked=true; $('#trackFormTitle').textContent='Nova pista'; $('#trackPreviewBox').hidden=true; $('#trackPreview').removeAttribute('src'); }
@@ -388,10 +607,60 @@ function editTrack(id){ const track=(content.tracks||[]).find(item=>item.id===id
 function deleteTrack(id){ const track=(content.tracks||[]).find(item=>item.id===id); if(!track) return; if(!confirm(`Vols eliminar “${track.title}”?`)) return; content.tracks=content.tracks.filter(item=>item.id!==id); save(content,'Pista eliminada'); resetTrackForm(); }
 function moveTrack(id,direction){ const index=content.tracks.findIndex(track=>track.id===id); if(index<0) return; const target=index+direction; if(target<0||target>=content.tracks.length)return; [content.tracks[index],content.tracks[target]]=[content.tracks[target],content.tracks[index]]; save(content,'Ordre actualitzat'); }
 function toggleTrack(id){ const track=content.tracks.find(item=>item.id===id); if(!track)return; track.visible=track.visible===false; save(content,track.visible?'Pista visible':'Pista oculta'); }
-function renderTracks(){ const list=content.tracks||[]; $('#trackCountEditor').textContent=list.length; $('#trackEditorList').innerHTML=list.length?list.map((track,index)=>`<article class="list-item track-list-item" draggable="true" data-track-row="${track.id}"><span class="drag-handle">⋮⋮</span><div class="list-main"><div class="list-kicker"><span>#${String(index+1).padStart(2,'0')}</span><span class="visibility-pill ${track.visible===false?'hidden':''}">${track.visible===false?'OCULTA':'VISIBLE'}</span></div><h3>${esc(track.title)}</h3>${track.meta?`<p>${esc(track.meta)}</p>`:''}<p>${esc(track.src||'Sense ruta')}</p></div><div class="list-actions"><button class="tiny-btn" data-up-track="${track.id}">↑</button><button class="tiny-btn" data-down-track="${track.id}">↓</button><button class="tiny-btn" data-toggle-track="${track.id}">◉</button><button class="tiny-btn" data-edit-track="${track.id}">✎</button><button class="tiny-btn delete" data-delete-track="${track.id}">×</button></div></article>`).join(''):'<div class="empty-state">Encara no hi ha cap pista al Player.</div>';
-  $$('[data-up-track]').forEach(btn=>btn.onclick=()=>moveTrack(btn.dataset.upTrack,-1)); $$('[data-down-track]').forEach(btn=>btn.onclick=()=>moveTrack(btn.dataset.downTrack,1)); $$('[data-toggle-track]').forEach(btn=>btn.onclick=()=>toggleTrack(btn.dataset.toggleTrack)); $$('[data-edit-track]').forEach(btn=>btn.onclick=()=>editTrack(btn.dataset.editTrack)); $$('[data-delete-track]').forEach(btn=>btn.onclick=()=>deleteTrack(btn.dataset.deleteTrack));
-  $$('[data-track-row]').forEach(row=>{row.addEventListener('dragstart',()=>{draggedTrackId=row.dataset.trackRow;row.classList.add('dragging');});row.addEventListener('dragend',()=>{draggedTrackId=null;row.classList.remove('dragging');});row.addEventListener('dragover',e=>e.preventDefault());row.addEventListener('drop',e=>{e.preventDefault();const targetId=row.dataset.trackRow;if(!draggedTrackId||draggedTrackId===targetId)return;const from=content.tracks.findIndex(t=>t.id===draggedTrackId),to=content.tracks.findIndex(t=>t.id===targetId);if(from<0||to<0)return;const[moved]=content.tracks.splice(from,1);content.tracks.splice(to,0,moved);save(content,'Ordre del Player actualitzat');});});
+function fitTrackListFourAndHalf(){
+  const host=$('#trackEditorList'); if(!host) return;
+  if(host._trackFitFrame) cancelAnimationFrame(host._trackFitFrame);
+  host._trackFitFrame=requestAnimationFrame(()=>{
+    host._trackFitFrame=0;
+    const items=[...host.children].filter(el=>el.matches?.('.track-list-item'));
+    if(trackListResizeObserver){trackListResizeObserver.disconnect();trackListResizeObserver=null;}
+    if(items.length<5){
+      host.style.maxHeight='';
+      host.classList.remove('track-scroll-preview');
+      return;
+    }
+    host.classList.add('track-scroll-preview');
+    host.style.maxHeight='none';
+    void host.offsetWidth;
+    const hostRect=host.getBoundingClientRect();
+    const fourthRect=items[3].getBoundingClientRect();
+    const fifthRect=items[4].getBoundingClientRect();
+    const gap=Math.max(0,fifthRect.top-fourthRect.bottom);
+    const visibleHeight=(fourthRect.bottom-hostRect.top+host.scrollTop)+gap+(fifthRect.height*.5);
+    host.style.maxHeight=`${Math.ceil(visibleHeight)}px`;
+    if('ResizeObserver' in window){
+      trackListResizeObserver=new ResizeObserver(()=>fitTrackListFourAndHalf());
+      items.slice(0,5).forEach(item=>trackListResizeObserver.observe(item));
+    }
+  });
 }
+function renderTracks(){
+  const list=content.tracks||[];
+  $('#trackCountEditor').textContent=list.length;
+  $('#trackEditorList').innerHTML=list.length?list.map((track,index)=>`<article class="list-item track-list-item" draggable="true" data-track-row="${esc(track.id)}"><span class="drag-handle">⋮⋮</span><div class="list-main"><div class="list-kicker"><span>#${String(index+1).padStart(2,'0')}</span><span class="visibility-pill ${track.visible===false?'hidden':''}">${track.visible===false?'OCULTA':'VISIBLE'}</span></div><h3>${esc(track.title)}</h3>${track.meta?`<p>${esc(track.meta)}</p>`:''}<p>${esc(track.src||'Sense ruta')}</p></div><div class="list-actions"><button class="tiny-btn" data-up-track="${esc(track.id)}">↑</button><button class="tiny-btn" data-down-track="${esc(track.id)}">↓</button><button class="tiny-btn" data-toggle-track="${esc(track.id)}">◉</button><button class="tiny-btn" data-edit-track="${esc(track.id)}">✎</button><button class="tiny-btn delete" data-delete-track="${esc(track.id)}">×</button></div></article>`).join(''):'<div class="empty-state">Encara no hi ha cap pista al Player.</div>';
+  $$('[data-up-track]').forEach(btn=>btn.onclick=()=>moveTrack(btn.dataset.upTrack,-1));
+  $$('[data-down-track]').forEach(btn=>btn.onclick=()=>moveTrack(btn.dataset.downTrack,1));
+  $$('[data-toggle-track]').forEach(btn=>btn.onclick=()=>toggleTrack(btn.dataset.toggleTrack));
+  $$('[data-edit-track]').forEach(btn=>btn.onclick=()=>editTrack(btn.dataset.editTrack));
+  $$('[data-delete-track]').forEach(btn=>btn.onclick=()=>deleteTrack(btn.dataset.deleteTrack));
+  $$('[data-track-row]').forEach(row=>{
+    row.addEventListener('dragstart',()=>{draggedTrackId=row.dataset.trackRow;row.classList.add('dragging');});
+    row.addEventListener('dragend',()=>{draggedTrackId=null;row.classList.remove('dragging');});
+    row.addEventListener('dragover',e=>e.preventDefault());
+    row.addEventListener('drop',e=>{
+      e.preventDefault();
+      const targetId=row.dataset.trackRow;
+      if(!draggedTrackId||draggedTrackId===targetId)return;
+      const from=content.tracks.findIndex(t=>t.id===draggedTrackId),to=content.tracks.findIndex(t=>t.id===targetId);
+      if(from<0||to<0)return;
+      const[moved]=content.tracks.splice(from,1);
+      content.tracks.splice(to,0,moved);
+      save(content,'Ordre del Player actualitzat');
+    });
+  });
+  fitTrackListFourAndHalf();
+}
+
 function bindTrackForm(){ $('#trackForm').addEventListener('submit',event=>{event.preventDefault();const id=$('#trackId').value||BandaStore.uid('trk');const item={id,title:$('#trackTitle').value.trim(),meta:$('#trackMeta').value.trim(),src:$('#trackSrc').value.trim(),visible:$('#trackVisible').checked};if(!item.title||!item.src){showToast('Cal indicar títol i ruta/URL');return;}const index=content.tracks.findIndex(t=>t.id===id);if(index>=0)content.tracks[index]=item;else content.tracks.push(item);save(content,index>=0?'Pista actualitzada':'Pista afegida');resetTrackForm();}); $('#newTrackBtn').onclick=resetTrackForm; $('#cancelTrackEdit').onclick=resetTrackForm; $('#trackSrc').addEventListener('change',updateTrackPreview); }
 
 function renderAudioLibrary(files=audioLibrary){
@@ -684,6 +953,17 @@ async function deleteHistoric(id){
   resetHistoricForm();
 }
 
+function historicEditorItemMarkup(item){
+  const period=historicPeriodById(item.periodId);
+  const images=historicImages(item);
+  const thumbCols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
+  const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button></div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
+  return `<article class="historic-editor-item">
+    <div class="historic-thumb-wrap">${thumbs}</div>
+    <div class="list-main"><div class="list-kicker"><span>${esc(item.year)}</span><span>·</span><span>${esc(period?.director||'Sense període')}</span><span>·</span><span>${images.length} ${images.length===1?'foto':'fotos'}</span></div>${item.title?`<h3>${esc(item.title)}</h3>`:'<h3>Sense títol</h3>'}${item.description?`<p>${esc(item.description)}</p>`:''}</div>
+    <div class="list-actions"><button class="tiny-btn" data-edit-historic="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-historic="${esc(item.id)}" title="Eliminar">×</button></div>
+  </article>`;
+}
 function renderHistoric(){
   const list=[...(content.historicItems||[])].sort((a,b)=>{
     const pa=historicPeriods().findIndex(p=>p.id===a.periodId), pb=historicPeriods().findIndex(p=>p.id===b.periodId);
@@ -695,20 +975,25 @@ function renderHistoric(){
   $('#historicCount').textContent=list.length;
   const host=$('#historicEditorList');
   if(!list.length){ host.innerHTML='<div class="empty-state">Encara no hi ha cap fotografia a l’Històric.</div>'; return; }
-  let currentPeriod='';
-  host.innerHTML=list.map(item=>{
-    const period=historicPeriodById(item.periodId);
-    const group=item.periodId!==currentPeriod ? `<div class="history-editor-period"><strong>${esc(period?.years||'—')}</strong><span>${esc(period?.director||'Període desconegut')}</span></div>` : '';
-    currentPeriod=item.periodId;
-    const images=historicImages(item);
-    const thumbCols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
-    const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button></div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
-    return `${group}<article class="historic-editor-item">
-      <div class="historic-thumb-wrap">${thumbs}</div>
-      <div class="list-main"><div class="list-kicker"><span>${esc(item.year)}</span><span>·</span><span>${esc(period?.director||'Sense període')}</span><span>·</span><span>${images.length} ${images.length===1?'foto':'fotos'}</span></div>${item.title?`<h3>${esc(item.title)}</h3>`:'<h3>Sense títol</h3>'}${item.description?`<p>${esc(item.description)}</p>`:''}</div>
-      <div class="list-actions"><button class="tiny-btn" data-edit-historic="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-historic="${esc(item.id)}" title="Eliminar">×</button></div>
-    </article>`;
+  const periods=historicPeriods();
+  const groupIds=[...new Set(list.map(item=>item.periodId||'unknown'))];
+  host.innerHTML=groupIds.map(periodId=>{
+    const items=list.filter(item=>(item.periodId||'unknown')===periodId);
+    const period=periods.find(p=>p.id===periodId);
+    const open=openHistoricEditorPeriods.has(periodId);
+    return `<section class="editor-collapse-group history-collapse-group ${open?'is-open':''}" data-history-editor-group="${esc(periodId)}">
+      <button type="button" class="editor-collapse-head" data-toggle-history-editor="${esc(periodId)}" aria-expanded="${open?'true':'false'}">
+        <span class="editor-collapse-main"><strong>${esc(period?.years||'SENSE PERÍODE')}</strong><span>${esc(period?.director||'Període desconegut')}</span></span>
+        <span class="editor-collapse-count">${items.length}</span><span class="editor-collapse-chevron" aria-hidden="true">⌄</span>
+      </button>
+      <div class="editor-collapse-body" ${open?'':'hidden'}>${items.map(historicEditorItemMarkup).join('')}</div>
+    </section>`;
   }).join('');
+  $$('[data-toggle-history-editor]').forEach(btn=>btn.onclick=()=>{
+    const id=btn.dataset.toggleHistoryEditor;
+    if(openHistoricEditorPeriods.has(id)) openHistoricEditorPeriods.delete(id); else openHistoricEditorPeriods.add(id);
+    renderHistoric();
+  });
   $$('[data-edit-historic]').forEach(btn=>btn.onclick=()=>editHistoric(btn.dataset.editHistoric));
   $$('[data-delete-historic]').forEach(btn=>btn.onclick=()=>deleteHistoric(btn.dataset.deleteHistoric));
   $$('[data-download-historic]').forEach(btn=>btn.onclick=()=>{ const item=(content.historicItems||[]).find(entry=>entry.id===btn.dataset.downloadHistoric); const images=historicImages(item); const index=Number(btn.dataset.downloadIndex||0); if(item&&images[index]) downloadHistoricPhoto(images[index],item,index); });
@@ -833,14 +1118,42 @@ async function deleteHemeroteca(id){
   try{for(const src of hemerotecaImages(item)){if(supabaseActive&&currentSession&&window.BandaSupabase?.deletePublicFile)await BandaSupabase.deletePublicFile('historic-media',src);}}catch(error){console.error(error);showToast('No s’han pogut eliminar totes les imatges de Storage');return;}
   content.hemerotecaItems=(content.hemerotecaItems||[]).filter(entry=>entry.id!==id);save(content,'Entrada de l’Hemeroteca eliminada');resetHemerotecaForm();
 }
+function hemerotecaEditorItemMarkup(item){
+  const images=hemerotecaImages(item);
+  const thumbs=images.length?`<div class="historic-thumb-grid" style="--thumb-cols:${Math.max(1,Math.ceil(Math.sqrt(images.length)))}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-hemero="${esc(item.id)}" data-download-index="${index}" title="Descarregar imatge" aria-label="Descarregar imatge ${index+1}">⇩</button></div>`).join('')}</div>`:'<div class="historic-thumb"><span>▤</span></div>';
+  const dateLabel=hemerotecaDateLabel(item);
+  return `<article class="historic-editor-item hemeroteca-editor-item type-${esc(item.type)}"><div class="historic-thumb-wrap">${thumbs}</div><div class="list-main"><div class="list-kicker"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${dateLabel?`<span>·</span><span>${esc(dateLabel)}</span>`:''}${item.url?'<span>·</span><span>ENLLAÇ</span>':''}</div><h3>${esc(item.title||hemerotecaTypeLabel(item.type))}</h3>${item.description?`<p>${esc(item.description)}</p>`:''}</div><div class="list-actions"><button class="tiny-btn" data-edit-hemero="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-hemero="${esc(item.id)}" title="Eliminar">×</button></div></article>`;
+}
 function renderHemerotecaEditor(){
   const all=[...(content.hemerotecaItems||[])].sort((a,b)=>{const da=hemerotecaSortValue(a),db=hemerotecaSortValue(b);if(da!==db)return db-da;return String(b.createdAt||'').localeCompare(String(a.createdAt||''));});
-  $('#hemerotecaCount').textContent=all.length;$$('[data-hemeroteca-editor-filter]').forEach(btn=>btn.classList.toggle('active',btn.dataset.hemerotecaEditorFilter===hemerotecaEditorFilter));
-  const list=hemerotecaEditorFilter==='all'?all:all.filter(item=>item.type===hemerotecaEditorFilter); const host=$('#hemerotecaEditorList');if(!host)return;
-  if(!list.length){host.innerHTML='<div class="empty-state">Encara no hi ha cap document en aquesta categoria.</div>';return;}
-  host.innerHTML=list.map(item=>{const images=hemerotecaImages(item);const thumbs=images.length?`<div class="historic-thumb-grid" style="--thumb-cols:${Math.max(1,Math.ceil(Math.sqrt(images.length)))}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-hemero="${esc(item.id)}" data-download-index="${index}" title="Descarregar imatge" aria-label="Descarregar imatge ${index+1}">⇩</button></div>`).join('')}</div>`:'<div class="historic-thumb"><span>▤</span></div>';const dateLabel=hemerotecaDateLabel(item);return `<article class="historic-editor-item hemeroteca-editor-item type-${esc(item.type)}"><div class="historic-thumb-wrap">${thumbs}</div><div class="list-main"><div class="list-kicker"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${dateLabel?`<span>·</span><span>${esc(dateLabel)}</span>`:''}${item.url?'<span>·</span><span>ENLLAÇ</span>':''}</div><h3>${esc(item.title||hemerotecaTypeLabel(item.type))}</h3>${item.description?`<p>${esc(item.description)}</p>`:''}</div><div class="list-actions"><button class="tiny-btn" data-edit-hemero="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-hemero="${esc(item.id)}" title="Eliminar">×</button></div></article>`;}).join('');
-  $$('[data-edit-hemero]').forEach(btn=>btn.onclick=()=>editHemeroteca(btn.dataset.editHemero));$$('[data-delete-hemero]').forEach(btn=>btn.onclick=()=>deleteHemeroteca(btn.dataset.deleteHemero));$$('[data-download-hemero]').forEach(btn=>btn.onclick=()=>{const item=(content.hemerotecaItems||[]).find(entry=>entry.id===btn.dataset.downloadHemero);const images=hemerotecaImages(item);const index=Number(btn.dataset.downloadIndex||0);if(item&&images[index])downloadHistoricPhoto(images[index],item,index);});
+  $('#hemerotecaCount').textContent=all.length;
+  const host=$('#hemerotecaEditorList'); if(!host)return;
+  const groups=[
+    {id:'cartells',label:'CARTELLS'},
+    {id:'noticies',label:'NOTÍCIES'},
+    {id:'entrevistes',label:'ENTREVISTES'}
+  ];
+  host.innerHTML=groups.map(group=>{
+    const items=all.filter(item=>item.type===group.id);
+    const open=openHemerotecaEditorSections.has(group.id);
+    return `<section class="editor-collapse-group hemeroteca-collapse-group type-${group.id} ${open?'is-open':''}" data-hemero-editor-group="${group.id}">
+      <button type="button" class="editor-collapse-head" data-toggle-hemero-editor="${group.id}" aria-expanded="${open?'true':'false'}">
+        <span class="editor-collapse-main"><strong>${group.label}</strong><span>${items.length?`${items.length} ${items.length===1?'document':'documents'}`:'Sense documents'}</span></span>
+        <span class="editor-collapse-count">${items.length}</span><span class="editor-collapse-chevron" aria-hidden="true">⌄</span>
+      </button>
+      <div class="editor-collapse-body" ${open?'':'hidden'}>${items.length?items.map(hemerotecaEditorItemMarkup).join(''):'<div class="empty-state compact">Encara no hi ha cap document en aquesta categoria.</div>'}</div>
+    </section>`;
+  }).join('');
+  $$('[data-toggle-hemero-editor]').forEach(btn=>btn.onclick=()=>{
+    const id=btn.dataset.toggleHemeroEditor;
+    if(openHemerotecaEditorSections.has(id)) openHemerotecaEditorSections.delete(id); else openHemerotecaEditorSections.add(id);
+    renderHemerotecaEditor();
+  });
+  $$('[data-edit-hemero]').forEach(btn=>btn.onclick=()=>editHemeroteca(btn.dataset.editHemero));
+  $$('[data-delete-hemero]').forEach(btn=>btn.onclick=()=>deleteHemeroteca(btn.dataset.deleteHemero));
+  $$('[data-download-hemero]').forEach(btn=>btn.onclick=()=>{const item=(content.hemerotecaItems||[]).find(entry=>entry.id===btn.dataset.downloadHemero);const images=hemerotecaImages(item);const index=Number(btn.dataset.downloadIndex||0);if(item&&images[index])downloadHistoricPhoto(images[index],item,index);});
 }
+
 function bindHemerotecaEditor(){
   $('#hemerotecaYear').max=String(new Date().getFullYear());$('#hemerotecaType').addEventListener('change',syncHemerotecaRuleHelp);
   $('#hemerotecaImageFile').addEventListener('change',async event=>{const files=[...(event.target.files||[])];if(!files.length)return;try{showToast(`Preparant ${files.length} ${files.length===1?'imatge':'imatges'}…`);for(const file of files)pendingHemerotecaImages.push(await compressHistoricImage(file));renderHemerotecaFormPreview();}catch(error){console.error(error);showToast('No s’han pogut preparar les imatges');}finally{event.target.value='';}});
@@ -1085,7 +1398,7 @@ function bindUsers(){
   });
 }
 
-function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderDresscodeEventOptions(); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderSystem(); renderUsers(); }
+function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderSystem(); renderUsers(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{ if(supabaseActive) return; content=BandaStore.normalize(event.detail);renderAll();}); }
 
 function setEditorAccess({session=null,profile=null}={}){

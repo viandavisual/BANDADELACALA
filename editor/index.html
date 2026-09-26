@@ -14,7 +14,7 @@
   <link rel="manifest" href="editor/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="editor/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="editor/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="editor.css?v=0.41" />
+  <link rel="stylesheet" href="editor.css?v=0.42" />
 </head>
 <body>
   <section id="editorLoginGate" class="editor-login-gate" aria-label="Accés a l'Editor">
@@ -58,7 +58,7 @@
 
     <main class="editor-main">
       <header class="editor-topbar">
-        <div><span class="eyebrow" id="editorEyebrow">CONTROL</span><h1 id="editorTitle">RESUM</h1></div>
+        <div><span class="eyebrow" id="editorEyebrow">CONTROL</span><div class="editor-title-row"><span id="editorTitleIcon" class="editor-page-title-icon" aria-hidden="true" hidden></span><h1 id="editorTitle">RESUM</h1></div></div>
         <div class="top-actions"><span id="editorAccessBadge" class="editor-access-badge">—</span><span class="save-state" id="saveState">DADES CARREGADES</span><button id="editorInstallBtn" class="editor-install-btn" type="button">INSTAL·LAR EDITOR</button><a class="open-app-btn" href="index.html" target="_blank" rel="noopener">OBRIR APP ↗</a></div>
       </header>
 
@@ -102,7 +102,7 @@
 
       <section class="editor-view" data-editor-view="calendar">
         <div class="editor-two-col">
-          <form id="eventForm" class="editor-card form-card">
+          <form id="eventForm" class="editor-card form-card event-form-card">
             <div class="card-head"><div><span class="eyebrow">CALENDARI</span><h2 id="eventFormTitle">Nou esdeveniment</h2></div><button type="button" id="newEventBtn" class="ghost-btn">NOU</button></div>
             <input type="hidden" id="eventId" />
             <label>Tipus<select id="eventType"><option value="ASSAIG">ASSAIG</option><option value="CONCERT">CONCERT</option><option value="ACTUACIÓ">ACTUACIÓ</option><option value="ALTRES">ALTRES</option></select></label>
@@ -122,7 +122,8 @@
             <div class="form-row"><label>Data<input id="eventDate" required type="date" /></label><label>Hora<input id="eventTime" type="time" /></label></div>
             <label>Lloc<select id="eventPlacePreset"><option value="LOCAL SOCIAL">LOCAL SOCIAL</option><option value="ALTRES">ALTRES</option></select></label>
             <label id="eventPlaceDetailWrap" hidden>Especificar lloc<input id="eventPlaceDetail" maxlength="140" placeholder="Ex.: Plaça Nova, Auditori..." /></label>
-            <label>Notes<textarea id="eventNotes" rows="5" maxlength="700" placeholder="Informació addicional..."></textarea></label>
+            <label id="eventDresscodeWrap" hidden>Dresscode<select id="eventDresscode"><option value="">SENSE DRESSCODE</option></select></label>
+            <label>Notes<textarea id="eventNotes" rows="4" maxlength="700" placeholder="Informació addicional..."></textarea></label>
             <div class="form-actions"><button type="submit" class="primary-btn">DESAR ESDEVENIMENT</button><button type="button" id="cancelEventEdit" class="secondary-btn">NETEJAR</button></div>
           </form>
           <div class="editor-card list-card">
@@ -135,10 +136,9 @@
       <section class="editor-view" data-editor-view="dresscode">
         <div class="dresscode-editor-stack">
           <form id="dresscodeForm" class="editor-card form-card dresscode-form-card">
-            <div class="card-head"><div><span class="eyebrow">DRESSCODE</span><h2 id="dresscodeFormTitle">Nou dresscode</h2></div><button type="button" id="newDresscodeBtn" class="ghost-btn">NOU</button></div>
+            <div class="card-head dresscode-card-head"><button type="button" id="newDresscodeBtn" class="ghost-btn">NOU</button><div><span class="eyebrow">DRESSCODE</span><h2 id="dresscodeFormTitle">Nou dresscode</h2></div></div>
             <input type="hidden" id="dresscodeId" />
             <div class="dresscode-top-fields">
-              <label>Esdeveniment<select id="dresscodeEvent" required></select></label>
               <label>Títol<input id="dresscodeTitle" maxlength="120" value="Dress code - diada" /></label>
               <label>Subtítol<input id="dresscodeSubtitle" maxlength="120" value="Uniforme de banda" /></label>
             </div>
@@ -157,7 +157,7 @@
           </form>
           <div class="editor-card list-card">
             <div class="card-head"><div><span class="eyebrow">VESTUARI</span><h2>Dresscodes configurats</h2></div><span class="count-pill" id="dresscodeCount">0</span></div>
-            <p class="helper-copy">Per defecte, els dresscodes només es poden vincular a CONCERTS i ACTUACIONS. A l’APP apareix un botó a la fitxa de l’esdeveniment per consultar-lo.</p>
+            <p class="helper-copy">Crea dresscodes reutilitzables. Després els pots vincular a qualsevol CONCERT o ACTUACIÓ des del CALENDARI.</p>
             <div id="dresscodeList" class="editor-list"></div>
           </div>
         </div>
@@ -226,7 +226,7 @@
 
         <div class="hemeroteca-editor-title">
           <span class="eyebrow">ARXIU DOCUMENTAL</span>
-          <h2>HEMEROTECA</h2>
+          <h2 class="editor-section-icon-title"><span class="editor-documents-icon" aria-hidden="true"></span>HEMEROTECA</h2>
           <p>Gestiona cartells històrics, retalls o enllaços de notícies i entrevistes. Les imatges es desen al mateix Storage de l’Històric, dins la carpeta Hemeroteca.</p>
         </div>
         <div class="history-editor-layout hemeroteca-editor-layout">
@@ -254,7 +254,6 @@
           </form>
           <div class="editor-card list-card history-list-card">
             <div class="card-head"><div><span class="eyebrow">HEMEROTECA</span><h2>Documents</h2></div><span class="count-pill" id="hemerotecaCount">0</span></div>
-            <div class="hemeroteca-editor-filters" role="tablist" aria-label="Filtrar hemeroteca"><button class="active" type="button" data-hemeroteca-editor-filter="all">TOTS</button><button type="button" data-hemeroteca-editor-filter="cartells">CARTELLS</button><button type="button" data-hemeroteca-editor-filter="noticies">NOTÍCIES</button><button type="button" data-hemeroteca-editor-filter="entrevistes">ENTREVISTES</button></div>
             <div id="hemerotecaEditorList" class="historic-editor-list"></div>
           </div>
         </div>
@@ -303,12 +302,12 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="version.js?v=0.41"></script>
-  <script src="config.js?v=0.41"></script>
-  <script src="data/content-published.js?v=0.41"></script>
-  <script src="content-store.js?v=0.41"></script>
+  <script src="version.js?v=0.42"></script>
+  <script src="config.js?v=0.42"></script>
+  <script src="data/content-published.js?v=0.42"></script>
+  <script src="content-store.js?v=0.42"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.41"></script>
-  <script src="editor.js?v=0.41"></script>
+  <script src="supabase-client.js?v=0.42"></script>
+  <script src="editor.js?v=0.42"></script>
 </body>
 </html>
