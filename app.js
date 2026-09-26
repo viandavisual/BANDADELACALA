@@ -844,7 +844,13 @@ function bindCalendar(){
   };
 }
 
-const audio = () => $('#audioPlayer');
+// v0.49 · Motor persistent fora del DOM, igual que Disturbing Player.
+// Això desacobla la reproducció de la vista PLAYER i evita que cap re-render o
+// canvi de secció pugui reemplaçar/alterar l'element d'àudio actiu.
+const bandaPlayerAudioEngine=document.createElement('audio');
+bandaPlayerAudioEngine.preload='auto';
+bandaPlayerAudioEngine.setAttribute('aria-hidden','true');
+const audio = () => bandaPlayerAudioEngine;
 
 const TRACK_DURATION_CACHE_KEY='banda-track-durations-v041';
 const trackDurationCache=new Map();
@@ -884,81 +890,29 @@ function renderTracks(){
   refreshTrackDurations(tracks);
 }
 
-// v0.48 · Continuïtat robusta del PLAYER.
-// Alguns navegadors/dispositius poden no encadenar de forma fiable només amb `ended`.
-// Mantenim una única funció de salt seqüencial i la podem activar tant des d'`ended`
-// com des d'un watchdog de final de pista a `timeupdate`.
-let sequentialAdvanceLocked=false;
-let playbackRequestToken=0;
-let naturalEndWatchdog=0;
-function clearNaturalEndWatchdog(){
-  if(naturalEndWatchdog){ clearTimeout(naturalEndWatchdog); naturalEndWatchdog=0; }
-}
-function armNaturalEndWatchdog(player){
-  clearNaturalEndWatchdog();
-  if(!player || player.paused || player.ended || !Number.isFinite(player.duration) || player.duration<=0) return;
-  const remaining=Math.max(0,player.duration-player.currentTime);
-  const rate=Math.max(.1,Number(player.playbackRate)||1);
-  naturalEndWatchdog=setTimeout(()=>{
-    naturalEndWatchdog=0;
-    if(!player || state.currentTrack<0) return;
-    const left=Number.isFinite(player.duration)?player.duration-player.currentTime:Infinity;
-    if(player.ended || left<=0.15){
-      if(advanceToFollowingTrack()) return;
-      sequentialAdvanceLocked=false;
-      if(player.ended) playNextFromMode();
-    }else if(!player.paused){
-      armNaturalEndWatchdog(player);
-    }
-  },Math.ceil((remaining/rate)*1000)+120);
-}
-function requestReliablePlayback(player, token){
-  if(!player) return;
-  let attempts=0;
-  const tryPlay=()=>{
-    if(token!==playbackRequestToken || player.dataset.autoplayRequested!=='1') return;
-    if(!player.paused) return;
-    attempts+=1;
-    const promise=player.play();
-    if(promise && typeof promise.catch==='function'){
-      promise.catch(()=>{
-        if(attempts<6 && token===playbackRequestToken && player.dataset.autoplayRequested==='1'){
-          setTimeout(tryPlay,Math.min(900,120*attempts));
-        }
-      });
-    }
-  };
-  if(player.readyState>=2) tryPlay();
-  ['loadeddata','canplay','canplaythrough'].forEach(eventName=>{
-    player.addEventListener(eventName,tryPlay,{once:true});
-  });
-  setTimeout(tryPlay,80);
-  setTimeout(tryPlay,320);
-}
-function advanceToFollowingTrack(){
-  if(sequentialAdvanceLocked) return false;
-  const tracks=getTracks();
-  if(state.currentTrack<0 || state.currentTrack>=tracks.length-1) return false;
-  sequentialAdvanceLocked=true;
-  const nextIndex=state.currentTrack+1;
-  loadTrack(nextIndex,true);
-  return true;
-}
-
+// v0.49 · Continuïtat del PLAYER basada en el patró estable de Disturbing Player.
+// Una sola font de veritat: l'event `ended` decideix la pista següent.
+// En canvi automàtic NO forcem audio.load(): canviem src i cridem play() directament.
 function loadTrack(index, autoplay = false){
   const tracks = getTracks();
-  if(!tracks.length) return;
+  const player = audio();
+  if(!player || !tracks.length) return;
+
   state.currentTrack = (index + tracks.length) % tracks.length;
   const track = tracks[state.currentTrack];
-  const player = audio();
-  const requestToken=++playbackRequestToken;
-  state.playlistAudioPlaying=false;
+  const changed = player.dataset.track !== String(state.currentTrack) || player.dataset.trackSrc !== String(track.src||'');
+
   player.dataset.playlistTrack='1';
-  player.dataset.userPauseRequested='0';
-  player.dataset.autoplayRequested=autoplay?'1':'0';
-  player.autoplay=!!autoplay;
-  player.src = track.src;
-  try{ player.load(); }catch(_error){}
+  player.preload='auto';
+  if(changed){
+    player.dataset.track=String(state.currentTrack);
+    player.dataset.trackSrc=String(track.src||'');
+    player.src=track.src;
+    // Mateix patró que Disturbing Player: només load() quan NO volem autoplay.
+    if(!autoplay){ try{ player.load(); }catch(_error){} }
+  }
+
+  state.playlistAudioPlaying=false;
   syncPlayerEqualizers(false);
   $('#nowPlayingTitle').textContent = track.title;
   $('#nowPlayingMeta').textContent = track.meta || 'Banda de la Cala';
@@ -968,7 +922,42 @@ function loadTrack(index, autoplay = false){
   $('#miniPlayer').hidden = false;
   $('#appShell')?.classList.add('has-mini-player');
   renderTracks();
-  if(autoplay) requestReliablePlayback(player,requestToken);
+
+  if(autoplay){
+    const promise=player.play();
+    if(promise && typeof promise.catch==='function') promise.catch(()=>{});
+  }
+}
+
+function playerHandleEnded(){
+  const player=audio();
+  const tracks=getTracks();
+  if(!player || !tracks.length) return;
+
+  state.playlistAudioPlaying=false;
+  syncPlayerEqualizers(false);
+
+  if(state.playbackMode==='one'){
+    player.currentTime=0;
+    const promise=player.play();
+    if(promise && typeof promise.catch==='function') promise.catch(()=>{});
+    return;
+  }
+  if(state.playbackMode==='random'){
+    loadTrack(randomTrackIndex(tracks),true);
+    return;
+  }
+  if(state.currentTrack < tracks.length-1){
+    loadTrack(state.currentTrack+1,true);
+    return;
+  }
+  if(state.playbackMode==='all'){
+    loadTrack(0,true);
+    return;
+  }
+
+  player.currentTime=0;
+  setPlayIcon();
 }
 
 function playlistAudioIsAudible(){
@@ -1085,25 +1074,24 @@ function randomTrackIndex(tracks){
   while(next===state.currentTrack) next=Math.floor(Math.random()*tracks.length);
   return next;
 }
-function playNextFromMode(){
-  const tracks=getTracks();
-  if(!tracks.length) return;
-  if(state.playbackMode==='one'){ audio().currentTime=0; audio().play().catch(()=>{}); return; }
-  if(state.playbackMode==='random'){ loadTrack(randomTrackIndex(tracks),true); return; }
-  if(state.currentTrack < tracks.length-1){ loadTrack(state.currentTrack+1,true); return; }
-  if(state.playbackMode==='all'){ loadTrack(0,true); return; }
-  audio().currentTime=0;
-  setPlayIcon();
-}
+function playNextFromMode(){ playerHandleEnded(); }
 function bindPlayer(){
   const player = audio();
+  if(!player) return;
+  player.preload='auto';
+
   const toggle = () => {
     const tracks = getTracks();
     if(!tracks.length) return;
     if(state.currentTrack < 0) loadTrack(0,false);
-    if(player.paused){ player.dataset.userPauseRequested='0'; player.dataset.autoplayRequested='1'; player.play().catch(()=>{}); }
-    else{ player.dataset.autoplayRequested='0'; player.dataset.userPauseRequested='1'; player.pause(); }
+    if(player.paused){
+      const promise=player.play();
+      if(promise && typeof promise.catch==='function') promise.catch(()=>{});
+    }else{
+      player.pause();
+    }
   };
+
   $('#playPause').onclick = toggle;
   $('#miniPlay').onclick = toggle;
   $('#prevTrack').onclick = () => { const tracks=getTracks(); if(tracks.length) loadTrack(state.currentTrack<=0 ? tracks.length-1 : state.currentTrack-1,true); };
@@ -1113,59 +1101,48 @@ function bindPlayer(){
   $('#randomBtn').onclick=()=>setPlaybackMode('random');
   updatePlaybackModeButtons();
   setPlayIcon();
-  player.addEventListener('play',()=>{ syncPlayerEqualizers(); setPlayIcon(); });
-  player.addEventListener('playing',()=>{ player.dataset.autoplayRequested='0'; sequentialAdvanceLocked=false; state.playlistAudioPlaying=true; syncPlayerEqualizers(); setPlayIcon(); armNaturalEndWatchdog(player); });
-  player.addEventListener('pause',()=>{
-    clearNaturalEndWatchdog();
-    const userPaused=player.dataset.userPauseRequested==='1';
-    player.dataset.userPauseRequested='0';
-    state.playlistAudioPlaying=false;
-    syncPlayerEqualizers(false);
-    setPlayIcon();
-    // Fallback addicional: alguns motors poden quedar en pausa al límit final
-    // sense lliurar `ended`. Només autoavancem si NO ha estat una pausa manual.
-    const atNaturalEnd=!userPaused && Number.isFinite(player.duration) && player.duration>0 && (player.ended || (player.duration-player.currentTime)<=0.12);
-    if(atNaturalEnd) setTimeout(()=>{ if(advanceToFollowingTrack()) return; sequentialAdvanceLocked=false; if(player.ended) playNextFromMode(); },0);
-  });
-  player.addEventListener('waiting',()=>{ clearNaturalEndWatchdog(); state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
-  player.addEventListener('stalled',()=>{ clearNaturalEndWatchdog(); state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
-  player.addEventListener('canplay',()=>{
-    syncPlayerEqualizers();
-    if(player.dataset.autoplayRequested==='1' && player.paused && state.currentTrack>=0){
-      requestReliablePlayback(player,playbackRequestToken);
-    }else if(!player.paused){
-      armNaturalEndWatchdog(player);
-    }
-  });
-  player.addEventListener('seeked',()=>{ syncPlayerEqualizers(); armNaturalEndWatchdog(player); });
-  player.addEventListener('volumechange',()=>{ syncPlayerEqualizers(); });
-  player.addEventListener('emptied',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
-  player.addEventListener('error',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
-  player.addEventListener('ended',()=>{
-    clearNaturalEndWatchdog();
-    state.playlistAudioPlaying=false;
-    syncPlayerEqualizers(false);
-    if(advanceToFollowingTrack()) return;
-    sequentialAdvanceLocked=false;
-    playNextFromMode();
-  });
-  player.addEventListener('loadedmetadata',() => { $('#durationTime').textContent = formatTime(player.duration); if(!player.paused) armNaturalEndWatchdog(player); });
-  player.addEventListener('ratechange',()=>{ if(!player.paused) armNaturalEndWatchdog(player); });
-  player.addEventListener('timeupdate',() => {
+
+  player.addEventListener('timeupdate',()=>{
     const progress = player.duration ? (player.currentTime/player.duration)*100 : 0;
     $('#seekBar').value = progress;
     $('#currentTime').textContent = formatTime(player.currentTime);
     $('#miniProgress').style.width = `${progress}%`;
-    // Recalibrem el watchdog al tram final sense avançar mai abans d'hora.
-    if(!player.paused && Number.isFinite(player.duration) && player.duration>0 && (player.duration-player.currentTime)<1.25){
-      armNaturalEndWatchdog(player);
-    }
   });
+  player.addEventListener('loadedmetadata',()=>{
+    $('#durationTime').textContent = formatTime(player.duration);
+  });
+  player.addEventListener('play',()=>{
+    state.playlistAudioPlaying=true;
+    syncPlayerEqualizers();
+    setPlayIcon();
+  });
+  player.addEventListener('playing',()=>{
+    state.playlistAudioPlaying=true;
+    syncPlayerEqualizers();
+    setPlayIcon();
+  });
+  player.addEventListener('pause',()=>{
+    state.playlistAudioPlaying=false;
+    syncPlayerEqualizers(false);
+    setPlayIcon();
+  });
+  player.addEventListener('waiting',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
+  player.addEventListener('stalled',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
+  player.addEventListener('canplay',()=>{ syncPlayerEqualizers(); });
+  player.addEventListener('seeked',()=>{ syncPlayerEqualizers(); });
+  player.addEventListener('volumechange',()=>{ syncPlayerEqualizers(); });
+  player.addEventListener('emptied',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
+  player.addEventListener('error',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
+
+  // Patró Disturbing Player: una única transició de final de pista.
+  player.addEventListener('ended',playerHandleEnded);
+
   $('#seekBar').addEventListener('input',event => { if(player.duration) player.currentTime = (+event.target.value/100)*player.duration; });
 }
 
 function applyGlobalMute(){
   document.querySelectorAll('audio').forEach(el => { el.muted = state.globalMuted; });
+  try{ bandaPlayerAudioEngine.muted=state.globalMuted; }catch(_error){}
   const btn = $('#muteBtn');
   if(btn){
     btn.classList.toggle('is-muted', state.globalMuted);
@@ -1508,7 +1485,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.48',root).href;
+    const swUrl=new URL('app/sw.js?v=0.49',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

@@ -1,32 +1,24 @@
-BANDA DE LA CALA · PATCH v0.48 des de v0.47
+BANDA DE LA CALA · PATCH v0.49 DESDE v0.48
+==========================================
 
-SOBREESCRIURE:
+SOBRESCRIBIR:
+- app.js
 - app/index.html
 - app/sw.js
-- app.js
-- style.css
-- version.js
+- editor.js
 - editor/index.html
 - editor/sw.js
-- editor.js
-- create-band-user-edge-function.zip
-- PATCH_README.txt
+- version.js
 
-AFEGIR:
-- EDGE_FUNCTION_CREATE_USER_v0.48.ts
-- V0_48_CAMBIOS.txt
-- SUPABASE_v0.48_PASOS.txt
-
-SUPABASE · PAS NECESSARI:
-- Tornar a desplegar l'Edge Function "create-band-user" amb la versió inclosa a create-band-user-edge-function.zip
-  (o amb EDGE_FUNCTION_CREATE_USER_v0.48.ts com a index.ts).
-- No cal executar cap SQL nou.
+AÑADIR:
+- V0_49_CAMBIOS.txt
 
 NO TOCAR:
-- manifests APP / EDITOR
-- config.js
-- content-store.js
-- supabase-client.js
-- dades publicades
-- SMTP
-- assets existents
+- manifests / IDs PWA / scopes / start_url
+- Supabase / SMTP / Auth / Edge Function
+- bases de datos / SQL
+- assets
+
+OBJETIVO PRINCIPAL:
+El PLAYER usa ahora el mismo patrón de continuidad que Disturbing Player:
+motor Audio persistente fuera del DOM + evento ended único + cambio directo de src + play().

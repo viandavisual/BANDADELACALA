@@ -1,0 +1,21 @@
+BANDA DE LA CALA · v0.49
+=========================
+
+PLAYER APP
+----------
+- Reimplementado el encadenado automático de pistas tomando como referencia directa el patrón estable de Disturbing Player (Disturbing Stories App v6.17).
+- El motor del PLAYER pasa a ser un elemento Audio persistente creado por JavaScript y mantenido fuera del DOM.
+- preload = auto.
+- Eliminados watchdogs, locks, reintentos y detecciones paralelas de final de pista de v0.48.
+- Un único evento `ended` decide la transición.
+- En modo normal: si existe una pista posterior, carga índice + 1 y ejecuta play() directamente.
+- Al cambiar automáticamente de pista NO se fuerza audio.load(); se replica el patrón de Disturbing Player: src nuevo + play().
+- Se preservan REPETIR 1, REPETIR TOT y RANDOM.
+- El motor persistente sigue respetando el MUTE global de la APP.
+
+PWA / SISTEMA
+-------------
+- version.js actualizado a v0.49.
+- Cache-busting y Service Workers actualizados a v0.49.
+- Manifests, IDs, scopes y start_url preservados.
+- Sin cambios de Supabase, SMTP, Edge Functions, SQL o roles.
