@@ -1,0 +1,22 @@
+BANDA DE LA CALA · v0.48
+
+APP
+- PLAYER: continuïtat seqüencial reforçada. Quan una pista arriba al final i existeix una pista posterior, es carrega automàticament la següent.
+- PLAYER: nou watchdog de final de pista basat en la durada real, a més de l'esdeveniment ended, amb reintents de play durant la càrrega de la pista següent.
+- USUARI: les quatre capçaleres AVATAR / NOM / GÈNERE / CONTRASENYA tenen exactament la mateixa alçada dins la graella 2x2.
+
+EDITOR · ROLS
+- ADMIN: manté accés complet a totes les seccions i funcions.
+- GESTOR: no veu ni pot navegar a MINIJOCS ni SISTEMA.
+- GESTOR: només pot eliminar USER STANDARD.
+- ADMIN: pot eliminar qualsevol altre usuari, inclòs un altre USER ADMIN.
+- Cap usuari pot eliminar el seu propi compte des de la llista.
+
+SUPABASE EDGE FUNCTION
+- Actualitzada create-band-user per aplicar també al servidor les noves regles d'eliminació d'usuaris.
+- Cal tornar a desplegar la funció create-band-user utilitzant el ZIP/font inclòs a la v0.48.
+- No cal executar cap SQL nou.
+
+PWA
+- version.js, cache-busting i Service Workers actualitzats a v0.48.
+- Manifests, IDs, scopes i start_url preservats sense canvis.

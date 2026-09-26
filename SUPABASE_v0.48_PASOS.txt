@@ -1,0 +1,20 @@
+BANDA DE LA CALA · SUPABASE v0.48
+
+ÚNIC CANVI NECESSARI A SUPABASE:
+Actualitzar l'Edge Function existent "create-band-user".
+
+FITXER INCLÒS:
+- create-band-user-edge-function.zip
+- EDGE_FUNCTION_CREATE_USER_v0.48.ts (mateix codi font; s'ha d'usar com index.ts si es desplega manualment)
+
+OBJECTIU:
+- USER ADMIN pot eliminar qualsevol altre compte, inclòs un altre USER ADMIN.
+- USER GESTOR només pot eliminar USER STANDARD.
+- Cap usuari pot eliminar el seu propi compte.
+
+NO CAL:
+- executar SQL;
+- crear cap taula;
+- canviar SMTP;
+- canviar claus o secrets;
+- modificar Auth.

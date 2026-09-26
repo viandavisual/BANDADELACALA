@@ -295,7 +295,7 @@ function switchView(id, remember = true){
   const target=navItems.find(item=>item.id===id);
   if(!target) id='home';
   else if(!target.public && !state.authenticated) id='user';
-  // v0.47: qualsevol accés explícit a HISTÒRIC torna sempre a l'arrel de la secció.
+  // v0.48: qualsevol accés explícit a HISTÒRIC torna sempre a l'arrel de la secció.
   // Això evita quedar-se dins HEMEROTECA quan el USER torna a prémer HISTÒRIC.
   if(id==='history'){
     const historyMain=$('#historyMainContent');
@@ -884,14 +884,77 @@ function renderTracks(){
   refreshTrackDurations(tracks);
 }
 
+// v0.48 · Continuïtat robusta del PLAYER.
+// Alguns navegadors/dispositius poden no encadenar de forma fiable només amb `ended`.
+// Mantenim una única funció de salt seqüencial i la podem activar tant des d'`ended`
+// com des d'un watchdog de final de pista a `timeupdate`.
+let sequentialAdvanceLocked=false;
+let playbackRequestToken=0;
+let naturalEndWatchdog=0;
+function clearNaturalEndWatchdog(){
+  if(naturalEndWatchdog){ clearTimeout(naturalEndWatchdog); naturalEndWatchdog=0; }
+}
+function armNaturalEndWatchdog(player){
+  clearNaturalEndWatchdog();
+  if(!player || player.paused || player.ended || !Number.isFinite(player.duration) || player.duration<=0) return;
+  const remaining=Math.max(0,player.duration-player.currentTime);
+  const rate=Math.max(.1,Number(player.playbackRate)||1);
+  naturalEndWatchdog=setTimeout(()=>{
+    naturalEndWatchdog=0;
+    if(!player || state.currentTrack<0) return;
+    const left=Number.isFinite(player.duration)?player.duration-player.currentTime:Infinity;
+    if(player.ended || left<=0.15){
+      if(advanceToFollowingTrack()) return;
+      sequentialAdvanceLocked=false;
+      if(player.ended) playNextFromMode();
+    }else if(!player.paused){
+      armNaturalEndWatchdog(player);
+    }
+  },Math.ceil((remaining/rate)*1000)+120);
+}
+function requestReliablePlayback(player, token){
+  if(!player) return;
+  let attempts=0;
+  const tryPlay=()=>{
+    if(token!==playbackRequestToken || player.dataset.autoplayRequested!=='1') return;
+    if(!player.paused) return;
+    attempts+=1;
+    const promise=player.play();
+    if(promise && typeof promise.catch==='function'){
+      promise.catch(()=>{
+        if(attempts<6 && token===playbackRequestToken && player.dataset.autoplayRequested==='1'){
+          setTimeout(tryPlay,Math.min(900,120*attempts));
+        }
+      });
+    }
+  };
+  if(player.readyState>=2) tryPlay();
+  ['loadeddata','canplay','canplaythrough'].forEach(eventName=>{
+    player.addEventListener(eventName,tryPlay,{once:true});
+  });
+  setTimeout(tryPlay,80);
+  setTimeout(tryPlay,320);
+}
+function advanceToFollowingTrack(){
+  if(sequentialAdvanceLocked) return false;
+  const tracks=getTracks();
+  if(state.currentTrack<0 || state.currentTrack>=tracks.length-1) return false;
+  sequentialAdvanceLocked=true;
+  const nextIndex=state.currentTrack+1;
+  loadTrack(nextIndex,true);
+  return true;
+}
+
 function loadTrack(index, autoplay = false){
   const tracks = getTracks();
   if(!tracks.length) return;
   state.currentTrack = (index + tracks.length) % tracks.length;
   const track = tracks[state.currentTrack];
   const player = audio();
+  const requestToken=++playbackRequestToken;
   state.playlistAudioPlaying=false;
   player.dataset.playlistTrack='1';
+  player.dataset.userPauseRequested='0';
   player.dataset.autoplayRequested=autoplay?'1':'0';
   player.autoplay=!!autoplay;
   player.src = track.src;
@@ -905,9 +968,7 @@ function loadTrack(index, autoplay = false){
   $('#miniPlayer').hidden = false;
   $('#appShell')?.classList.add('has-mini-player');
   renderTracks();
-  if(autoplay){
-    player.play().catch(()=>{});
-  }
+  if(autoplay) requestReliablePlayback(player,requestToken);
 }
 
 function playlistAudioIsAudible(){
@@ -1040,8 +1101,8 @@ function bindPlayer(){
     const tracks = getTracks();
     if(!tracks.length) return;
     if(state.currentTrack < 0) loadTrack(0,false);
-    if(player.paused){ player.dataset.autoplayRequested='1'; player.play().catch(()=>{}); }
-    else{ player.dataset.autoplayRequested='0'; player.pause(); }
+    if(player.paused){ player.dataset.userPauseRequested='0'; player.dataset.autoplayRequested='1'; player.play().catch(()=>{}); }
+    else{ player.dataset.autoplayRequested='0'; player.dataset.userPauseRequested='1'; player.pause(); }
   };
   $('#playPause').onclick = toggle;
   $('#miniPlay').onclick = toggle;
@@ -1053,41 +1114,52 @@ function bindPlayer(){
   updatePlaybackModeButtons();
   setPlayIcon();
   player.addEventListener('play',()=>{ syncPlayerEqualizers(); setPlayIcon(); });
-  player.addEventListener('playing',()=>{ player.dataset.autoplayRequested='0'; state.playlistAudioPlaying=true; syncPlayerEqualizers(); setPlayIcon(); });
-  player.addEventListener('pause',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); setPlayIcon(); });
-  player.addEventListener('waiting',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
-  player.addEventListener('stalled',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
+  player.addEventListener('playing',()=>{ player.dataset.autoplayRequested='0'; sequentialAdvanceLocked=false; state.playlistAudioPlaying=true; syncPlayerEqualizers(); setPlayIcon(); armNaturalEndWatchdog(player); });
+  player.addEventListener('pause',()=>{
+    clearNaturalEndWatchdog();
+    const userPaused=player.dataset.userPauseRequested==='1';
+    player.dataset.userPauseRequested='0';
+    state.playlistAudioPlaying=false;
+    syncPlayerEqualizers(false);
+    setPlayIcon();
+    // Fallback addicional: alguns motors poden quedar en pausa al límit final
+    // sense lliurar `ended`. Només autoavancem si NO ha estat una pausa manual.
+    const atNaturalEnd=!userPaused && Number.isFinite(player.duration) && player.duration>0 && (player.ended || (player.duration-player.currentTime)<=0.12);
+    if(atNaturalEnd) setTimeout(()=>{ if(advanceToFollowingTrack()) return; sequentialAdvanceLocked=false; if(player.ended) playNextFromMode(); },0);
+  });
+  player.addEventListener('waiting',()=>{ clearNaturalEndWatchdog(); state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
+  player.addEventListener('stalled',()=>{ clearNaturalEndWatchdog(); state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
   player.addEventListener('canplay',()=>{
     syncPlayerEqualizers();
-    // v0.47: si el canvi de pista demanava reproducció automàtica i el navegador
-    // encara l'ha deixada en pausa mentre carregava el nou fitxer, la reprenem aquí.
     if(player.dataset.autoplayRequested==='1' && player.paused && state.currentTrack>=0){
-      player.play().catch(()=>{});
+      requestReliablePlayback(player,playbackRequestToken);
+    }else if(!player.paused){
+      armNaturalEndWatchdog(player);
     }
   });
-  player.addEventListener('seeked',()=>{ syncPlayerEqualizers(); });
+  player.addEventListener('seeked',()=>{ syncPlayerEqualizers(); armNaturalEndWatchdog(player); });
   player.addEventListener('volumechange',()=>{ syncPlayerEqualizers(); });
   player.addEventListener('emptied',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
   player.addEventListener('error',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
   player.addEventListener('ended',()=>{
+    clearNaturalEndWatchdog();
     state.playlistAudioPlaying=false;
     syncPlayerEqualizers(false);
-    // v0.47: continuïtat seqüencial garantida. Si hi ha una pista posterior,
-    // es carrega amb reproducció pendent i el canplay la reprèn si cal.
-    const tracks=getTracks();
-    if(state.currentTrack>=0 && state.currentTrack<tracks.length-1){
-      const nextIndex=state.currentTrack+1;
-      loadTrack(nextIndex,true);
-      return;
-    }
+    if(advanceToFollowingTrack()) return;
+    sequentialAdvanceLocked=false;
     playNextFromMode();
   });
-  player.addEventListener('loadedmetadata',() => { $('#durationTime').textContent = formatTime(player.duration); });
+  player.addEventListener('loadedmetadata',() => { $('#durationTime').textContent = formatTime(player.duration); if(!player.paused) armNaturalEndWatchdog(player); });
+  player.addEventListener('ratechange',()=>{ if(!player.paused) armNaturalEndWatchdog(player); });
   player.addEventListener('timeupdate',() => {
     const progress = player.duration ? (player.currentTime/player.duration)*100 : 0;
     $('#seekBar').value = progress;
     $('#currentTime').textContent = formatTime(player.currentTime);
     $('#miniProgress').style.width = `${progress}%`;
+    // Recalibrem el watchdog al tram final sense avançar mai abans d'hora.
+    if(!player.paused && Number.isFinite(player.duration) && player.duration>0 && (player.duration-player.currentTime)<1.25){
+      armNaturalEndWatchdog(player);
+    }
   });
   $('#seekBar').addEventListener('input',event => { if(player.duration) player.currentTime = (+event.target.value/100)*player.duration; });
 }
@@ -1436,7 +1508,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.47',root).href;
+    const swUrl=new URL('app/sw.js?v=0.48',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

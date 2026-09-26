@@ -132,6 +132,12 @@ function cleanTechnicalUiText(message){
 function syncAdminOnlyUi(){
   document.body.classList.toggle('editor-admin',editorIsAdmin());
   $$('[data-admin-only]').forEach(el=>{el.hidden=!editorIsAdmin();});
+  const gestor=currentProfile?.role==='gestor';
+  ['games','system'].forEach(id=>{
+    $$(`[data-editor-nav="${id}"], [data-editor-view="${id}"]`).forEach(el=>{ el.hidden=gestor; });
+  });
+  const activeRestricted=document.querySelector('.editor-view.active[data-editor-view="games"], .editor-view.active[data-editor-view="system"]');
+  if(gestor && activeRestricted) switchEditorView('dashboard');
 }
 function showToast(message){
   const toast=$('#toast'); toast.textContent=cleanTechnicalUiText(message); toast.classList.add('show');
@@ -172,7 +178,8 @@ function save(next=content,message='Canvis desats'){
   }
 }
 function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.26'); }
-function switchEditorView(id){ if(!views[id]) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const titleIcon=$('#editorTitleIcon'); if(titleIcon){titleIcon.innerHTML=editorPageTitleIcon(id);titleIcon.hidden=id!=='history';} const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); window.scrollTo({top:0,behavior:'smooth'}); }
+function editorCanAccessView(id){ return !(currentProfile?.role==='gestor' && ['games','system'].includes(id)); }
+function switchEditorView(id){ if(!views[id] || !editorCanAccessView(id)) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const titleIcon=$('#editorTitleIcon'); if(titleIcon){titleIcon.innerHTML=editorPageTitleIcon(id);titleIcon.hidden=id!=='history';} const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
 function formatDateNumeric(date){ if(!date) return '—'; const [y,m,d]=String(date).split('-'); return y&&m&&d?`${d}/${m}/${y}`:String(date); }
@@ -1411,9 +1418,11 @@ function roleEditorLabel(role){
 
 function canDeleteUserProfile(profile){
   if(!profile || !currentSession || !currentProfile) return false;
+  // Ningú pot esborrar el seu propi compte des de la llista.
   if(profile.user_id===currentSession.user.id) return false;
-  if(profile.role==='admin') return false;
-  if(currentProfile.role==='admin') return ['gestor','standard'].includes(profile.role);
+  // ADMIN pot gestionar qualsevol altre usuari, inclosos altres ADMIN.
+  if(currentProfile.role==='admin') return ['admin','gestor','standard'].includes(profile.role);
+  // GESTOR només pot eliminar STANDARD; mai ADMIN ni altres GESTOR.
   if(currentProfile.role==='gestor') return profile.role==='standard';
   return false;
 }
@@ -1443,8 +1452,8 @@ async function deleteManagedUserFromEditor(userId){
   }catch(error){
     console.error(error);
     const message=String(error?.message||'No s’ha pogut eliminar l’usuari.');
-    if(/ADMIN_CANNOT_BE_DELETED/i.test(message)) showToast('El USER ADMIN no es pot eliminar des de l’EDITOR');
-    else if(/GESTOR_CANNOT_DELETE_GESTOR/i.test(message)) showToast('Un USER GESTOR només pot eliminar USER STANDARD');
+    if(/ADMIN_DELETE_REQUIRES_ADMIN/i.test(message)) showToast('Només un USER ADMIN pot eliminar un altre USER ADMIN');
+    else if(/GESTOR_CAN_ONLY_DELETE_STANDARD/i.test(message)) showToast('Un USER GESTOR només pot eliminar USER STANDARD');
     else if(/CANNOT_DELETE_SELF/i.test(message)) showToast('No pots eliminar el teu propi usuari');
     else showToast(`Error eliminant usuari: ${message}`);
   }
@@ -1697,7 +1706,7 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.47',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.48',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
