@@ -890,8 +890,9 @@ function renderTracks(){
   refreshTrackDurations(tracks);
 }
 
-// v0.49 · Continuïtat del PLAYER basada en el patró estable de Disturbing Player.
-// Una sola font de veritat: l'event `ended` decideix la pista següent.
+// v0.50 · Continuïtat del PLAYER: patró Disturbing + fallback validat al laboratori.
+// `ended` és el camí normal. Si Chromium retorna MEDIA_ERR_DECODE (code 3)
+// en lloc d'`ended`, el fallback el tracta com un final tècnic de pista.
 // En canvi automàtic NO forcem audio.load(): canviem src i cridem play() directament.
 function loadTrack(index, autoplay = false){
   const tracks = getTracks();
@@ -958,6 +959,31 @@ function playerHandleEnded(){
 
   player.currentTime=0;
   setPlayIcon();
+}
+
+// v0.50 · Fallback probado en PLAYER_TEST_BANDA_v2.
+// Algunas versiones de Chromium/Symphonia pueden terminar ciertos MP3 con
+// MEDIA_ERR_DECODE (code 3) en lugar de emitir `ended`. En ese caso tratamos
+// el error como un final técnico de pista y ejecutamos exactamente la misma
+// transición del PLAYER. El lock impide un doble salto si llegan varios eventos.
+let playerDecodeFallbackLock=false;
+function playerHandleDecodeFallback(){
+  const player=audio();
+  const tracks=getTracks();
+  const failedTrack=state.currentTrack;
+  const mediaError=player?.error;
+  if(!player || !tracks.length || mediaError?.code!==3 || failedTrack<0 || playerDecodeFallbackLock) return;
+
+  playerDecodeFallbackLock=true;
+  state.playlistAudioPlaying=false;
+  syncPlayerEqualizers(false);
+  setPlayIcon();
+
+  setTimeout(()=>{
+    // Solo avanzamos si seguimos en la misma pista que produjo el error.
+    if(state.currentTrack===failedTrack) playerHandleEnded();
+    setTimeout(()=>{ playerDecodeFallbackLock=false; },250);
+  },80);
 }
 
 function playlistAudioIsAudible(){
@@ -1132,9 +1158,14 @@ function bindPlayer(){
   player.addEventListener('seeked',()=>{ syncPlayerEqualizers(); });
   player.addEventListener('volumechange',()=>{ syncPlayerEqualizers(); });
   player.addEventListener('emptied',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
-  player.addEventListener('error',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
+  player.addEventListener('error',()=>{
+    state.playlistAudioPlaying=false;
+    syncPlayerEqualizers(false);
+    setPlayIcon();
+    playerHandleDecodeFallback();
+  });
 
-  // Patró Disturbing Player: una única transició de final de pista.
+  // Final normal de pista; MEDIA_ERR_DECODE es resol al listener `error` de dalt.
   player.addEventListener('ended',playerHandleEnded);
 
   $('#seekBar').addEventListener('input',event => { if(player.duration) player.currentTime = (+event.target.value/100)*player.duration; });
@@ -1485,7 +1516,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.49',root).href;
+    const swUrl=new URL('app/sw.js?v=0.50',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

@@ -1,0 +1,27 @@
+BANDA DE LA CALA · v0.50
+Fecha: 26/09/2026
+
+OBJETIVO
+Integrar en la APP el fallback de continuidad del PLAYER que fue validado correctamente en PLAYER_TEST_BANDA_v2.html con las pistas reales del proyecto.
+
+CAMBIOS
+1. PLAYER · CONTINUIDAD DE PLAYLIST
+- Se mantiene `ended` como final normal de pista.
+- Si Chromium devuelve MEDIA_ERR_DECODE (MediaError.code = 3) en lugar de `ended`, el error se trata como un final técnico de pista.
+- El fallback ejecuta la misma transición de reproducción que el final normal.
+- Se incluye un lock para evitar dobles saltos si llegan varios eventos durante el mismo fallo.
+- El fallback comprueba que la pista activa siga siendo la misma que produjo el error antes de avanzar.
+- No se fuerza audio.load() durante el cambio automático: se conserva el motor persistente introducido en v0.49.
+
+2. RELEASE
+- version.js actualizado a v0.50.
+- Cache-busting actualizado a v0.50.
+- Service Workers APP/EDITOR actualizados a v0.50.
+- Manifests, IDs PWA, scopes y start_url no se modifican.
+
+NO CAMBIA
+- Supabase / SQL / SMTP.
+- Roles y permisos.
+- Editor funcional, salvo numeración/cache de release.
+- UI del PLAYER.
+- Resto de secciones de APP y EDITOR.
