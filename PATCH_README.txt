@@ -1,29 +1,29 @@
-BANDA DE LA CALA · v0.65 · PATCH DESDE v0.64
+BANDA DE LA CALA · v0.66 · PATCH DESDE v0.65
 
 SOBRESCRIBIR:
 - app.js
+- editor.js
+- style.css
+- editor.css
+- supabase-client.js
 - version.js
+- editor/index.html
 - app/sw.js
 - editor/sw.js
 
 AÑADIR:
-- V0_65_CAMBIOS.txt
+- SUPABASE_UPDATE_v0.66.sql
+- SUPABASE_v0.66_PASOS.txt
+- V0_66_CAMBIOS.txt
 
-SQL / SUPABASE:
-- NO hay SQL nuevo.
-- Mantener la infraestructura creada en v0.64 (archive_submissions + archive-submissions).
+SUPABASE:
+- Ejecutar SUPABASE_UPDATE_v0.66.sql UNA SOLA VEZ antes de usar ELIMINAR DEFINITIVAMENT.
+- No hace falta crear buckets nuevos ni desplegar Edge Functions.
 
 NO TOCAR:
-- manifests / manifest IDs
-- scopes PWA
-- configuración SMTP
-- Edge Functions existentes
-- secrets
-- configuración del backup GitHub
-
-QA mínimo:
-1. USER STANDARD abre ENVIAR MULTIMEDIA PER L'ARXIU.
-2. Envía una imagen con ANY obligatorio.
-3. La APP muestra confirmación correcta y limpia el formulario.
-4. ADMIN/GESTOR comprueba que la imagen aparece en APORTACIONS > PENDENTS.
-5. Revisar PENDENTS por si intentos anteriores de v0.64 ya hubieran quedado guardados.
+- manifests / IDs / scopes PWA
+- auth / SMTP / invitaciones / recuperación de contraseña
+- PLAYER y technical-end MP3
+- backup-band-media
+- lógica pública/privada de contenido
+- minijuego diario

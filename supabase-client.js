@@ -396,6 +396,14 @@
     return rows;
   }
 
+  async function countArchiveSubmissions(status='pending'){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const clean=String(status||'pending').toLowerCase();
+    const {count,error}=await c.from('archive_submissions').select('id',{count:'exact',head:true}).eq('status',clean);
+    if(error) throw error;
+    return Number(count)||0;
+  }
+
   async function updateArchiveSubmission(id,patch={}){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     const clean={};
@@ -428,6 +436,18 @@
     return toPath;
   }
 
+  async function deleteArchiveSubmission(id,storagePath=''){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const currentSession=await session(); if(!currentSession) throw new Error('AUTH_REQUIRED');
+    if(storagePath){
+      const {error:storageError}=await c.storage.from('archive-submissions').remove([storagePath]);
+      if(storageError) throw storageError;
+    }
+    const {error}=await c.from('archive_submissions').delete().eq('id',id);
+    if(error) throw error;
+    return true;
+  }
+
   function onAuthChange(callback){
     const c=getClient(); if(!c) return null;
     return c.auth.onAuthStateChange((_event,s)=>callback(s));
@@ -435,6 +455,6 @@
 
   window.BandaSupabase={
     enabled,getClient,session,signIn,signOut,requestPasswordReset,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updateOwnGender,getQuinaNotaPublicChallenge,getQuinaNotaState,submitQuinaNotaAnswer,updatePassword,
-    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,backupOriginalMedia,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,createArchiveSubmission,listArchiveSubmissions,updateArchiveSubmission,downloadArchiveSubmission,moveArchiveSubmission,onAuthChange,dataUrlToFile
+    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,backupOriginalMedia,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,createArchiveSubmission,listArchiveSubmissions,countArchiveSubmissions,updateArchiveSubmission,downloadArchiveSubmission,moveArchiveSubmission,deleteArchiveSubmission,onAuthChange,dataUrlToFile
   };
 })();

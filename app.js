@@ -650,7 +650,8 @@ function historyMediaMarkup(periodId){
   const mobile=!!window.matchMedia?.('(max-width: 780px)').matches;
   const mediaMarkup=(item,src,index,extraClass,label,extra='')=>{
     const submitter=item.submittedByName?`<span class="history-submitter">ENVIADA PER ${esc(item.submittedByName)}</span>`:'';
-    const img=`<img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${submitter}${extra}`;
+    const author=item.authorSource?`<span class="history-author">AUTOR: ${esc(item.authorSource)}</span>`:'';
+    const img=`<img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${submitter}${author}${extra}`;
     if(mobile) return `<div class="history-image-button ${extraClass} history-image-static-mobile">${img}</div>`;
     return `<button class="history-image-button ${extraClass}" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${index}" aria-label="${esc(label)}">${img}</button>`;
   };
@@ -875,7 +876,7 @@ function historicViewerItemsForEntry(id){
     imageIndex,
     src,
     title:item.title||String(item.year||''),
-    caption:[String(item.year||''),item.description].filter(Boolean).join(' · '),
+    caption:[String(item.year||''),item.authorSource?`Autor / procedència: ${item.authorSource}`:'',item.description].filter(Boolean).join(' · '),
     alt:item.title||`Fotografia de ${item.year||''}`
   }));
 }

@@ -1,0 +1,7 @@
+BANDA DE LA CALA · v0.66 · PASOS SUPABASE
+
+1. Obre Supabase > SQL Editor.
+2. Executa el fitxer SUPABASE_UPDATE_v0.66.sql UNA SOLA VEGADA.
+3. No cal crear cap bucket nou ni desplegar cap Edge Function.
+
+Aquesta actualització només afegeix el permís RLS perquè ADMIN/GESTOR puguin eliminar definitivament una aportació i el seu registre.

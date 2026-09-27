@@ -1,0 +1,12 @@
+BANDA DE LA CALA · v0.66
+
+- APORTACIONS (EDITOR): totes les aportacions PENDENTS i REBUTJADES incorporen ELIMINAR DEFINITIVAMENT.
+- L'eliminació definitiva esborra l'original del bucket privat archive-submissions i el registre de archive_submissions.
+- REBUTJATS conserva TORNAR A PENDENTS i afegeix també eliminació definitiva.
+- HISTÒRIC (EDITOR): nou camp opcional AUTOR / PROCEDÈNCIA en les entrades de la cronologia.
+- Les aportacions validades com FOTO HISTÒRIC transfereixen l'autor/procedència al camp propi de l'entrada publicada.
+- HISTÒRIC (APP): quan existeix autor/procedència, es mostra discretament sobre la fotografia i també al visor desktop.
+- APORTACIONS (EDITOR): bubble vermella sobre la icona amb el nombre actual d'aportacions PENDENTS, tant en desktop com en la navegació superior mobile.
+- La bubble desapareix quan no hi ha pendents y se sincronitza al revisar, validar, rebutjar, restaurar o eliminar.
+- Requiere ejecutar SUPABASE_UPDATE_v0.66.sql una sola vez.
+- Versionado y caches PWA actualizados a v0.66.

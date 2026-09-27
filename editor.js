@@ -185,7 +185,7 @@ function save(next=content,message='Canvis desats'){
 }
 function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.26'); }
 function editorCanAccessView(id){ return !(currentProfile?.role==='gestor' && ['games','system'].includes(id)); }
-function switchEditorView(id){ if(!views[id] || !editorCanAccessView(id)) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const titleIcon=$('#editorTitleIcon'); if(titleIcon){titleIcon.innerHTML=editorPageTitleIcon(id);titleIcon.hidden=id!=='history';} const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); if(id==='archive') refreshArchiveReview(); window.scrollTo({top:0,behavior:'smooth'}); }
+function switchEditorView(id){ if(!views[id] || !editorCanAccessView(id)) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const titleIcon=$('#editorTitleIcon'); if(titleIcon){titleIcon.innerHTML=editorPageTitleIcon(id);titleIcon.hidden=id!=='history';} const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); if(id==='archive') refreshArchiveReview(); else refreshArchivePendingBadge(); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
 function formatDateNumeric(date){ if(!date) return '—'; const [y,m,d]=String(date).split('-'); return y&&m&&d?`${d}/${m}/${y}`:String(date); }
@@ -1131,6 +1131,7 @@ function resetHistoricForm(){
   $('#historicId').value='';
   $('#historicFormTitle').textContent='Nova entrada';
   $('#historicImagePreviewWrap').hidden=true;
+  const authorField=$('#historicAuthorSource'); if(authorField) authorField.value='';
   $('#historicImagePreviewGrid').innerHTML='';
   $('#historicPeriodHint').hidden=true;
   $('#historicImageFile').required=false;
@@ -1172,6 +1173,7 @@ function editHistoric(id){
   $('#historicYear').value=item.year||'';
   renderHistoricPeriodOptions(item.periodId||'');
   $('#historicTitle').value=item.title||'';
+  $('#historicAuthorSource').value=item.authorSource||'';
   $('#historicDescription').value=item.description||'';
   $('#historicFormTitle').textContent='Editar entrada';
   $('#historicImageFile').required=false;
@@ -1208,7 +1210,7 @@ function historicEditorItemMarkup(item){
   const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button></div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
   return `<article class="historic-editor-item">
     <div class="historic-thumb-wrap">${thumbs}</div>
-    <div class="list-main"><div class="list-kicker"><span>${esc(item.year)}</span><span>·</span><span>${esc(period?.director||'Sense període')}</span><span>·</span><span>${images.length} ${images.length===1?'foto':'fotos'}</span></div>${item.title?`<h3>${esc(item.title)}</h3>`:'<h3>Sense títol</h3>'}${item.description?`<p>${esc(item.description)}</p>`:''}</div>
+    <div class="list-main"><div class="list-kicker"><span>${esc(item.year)}</span><span>·</span><span>${esc(period?.director||'Sense període')}</span><span>·</span><span>${images.length} ${images.length===1?'foto':'fotos'}</span></div>${item.title?`<h3>${esc(item.title)}</h3>`:'<h3>Sense títol</h3>'}${item.authorSource?`<p><strong>Autor / procedència:</strong> ${esc(item.authorSource)}</p>`:''}${item.description?`<p>${esc(item.description)}</p>`:''}</div>
     <div class="list-actions"><button class="tiny-btn" data-edit-historic="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-historic="${esc(item.id)}" title="Eliminar">×</button></div>
   </article>`;
 }
@@ -1312,7 +1314,7 @@ function bindHistoric(){
       }catch(error){ console.error(error); mediaUploadErrorToast(error,'No s’han pogut pujar les fotografies'); return; }
     }
     if(!images.length){ showToast('Cal seleccionar almenys una fotografia'); return; }
-    const item={id,year,periodId,title:$('#historicTitle').value.trim(),description:$('#historicDescription').value.trim(),images,imageSrc:images[0]||'',createdAt:existing?.createdAt||new Date().toISOString()};
+    const item={id,year,periodId,title:$('#historicTitle').value.trim(),authorSource:$('#historicAuthorSource').value.trim(),description:$('#historicDescription').value.trim(),images,imageSrc:images[0]||'',createdAt:existing?.createdAt||new Date().toISOString()};
     content.historicItems=content.historicItems||[];
     const index=content.historicItems.findIndex(entry=>entry.id===id);
     if(index>=0) content.historicItems[index]=item; else content.historicItems.push(item);
@@ -1507,7 +1509,7 @@ function archiveReviewCard(row){
       <label>Descripció<textarea data-archive-field="description" rows="3" maxlength="1600" placeholder="Opcional">${esc(row.description||'')}</textarea></label>
       <label>Autor / procedència<input data-archive-field="author_source" maxlength="180" value="${esc(row.author_source||'')}" placeholder="Opcional" /></label>
       ${rejected?`<label>Nota interna del rebuig<textarea data-archive-field="rejection_note" rows="2" maxlength="500" placeholder="Opcional">${esc(row.rejection_note||'')}</textarea></label>`:''}
-      <div class="archive-review-actions">${rejected?'<button class="secondary-btn" type="button" data-archive-restore>TORNAR A PENDENTS</button>':'<button class="primary-btn" type="button" data-archive-validate>VALIDAR</button><button class="danger-btn" type="button" data-archive-reject>REBUTJAR</button>'}</div>
+      <div class="archive-review-actions">${rejected?'<button class="secondary-btn" type="button" data-archive-restore>TORNAR A PENDENTS</button>':'<button class="primary-btn" type="button" data-archive-validate>VALIDAR</button><button class="danger-btn" type="button" data-archive-reject>REBUTJAR</button>'}<button class="danger-btn archive-delete-forever" type="button" data-archive-delete>ELIMINAR DEFINITIVAMENT</button></div>
     </div>
   </article>`;
 }
@@ -1528,13 +1530,41 @@ function renderArchiveReview(){
   host.querySelectorAll('[data-archive-validate]').forEach(btn=>btn.onclick=()=>validateArchiveSubmission(btn.closest('.archive-review-card')));
   host.querySelectorAll('[data-archive-reject]').forEach(btn=>btn.onclick=()=>rejectArchiveSubmission(btn.closest('.archive-review-card')));
   host.querySelectorAll('[data-archive-restore]').forEach(btn=>btn.onclick=()=>restoreArchiveSubmission(btn.closest('.archive-review-card')));
+  host.querySelectorAll('[data-archive-delete]').forEach(btn=>btn.onclick=()=>deleteArchiveSubmissionForever(btn.closest('.archive-review-card')));
 }
+function syncArchiveNavBadge(){
+  const badge=$('#archiveNavBadge'); if(!badge) return;
+  const count=Math.max(0,Number(archiveCounts.pending)||0);
+  badge.textContent=count>99?'99+':String(count);
+  badge.hidden=count<1;
+  badge.setAttribute('aria-label',`${count} aportacions pendents`);
+}
+async function refreshArchivePendingBadge(){
+  if(!currentSession || !['admin','gestor'].includes(currentProfile?.role) || !window.BandaSupabase?.countArchiveSubmissions) return;
+  try{
+    const pending=await BandaSupabase.countArchiveSubmissions('pending');
+    archiveCounts.pending=pending;
+    syncArchiveNavBadge();
+  }catch(error){ console.error(error); }
+}
+async function deleteArchiveSubmissionForever(card){
+  const data=archiveCardData(card), row=archiveRowById(data.id); if(!row) return;
+  if(!confirm('Vols ELIMINAR DEFINITIVAMENT aquesta aportació? La imatge i les seves dades s’esborraran del sistema i no es podran recuperar.')) return;
+  try{
+    showToast('Eliminant aportació definitivament…');
+    await BandaSupabase.deleteArchiveSubmission(row.id,row.storage_path||'');
+    showToast('Aportació eliminada definitivament');
+    await refreshArchiveReview();
+  }catch(error){ console.error(error); showToast('No s’ha pogut eliminar definitivament l’aportació'); }
+}
+
 async function refreshArchiveReview(){
   if(!currentSession || !['admin','gestor'].includes(currentProfile?.role) || !window.BandaSupabase?.listArchiveSubmissions) return;
   const status=$('#archiveReviewStatus'); if(status) status.textContent='Carregant aportacions…';
   try{
     const [pending,rejected]=await Promise.all([BandaSupabase.listArchiveSubmissions('pending'),BandaSupabase.listArchiveSubmissions('rejected')]);
     archiveCounts={pending:pending.length,rejected:rejected.length};
+    syncArchiveNavBadge();
     archiveSubmissions=archiveReviewFilter==='pending'?pending:rejected;
     renderArchiveReview(); if(status) status.textContent='';
   }catch(error){ console.error(error); if(status) status.textContent='No s’han pogut carregar les aportacions. Comprova que has aplicat SUPABASE_UPDATE_v0.64.sql.'; }
@@ -1592,8 +1622,7 @@ async function validateArchiveSubmission(card){
       activeUrl=await uploadImageWithBackup({file,compressed,activeBucket:'historic-media',activeFolder:String(data.year),activeName:`aportacio-${data.year}-${row.id.slice(0,8)}`,backupRoot:`historic/${data.year}/aportacions`,backupLabel:'l’aportació'});
       publishedItemId=BandaStore.uid('hist');
       content.historicItems=content.historicItems||[];
-      const extra=data.author_source?`${data.description}${data.description?'\n\n':''}Procedència: ${data.author_source}`:data.description;
-      content.historicItems.push({id:publishedItemId,year:data.year,periodId:data.period_id,title:data.title,description:extra,images:[activeUrl],imageSrc:activeUrl,createdAt:new Date().toISOString(),submittedByName:row.submitter_name||'',submittedByUserId:row.user_id||'',archiveSubmissionId:row.id});
+      content.historicItems.push({id:publishedItemId,year:data.year,periodId:data.period_id,title:data.title,authorSource:data.author_source||'',description:data.description,images:[activeUrl],imageSrc:activeUrl,createdAt:new Date().toISOString(),submittedByName:row.submitter_name||'',submittedByUserId:row.user_id||'',archiveSubmissionId:row.id});
     }
     if(!save(content,'Aportació validada i publicada')) throw new Error('CONTENT_SAVE_FAILED');
     await remoteSaveChain;
