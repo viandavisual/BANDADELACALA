@@ -803,3 +803,40 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 @media(max-width:1350px){.system-home-copy-form{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:900px){.system-home-copy-form{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.system-home-copy-form{grid-template-columns:1fr}}
+
+
+/* ============================================================
+   v0.60 · RESUM + USUARIS MOBILE
+   ============================================================ */
+.stat-events-label-mobile{display:none!important}
+.stat-events-label-desktop{display:inline!important}
+
+@media(max-width:780px){
+  .stat-events-label-desktop{display:none!important}
+  .stat-events-label-mobile{display:inline!important}
+
+  /* USUARIS: les dues targetes han de respectar exactament l'amplada útil. */
+  .users-editor-grid{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .users-editor-grid>* ,
+  .users-editor-grid .editor-card,
+  .users-editor-grid .form-card,
+  .users-editor-grid .list-card,
+  .users-editor-grid .users-list,
+  .users-editor-grid .user-list-item{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+  }
+  .users-editor-grid .editor-card{overflow:hidden}
+  .users-editor-grid input,
+  .users-editor-grid select,
+  .users-editor-grid textarea{min-width:0!important;max-width:100%!important}
+  .users-editor-grid .user-list-item.user-strip{overflow:hidden!important}
+  .users-editor-grid .user-strip-main{flex:1 1 auto!important;min-width:0!important;max-width:100%!important}
+  .users-editor-grid .user-strip-actions{flex:0 0 auto!important;max-width:48%!important}
+}

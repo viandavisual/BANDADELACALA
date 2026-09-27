@@ -185,6 +185,14 @@ function switchEditorView(id){ if(!views[id] || !editorCanAccessView(id)) id='da
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
 function formatDateNumeric(date){ if(!date) return '—'; const [y,m,d]=String(date).split('-'); return y&&m&&d?`${d}/${m}/${y}`:String(date); }
+function formatDashboardEventDate(date){
+  if(!date) return 'SENSE DATA';
+  const [y,m,d]=String(date).split('-');
+  if(!y||!m||!d) return String(date).toUpperCase();
+  const parsed=new Date(`${y}-${m}-${d}T12:00:00`);
+  const weekday=new Intl.DateTimeFormat('ca-ES',{weekday:'long'}).format(parsed).replace(/^./,c=>c.toUpperCase()).toUpperCase();
+  return `${weekday} · ${d}/${m}/${String(y).slice(-2)}`;
+}
 
 function animateStatCounter(element,target,duration=720){
   if(!element) return;
@@ -275,7 +283,7 @@ function initManagedListViewports(){
 function renderDashboard(){
   const events=[...(content.events||[])].sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
   const tracks=content.tracks||[]; const now=new Date(); const today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; const next=events.find(event=>event.date>=today);
-  animateStatCounter($('#statEvents'),events.length); $('#statNextEvent').textContent=next?`${formatDate(next.date)} · ${next.title}`:'Cap activitat futura';
+  animateStatCounter($('#statEvents'),events.length); $('#statNextEvent').textContent=next?`${formatDashboardEventDate(next.date)} · ${next.title}`:'Cap activitat futura';
   animateStatCounter($('#statDresscodes'),(content.dresscodes||[]).length); animateStatCounter($('#statTracks'),tracks.length); $('#statVisibleTracks').textContent=`${tracks.filter(track=>track.visible!==false).length} visibles`; animateStatCounter($('#statHistoric'),(content.historicItems||[]).length);
 }
 

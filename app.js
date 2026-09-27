@@ -568,6 +568,15 @@ function isoDate(year, month, day){
   return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
 }
 
+function calendarEventHasPassed(event, now=new Date()){
+  const date=String(event?.date||'').trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const time=String(event?.time||'').trim();
+  const hasTime=/^\d{1,2}:\d{2}$/.test(time);
+  const eventMoment=new Date(`${date}T${hasTime?time:'23:59:59.999'}`);
+  return Number.isFinite(eventMoment.getTime()) && eventMoment.getTime()<now.getTime();
+}
+
 function renderCalendar(){
   const events = getEvents();
   const year = state.calendarDate.getFullYear();
@@ -589,8 +598,10 @@ function renderCalendar(){
     const key = isoDate(cellYear,cellMonth,day);
     const dayEvents = events.filter(event => event.date === key);
     const has = dayEvents.length > 0;
-    const featured = dayEvents.some(event => ['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase()));
-    const eventClass = has ? (featured ? 'event-featured' : 'event-normal') : '';
+    const activeEvents = dayEvents.filter(event => !calendarEventHasPassed(event,today));
+    const allPassed = has && activeEvents.length===0;
+    const featured = (allPassed?dayEvents:activeEvents).some(event => ['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase()));
+    const eventClass = has ? (allPassed ? 'event-past' : (featured ? 'event-featured' : 'event-normal')) : '';
     const isToday = key === isoDate(today.getFullYear(),today.getMonth(),today.getDate());
     const selected = key === state.selectedDate;
     cells.push(`<button class="calendar-day ${outside?'outside':''} ${has?'has-event':''} ${eventClass} ${isToday?'today':''} ${selected?'selected':''}" data-date="${key}" aria-label="${key}"><span class="day-number">${day}</span></button>`);

@@ -1,0 +1,24 @@
+BANDA DE LA CALA · v0.60
+
+- APP · HISTÒRIC MOBILE:
+  - corregida la duplicació accidental dels anys introduïda a v0.59;
+  - tots els períodes recuperen una única etiqueta;
+  - el període actual es mostra com 2012-ACT. només en MOBILE.
+
+- APP · CALENDARI:
+  - els dies amb esdeveniments ja finalitzats continuen marcats, però passen a gris clar;
+  - si un esdeveniment té hora, es considera passat quan aquella hora ja ha transcorregut;
+  - si no té hora, es manté actiu fins al final del dia;
+  - si un mateix dia encara conserva algun esdeveniment futur, manté el color blau/daurat corresponent.
+
+- EDITOR · RESUM:
+  - en MOBILE, ESDEVENIMENTS passa a EVENTS;
+  - la data del pròxim esdeveniment usa NOM DIA · DD/MM/AA, mantenint després el nom de l'esdeveniment.
+
+- EDITOR · USUARIS MOBILE:
+  - les dues caixes queden restringides a l'amplada útil de la pantalla;
+  - reforçats min-width/max-width i overflow dels continguts interns per evitar desbordaments.
+
+- PWA:
+  - version.js i caches actualitzats a v0.60;
+  - manifests, IDs, start_url i scopes no modificats.

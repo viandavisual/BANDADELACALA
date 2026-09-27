@@ -1,25 +1,25 @@
-BANDA DE LA CALA v0.59 — PATCH DES DE v0.58
+BANDA DE LA CALA · PATCH v0.60 DES DE v0.59
 
-SOBREESCRIURE
+SOBREESCRIURE:
 - app.js
-- editor.js
 - style.css
-- version.js
+- editor.js
+- editor.css
 - app/index.html
 - editor/index.html
 - app/sw.js
 - editor/sw.js
-- app/minigames/quina-nota-es/app.html
+- version.js
 - PATCH_README.txt
 
-AFEGIR
-- V0_59_CAMBIOS.txt
+AFEGIR:
+- V0_60_CAMBIOS.txt
 
-NO CAL TOCAR
-- Supabase / SQL
-- Edge Functions
-- manifests / IDs / scopes PWA
-- assets multimèdia
+NO CAL:
+- executar SQL;
+- modificar Supabase;
+- modificar manifests;
+- tocar tokens/secrets;
+- modificar assets.
 
-NOTA
-- El canvi d'editor.js és només el cache-buster del Service Worker per mantenir les dues PWAs alineades amb v0.59.
+Canvis: HISTÒRIC MOBILE sense anys duplicats, CALENDARI amb esdeveniments passats en gris, RESUM amb EVENTS en MOBILE i nova data, i correcció d'amplada d'USUARIS MOBILE.

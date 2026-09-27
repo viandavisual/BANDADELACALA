@@ -2255,3 +2255,39 @@ a.social-link:active,
     text-overflow:clip!important;
   }
 }
+
+
+/* ============================================================
+   v0.60 · HISTÒRIC MOBILE + CALENDARI esdeveniments passats
+   ============================================================ */
+/*
+ * v0.59 va introduir dues etiquetes responsives per als anys. Una regla
+ * antiga més específica forçava display:inline-flex a totes dues. Aquestes
+ * regles tenen la mateixa especificitat estructural i deixen visible només
+ * l'etiqueta correcta a cada mida.
+ */
+.history-period-head .history-period-inline>.history-period-years-mobile{display:none!important}
+.history-period-head .history-period-inline>.history-period-years-desktop{display:inline-flex!important}
+
+/* Un esdeveniment que ja ha acabat continua marcat al calendari, però en gris. */
+.calendar-day.event-past{
+  background:#e7e8eb!important;
+  border-color:#cfd2d6!important;
+  color:#686d73!important;
+}
+.calendar-day.event-past .day-number{color:#686d73!important}
+.calendar-day.event-past:hover{background:#dde0e3!important;border-color:#c3c7cc!important}
+.calendar-day.event-past.outside{opacity:.46}
+.calendar-day.event-past.selected{box-shadow:inset 0 0 0 3px #fff,0 0 0 3px rgba(104,109,115,.24)!important}
+.calendar-day.event-past:after{display:block!important;content:"";position:absolute;left:auto!important;right:9px;bottom:9px!important;top:auto!important;width:7px;height:7px;border-radius:50%;background:#9da2a8!important;box-shadow:none!important}
+
+@media(max-width:780px){
+  .history-period-head .history-period-inline>.history-period-years-desktop{display:none!important}
+  .history-period-head .history-period-inline>.history-period-years-mobile{display:inline-flex!important}
+  .calendar-day.event-past:after{right:5px!important;bottom:4px!important;width:5px;height:5px}
+}
+/* AVUI + event passat: el marcador també queda gris. */
+.calendar-day.today.event-past:after{
+  background:#9da2a8!important;
+  box-shadow:0 0 0 2px rgba(255,255,255,.92)!important;
+}
