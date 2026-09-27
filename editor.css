@@ -766,3 +766,22 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 
 /* v0.53 · títol gràfic de minijoc */
 .minigame-preview-title-image{display:block;max-width:min(100%,420px);max-height:110px;object-fit:contain;margin:0 0 12px}.minigame-settings-card input[type="file"]{width:100%}
+
+
+/* ============================================================
+   v0.55 · TEXT MULTILÍNIA + PNG TRANSPARENT
+   ============================================================ */
+.minigame-preview-card p,
+.historic-editor-item .list-main p{
+  white-space:pre-line!important;
+  overflow-wrap:anywhere;
+}
+.minigame-preview-icon,
+.minigame-preview-icon img{
+  background:transparent!important;
+}
+.minigame-preview-icon img{
+  object-fit:contain!important;
+  object-position:center!important;
+  filter:none!important;
+}

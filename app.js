@@ -249,7 +249,21 @@ function renderGames(){
   const icon=qne.icon
     ? `<span class="game-launch-icon game-launch-image"><img src="${esc(qne.icon)}" alt="" /></span>`
     : `<span class="game-launch-icon">${quinaNotaIconSvg()}</span>`;
-  grid.innerHTML=`<button class="game-launch-card" type="button" data-open-minigame="QUINA_NOTA_ES">${icon}<span class="game-launch-copy"><strong>${esc(qne.visibleName)}</strong><small>${esc(qne.description)}</small>${marker}</span></button>`;
+  const title=qne.titleImage
+    ? `<img class="game-launch-title-image" src="${esc(qne.titleImage)}" alt="${esc(qne.visibleName)}" />`
+    : `<strong>${esc(qne.visibleName)}</strong>`;
+  grid.innerHTML=`<button class="game-launch-card" type="button" data-open-minigame="QUINA_NOTA_ES">${icon}<span class="game-launch-copy">${title}<small class="preserve-lines">${esc(qne.description)}</small>${marker}</span></button>`;
+  const titleImage=grid.querySelector('.game-launch-title-image');
+  titleImage?.addEventListener('error',()=>{
+    const strong=document.createElement('strong');
+    strong.textContent=qne.visibleName;
+    titleImage.replaceWith(strong);
+  },{once:true});
+  const iconImage=grid.querySelector('.game-launch-icon.game-launch-image img');
+  iconImage?.addEventListener('error',()=>{
+    const host=iconImage.closest('.game-launch-icon');
+    if(host){host.classList.remove('game-launch-image');host.innerHTML=quinaNotaIconSvg();}
+  },{once:true});
   grid.querySelector('[data-open-minigame]')?.addEventListener('click',openQuinaNotaGame);
 }
 function sendToOpenMinigame(payload){
@@ -293,7 +307,7 @@ async function openQuinaNotaGame(){
       }
     }
   };
-  frame.src=`app/minigames/quina-nota-es/app.html?v=0.53&ts=${Date.now()}`;
+  frame.src=`app/minigames/quina-nota-es/app.html?v=0.55&ts=${Date.now()}`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function closeOpenMinigame({resumePlayer=true}={}){
@@ -531,7 +545,7 @@ function selectDate(date){
   $('#eventList').innerHTML = list.length ? list.map(event => {
     const dresscodeAllowed=['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase());
     const dresscode=dresscodeAllowed?(state.content.dresscodes||[]).find(item=>item.id===event.dresscodeId):null;
-    return `<article class="event-card"><span class="event-type">${esc(event.type)}</span><h4>${esc(event.title)}</h4>${event.time?`<p class="event-meta-line">${eventMetaIcon('time')}<span>${esc(event.time)}</span></p>`:''}${event.place?`<p class="event-meta-line">${eventMetaIcon('place')}<span>${esc(event.place)}</span></p>`:''}${event.notes?`<p>${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
+    return `<article class="event-card"><span class="event-type">${esc(event.type)}</span><h4>${esc(event.title)}</h4>${event.time?`<p class="event-meta-line">${eventMetaIcon('time')}<span>${esc(event.time)}</span></p>`:''}${event.place?`<p class="event-meta-line">${eventMetaIcon('place')}<span>${esc(event.place)}</span></p>`:''}${event.notes?`<p class="preserve-lines">${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
   }).join('') : '<p class="empty-copy">No hi ha cap activitat prevista per aquest dia.</p>';
   $$('[data-dresscode]').forEach(btn=>btn.addEventListener('click',()=>openDresscode(btn.dataset.dresscode)));
 }
@@ -559,7 +573,7 @@ function historyMediaMarkup(periodId){
   return periodItems.map(item=>{
     const side=(Math.max(0,items.findIndex(entry=>entry.id===item.id)) % 2===0)?'left':'right';
     const title=item.title ? `<h4>${esc(item.title)}</h4>` : '';
-    const desc=item.description ? `<p>${esc(item.description)}</p>` : '';
+    const desc=item.description ? `<p class="preserve-lines">${esc(item.description)}</p>` : '';
     const images=getHistoricImages(item);
     let gallery='';
     if(images.length){
@@ -880,7 +894,7 @@ function hemerotecaCardMarkup(item){
   const linkPreview=!images.length&&safeUrl?linkThumbMarkup(item,safeUrl):'';
   const link=safeUrl?`<a class="hemeroteca-link" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer">OBRIR ENLLAÇ ↗</a>`:'';
   const dateLabel=hemerotecaDateLabel(item);
-  return `<article class="hemeroteca-card type-${esc(item.type)}">${gallery}${linkPreview}<div class="hemeroteca-card-copy"><div class="hemeroteca-card-meta"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${dateLabel?`<strong>${esc(dateLabel)}</strong>`:''}</div><h4>${esc(item.title||hemerotecaTypeLabel(item.type))}</h4>${item.description?`<p>${esc(item.description)}</p>`:''}${link}</div></article>`;
+  return `<article class="hemeroteca-card type-${esc(item.type)}">${gallery}${linkPreview}<div class="hemeroteca-card-copy"><div class="hemeroteca-card-meta"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${dateLabel?`<strong>${esc(dateLabel)}</strong>`:''}</div><h4>${esc(item.title||hemerotecaTypeLabel(item.type))}</h4>${item.description?`<p class="preserve-lines">${esc(item.description)}</p>`:''}${link}</div></article>`;
 }
 function renderHemeroteca(){
   const host=$('#hemerotecaGrid'); if(!host)return;

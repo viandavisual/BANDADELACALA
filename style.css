@@ -1958,3 +1958,36 @@ body.minigame-fullscreen-open .mini-player,body.minigame-fullscreen-open .mobile
   .history-image-stage{grid-template-columns:36px minmax(0,1fr) 36px}.history-image-nav{width:36px!important;font-size:1.6rem!important}
   .playback-modes .mode-btn{min-height:55px!important;font-size:1.32rem!important}.playback-modes .mode-btn span{font-size:.68rem!important}
 }
+
+
+/* ============================================================
+   v0.55 · TEXT MULTILÍNIA + MINIJOC PNG/TÍTOL
+   ============================================================ */
+.preserve-lines,
+#dresscodeOtherView,
+.history-image-caption span{
+  white-space:pre-line!important;
+  overflow-wrap:anywhere;
+}
+.game-launch-icon.game-launch-image,
+.game-launch-icon.game-launch-image img{
+  background:transparent!important;
+}
+.game-launch-icon.game-launch-image img{
+  object-fit:contain!important;
+  object-position:center!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+}
+.game-launch-title-image{
+  display:block;
+  width:auto;
+  max-width:min(100%,240px);
+  max-height:74px;
+  object-fit:contain;
+  object-position:center;
+  background:transparent;
+}
+@media(max-width:780px){
+  .game-launch-title-image{max-width:min(100%,150px);max-height:48px}
+}

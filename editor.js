@@ -344,13 +344,16 @@ function mediaBackupPath(root,file){
 function cloudMediaReady(){
   return !!(editorCanWrite && supabaseActive && currentSession && window.BandaSupabase?.backupOriginalMedia);
 }
-async function uploadImageWithBackup({file,compressed,activeBucket,activeFolder,activeName,backupRoot,backupLabel='imatge'}){
+async function uploadImageWithBackup({file,compressed,activeFile=null,activeBucket,activeFolder,activeName,backupRoot,backupLabel='imatge'}){
   if(!cloudMediaReady()) throw new Error('MEDIA_CLOUD_REQUIRED');
   const githubPath=mediaBackupPath(backupRoot,file);
   showToast(`Creant còpia de seguretat de ${backupLabel}…`);
   const backup=await BandaSupabase.backupOriginalMedia(file,githubPath);
   if(backup?.stagingRemoved===false) console.warn('Backup confirmat però staging pendent de neteja',backup);
-  showToast(`Pujant ${backupLabel} optimitzada al núvol…`);
+  showToast(`Pujant ${backupLabel} al núvol…`);
+  if(activeFile instanceof Blob){
+    return (await BandaSupabase.uploadFile(activeBucket,activeFile,activeFolder,activeName)).url;
+  }
   return (await BandaSupabase.uploadDataUrl(activeBucket,compressed,activeFolder,activeName)).url;
 }
 function mediaUploadErrorToast(error,fallback='No s’ha pogut pujar la imatge'){
@@ -375,7 +378,7 @@ function bindMinigames(){
     try{
       const compressed=await compressImage(file,true);
       const imageSrc=await uploadImageWithBackup({
-        file,compressed,
+        file,compressed,activeFile:file,
         activeBucket:'app-images',activeFolder:'minigames/quina-nota-es',activeName:'quina-nota-es-icon',
         backupRoot:'minijocs/quina-nota-es/icon',backupLabel:'la icona del minijoc'
       });
@@ -389,7 +392,7 @@ function bindMinigames(){
     try{
       const compressed=await compressImage(file,true);
       const imageSrc=await uploadImageWithBackup({
-        file,compressed,
+        file,compressed,activeFile:file,
         activeBucket:'app-images',activeFolder:'minigames/quina-nota-es',activeName:'quina-nota-es-title',
         backupRoot:'minijocs/quina-nota-es/title',backupLabel:'la imatge del títol'
       });
@@ -1118,7 +1121,7 @@ function resetHistoricForm(){
   $('#historicImagePreviewWrap').hidden=true;
   $('#historicImagePreviewGrid').innerHTML='';
   $('#historicPeriodHint').hidden=true;
-  $('#historicImageFile').required=true;
+  $('#historicImageFile').required=false;
   renderHistoricPeriodOptions('');
   $('#historicYear').max=String(new Date().getFullYear());
 }

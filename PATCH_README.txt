@@ -1,26 +1,28 @@
-BANDA DE LA CALA v0.54 — PATCH DES DE v0.53
+BANDA DE LA CALA v0.55 — PATCH DES DE v0.54
 
-Sobreescriure:
+SOBRESCRIBIR:
 - editor.js
+- editor.css
+- app.js
+- style.css
 - supabase-client.js
 - version.js
 - app/sw.js
 - editor/sw.js
-- PATCH_README.txt
+- app/minigames/quina-nota-es/app.html
 
-Afegir:
-- V0_54_CAMBIOS.txt
-- SUPABASE_v0.54_PASOS.txt
-- SUPABASE_UPDATE_v0.54.sql
-- EDGE_FUNCTION_BACKUP_MEDIA_v0.54.ts
-- supabase/functions/backup-band-media/index.ts
+AÑADIR:
+- V0_55_CAMBIOS.txt
 
-No tocar:
-- manifests PWA
-- Auth / SMTP
-- create-band-user
-- dades/publicacions existents
+NO TOCAR:
+- manifests de APP/EDITOR
+- configuración de Supabase
+- secrets
+- Edge Function backup-band-media
+- bucket media-backup-staging
+- sistema de usuarios/auth
 
-Infraestructura:
-- La configuració Supabase/GitHub del backup ja s'ha realitzat manualment.
-- NO cal tornar a executar SQL ni recrear secrets/bucket/funció si continuen presents.
+NO HAY SQL NUEVO.
+
+IMPORTANTE SOBRE EL ICONO PNG:
+La v0.55 preserva el archivo original para la copia activa. Si el icono actualmente publicado fue procesado por una versión anterior y aparece con fondo negro, vuelve a cargar el PNG una sola vez desde el EDITOR después de publicar v0.55.

@@ -242,8 +242,18 @@
     return new File([bytes],name,{type:mime});
   }
 
+  function extensionForDataUrl(dataUrl){
+    const mime=(String(dataUrl||'').match(/^data:([^;,]+)/i)||[])[1]?.toLowerCase()||'';
+    if(mime==='image/png') return 'png';
+    if(mime==='image/webp') return 'webp';
+    if(mime==='image/gif') return 'gif';
+    if(mime==='image/svg+xml') return 'svg';
+    return 'jpg';
+  }
+
   async function uploadDataUrl(bucket,dataUrl,folder='misc',preferredName='image'){
-    return uploadFile(bucket,dataUrlToFile(dataUrl,`${preferredName}.jpg`),folder,preferredName);
+    const ext=extensionForDataUrl(dataUrl);
+    return uploadFile(bucket,dataUrlToFile(dataUrl,`${preferredName}.${ext}`),folder,preferredName);
   }
 
   function isStorageAlreadyExistsError(error){

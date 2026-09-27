@@ -1,0 +1,18 @@
+BANDA DE LA CALA v0.55
+
+CORRECCIONES
+- HISTÒRIC / TIMELINE: corregido el bloqueo al guardar una entrada nueva después de seleccionar una foto. El input de archivo ya no usa validación HTML required porque se vacía intencionadamente tras crear la preview; la validación se hace contra las fotos pendientes/guardadas.
+- MINIJOCS: la imagen configurada como título de QUINA NOTA ÉS? se muestra también en la card de MINIJOCS de la APP, sustituyendo visualmente el texto cuando existe.
+- MINIJOCS: icono PNG y título gráfico se suben como archivo original para preservar exactamente el canal alfa/transparencia; no se rasterizan a otro formato para la copia activa.
+- Upload DataURL: la extensión ahora se deriva del MIME real (PNG/WebP/GIF/SVG/JPG), evitando archivos PNG almacenados con extensión .jpg.
+- Transparencia: eliminado cualquier fondo/marco residual alrededor del icono personalizado del minijoc y ajustado object-fit a contain tanto en APP como en preview del EDITOR.
+- Textos multilínea: los saltos de línea introducidos en textareas se respetan en APP para Notes de Calendari, ALTRES de Dresscode, descripciones de Històric, Hemeroteca y MINIJOCS; también en previews/listados correspondientes del EDITOR y captions del visor.
+- QUINA NOTA ÉS?: el título textual interno usa ahora el nombre visible configurado si no hay imagen de título.
+
+SIN CAMBIOS DE BASE DE DATOS
+- No requiere SQL nuevo.
+- Mantiene el sistema de backup multimedia v0.54 ya configurado.
+
+PWA
+- IDs, scopes, start_url y manifests se mantienen intactos.
+- Cachés de APP y EDITOR incrementadas a v0.55.

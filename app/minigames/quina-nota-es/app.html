@@ -581,7 +581,7 @@
   
     /* v0.53 · capçalera del joc */
     .game-logo-icon{width:96px;height:96px;border-radius:24px}.game-logo-icon svg{width:60px;height:60px}
-    .game-title-image[hidden]{display:none!important}.game-title-image{display:block;max-width:min(100%,420px);max-height:98px;object-fit:contain;object-position:left center}
+    .game-title-image[hidden]{display:none!important}.game-title-image{display:block;max-width:min(100%,420px);max-height:98px;object-fit:contain;object-position:left center;background:transparent}
     .points-box{color:var(--banda-blue-deep)}
     .points-phrase{display:flex;align-items:baseline;justify-content:center;gap:5px;flex-wrap:wrap;font-size:13px;line-height:1.1;font-weight:800}
     .points-phrase .points-number{font-size:48px;line-height:.9;color:var(--banda-gold-deep);min-height:0}
@@ -788,7 +788,7 @@
   async function introTexts() {
     typeText(brandText, "BANDA DE LA CALA · MINIJOC DIARI", 16, true);
     await sleep(130);
-    if(!titleText.hidden) typeText(titleText, "QUINA NOTA ÉS?", 26, true);
+    if(!titleText.hidden) typeText(titleText, String(initData?.settings?.visibleName||"QUINA NOTA ÉS?"), 26, true);
     await sleep(180);
     typeText(heroSubMain, "Observa el pentagrama, identifica la nota i tria la resposta correcta. Tens un únic intent. Si l’encertes, guanyes +1 punt.", 14, true);
     await sleep(100);
@@ -1043,9 +1043,19 @@
     registeredUser=!!payload?.registered;
     setMuted(!!payload?.muted);
     pointsTotal=registeredUser?Number(payload?.pointsTotal??payload?.dailyState?.pointsTotal??0):0;
+    const configuredTitle=String(payload?.settings?.visibleName||'QUINA NOTA ÉS?').trim()||'QUINA NOTA ÉS?';
     const configuredTitleImage=String(payload?.settings?.titleImage||'').trim();
-    if(titleImage && configuredTitleImage){titleImage.hidden=false;titleImage.src=configuredTitleImage;titleText.hidden=true;titleImage.onerror=()=>{titleImage.hidden=true;titleText.hidden=false;};}
-    else if(titleImage){titleImage.hidden=true;titleText.hidden=false;}
+    if(titleImage && configuredTitleImage){
+      titleImage.alt=configuredTitle;
+      titleImage.hidden=false;
+      titleImage.src=configuredTitleImage;
+      titleText.hidden=true;
+      titleImage.onerror=()=>{titleImage.hidden=true;titleText.hidden=false;titleText.textContent=configuredTitle;};
+    } else if(titleImage){
+      titleImage.hidden=true;
+      titleText.hidden=false;
+      titleText.textContent=configuredTitle;
+    }
     challenge=payload?.dailyState?.challenge||standaloneChallenge(madridCycleDate());
     const chosen=drawChallenge(challenge);
     startAudioSequence();
