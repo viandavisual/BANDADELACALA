@@ -76,7 +76,10 @@
         description: item.description || '',
         images,
         imageSrc: images[0] || '',
-        createdAt: item.createdAt || ''
+        createdAt: item.createdAt || '',
+        submittedByName: item.submittedByName || '',
+        submittedByUserId: item.submittedByUserId || '',
+        archiveSubmissionId: item.archiveSubmissionId || ''
       };
     }) : [];
     base.hemerotecaItems = Array.isArray(base.hemerotecaItems) ? base.hemerotecaItems.map((item,index)=>{
@@ -95,7 +98,10 @@
         url: item.url || '',
         images,
         imageSrc: images[0] || '',
-        createdAt: item.createdAt || ''
+        createdAt: item.createdAt || '',
+        submittedByName: item.submittedByName || '',
+        submittedByUserId: item.submittedByUserId || '',
+        archiveSubmissionId: item.archiveSubmissionId || ''
       };
     }) : [];
     return base;

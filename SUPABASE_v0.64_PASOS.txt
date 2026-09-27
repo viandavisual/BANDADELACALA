@@ -1,0 +1,19 @@
+BANDA DE LA CALA v0.64 · PASOS SUPABASE
+
+1. Abre Supabase > SQL Editor.
+2. Ejecuta completo: SUPABASE_UPDATE_v0.64.sql
+3. Debe crearse:
+   - tabla public.archive_submissions
+   - bucket PRIVADO archive-submissions
+   - policies para USER registrado + ADMIN/GESTOR
+4. No hay que crear una Edge Function nueva en v0.64.
+5. No cambies las policies ya existentes de HISTORIC, AUTH, backup GitHub ni app_content.
+
+PRUEBA RECOMENDADA
+A) APP: inicia sesión como USER STANDARD.
+B) USUARI > ENVIAR MULTIMEDIA PER L'ARXIU.
+C) Envía una FOTO HISTÒRIC con ANY obligatorio.
+D) EDITOR (ADMIN/GESTOR) > APORTACIONS > PENDENTS.
+E) Revisa/edita > VALIDAR.
+F) Comprueba que aparece en HISTÒRIC y que abajo a la izquierda figura quien la envió.
+G) Repite con CARTELL y con el flujo REBUTJAR > REBUTJATS > TORNAR A PENDENTS.

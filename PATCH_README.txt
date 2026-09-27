@@ -1,41 +1,40 @@
-BANDA DE LA CALA — PATCH v0.63 desde v0.62
+BANDA DE LA CALA · v0.64 · PATCH DESDE v0.63
 
 SOBRESCRIBIR:
 - app/index.html
-- app.js
-- supabase-client.js
-- style.css
-- version.js
 - app/sw.js
-- PATCH_README.txt
+- editor/index.html
+- editor/sw.js
+- app.js
+- editor.js
+- style.css
+- editor.css
+- content-store.js
+- supabase-client.js
+- version.js
 
 AÑADIR:
-- V0_63_CAMBIOS.txt
+- SUPABASE_UPDATE_v0.64.sql
+- SUPABASE_v0.64_PASOS.txt
+- V0_64_CAMBIOS.txt
+
+SUPABASE — OBLIGATORIO UNA VEZ:
+1. Abrir Supabase > SQL Editor.
+2. Ejecutar SUPABASE_UPDATE_v0.64.sql completo.
+3. No volver a ejecutar SQL anteriores.
 
 NO TOCAR:
-- editor/
-- editor.js
-- editor.css
-- manifests APP/EDITOR
-- config.js
-- content-store.js
-- datos/contenido
+- manifests / manifest IDs
+- scopes PWA
+- configuración SMTP
 - Edge Functions existentes
-- SQL existente
-- Auth/SMTP/invitaciones existentes
+- secrets
+- configuración del backup GitHub
 
-SQL:
-- No requiere SQL nuevo.
-
-EDGE FUNCTIONS:
-- No requiere desplegar ninguna Edge Function nueva.
-
-CONFIGURACIÓN EXTERNA PENDIENTE ANTES DE USAR EN PRODUCCIÓN:
-1. En Supabase Auth, permitir como Redirect URL la URL de recuperación de la APP.
-2. Personalizar el template de email «Reset password / Recovery».
-3. Hacer una prueba real con un USER ya registrado y comprobar que conserva su user_id/perfil/puntos.
-
-COMPORTAMIENTO DE SEGURIDAD:
-- La APP no revela si un email existe o no.
-- Supabase solo envía el email de recuperación si esa dirección pertenece a una cuenta Auth existente.
-- Un email no registrado no crea cuenta ni recibe acceso.
+QA mínimo:
+- USER STANDARD envía FOTO HISTÒRIC.
+- GESTOR/ADMIN la ve en APORTACIONS > PENDENTS.
+- Validar y comprobar publicación en HISTÒRIC.
+- Comprobar etiqueta ENVIADA PER ... abajo a la izquierda.
+- Enviar CARTELL y validar en HEMEROTECA > CARTELLS.
+- Rechazar otra imagen y restaurarla desde REBUTJATS.

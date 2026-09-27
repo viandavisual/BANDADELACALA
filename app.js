@@ -649,7 +649,8 @@ function historyMediaMarkup(periodId){
   if(!periodItems.length) return `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
   const mobile=!!window.matchMedia?.('(max-width: 780px)').matches;
   const mediaMarkup=(item,src,index,extraClass,label,extra='')=>{
-    const img=`<img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${extra}`;
+    const submitter=item.submittedByName?`<span class="history-submitter">ENVIADA PER ${esc(item.submittedByName)}</span>`:'';
+    const img=`<img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${submitter}${extra}`;
     if(mobile) return `<div class="history-image-button ${extraClass} history-image-static-mobile">${img}</div>`;
     return `<button class="history-image-button ${extraClass}" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${index}" aria-label="${esc(label)}">${img}</button>`;
   };
@@ -981,7 +982,8 @@ function linkThumbMarkup(item,safeUrl){
 }
 function hemerotecaCardMarkup(item){
   const images=hemerotecaImages(item);
-  const gallery=images.length?`<div class="hemeroteca-media ${images.length===1?'single':''}">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))}" /></button>`).join('')}</div>`:'';
+  const submitter=item.submittedByName?`<span class="hemeroteca-submitter">ENVIAT PER ${esc(item.submittedByName)}</span>`:'';
+  const gallery=images.length?`<div class="hemeroteca-media ${images.length===1?'single':''}">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))}" />${submitter}</button>`).join('')}</div>`:'';
   const safeUrl=safeExternalUrl(item.url);
   const linkPreview=!images.length&&safeUrl?linkThumbMarkup(item,safeUrl):'';
   const link=safeUrl?`<a class="hemeroteca-link" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer">OBRIR ENLLAÇ ↗</a>`:'';
@@ -1908,6 +1910,64 @@ function bindUserAuth(){
       if(recovery) clearPasswordRecoveryUrl();
       status.textContent=recovery?'Contrasenya restablerta correctament. Conserves el mateix compte i tot el teu progrés.':(initialSetup?'Contrasenya creada correctament. El teu compte ja està preparat.':'Contrasenya actualitzada correctament.');
     }catch(error){ console.error(error); status.textContent='No s’ha pogut canviar la contrasenya.'; }
+  });
+
+  $('#openArchiveUploadBtn')?.addEventListener('click',()=>{
+    const box=$('#archiveUploadBox'); if(!box) return;
+    box.hidden=false;
+    $('#archiveUploadStatus').textContent='';
+    box.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  $('#closeArchiveUploadBtn')?.addEventListener('click',()=>{
+    const box=$('#archiveUploadBox'); if(box) box.hidden=true;
+    $('#archiveUploadStatus').textContent='';
+  });
+  $('#archiveUploadFile')?.addEventListener('change',event=>{
+    const preview=$('#archiveUploadPreview');
+    const file=event.target.files?.[0];
+    if(!preview) return;
+    if(preview.dataset.objectUrl){ try{URL.revokeObjectURL(preview.dataset.objectUrl);}catch(_error){} preview.dataset.objectUrl=''; }
+    if(!file){ preview.hidden=true; preview.innerHTML=''; return; }
+    const url=URL.createObjectURL(file); preview.dataset.objectUrl=url;
+    preview.innerHTML=`<img src="${esc(url)}" alt="Previsualització del material" /><small>${esc(file.name)} · ${Math.max(.1,file.size/1024/1024).toFixed(1)} MB</small>`;
+    preview.hidden=false;
+  });
+  $('#archiveUploadForm')?.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const status=$('#archiveUploadStatus');
+    if(!state.authenticated){ status.textContent='Cal iniciar sessió.'; return; }
+    const file=$('#archiveUploadFile')?.files?.[0];
+    const year=Number.parseInt($('#archiveUploadYear')?.value,10);
+    const month=Number.parseInt($('#archiveUploadMonth')?.value,10)||'';
+    const day=Number.parseInt($('#archiveUploadDay')?.value,10)||'';
+    if(!file){ status.textContent='Selecciona una imatge.'; return; }
+    if(!Number.isInteger(year)){ status.textContent='L’any és obligatori.'; return; }
+    if(month!==''&&(month<1||month>12)){ status.textContent='El mes no és vàlid.'; return; }
+    if(day!==''&&(day<1||day>31)){ status.textContent='El dia no és vàlid.'; return; }
+    if(day!==''&&month===''){ status.textContent='Per indicar el dia, selecciona també el mes.'; return; }
+    if(month!==''&&day!==''){
+      const check=new Date(year,month-1,day);
+      if(check.getFullYear()!==year||check.getMonth()!==month-1||check.getDate()!==day){ status.textContent='La data indicada no existeix.'; return; }
+    }
+    status.textContent='Enviant material…';
+    const submitBtn=event.currentTarget.querySelector('button[type="submit"]'); if(submitBtn) submitBtn.disabled=true;
+    try{
+      await BandaSupabase.createArchiveSubmission(file,{
+        mediaType:$('#archiveUploadType').value,year,month,day,
+        title:$('#archiveUploadTitle').value,
+        description:$('#archiveUploadDescription').value,
+        authorSource:$('#archiveUploadAuthor').value
+      });
+      const preview=$('#archiveUploadPreview');
+      if(preview?.dataset.objectUrl){ try{URL.revokeObjectURL(preview.dataset.objectUrl);}catch(_error){} }
+      event.currentTarget.reset();
+      if(preview){preview.hidden=true;preview.innerHTML='';preview.dataset.objectUrl='';}
+      status.textContent='Material enviat correctament. Queda pendent de revisió per un GESTOR o ADMIN.';
+    }catch(error){
+      console.error(error);
+      const code=String(error?.message||'');
+      status.textContent=code==='FILE_TOO_LARGE'?'La imatge supera el límit de 20 MB.':(code==='IMAGE_REQUIRED'?'Només es poden enviar imatges.':'No s’ha pogut enviar el material. Torna-ho a provar.');
+    }finally{ if(submitBtn) submitBtn.disabled=false; }
   });
 }
 

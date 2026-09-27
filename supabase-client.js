@@ -337,6 +337,97 @@
     return {deleted:true,path,data:data||[]};
   }
 
+
+  function archiveSafeFilename(name='image.jpg'){
+    const raw=String(name||'image.jpg');
+    const dot=raw.lastIndexOf('.');
+    const ext=(dot>=0?raw.slice(dot+1):'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+    const base=(dot>=0?raw.slice(0,dot):raw).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()||'image';
+    return `${base}.${ext}`;
+  }
+
+  async function createArchiveSubmission(file,meta={}){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const currentSession=await session(); if(!currentSession) throw new Error('AUTH_REQUIRED');
+    if(!(file instanceof Blob)) throw new Error('FILE_REQUIRED');
+    if(!String(file.type||'').startsWith('image/')) throw new Error('IMAGE_REQUIRED');
+    if(Number(file.size||0)>20*1024*1024) throw new Error('FILE_TOO_LARGE');
+    const year=Number.parseInt(meta.year,10);
+    if(!Number.isInteger(year)) throw new Error('YEAR_REQUIRED');
+    const type=String(meta.mediaType||'photo').toLowerCase();
+    if(!['photo','cartell'].includes(type)) throw new Error('INVALID_MEDIA_TYPE');
+    const id=(globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+    const filename=archiveSafeFilename(file.name||'image.jpg');
+    const storagePath=`pending/${currentSession.user.id}/${id}/${filename}`;
+    const {error:uploadError}=await c.storage.from('archive-submissions').upload(storagePath,file,{cacheControl:'3600',upsert:false,contentType:file.type||undefined});
+    if(uploadError) throw uploadError;
+    const profile=await getMyProfile().catch(()=>null);
+    const row={
+      id,user_id:currentSession.user.id,
+      submitter_name:String(profile?.name||currentSession.user.user_metadata?.name||currentSession.user.email||'USER').trim(),
+      submitter_email:String(currentSession.user.email||'').trim(),
+      media_type:type,year,
+      month:Number.parseInt(meta.month,10)||null,
+      day:Number.parseInt(meta.day,10)||null,
+      title:String(meta.title||'').trim(),
+      description:String(meta.description||'').trim(),
+      author_source:String(meta.authorSource||'').trim(),
+      storage_path:storagePath,
+      original_filename:String(file.name||filename),
+      mime_type:String(file.type||''),
+      file_size:Number(file.size||0),
+      status:'pending'
+    };
+    const {data,error}=await c.from('archive_submissions').insert(row).select('*').single();
+    if(error){ try{await c.storage.from('archive-submissions').remove([storagePath]);}catch(_error){} throw error; }
+    return data;
+  }
+
+  async function listArchiveSubmissions(status='pending'){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const clean=String(status||'pending').toLowerCase();
+    const {data,error}=await c.from('archive_submissions').select('*').eq('status',clean).order('created_at',{ascending:true});
+    if(error) throw error;
+    const rows=data||[];
+    for(const row of rows){
+      const {data:signed,error:signedError}=await c.storage.from('archive-submissions').createSignedUrl(row.storage_path,3600);
+      row.preview_url=signedError?'':(signed?.signedUrl||'');
+    }
+    return rows;
+  }
+
+  async function updateArchiveSubmission(id,patch={}){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const clean={};
+    for(const key of ['media_type','year','month','day','title','description','author_source','status','rejection_note','published_item_id','published_url','storage_path']){
+      if(Object.prototype.hasOwnProperty.call(patch,key)) clean[key]=patch[key];
+    }
+    if(Object.prototype.hasOwnProperty.call(clean,'year')) clean.year=Number.parseInt(clean.year,10);
+    if(Object.prototype.hasOwnProperty.call(clean,'month')) clean.month=Number.parseInt(clean.month,10)||null;
+    if(Object.prototype.hasOwnProperty.call(clean,'day')) clean.day=Number.parseInt(clean.day,10)||null;
+    const currentSession=await session(); if(!currentSession) throw new Error('AUTH_REQUIRED');
+    if(['validated','rejected'].includes(clean.status)){ clean.reviewed_at=new Date().toISOString(); clean.reviewed_by=currentSession.user.id; }
+    if(clean.status==='pending'){ clean.reviewed_at=null; clean.reviewed_by=null; }
+    const {data,error}=await c.from('archive_submissions').update(clean).eq('id',id).select('*').single();
+    if(error) throw error;
+    return data;
+  }
+
+  async function downloadArchiveSubmission(path){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const {data,error}=await c.storage.from('archive-submissions').download(path);
+    if(error) throw error;
+    return data;
+  }
+
+  async function moveArchiveSubmission(fromPath,toPath){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    if(fromPath===toPath) return toPath;
+    const {error}=await c.storage.from('archive-submissions').move(fromPath,toPath);
+    if(error) throw error;
+    return toPath;
+  }
+
   function onAuthChange(callback){
     const c=getClient(); if(!c) return null;
     return c.auth.onAuthStateChange((_event,s)=>callback(s));
@@ -344,6 +435,6 @@
 
   window.BandaSupabase={
     enabled,getClient,session,signIn,signOut,requestPasswordReset,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updateOwnGender,getQuinaNotaPublicChallenge,getQuinaNotaState,submitQuinaNotaAnswer,updatePassword,
-    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,backupOriginalMedia,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,onAuthChange,dataUrlToFile
+    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,backupOriginalMedia,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,createArchiveSubmission,listArchiveSubmissions,updateArchiveSubmission,downloadArchiveSubmission,moveArchiveSubmission,onAuthChange,dataUrlToFile
   };
 })();

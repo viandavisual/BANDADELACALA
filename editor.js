@@ -38,6 +38,9 @@ let pendingHemerotecaImages = [];
 let pendingHemerotecaOriginalFiles = [];
 let editingHemerotecaImages = [];
 let hemerotecaEditorFilter = 'all';
+let archiveReviewFilter = 'pending';
+let archiveSubmissions = [];
+let archiveCounts = {pending:0,rejected:0};
 const openHistoricEditorPeriods=new Set();
 const openHemerotecaEditorSections=new Set();
 let trackListResizeObserver=null;
@@ -108,6 +111,7 @@ const views = {
   dresscode:{eyebrow:'CONTINGUT',title:'DRESSCODE'},
   player:{eyebrow:'CONTINGUT',title:'PLAYER'},
   history:{eyebrow:'CONTINGUT',title:'HISTÒRIC'},
+  archive:{eyebrow:'GESTIÓ',title:'APORTACIONS'},
   games:{eyebrow:'CONTINGUT',title:'MINIJOCS'},
   users:{eyebrow:'GESTIÓ',title:'USUARIS'},
   system:{eyebrow:'CONFIGURACIÓ',title:'SISTEMA'}
@@ -181,7 +185,7 @@ function save(next=content,message='Canvis desats'){
 }
 function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.26'); }
 function editorCanAccessView(id){ return !(currentProfile?.role==='gestor' && ['games','system'].includes(id)); }
-function switchEditorView(id){ if(!views[id] || !editorCanAccessView(id)) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const titleIcon=$('#editorTitleIcon'); if(titleIcon){titleIcon.innerHTML=editorPageTitleIcon(id);titleIcon.hidden=id!=='history';} const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); window.scrollTo({top:0,behavior:'smooth'}); }
+function switchEditorView(id){ if(!views[id] || !editorCanAccessView(id)) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const titleIcon=$('#editorTitleIcon'); if(titleIcon){titleIcon.innerHTML=editorPageTitleIcon(id);titleIcon.hidden=id!=='history';} const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); if(id==='archive') refreshArchiveReview(); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
 function formatDateNumeric(date){ if(!date) return '—'; const [y,m,d]=String(date).split('-'); return y&&m&&d?`${d}/${m}/${y}`:String(date); }
@@ -1477,6 +1481,132 @@ function bindHemerotecaEditor(){
   $('#newHemerotecaBtn').onclick=resetHemerotecaForm;$('#cancelHemerotecaEdit').onclick=resetHemerotecaForm;$$('[data-hemeroteca-editor-filter]').forEach(btn=>btn.onclick=()=>{hemerotecaEditorFilter=btn.dataset.hemerotecaEditorFilter;renderHemerotecaEditor();});syncHemerotecaRuleHelp();
 }
 
+
+function archivePeriodOptions(year,selected=''){
+  const y=Number.parseInt(year,10);
+  const periods=historicPeriods().filter(period=>Number.isInteger(y)&&yearFitsPeriod(y,period));
+  const options=(periods.length?periods:historicPeriods()).map(period=>`<option value="${esc(period.id)}" ${selected===period.id?'selected':''}>${esc(historicPeriodLabel(period))}</option>`).join('');
+  return `<option value="">— Selecciona període —</option>${options}`;
+}
+function archiveSubmissionDate(row){
+  const d=new Date(row.created_at||'');
+  return Number.isNaN(d.getTime())?'':new Intl.DateTimeFormat('ca-ES',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(d);
+}
+function archiveReviewCard(row){
+  const rejected=row.status==='rejected';
+  const type=row.media_type==='cartell'?'cartell':'photo';
+  const guessed=type==='photo' ? (historicPeriods().filter(period=>yearFitsPeriod(Number(row.year),period))[0]?.id||'') : '';
+  return `<article class="archive-review-card" data-archive-id="${esc(row.id)}">
+    <div class="archive-review-media">${row.preview_url?`<img src="${esc(row.preview_url)}" alt="Material enviat" loading="lazy" />`:'<div class="empty-state">Sense previsualització</div>'}<span>ENVIAT PER ${esc(row.submitter_name||row.submitter_email||'USER')}</span></div>
+    <div class="archive-review-form">
+      <div class="archive-review-meta"><strong>${type==='cartell'?'CARTELL':'FOTO HISTÒRIC'}</strong><span>${esc(archiveSubmissionDate(row))}</span></div>
+      <div class="form-row"><label>Tipus<select data-archive-field="media_type"><option value="photo" ${type==='photo'?'selected':''}>FOTO HISTÒRIC</option><option value="cartell" ${type==='cartell'?'selected':''}>CARTELL</option></select></label><label>Any *<input data-archive-field="year" type="number" min="1900" max="2100" value="${esc(row.year||'')}" required /></label></div>
+      <div class="form-row"><label>Mes<input data-archive-field="month" type="number" min="1" max="12" value="${esc(row.month||'')}" placeholder="Opcional" /></label><label>Dia<input data-archive-field="day" type="number" min="1" max="31" value="${esc(row.day||'')}" placeholder="Opcional" /></label></div>
+      <label class="archive-period-field" ${type==='cartell'?'hidden':''}>Període HISTÒRIC *<select data-archive-field="period_id">${archivePeriodOptions(row.year,guessed)}</select></label>
+      <label>Títol<input data-archive-field="title" maxlength="180" value="${esc(row.title||'')}" placeholder="Opcional" /></label>
+      <label>Descripció<textarea data-archive-field="description" rows="3" maxlength="1600" placeholder="Opcional">${esc(row.description||'')}</textarea></label>
+      <label>Autor / procedència<input data-archive-field="author_source" maxlength="180" value="${esc(row.author_source||'')}" placeholder="Opcional" /></label>
+      ${rejected?`<label>Nota interna del rebuig<textarea data-archive-field="rejection_note" rows="2" maxlength="500" placeholder="Opcional">${esc(row.rejection_note||'')}</textarea></label>`:''}
+      <div class="archive-review-actions">${rejected?'<button class="secondary-btn" type="button" data-archive-restore>TORNAR A PENDENTS</button>':'<button class="primary-btn" type="button" data-archive-validate>VALIDAR</button><button class="danger-btn" type="button" data-archive-reject>REBUTJAR</button>'}</div>
+    </div>
+  </article>`;
+}
+function renderArchiveReview(){
+  const host=$('#archiveReviewList'); if(!host) return;
+  $('#archivePendingCount').textContent=String(archiveCounts.pending||0);
+  $('#archiveRejectedCount').textContent=String(archiveCounts.rejected||0);
+  $$('[data-archive-filter]').forEach(btn=>btn.classList.toggle('active',btn.dataset.archiveFilter===archiveReviewFilter));
+  if(!archiveSubmissions.length){ host.innerHTML=`<div class="empty-state">No hi ha aportacions ${archiveReviewFilter==='pending'?'pendents':'rebutjades'}.</div>`; return; }
+  host.innerHTML=archiveSubmissions.map(archiveReviewCard).join('');
+  host.querySelectorAll('[data-archive-field="media_type"]').forEach(select=>select.addEventListener('change',()=>{
+    const card=select.closest('.archive-review-card'); const period=card?.querySelector('.archive-period-field'); if(period) period.hidden=select.value==='cartell';
+  }));
+  host.querySelectorAll('[data-archive-field="year"]').forEach(input=>input.addEventListener('change',()=>{
+    const card=input.closest('.archive-review-card'); const select=card?.querySelector('[data-archive-field="period_id"]'); const type=card?.querySelector('[data-archive-field="media_type"]')?.value;
+    if(select&&type==='photo') select.innerHTML=archivePeriodOptions(input.value,'');
+  }));
+  host.querySelectorAll('[data-archive-validate]').forEach(btn=>btn.onclick=()=>validateArchiveSubmission(btn.closest('.archive-review-card')));
+  host.querySelectorAll('[data-archive-reject]').forEach(btn=>btn.onclick=()=>rejectArchiveSubmission(btn.closest('.archive-review-card')));
+  host.querySelectorAll('[data-archive-restore]').forEach(btn=>btn.onclick=()=>restoreArchiveSubmission(btn.closest('.archive-review-card')));
+}
+async function refreshArchiveReview(){
+  if(!currentSession || !['admin','gestor'].includes(currentProfile?.role) || !window.BandaSupabase?.listArchiveSubmissions) return;
+  const status=$('#archiveReviewStatus'); if(status) status.textContent='Carregant aportacions…';
+  try{
+    const [pending,rejected]=await Promise.all([BandaSupabase.listArchiveSubmissions('pending'),BandaSupabase.listArchiveSubmissions('rejected')]);
+    archiveCounts={pending:pending.length,rejected:rejected.length};
+    archiveSubmissions=archiveReviewFilter==='pending'?pending:rejected;
+    renderArchiveReview(); if(status) status.textContent='';
+  }catch(error){ console.error(error); if(status) status.textContent='No s’han pogut carregar les aportacions. Comprova que has aplicat SUPABASE_UPDATE_v0.64.sql.'; }
+}
+function archiveCardData(card){
+  const value=name=>card?.querySelector(`[data-archive-field="${name}"]`)?.value??'';
+  return {id:card?.dataset.archiveId||'',media_type:value('media_type'),year:Number.parseInt(value('year'),10),month:Number.parseInt(value('month'),10)||null,day:Number.parseInt(value('day'),10)||null,period_id:value('period_id'),title:value('title').trim(),description:value('description').trim(),author_source:value('author_source').trim(),rejection_note:value('rejection_note').trim()};
+}
+function archiveRowById(id){ return archiveSubmissions.find(row=>row.id===id); }
+function archiveMovedPath(row,state){ return String(row.storage_path||'').replace(/^(pending|rejected|validated)\//,`${state}/`); }
+async function rejectArchiveSubmission(card){
+  const data=archiveCardData(card), row=archiveRowById(data.id); if(!row) return;
+  const note=prompt('Motiu intern del rebuig (opcional):',data.rejection_note||'') ?? null; if(note===null) return;
+  try{
+    showToast('Rebutjant aportació…');
+    const nextPath=archiveMovedPath(row,'rejected');
+    await BandaSupabase.moveArchiveSubmission(row.storage_path,nextPath);
+    await BandaSupabase.updateArchiveSubmission(row.id,{...data,status:'rejected',rejection_note:note,storage_path:nextPath});
+    showToast('Aportació enviada a REBUTJATS'); await refreshArchiveReview();
+  }catch(error){console.error(error);showToast('No s’ha pogut rebutjar l’aportació');}
+}
+async function restoreArchiveSubmission(card){
+  const data=archiveCardData(card), row=archiveRowById(data.id); if(!row) return;
+  try{
+    showToast('Tornant a PENDENTS…');
+    const nextPath=archiveMovedPath(row,'pending');
+    await BandaSupabase.moveArchiveSubmission(row.storage_path,nextPath);
+    await BandaSupabase.updateArchiveSubmission(row.id,{...data,status:'pending',rejection_note:'',storage_path:nextPath});
+    showToast('Aportació recuperada'); await refreshArchiveReview();
+  }catch(error){console.error(error);showToast('No s’ha pogut recuperar l’aportació');}
+}
+async function validateArchiveSubmission(card){
+  const data=archiveCardData(card), row=archiveRowById(data.id); if(!row) return;
+  if(!Number.isInteger(data.year)){showToast('L’any és obligatori');return;}
+  if(data.media_type==='photo'){
+    const period=historicPeriodById(data.period_id);
+    if(!period){showToast('Selecciona el període de l’HISTÒRIC');return;}
+    if(!yearFitsPeriod(data.year,period)){showToast('L’any no correspon al període seleccionat');return;}
+  }
+  if(data.day && !data.month){showToast('Per indicar el dia, cal indicar també el mes');return;}
+  if(!confirm('Vols validar i publicar aquesta aportació?')) return;
+  try{
+    showToast('Preparant original…');
+    const blob=await BandaSupabase.downloadArchiveSubmission(row.storage_path);
+    const file=new File([blob],row.original_filename||'aportacio.jpg',{type:row.mime_type||blob.type||'image/jpeg'});
+    const compressed=await compressHistoricImage(file);
+    let activeUrl='',publishedItemId='';
+    if(data.media_type==='cartell'){
+      activeUrl=await uploadImageWithBackup({file,compressed,activeBucket:'historic-media',activeFolder:`hemeroteca/cartells/${data.year}`,activeName:`aportacio-${data.year}-${row.id.slice(0,8)}`,backupRoot:`hemeroteca/cartells/${data.year}/aportacions`,backupLabel:'l’aportació'});
+      publishedItemId=BandaStore.uid('hemero');
+      content.hemerotecaItems=content.hemerotecaItems||[];
+      const cartellDescription=data.author_source?`${data.description}${data.description?'\n\n':''}Procedència: ${data.author_source}`:data.description;
+      content.hemerotecaItems.push({id:publishedItemId,type:'cartells',year:data.year,month:data.month||'',day:data.day||'',title:data.title,description:cartellDescription,url:'',images:[activeUrl],imageSrc:activeUrl,createdAt:new Date().toISOString(),submittedByName:row.submitter_name||'',submittedByUserId:row.user_id||'',archiveSubmissionId:row.id});
+    }else{
+      activeUrl=await uploadImageWithBackup({file,compressed,activeBucket:'historic-media',activeFolder:String(data.year),activeName:`aportacio-${data.year}-${row.id.slice(0,8)}`,backupRoot:`historic/${data.year}/aportacions`,backupLabel:'l’aportació'});
+      publishedItemId=BandaStore.uid('hist');
+      content.historicItems=content.historicItems||[];
+      const extra=data.author_source?`${data.description}${data.description?'\n\n':''}Procedència: ${data.author_source}`:data.description;
+      content.historicItems.push({id:publishedItemId,year:data.year,periodId:data.period_id,title:data.title,description:extra,images:[activeUrl],imageSrc:activeUrl,createdAt:new Date().toISOString(),submittedByName:row.submitter_name||'',submittedByUserId:row.user_id||'',archiveSubmissionId:row.id});
+    }
+    if(!save(content,'Aportació validada i publicada')) throw new Error('CONTENT_SAVE_FAILED');
+    await remoteSaveChain;
+    const nextPath=archiveMovedPath(row,'validated');
+    await BandaSupabase.moveArchiveSubmission(row.storage_path,nextPath);
+    await BandaSupabase.updateArchiveSubmission(row.id,{...data,status:'validated',storage_path:nextPath,published_item_id:publishedItemId,published_url:activeUrl,rejection_note:''});
+    showToast('VALIDAT · ja forma part de l’arxiu'); await refreshArchiveReview();
+  }catch(error){console.error(error);mediaUploadErrorToast(error,'No s’ha pogut validar l’aportació');}
+}
+function bindArchiveReview(){
+  $$('[data-archive-filter]').forEach(btn=>btn.addEventListener('click',()=>{archiveReviewFilter=btn.dataset.archiveFilter||'pending';refreshArchiveReview();}));
+}
+
 function contentHasUsefulData(value){
   if(!value) return false;
   if(value.settings?.supabaseInitialized) return true;
@@ -1918,7 +2048,7 @@ function bindUsers(){
   });
 }
 
-function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderMinigames(); renderSystem(); renderUsers(); }
+function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{ if(supabaseActive) return; content=BandaStore.normalize(event.detail);renderAll();}); }
 
 function setEditorAccess({session=null,profile=null}={}){
@@ -2135,5 +2265,5 @@ async function registerEditorSW(){
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindMinigames(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();

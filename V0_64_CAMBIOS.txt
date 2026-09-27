@@ -1,0 +1,58 @@
+BANDA DE LA CALA · v0.64
+
+NUEVA FUNCIÓN: APORTACIONES MULTIMEDIA DE USERS
+
+APP · USUARI REGISTRAT
+- Nuevo botón: ENVIAR MULTIMEDIA PER L'ARXIU.
+- Solo aparece dentro de la sección de un USER con sesión iniciada.
+- Abre un formulario simple con:
+  · ENVIA EL TEU MATERIAL
+  · "Carrega FOTOS i/o CARTELLS per incloure'ls a l'apartat HISTÒRIC de la banda."
+  · tipo FOTO HISTÒRIC / CARTELL
+  · imagen
+  · ANY obligatorio
+  · mes/día opcionales
+  · título, descripción y autor/procedencia opcionales
+- Cada envío corresponde a una sola imagen, para que los metadatos queden asociados uno a uno.
+- Formatos v0.64: JPG/JPEG, PNG y WEBP.
+- Máximo: 20 MB por imagen.
+- El material NO se publica directamente: entra en una pool privada PENDENT.
+
+SUPABASE
+- Nueva tabla: public.archive_submissions.
+- Nuevo bucket PRIVADO: archive-submissions.
+- Estados: pending / validated / rejected.
+- RLS:
+  · USER autenticado solo puede crear sus propias aportaciones pending.
+  · ADMIN/GESTOR puede revisar y modificar la pool.
+  · visitantes sin sesión no tienen acceso.
+- Ejecutar SUPABASE_UPDATE_v0.64.sql una sola vez.
+
+EDITOR
+- Nueva sección: APORTACIONS.
+- Disponible para ADMIN y GESTOR.
+- Dos vistas: PENDENTS y REBUTJATS.
+- Cada aportación muestra imagen, USER remitente y datos editables.
+- VALIDAR:
+  · conserva backup del original mediante el sistema GitHub existente;
+  · genera la media activa en historic-media;
+  · añade FOTO al HISTÒRIC o CARTELL a HEMEROTECA/CARTELLS;
+  · registra la aportación como validated.
+- REBUTJAR:
+  · mueve el original a la pool rejected;
+  · no aparece en la APP.
+- REBUTJATS permite TORNAR A PENDENTS sin volver a subir el archivo.
+
+HISTÒRIC / CARTELLS
+- El material validado usa el sistema normal ya existente.
+- Las aportaciones muestran en pequeño, abajo a la izquierda de la imagen, quién envió el archivo.
+- Se conservan submittedByName, submittedByUserId y archiveSubmissionId en el contenido publicado.
+
+ARQUITECTURA
+- No se modifican manifest IDs ni scopes.
+- APP y EDITOR siguen siendo PWAs independientes.
+- No se modifica AUTH, invitaciones, SMTP, PLAYER, minijuego diario ni el sistema de contenido público/privado.
+- No requiere nueva Edge Function en v0.64: la moderación usa RLS + el sistema de backup/media ya existente.
+
+NOTA PARA v0.65
+- Afinar UX y QA real tras probar la pool con varios USERS, fotos y carteles.
