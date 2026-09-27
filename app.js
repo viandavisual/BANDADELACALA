@@ -1950,7 +1950,10 @@ function bindUserAuth(){
       if(check.getFullYear()!==year||check.getMonth()!==month-1||check.getDate()!==day){ status.textContent='La data indicada no existeix.'; return; }
     }
     status.textContent='Enviant material…';
-    const submitBtn=event.currentTarget.querySelector('button[type="submit"]'); if(submitBtn) submitBtn.disabled=true;
+    // Guardem la referència al formulari abans de qualsevol await. En un listener async,
+    // Event.currentTarget pot passar a null quan es reprèn l'execució després de l'await.
+    const form=event.currentTarget;
+    const submitBtn=form?.querySelector('button[type="submit"]'); if(submitBtn) submitBtn.disabled=true;
     try{
       await BandaSupabase.createArchiveSubmission(file,{
         mediaType:$('#archiveUploadType').value,year,month,day,
@@ -1960,7 +1963,7 @@ function bindUserAuth(){
       });
       const preview=$('#archiveUploadPreview');
       if(preview?.dataset.objectUrl){ try{URL.revokeObjectURL(preview.dataset.objectUrl);}catch(_error){} }
-      event.currentTarget.reset();
+      form?.reset();
       if(preview){preview.hidden=true;preview.innerHTML='';preview.dataset.objectUrl='';}
       status.textContent='Material enviat correctament. Queda pendent de revisió per un GESTOR o ADMIN.';
     }catch(error){

@@ -1,0 +1,19 @@
+BANDA DE LA CALA · v0.65
+
+FIX · ENVÍO DE APORTACIONES MULTIMEDIA
+
+APP · USUARI REGISTRAT
+- Corregido el envío de FOTOS/CARTELLS desde ENVIAR MULTIMEDIA PER L'ARXIU.
+- La v0.64 realizaba correctamente la operación de Supabase, pero después del await intentaba ejecutar reset() mediante event.currentTarget.
+- En listeners async, event.currentTarget puede quedar a null al reanudar la ejecución, provocando: TypeError: Cannot read properties of null (reading 'reset').
+- El formulario ahora conserva su propia referencia antes del await y la reutiliza de forma segura al terminar.
+- Resultado: tras un envío correcto ya no aparece el falso mensaje de error; el formulario se limpia y se muestra la confirmación correcta.
+
+DATOS YA ENVIADOS DESDE v0.64
+- Como el error ocurría DESPUÉS de createArchiveSubmission(), algunos intentos realizados con v0.64 pueden haber quedado realmente almacenados en APORTACIONS > PENDENTS aunque la APP mostrara error.
+- Conviene revisar la pool PENDENTS antes de repetir muchas veces las mismas imágenes.
+
+INFRAESTRUCTURA
+- No requiere SQL nuevo.
+- No modifica RLS, buckets, Auth, SMTP, manifest IDs ni scopes.
+- Se actualizan version.js y caches PWA a v0.65.

@@ -1,27 +1,17 @@
-BANDA DE LA CALA · v0.64 · PATCH DESDE v0.63
+BANDA DE LA CALA · v0.65 · PATCH DESDE v0.64
 
 SOBRESCRIBIR:
-- app/index.html
-- app/sw.js
-- editor/index.html
-- editor/sw.js
 - app.js
-- editor.js
-- style.css
-- editor.css
-- content-store.js
-- supabase-client.js
 - version.js
+- app/sw.js
+- editor/sw.js
 
 AÑADIR:
-- SUPABASE_UPDATE_v0.64.sql
-- SUPABASE_v0.64_PASOS.txt
-- V0_64_CAMBIOS.txt
+- V0_65_CAMBIOS.txt
 
-SUPABASE — OBLIGATORIO UNA VEZ:
-1. Abrir Supabase > SQL Editor.
-2. Ejecutar SUPABASE_UPDATE_v0.64.sql completo.
-3. No volver a ejecutar SQL anteriores.
+SQL / SUPABASE:
+- NO hay SQL nuevo.
+- Mantener la infraestructura creada en v0.64 (archive_submissions + archive-submissions).
 
 NO TOCAR:
 - manifests / manifest IDs
@@ -32,9 +22,8 @@ NO TOCAR:
 - configuración del backup GitHub
 
 QA mínimo:
-- USER STANDARD envía FOTO HISTÒRIC.
-- GESTOR/ADMIN la ve en APORTACIONS > PENDENTS.
-- Validar y comprobar publicación en HISTÒRIC.
-- Comprobar etiqueta ENVIADA PER ... abajo a la izquierda.
-- Enviar CARTELL y validar en HEMEROTECA > CARTELLS.
-- Rechazar otra imagen y restaurarla desde REBUTJATS.
+1. USER STANDARD abre ENVIAR MULTIMEDIA PER L'ARXIU.
+2. Envía una imagen con ANY obligatorio.
+3. La APP muestra confirmación correcta y limpia el formulario.
+4. ADMIN/GESTOR comprueba que la imagen aparece en APORTACIONS > PENDENTS.
+5. Revisar PENDENTS por si intentos anteriores de v0.64 ya hubieran quedado guardados.
