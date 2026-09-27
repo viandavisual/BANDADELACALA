@@ -1,0 +1,29 @@
+BANDA DE LA CALA v0.54 — BACKUP MULTIMÈDIA
+
+INFRAESTRUCTURA YA CONFIGURADA DURANTE EL DESARROLLO:
+- GitHub privat: viandavisual/BANDADELACALA-MEDIA-BACKUP
+- Edge Function: backup-band-media
+- Storage privat: media-backup-staging
+- Secrets:
+  GITHUB_MEDIA_BACKUP_TOKEN
+  GITHUB_MEDIA_BACKUP_OWNER
+  GITHUB_MEDIA_BACKUP_REPO
+- Policy INSERT per a ADMIN/GESTOR al bucket staging.
+
+NO CAL REPETIR AQUESTA CONFIGURACIÓ si el projecte Supabase actual ja la té.
+
+FUNCIONAMENT v0.54:
+1. EDITOR conserva temporalment el fitxer ORIGINAL seleccionat.
+2. Puja l'original a media-backup-staging.
+3. backup-band-media copia l'original al repo privat de GitHub.
+4. Només quan GitHub confirma la còpia, s'elimina el staging.
+5. EDITOR puja la versió OPTIMITZADA al Storage actiu de Supabase.
+6. El contingut de l'APP desa únicament la URL de Supabase.
+
+Si el backup falla, la imatge nova NO es publica i el temporal queda disponible
+per a reintent. No hi ha fallback base64 per a noves pujades d'imatges.
+
+IMPORTANT:
+- Esborrar una imatge des de l'EDITOR NO esborra mai la còpia de GitHub.
+- El token GitHub NO forma part del codi client; només existeix com a Secret.
+- EDGE_FUNCTION_BACKUP_MEDIA_v0.54.ts és còpia de referència del codi desplegat.

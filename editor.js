@@ -32,8 +32,10 @@ let toastTimer = null;
 let audioLibrary = [];
 let userProfiles = [];
 let pendingHistoricImages = [];
+let pendingHistoricOriginalFiles = [];
 let editingHistoricImages = [];
 let pendingHemerotecaImages = [];
+let pendingHemerotecaOriginalFiles = [];
 let editingHemerotecaImages = [];
 let hemerotecaEditorFilter = 'all';
 const openHistoricEditorPeriods=new Set();
@@ -324,6 +326,40 @@ function renderMinigames(){
   renderQuinaNotaIconPreview(settings);
   renderQuinaNotaTitlePreview(settings);
 }
+function backupSafeSegment(value,fallback='fitxer'){
+  const clean=String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'');
+  return clean || fallback;
+}
+function backupOriginalName(file){
+  const raw=backupSafeSegment(file?.name||'imatge','imatge');
+  if(/\.[a-z0-9]{1,8}$/i.test(raw)) return raw;
+  const ext=String(file?.type||'').split('/').pop()?.replace(/[^a-z0-9]/gi,'').toLowerCase() || 'bin';
+  return `${raw}.${ext}`;
+}
+function mediaBackupPath(root,file){
+  const cleanRoot=String(root||'altres').replace(/^\/+|\/+$/g,'');
+  const stamp=`${Number(file?.lastModified)||0}-${Number(file?.size)||0}`;
+  return `${cleanRoot}/${stamp}-${backupOriginalName(file)}`;
+}
+function cloudMediaReady(){
+  return !!(editorCanWrite && supabaseActive && currentSession && window.BandaSupabase?.backupOriginalMedia);
+}
+async function uploadImageWithBackup({file,compressed,activeBucket,activeFolder,activeName,backupRoot,backupLabel='imatge'}){
+  if(!cloudMediaReady()) throw new Error('MEDIA_CLOUD_REQUIRED');
+  const githubPath=mediaBackupPath(backupRoot,file);
+  showToast(`Creant còpia de seguretat de ${backupLabel}…`);
+  const backup=await BandaSupabase.backupOriginalMedia(file,githubPath);
+  if(backup?.stagingRemoved===false) console.warn('Backup confirmat però staging pendent de neteja',backup);
+  showToast(`Pujant ${backupLabel} optimitzada al núvol…`);
+  return (await BandaSupabase.uploadDataUrl(activeBucket,compressed,activeFolder,activeName)).url;
+}
+function mediaUploadErrorToast(error,fallback='No s’ha pogut pujar la imatge'){
+  const code=String(error?.message||'');
+  if(code==='MEDIA_CLOUD_REQUIRED') return showToast('Cal connexió i sessió de gestor per pujar imatges. No s’ha desat cap base64 local.');
+  if(/BACKUP|GITHUB|EDGE_FUNCTION|STORAGE/i.test(code)) return showToast('No s’ha pogut confirmar la còpia de seguretat. La imatge NO s’ha publicat. Torna-ho a provar.');
+  showToast(fallback);
+}
+
 function bindMinigames(){
   const form=$('#quinaNotaSettingsForm'); if(!form) return;
   const livePreview=()=>{
@@ -338,28 +374,28 @@ function bindMinigames(){
     const file=event.target.files?.[0]; if(!file)return;
     try{
       const compressed=await compressImage(file,true);
-      let imageSrc=compressed;
-      if(editorCanWrite && supabaseActive && currentSession){
-        showToast('Pujant icona del minijoc…');
-        imageSrc=(await BandaSupabase.uploadDataUrl('app-images',compressed,'minigames/quina-nota-es','quina-nota-es-icon')).url;
-      }
+      const imageSrc=await uploadImageWithBackup({
+        file,compressed,
+        activeBucket:'app-images',activeFolder:'minigames/quina-nota-es',activeName:'quina-nota-es-icon',
+        backupRoot:'minijocs/quina-nota-es/icon',backupLabel:'la icona del minijoc'
+      });
       const settings=quinaNotaEditorSettings(); settings.icon=imageSrc;
       save(content,'Icona de QUINA NOTA ÉS? actualitzada');
-    }catch(error){console.error(error);showToast('No s’ha pogut processar o pujar la icona');}
+    }catch(error){console.error(error);mediaUploadErrorToast(error,'No s’ha pogut processar o pujar la icona');}
     event.target.value='';
   });
   $('#quinaNotaTitleImageFile')?.addEventListener('change',async event=>{
     const file=event.target.files?.[0]; if(!file)return;
     try{
       const compressed=await compressImage(file,true);
-      let imageSrc=compressed;
-      if(editorCanWrite && supabaseActive && currentSession){
-        showToast('Pujant imatge del títol…');
-        imageSrc=(await BandaSupabase.uploadDataUrl('app-images',compressed,'minigames/quina-nota-es','quina-nota-es-title')).url;
-      }
+      const imageSrc=await uploadImageWithBackup({
+        file,compressed,
+        activeBucket:'app-images',activeFolder:'minigames/quina-nota-es',activeName:'quina-nota-es-title',
+        backupRoot:'minijocs/quina-nota-es/title',backupLabel:'la imatge del títol'
+      });
       const settings=quinaNotaEditorSettings(); settings.titleImage=imageSrc;
       save(content,'Imatge del títol de QUINA NOTA ÉS? actualitzada');
-    }catch(error){console.error(error);showToast('No s’ha pogut processar o pujar la imatge del títol');}
+    }catch(error){console.error(error);mediaUploadErrorToast(error,'No s’ha pogut processar o pujar la imatge del títol');}
     event.target.value='';
   });
   $('#clearQuinaNotaTitleImage')?.addEventListener('click',()=>{
@@ -403,14 +439,14 @@ function bindHomeEditor(){
     const file=event.target.files?.[0]; if(!file) return;
     try{
       const compressed=await compressImage(file);
-      let imageSrc=compressed;
-      if(editorCanWrite && supabaseActive && currentSession){
-        showToast('Pujant imatge de HOME…');
-        imageSrc=(await BandaSupabase.uploadDataUrl('app-images',compressed,'home','home-hero')).url;
-      }
+      const imageSrc=await uploadImageWithBackup({
+        file,compressed,
+        activeBucket:'app-images',activeFolder:'home',activeName:'home-hero',
+        backupRoot:'home',backupLabel:'la imatge de HOME'
+      });
       content.settings=content.settings||{}; content.settings.homeHeroImage=imageSrc;
       save(content,'Imatge de HOME actualitzada');
-    }catch(error){ console.error(error); showToast('No s’ha pogut processar o pujar la imatge'); }
+    }catch(error){ console.error(error); mediaUploadErrorToast(error,'No s’ha pogut processar o pujar la imatge'); }
     event.target.value='';
   });
   $('#clearHomeHero').onclick=()=>{ content.settings=content.settings||{}; content.settings.homeHeroImage=''; save(content,'Imatge per defecte restaurada'); };
@@ -1003,7 +1039,9 @@ function renderHistoricFormPreview(){
     return `<div class="history-image-preview-item ${isNew?'is-new':''}"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span><button class="history-image-remove-btn" type="button" ${removeAttr} title="${removeLabel}" aria-label="${removeLabel}">×</button></div>`;
   }).join('');
   $$('[data-remove-pending-historic]').forEach(btn=>btn.onclick=()=>{
-    pendingHistoricImages.splice(Number(btn.dataset.removePendingHistoric||0),1);
+    const index=Number(btn.dataset.removePendingHistoric||0);
+    pendingHistoricImages.splice(index,1);
+    pendingHistoricOriginalFiles.splice(index,1);
     renderHistoricFormPreview();
     showToast('Fotografia nova descartada');
   });
@@ -1073,6 +1111,7 @@ function resetHistoricForm(){
   const form=$('#historicForm'); if(!form) return;
   form.reset();
   pendingHistoricImages=[];
+  pendingHistoricOriginalFiles=[];
   editingHistoricImages=[];
   $('#historicId').value='';
   $('#historicFormTitle').textContent='Nova entrada';
@@ -1112,6 +1151,7 @@ async function compressHistoricImage(file){
 function editHistoric(id){
   const item=(content.historicItems||[]).find(entry=>entry.id===id); if(!item) return;
   pendingHistoricImages=[];
+  pendingHistoricOriginalFiles=[];
   editingHistoricImages=historicImages(item);
   $('#historicId').value=item.id;
   $('#historicYear').value=item.year||'';
@@ -1205,13 +1245,17 @@ function bindHistoric(){
       for(const file of files){
         const compressed=await compressHistoricImage(file);
         pendingHistoricImages.push(compressed);
+        pendingHistoricOriginalFiles.push(file);
         added.push(compressed);
       }
       renderHistoricFormPreview();
       showToast(`${files.length} ${files.length===1?'fotografia afegida':'fotografies afegides'} · ${pendingHistoricImages.length} pendents de desar`);
     }catch(error){
       console.error(error);
-      if(added.length) pendingHistoricImages.splice(Math.max(0,pendingHistoricImages.length-added.length),added.length);
+      if(added.length){
+        pendingHistoricImages.splice(Math.max(0,pendingHistoricImages.length-added.length),added.length);
+        pendingHistoricOriginalFiles.splice(Math.max(0,pendingHistoricOriginalFiles.length-added.length),added.length);
+      }
       renderHistoricFormPreview();
       showToast('No s’han pogut processar totes les fotografies');
     }finally{
@@ -1221,6 +1265,7 @@ function bindHistoric(){
   });
   $('#clearPendingHistoricImages')?.addEventListener('click',()=>{
     pendingHistoricImages=[];
+    pendingHistoricOriginalFiles=[];
     renderHistoricFormPreview();
     showToast('Fotografies noves descartades');
   });
@@ -1237,15 +1282,19 @@ function bindHistoric(){
     const images=existing ? historicImages(existing) : [];
     if(pendingHistoricImages.length){
       try{
+        if(!cloudMediaReady()) throw new Error('MEDIA_CLOUD_REQUIRED');
         for(let i=0;i<pendingHistoricImages.length;i++){
-          let src=pendingHistoricImages[i];
-          if(editorCanWrite && supabaseActive && currentSession){
-            showToast(`Pujant fotografia ${i+1}/${pendingHistoricImages.length} al núvol…`);
-            src=(await BandaSupabase.uploadDataUrl('historic-media',src,String(year),`historic-${year}-${images.length+i+1}`)).url;
-          }
+          const compressed=pendingHistoricImages[i];
+          const file=pendingHistoricOriginalFiles[i];
+          if(!file) throw new Error('BACKUP_FILE_REQUIRED');
+          const src=await uploadImageWithBackup({
+            file,compressed,
+            activeBucket:'historic-media',activeFolder:String(year),activeName:`historic-${year}-${images.length+i+1}`,
+            backupRoot:`historic/${year}`,backupLabel:`la fotografia ${i+1}/${pendingHistoricImages.length}`
+          });
           images.push(src);
         }
-      }catch(error){ console.error(error); showToast('No s’han pogut pujar les fotografies'); return; }
+      }catch(error){ console.error(error); mediaUploadErrorToast(error,'No s’han pogut pujar les fotografies'); return; }
     }
     if(!images.length){ showToast('Cal seleccionar almenys una fotografia'); return; }
     const item={id,year,periodId,title:$('#historicTitle').value.trim(),description:$('#historicDescription').value.trim(),images,imageSrc:images[0]||'',createdAt:existing?.createdAt||new Date().toISOString()};
@@ -1280,7 +1329,7 @@ function renderHemerotecaFormPreview(){
   const savedCount=editingHemerotecaImages.length; const images=[...editingHemerotecaImages,...pendingHemerotecaImages];
   wrap.hidden=!images.length;
   grid.innerHTML=images.map((src,index)=>{const isNew=index>=savedCount;const localIndex=isNew?index-savedCount:index;const attr=isNew?`data-remove-pending-hemero="${localIndex}"`:`data-remove-saved-hemero="${localIndex}"`;return `<div class="history-image-preview-item ${isNew?'is-new':''}"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span><button class="history-image-remove-btn" type="button" ${attr} aria-label="Eliminar imatge">×</button></div>`;}).join('');
-  $$('[data-remove-pending-hemero]').forEach(btn=>btn.onclick=()=>{pendingHemerotecaImages.splice(Number(btn.dataset.removePendingHemero||0),1);renderHemerotecaFormPreview();});
+  $$('[data-remove-pending-hemero]').forEach(btn=>btn.onclick=()=>{const index=Number(btn.dataset.removePendingHemero||0);pendingHemerotecaImages.splice(index,1);pendingHemerotecaOriginalFiles.splice(index,1);renderHemerotecaFormPreview();});
   $$('[data-remove-saved-hemero]').forEach(btn=>btn.onclick=()=>removeHemerotecaSavedImage(Number(btn.dataset.removeSavedHemero||0)));
 }
 function syncHemerotecaRuleHelp(){
@@ -1288,12 +1337,12 @@ function syncHemerotecaRuleHelp(){
   help.textContent=type==='cartells'?'CARTELLS necessita almenys una imatge. Pots afegir-ne més d’una si vols conservar diferents versions o detalls.':type==='noticies'?'NOTÍCIES admet retalls/imatges, un enllaç web actual o totes dues coses.':'ENTREVISTES admet un enllaç, imatges/documentació o totes dues coses.';
 }
 function resetHemerotecaForm(){
-  const form=$('#hemerotecaForm'); if(!form)return; form.reset(); pendingHemerotecaImages=[];editingHemerotecaImages=[];
+  const form=$('#hemerotecaForm'); if(!form)return; form.reset(); pendingHemerotecaImages=[];pendingHemerotecaOriginalFiles=[];editingHemerotecaImages=[];
   $('#hemerotecaId').value='';$('#hemerotecaFormTitle').textContent='Nova entrada';$('#hemerotecaType').value='cartells';$('#hemerotecaYear').max=String(new Date().getFullYear());$('#hemerotecaMonth').value='';$('#hemerotecaDay').value='';renderHemerotecaFormPreview();syncHemerotecaRuleHelp();
 }
 function editHemeroteca(id){
   const item=(content.hemerotecaItems||[]).find(entry=>entry.id===id); if(!item)return;
-  pendingHemerotecaImages=[];editingHemerotecaImages=hemerotecaImages(item);$('#hemerotecaId').value=item.id;$('#hemerotecaType').value=item.type||'cartells';$('#hemerotecaYear').value=item.year||'';$('#hemerotecaMonth').value=item.month||'';$('#hemerotecaDay').value=item.day||'';$('#hemerotecaTitle').value=item.title||'';$('#hemerotecaDescription').value=item.description||'';$('#hemerotecaUrl').value=item.url||'';$('#hemerotecaFormTitle').textContent='Editar entrada';renderHemerotecaFormPreview();syncHemerotecaRuleHelp();$('#hemerotecaForm').scrollIntoView({behavior:'smooth',block:'start'});
+  pendingHemerotecaImages=[];pendingHemerotecaOriginalFiles=[];editingHemerotecaImages=hemerotecaImages(item);$('#hemerotecaId').value=item.id;$('#hemerotecaType').value=item.type||'cartells';$('#hemerotecaYear').value=item.year||'';$('#hemerotecaMonth').value=item.month||'';$('#hemerotecaDay').value=item.day||'';$('#hemerotecaTitle').value=item.title||'';$('#hemerotecaDescription').value=item.description||'';$('#hemerotecaUrl').value=item.url||'';$('#hemerotecaFormTitle').textContent='Editar entrada';renderHemerotecaFormPreview();syncHemerotecaRuleHelp();$('#hemerotecaForm').scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function removeHemerotecaSavedImage(index){
   const id=$('#hemerotecaId')?.value||''; const item=(content.hemerotecaItems||[]).find(entry=>entry.id===id); if(!item)return;
@@ -1349,8 +1398,29 @@ function renderHemerotecaEditor(){
 
 function bindHemerotecaEditor(){
   $('#hemerotecaYear').max=String(new Date().getFullYear());$('#hemerotecaType').addEventListener('change',syncHemerotecaRuleHelp);
-  $('#hemerotecaImageFile').addEventListener('change',async event=>{const files=[...(event.target.files||[])];if(!files.length)return;try{showToast(`Preparant ${files.length} ${files.length===1?'imatge':'imatges'}…`);for(const file of files)pendingHemerotecaImages.push(await compressHistoricImage(file));renderHemerotecaFormPreview();}catch(error){console.error(error);showToast('No s’han pogut preparar les imatges');}finally{event.target.value='';}});
-  $('#clearPendingHemerotecaImages')?.addEventListener('click',()=>{pendingHemerotecaImages=[];renderHemerotecaFormPreview();});
+  $('#hemerotecaImageFile').addEventListener('change',async event=>{
+    const files=[...(event.target.files||[])]; if(!files.length)return;
+    const added=[];
+    try{
+      showToast(`Preparant ${files.length} ${files.length===1?'imatge':'imatges'}…`);
+      for(const file of files){
+        const compressed=await compressHistoricImage(file);
+        pendingHemerotecaImages.push(compressed);
+        pendingHemerotecaOriginalFiles.push(file);
+        added.push(compressed);
+      }
+      renderHemerotecaFormPreview();
+    }catch(error){
+      console.error(error);
+      if(added.length){
+        pendingHemerotecaImages.splice(Math.max(0,pendingHemerotecaImages.length-added.length),added.length);
+        pendingHemerotecaOriginalFiles.splice(Math.max(0,pendingHemerotecaOriginalFiles.length-added.length),added.length);
+      }
+      renderHemerotecaFormPreview();
+      showToast('No s’han pogut preparar totes les imatges');
+    }finally{event.target.value='';}
+  });
+  $('#clearPendingHemerotecaImages')?.addEventListener('click',()=>{pendingHemerotecaImages=[];pendingHemerotecaOriginalFiles=[];renderHemerotecaFormPreview();});
   $('#hemerotecaForm').addEventListener('submit',async event=>{
     event.preventDefault();
     const id=$('#hemerotecaId').value||BandaStore.uid('hemero');
@@ -1372,15 +1442,19 @@ function bindHemerotecaEditor(){
     const existing=(content.hemerotecaItems||[]).find(entry=>entry.id===id);
     const images=existing?hemerotecaImages(existing):[];
     try{
+      if(pendingHemerotecaImages.length && !cloudMediaReady()) throw new Error('MEDIA_CLOUD_REQUIRED');
       for(let i=0;i<pendingHemerotecaImages.length;i++){
-        let src=pendingHemerotecaImages[i];
-        if(editorCanWrite&&supabaseActive&&currentSession){
-          showToast(`Pujant imatge ${i+1}/${pendingHemerotecaImages.length}…`);
-          src=(await BandaSupabase.uploadDataUrl('historic-media',src,`hemeroteca/${type}/${year}`,`hemeroteca-${type}-${year}-${images.length+i+1}`)).url;
-        }
+        const compressed=pendingHemerotecaImages[i];
+        const file=pendingHemerotecaOriginalFiles[i];
+        if(!file) throw new Error('BACKUP_FILE_REQUIRED');
+        const src=await uploadImageWithBackup({
+          file,compressed,
+          activeBucket:'historic-media',activeFolder:`hemeroteca/${type}/${year}`,activeName:`hemeroteca-${type}-${year}-${images.length+i+1}`,
+          backupRoot:`hemeroteca/${type}/${year}`,backupLabel:`la imatge ${i+1}/${pendingHemerotecaImages.length}`
+        });
         images.push(src);
       }
-    }catch(error){console.error(error);showToast('No s’han pogut pujar les imatges');return;}
+    }catch(error){console.error(error);mediaUploadErrorToast(error,'No s’han pogut pujar les imatges');return;}
     if(type==='cartells'&&!images.length){showToast('CARTELLS necessita almenys una imatge');return;}
     if(type!=='cartells'&&!images.length&&!url){showToast('Afegeix almenys una imatge o un enllaç');return;}
     const item={id,type,year,month,day,title:$('#hemerotecaTitle').value.trim(),description:$('#hemerotecaDescription').value.trim(),url,images,imageSrc:images[0]||'',createdAt:existing?.createdAt||new Date().toISOString()};

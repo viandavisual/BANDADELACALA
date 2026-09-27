@@ -246,6 +246,44 @@
     return uploadFile(bucket,dataUrlToFile(dataUrl,`${preferredName}.jpg`),folder,preferredName);
   }
 
+  function isStorageAlreadyExistsError(error){
+    const status=Number(error?.statusCode||error?.status||0);
+    const message=String(error?.message||error?.error||'');
+    return status===409 || /already exists|duplicate|resource.*exists/i.test(message);
+  }
+
+  async function backupOriginalMedia(file,githubPath){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const currentSession=await session();
+    if(!currentSession) throw new Error('AUTH_REQUIRED');
+    if(!(file instanceof Blob)) throw new Error('BACKUP_FILE_REQUIRED');
+
+    const cleanGithubPath=String(githubPath||'').replace(/^\/+/, '').trim();
+    if(!cleanGithubPath) throw new Error('BACKUP_PATH_REQUIRED');
+
+    // Ruta determinista: si una petició falla després de pujar al staging,
+    // un nou intent pot reutilitzar exactament el mateix temporal.
+    const stagingPath=`pending/${currentSession.user.id}/${cleanGithubPath}`;
+    const contentType=file.type || 'application/octet-stream';
+    const {error:stagingError}=await c.storage
+      .from('media-backup-staging')
+      .upload(stagingPath,file,{cacheControl:'3600',upsert:false,contentType});
+
+    if(stagingError && !isStorageAlreadyExistsError(stagingError)) throw stagingError;
+
+    const {data,error}=await c.functions.invoke('backup-band-media',{
+      body:{
+        bucket:'media-backup-staging',
+        objectPath:stagingPath,
+        githubPath:cleanGithubPath
+      }
+    });
+    if(error) throw new Error(await functionsErrorMessage(error));
+    if(data?.error) throw new Error(String(data.error));
+    if(!data?.ok) throw new Error('MEDIA_BACKUP_NOT_CONFIRMED');
+    return data;
+  }
+
   async function listPublicFiles(bucket,folder=''){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     const {data,error}=await c.storage.from(bucket).list(folder,{limit:500,sortBy:{column:'name',order:'asc'}});
@@ -286,6 +324,6 @@
 
   window.BandaSupabase={
     enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updateOwnGender,getQuinaNotaPublicChallenge,getQuinaNotaState,submitQuinaNotaAnswer,updatePassword,
-    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,onAuthChange,dataUrlToFile
+    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,backupOriginalMedia,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,onAuthChange,dataUrlToFile
   };
 })();

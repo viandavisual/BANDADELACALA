@@ -1,0 +1,31 @@
+BANDA DE LA CALA v0.54
+
+BACKUP MULTIMÈDIA AUTOMÀTIC
+- Integrat el sistema de còpia de seguretat d'originals configurat amb Supabase + GitHub privat.
+- Cada nova imatge carregada manualment des de l'EDITOR es copia primer, en ORIGINAL, a BANDADELACALA-MEDIA-BACKUP.
+- Cobertura actual: HOME, HISTÒRIC, HEMEROTECA, icona de QUINA NOTA ÉS? i imatge de títol de QUINA NOTA ÉS?.
+- L'arquitectura queda preparada per reutilitzar el mateix servei en futures càrregues d'imatges.
+
+FLUX SEGUR
+- Original -> media-backup-staging privat -> Edge Function backup-band-media -> GitHub privat.
+- Només després de confirmació de GitHub es puja la versió optimitzada al Storage actiu.
+- Si falla GitHub/backup, la nova imatge NO es publica.
+- Si el backup ja existeix, no es sobreescriu; es considera confirmat i es continua.
+- El staging s'elimina després de backup confirmat; si GitHub falla, es conserva per a reintent.
+
+BASE64
+- Eliminat el fallback base64 per a NOVES pujades d'imatges des de l'EDITOR.
+- Les previsualitzacions poden usar data URLs només temporalment en memòria abans de desar.
+- Es manté la migració legacy de contingut base64 antic perquè pugui convertir-se a Storage.
+
+BORRAT
+- Eliminar una imatge/entrada des de l'EDITOR elimina la còpia activa de Supabase quan correspon.
+- La còpia ORIGINAL de GitHub NO s'elimina automàticament nunca.
+
+SEGURETAT
+- El PAT de GitHub no s'inclou en cap JS públic.
+- La Edge Function valida sessió i només admet ADMIN/GESTOR.
+- La funció només accepta el bucket media-backup-staging i rutes GitHub autoritzades.
+
+SISTEMES PRESERVATS
+- Auth/roles, PLAYER, MINIJOCS, identitat PWA, manifests, SMTP i lògica de v0.53 preservats.
