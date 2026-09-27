@@ -98,7 +98,7 @@ Deno.serve(async req => {
 
     if (action !== 'create') return json({ error: 'ACTION_NOT_ALLOWED' }, 400)
 
-    const name = String(body?.name || '').trim().slice(0, 120)
+    const name = String(body?.name || '').trim().toLocaleUpperCase('ca-ES').slice(0, 120)
     const email = String(body?.email || '').trim().toLowerCase()
     const role = String(body?.role || '').trim().toLowerCase()
 

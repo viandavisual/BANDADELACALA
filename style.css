@@ -2314,3 +2314,14 @@ a.social-link:active,
 /* v0.66 · autoria HISTÒRIC */
 .history-author{position:absolute;right:10px;bottom:10px;z-index:3;max-width:calc(100% - 20px);padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.62);color:#fff;font-size:10px;font-weight:800;letter-spacing:.04em;line-height:1.2}
 .history-submitter+.history-author{bottom:38px}
+
+
+/* v0.68 · USER uppercase + ARXIU upload visual/mobile */
+#profileDisplayName{text-transform:uppercase}
+.archive-upload-close{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;flex:0 0 36px!important;aspect-ratio:1/1!important;padding:0!important;border-radius:999px!important;display:grid!important;place-items:center!important;line-height:1!important;box-sizing:border-box!important}
+.archive-upload-box{background:#393A86!important;border-color:#393A86!important;color:#fff!important;box-shadow:0 12px 28px rgba(57,58,134,.18)}
+.archive-upload-box .eyebrow,.archive-upload-box .archive-upload-head h3,.archive-upload-box .archive-upload-intro,.archive-upload-box .archive-upload-form label{color:#fff!important}
+.archive-upload-box .archive-upload-close{background:#fff!important;color:#393A86!important}
+.archive-upload-box .archive-upload-preview small{background:#fff;color:#716c67}
+.archive-upload-box .user-auth-status{color:#fff!important}
+@media(max-width:780px){.archive-upload-box{scroll-margin-top:116px!important}}

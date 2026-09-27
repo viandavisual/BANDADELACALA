@@ -115,7 +115,7 @@ async function discoverAvailableAvatars(){
 }
 
 function currentUserDisplayName(){
-  return String(state.profile?.name || state.session?.user?.email?.split('@')[0] || 'USER').trim() || 'USER';
+  return (String(state.profile?.name || state.session?.user?.email?.split('@')[0] || 'USER').trim() || 'USER').toLocaleUpperCase('ca-ES');
 }
 function currentAvatarKey(){ return String(state.profile?.avatar_key || '').trim(); }
 function currentUserGender(){ const value=String(state.session?.user?.user_metadata?.gender || '').trim().toLowerCase(); return ['male','female'].includes(value)?value:''; }
@@ -657,7 +657,7 @@ function historyMediaMarkup(periodId){
   if(!periodItems.length) return `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
   const mobile=!!window.matchMedia?.('(max-width: 780px)').matches;
   const mediaMarkup=(item,src,index,extraClass,label,extra='')=>{
-    const submitter=item.submittedByName?`<span class="history-submitter">ENVIADA PER ${esc(item.submittedByName)}</span>`:'';
+    const submitter=item.submittedByName?`<span class="history-submitter">ENVIADA PER ${esc(String(item.submittedByName).toLocaleUpperCase('ca-ES'))}</span>`:'';
     const author=item.authorSource?`<span class="history-author">AUTOR: ${esc(item.authorSource)}</span>`:'';
     const img=`<img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${submitter}${author}${extra}`;
     if(mobile) return `<div class="history-image-button ${extraClass} history-image-static-mobile">${img}</div>`;
@@ -991,7 +991,7 @@ function linkThumbMarkup(item,safeUrl){
 }
 function hemerotecaCardMarkup(item){
   const images=hemerotecaImages(item);
-  const submitter=item.submittedByName?`<span class="hemeroteca-submitter">ENVIAT PER ${esc(item.submittedByName)}</span>`:'';
+  const submitter=item.submittedByName?`<span class="hemeroteca-submitter">ENVIAT PER ${esc(String(item.submittedByName).toLocaleUpperCase('ca-ES'))}</span>`:'';
   const gallery=images.length?`<div class="hemeroteca-media ${images.length===1?'single':''}">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))}" />${submitter}</button>`).join('')}</div>`:'';
   const safeUrl=safeExternalUrl(item.url);
   const linkPreview=!images.length&&safeUrl?linkThumbMarkup(item,safeUrl):'';
@@ -1879,7 +1879,7 @@ function bindUserAuth(){
   $('#nameProfileForm')?.addEventListener('submit',async event=>{
     event.preventDefault();
     const status=$('#nameProfileStatus');
-    const name=$('#profileDisplayName').value.trim();
+    const name=$('#profileDisplayName').value.trim().toLocaleUpperCase('ca-ES');
     if(!name){ status.textContent='Cal indicar un nom.'; return; }
     status.textContent='Desant nom…';
     try{

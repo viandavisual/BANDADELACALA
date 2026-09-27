@@ -1,0 +1,9 @@
+BANDA DE LA CALA · v0.68
+
+- NOM de USER sempre en MAJÚSCULES a APP/EDITOR i noves dades guardades.
+- USUARI: botó renombrat a PUJAR FATO MULTIMEDIA AQUÍ.
+- Caixa de pujada d'ARXIU en blau, X forçada a cercle i scroll mobile protegit sota el HEADER.
+- APORTACIONS > REBUTJATS ordenat sempre del més nou al més antic.
+- APORTACIONS: nou CROP manual no destructiu amb previsualització i quatre marges ajustables.
+- El crop es desa a Supabase i s'aplica només a la versió publicada; l'original complet continua sent el que va al backup.
+- Requereix SUPABASE_UPDATE_v0.68.sql.

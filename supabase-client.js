@@ -98,6 +98,7 @@
 
   async function createManagedUser({name,email,role}){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    name=String(name||'').trim().toLocaleUpperCase('ca-ES');
     if(!['gestor','standard'].includes(role)) throw new Error('ROLE_NOT_ALLOWED');
     const {data,error}=await c.functions.invoke('create-band-user',{body:{name,email,role}});
     if(error) throw new Error(await functionsErrorMessage(error));
@@ -119,7 +120,7 @@
 
   async function updateOwnProfile({name,avatarKey}){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
-    const cleanName=String(name||'').trim();
+    const cleanName=String(name||'').trim().toLocaleUpperCase('ca-ES');
     const cleanAvatar=String(avatarKey||'').trim();
     if(!cleanName) throw new Error('INVALID_NAME');
     const currentSession=await session();
@@ -364,7 +365,7 @@
     const profile=await getMyProfile().catch(()=>null);
     const row={
       id,user_id:currentSession.user.id,
-      submitter_name:String(profile?.name||currentSession.user.user_metadata?.name||currentSession.user.email||'USER').trim(),
+      submitter_name:String(profile?.name||currentSession.user.user_metadata?.name||currentSession.user.email||'USER').trim().toLocaleUpperCase('ca-ES'),
       submitter_email:String(currentSession.user.email||'').trim(),
       media_type:type,year,
       month:Number.parseInt(meta.month,10)||null,
@@ -386,7 +387,7 @@
   async function listArchiveSubmissions(status='pending'){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     const clean=String(status||'pending').toLowerCase();
-    const {data,error}=await c.from('archive_submissions').select('*').eq('status',clean).order('created_at',{ascending:true});
+    const {data,error}=await c.from('archive_submissions').select('*').eq('status',clean).order('created_at',{ascending:clean!=='rejected'});
     if(error) throw error;
     const rows=data||[];
     for(const row of rows){
@@ -407,12 +408,13 @@
   async function updateArchiveSubmission(id,patch={}){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     const clean={};
-    for(const key of ['media_type','year','month','day','title','description','author_source','status','rejection_note','published_item_id','published_url','storage_path']){
+    for(const key of ['media_type','year','month','day','title','description','author_source','status','rejection_note','published_item_id','published_url','storage_path','crop_left','crop_right','crop_top','crop_bottom']){
       if(Object.prototype.hasOwnProperty.call(patch,key)) clean[key]=patch[key];
     }
     if(Object.prototype.hasOwnProperty.call(clean,'year')) clean.year=Number.parseInt(clean.year,10);
     if(Object.prototype.hasOwnProperty.call(clean,'month')) clean.month=Number.parseInt(clean.month,10)||null;
     if(Object.prototype.hasOwnProperty.call(clean,'day')) clean.day=Number.parseInt(clean.day,10)||null;
+    for(const key of ['crop_left','crop_right','crop_top','crop_bottom']) if(Object.prototype.hasOwnProperty.call(clean,key)) clean[key]=Math.max(0,Math.min(45,Number(clean[key])||0));
     const currentSession=await session(); if(!currentSession) throw new Error('AUTH_REQUIRED');
     if(['validated','rejected'].includes(clean.status)){ clean.reviewed_at=new Date().toISOString(); clean.reviewed_by=currentSession.user.id; }
     if(clean.status==='pending'){ clean.reviewed_at=null; clean.reviewed_by=null; }

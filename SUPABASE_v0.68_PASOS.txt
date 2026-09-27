@@ -1,0 +1,7 @@
+BANDA DE LA CALA v0.68 · PASOS SUPABASE
+
+1. Obre Supabase > SQL Editor.
+2. Executa SUPABASE_UPDATE_v0.68.sql UNA SOLA VEGADA.
+3. No cal desplegar cap Edge Function nova.
+
+Aquest SQL només afegeix quatre camps numèrics per conservar el CROP manual de cada aportació.

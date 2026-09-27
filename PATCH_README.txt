@@ -1,21 +1,28 @@
-BANDA DE LA CALA · v0.67 · PATCH DESDE v0.66
+BANDA DE LA CALA v0.68 · PATCH DES DE v0.67
 
 SOBRESCRIBIR:
-- app.js
-- app/minigames/quina-nota-es/app.html
+- app/index.html
 - app/sw.js
+- editor/index.html
 - editor/sw.js
+- app.js
+- editor.js
+- style.css
+- editor.css
+- supabase-client.js
 - version.js
-- PATCH_README.txt
+- supabase/functions/create-band-user/index.ts
+- EDGE_FUNCTION_CREATE_USER_v0.48.ts
 
-AÑADIR:
-- V0_67_CAMBIOS.txt
+AFEGIR:
+- SUPABASE_UPDATE_v0.68.sql
+- SUPABASE_v0.68_PASOS.txt
+- V0_68_CAMBIOS.txt
+
+SUPABASE:
+- Executar SUPABASE_UPDATE_v0.68.sql una sola vegada.
+- NO cal desplegar cap Edge Function per a aquesta versió.
 
 NO TOCAR:
-- Supabase SQL / Edge Functions
-- manifests
-- auth / rols
-- contingut existent
-
-SQL:
-- No requiere SQL nuevo.
+- manifests / IDs PWA / scopes.
+- Auth, SMTP, backup multimèdia i lògica dels minijocs.

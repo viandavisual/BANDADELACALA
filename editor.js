@@ -16,6 +16,7 @@ const CFG = window.BANDA_CONFIG || {};
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
 const esc = value => String(value ?? '').replace(/[&<>'"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':'&quot;'}[char]));
+const upperUserName = value => String(value||'').trim().toLocaleUpperCase('ca-ES');
 function safeWebUrl(value){try{const url=new URL(String(value||''));return ['http:','https:'].includes(url.protocol)?url.href:'';}catch(_error){return '';}}
 
 const legacyLocalContent = BandaStore.load();
@@ -1499,7 +1500,7 @@ function archiveReviewCard(row){
   const type=row.media_type==='cartell'?'cartell':'photo';
   const guessed=type==='photo' ? (historicPeriods().filter(period=>yearFitsPeriod(Number(row.year),period))[0]?.id||'') : '';
   return `<article class="archive-review-card" data-archive-id="${esc(row.id)}">
-    <div class="archive-review-media">${row.preview_url?`<img src="${esc(row.preview_url)}" alt="Material enviat" loading="lazy" />`:'<div class="empty-state">Sense previsualització</div>'}<span>ENVIAT PER ${esc(row.submitter_name||row.submitter_email||'USER')}</span></div>
+    <div class="archive-review-media">${row.preview_url?`<img src="${esc(row.preview_url)}" alt="Material enviat" loading="lazy" />`:'<div class="empty-state">Sense previsualització</div>'}<span>ENVIAT PER ${esc(upperUserName(row.submitter_name)||row.submitter_email||'USER')}</span></div>
     <div class="archive-review-form">
       <div class="archive-review-meta"><strong>${type==='cartell'?'CARTELL':'FOTO HISTÒRIC'}</strong><span>${esc(archiveSubmissionDate(row))}</span></div>
       <div class="form-row"><label>Tipus<select data-archive-field="media_type"><option value="photo" ${type==='photo'?'selected':''}>FOTO HISTÒRIC</option><option value="cartell" ${type==='cartell'?'selected':''}>CARTELL</option></select></label><label>Any *<input data-archive-field="year" type="number" min="1900" max="2100" value="${esc(row.year||'')}" required /></label></div>
@@ -1509,7 +1510,8 @@ function archiveReviewCard(row){
       <label>Descripció<textarea data-archive-field="description" rows="3" maxlength="1600" placeholder="Opcional">${esc(row.description||'')}</textarea></label>
       <label>Autor / procedència<input data-archive-field="author_source" maxlength="180" value="${esc(row.author_source||'')}" placeholder="Opcional" /></label>
       ${rejected?`<label>Nota interna del rebuig<textarea data-archive-field="rejection_note" rows="2" maxlength="500" placeholder="Opcional">${esc(row.rejection_note||'')}</textarea></label>`:''}
-      <div class="archive-review-actions">${rejected?'<button class="secondary-btn" type="button" data-archive-restore>TORNAR A PENDENTS</button>':'<button class="primary-btn" type="button" data-archive-validate>VALIDAR</button><button class="danger-btn" type="button" data-archive-reject>REBUTJAR</button>'}<button class="danger-btn archive-delete-forever" type="button" data-archive-delete>ELIMINAR DEFINITIVAMENT</button></div>
+      <div class="archive-crop-summary">${[row.crop_left,row.crop_right,row.crop_top,row.crop_bottom].some(v=>Number(v)>0)?'<strong>CROP CONFIGURAT</strong><span>Es conservarà l’original complet al backup.</span>':'<span>Sense crop manual.</span>'}</div>
+      <div class="archive-review-actions"><button class="secondary-btn archive-crop-btn" type="button" data-archive-crop>CROP</button>${rejected?'<button class="secondary-btn" type="button" data-archive-restore>TORNAR A PENDENTS</button>':'<button class="primary-btn" type="button" data-archive-validate>VALIDAR</button><button class="danger-btn" type="button" data-archive-reject>REBUTJAR</button>'}<button class="danger-btn archive-delete-forever" type="button" data-archive-delete>ELIMINAR DEFINITIVAMENT</button></div>
     </div>
   </article>`;
 }
@@ -1531,6 +1533,73 @@ function renderArchiveReview(){
   host.querySelectorAll('[data-archive-reject]').forEach(btn=>btn.onclick=()=>rejectArchiveSubmission(btn.closest('.archive-review-card')));
   host.querySelectorAll('[data-archive-restore]').forEach(btn=>btn.onclick=()=>restoreArchiveSubmission(btn.closest('.archive-review-card')));
   host.querySelectorAll('[data-archive-delete]').forEach(btn=>btn.onclick=()=>deleteArchiveSubmissionForever(btn.closest('.archive-review-card')));
+  host.querySelectorAll('[data-archive-crop]').forEach(btn=>btn.onclick=()=>openArchiveCrop(btn.closest('.archive-review-card')));
+}
+let archiveCropState={id:'',row:null,objectUrl:'',image:null,left:0,right:0,top:0,bottom:0};
+function closeArchiveCrop(){
+  const modal=$('#archiveCropModal'); if(modal) modal.hidden=true;
+  if(archiveCropState.objectUrl){try{URL.revokeObjectURL(archiveCropState.objectUrl);}catch(_error){}}
+  archiveCropState={id:'',row:null,objectUrl:'',image:null,left:0,right:0,top:0,bottom:0};
+}
+function archiveCropValuesFromUi(){
+  const read=id=>Math.max(0,Math.min(45,Number($(id)?.value)||0));
+  return {left:read('#archiveCropLeft'),right:read('#archiveCropRight'),top:read('#archiveCropTop'),bottom:read('#archiveCropBottom')};
+}
+function renderArchiveCropCanvas(){
+  const canvas=$('#archiveCropCanvas'), image=archiveCropState.image; if(!canvas||!image) return;
+  const values=archiveCropValuesFromUi(); archiveCropState={...archiveCropState,...values};
+  const sx=image.naturalWidth*(values.left/100), sy=image.naturalHeight*(values.top/100);
+  const sw=image.naturalWidth*(1-(values.left+values.right)/100), sh=image.naturalHeight*(1-(values.top+values.bottom)/100);
+  const status=$('#archiveCropStatus');
+  if(sw<10||sh<10){ if(status) status.textContent='El retall és massa petit.'; return; }
+  const maxW=780,maxH=520,scale=Math.min(1,maxW/sw,maxH/sh);
+  canvas.width=Math.max(1,Math.round(sw*scale)); canvas.height=Math.max(1,Math.round(sh*scale));
+  const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(image,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+  ['Left','Right','Top','Bottom'].forEach(key=>{const out=$(`#archiveCrop${key}Value`);if(out)out.textContent=`${values[key.toLowerCase()]}%`;});
+  if(status) status.textContent=`Previsualització · ${Math.round(sw)} × ${Math.round(sh)} px`;
+}
+async function openArchiveCrop(card){
+  const data=archiveCardData(card), row=archiveRowById(data.id); if(!row) return;
+  const modal=$('#archiveCropModal'), status=$('#archiveCropStatus'); if(!modal) return;
+  modal.hidden=false; if(status) status.textContent='Carregant original…';
+  try{
+    const blob=await BandaSupabase.downloadArchiveSubmission(row.storage_path);
+    const url=URL.createObjectURL(blob), img=new Image();
+    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url;});
+    archiveCropState={id:row.id,row,objectUrl:url,image:img,left:Number(row.crop_left)||0,right:Number(row.crop_right)||0,top:Number(row.crop_top)||0,bottom:Number(row.crop_bottom)||0};
+    const map={Left:'left',Right:'right',Top:'top',Bottom:'bottom'};
+    Object.entries(map).forEach(([suffix,key])=>{const input=$(`#archiveCrop${suffix}`);if(input)input.value=String(archiveCropState[key]);});
+    renderArchiveCropCanvas();
+  }catch(error){console.error(error);if(status)status.textContent='No s’ha pogut carregar la imatge per fer el crop.';}
+}
+async function saveArchiveCrop(){
+  if(!archiveCropState.id) return;
+  const values=archiveCropValuesFromUi();
+  if(values.left+values.right>=90||values.top+values.bottom>=90){$('#archiveCropStatus').textContent='El crop és massa extrem.';return;}
+  try{
+    $('#archiveCropStatus').textContent='Desant crop…';
+    const updated=await BandaSupabase.updateArchiveSubmission(archiveCropState.id,{crop_left:values.left,crop_right:values.right,crop_top:values.top,crop_bottom:values.bottom});
+    const index=archiveSubmissions.findIndex(row=>row.id===archiveCropState.id); if(index>=0) archiveSubmissions[index]={...archiveSubmissions[index],...updated};
+    closeArchiveCrop(); renderArchiveReview(); showToast('CROP desat');
+  }catch(error){console.error(error);$('#archiveCropStatus').textContent='No s’ha pogut desar el crop. Comprova SUPABASE_UPDATE_v0.68.sql.';}
+}
+function resetArchiveCrop(){
+  ['#archiveCropLeft','#archiveCropRight','#archiveCropTop','#archiveCropBottom'].forEach(id=>{const input=$(id);if(input)input.value='0';});
+  renderArchiveCropCanvas();
+}
+async function cropArchiveFile(file,row){
+  const left=Number(row.crop_left)||0,right=Number(row.crop_right)||0,top=Number(row.crop_top)||0,bottom=Number(row.crop_bottom)||0;
+  if(!(left||right||top||bottom)) return file;
+  const url=URL.createObjectURL(file), img=new Image();
+  try{
+    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url;});
+    const sx=Math.round(img.naturalWidth*(left/100)), sy=Math.round(img.naturalHeight*(top/100));
+    const sw=Math.max(1,Math.round(img.naturalWidth*(1-(left+right)/100))), sh=Math.max(1,Math.round(img.naturalHeight*(1-(top+bottom)/100)));
+    const canvas=document.createElement('canvas'); canvas.width=sw; canvas.height=sh; canvas.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,sw,sh);
+    const type=['image/jpeg','image/png','image/webp'].includes(file.type)?file.type:'image/jpeg';
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('CROP_FAILED')),type,type==='image/jpeg'?0.94:0.92));
+    return new File([blob],file.name||'aportacio.jpg',{type});
+  }finally{URL.revokeObjectURL(url);}
 }
 function syncArchiveNavBadge(){
   const badge=$('#archiveNavBadge'); if(!badge) return;
@@ -1610,19 +1679,20 @@ async function validateArchiveSubmission(card){
     showToast('Preparant original…');
     const blob=await BandaSupabase.downloadArchiveSubmission(row.storage_path);
     const file=new File([blob],row.original_filename||'aportacio.jpg',{type:row.mime_type||blob.type||'image/jpeg'});
-    const compressed=await compressHistoricImage(file);
+    const croppedFile=await cropArchiveFile(file,row);
+    const compressed=await compressHistoricImage(croppedFile);
     let activeUrl='',publishedItemId='';
     if(data.media_type==='cartell'){
       activeUrl=await uploadImageWithBackup({file,compressed,activeBucket:'historic-media',activeFolder:`hemeroteca/cartells/${data.year}`,activeName:`aportacio-${data.year}-${row.id.slice(0,8)}`,backupRoot:`hemeroteca/cartells/${data.year}/aportacions`,backupLabel:'l’aportació'});
       publishedItemId=BandaStore.uid('hemero');
       content.hemerotecaItems=content.hemerotecaItems||[];
       const cartellDescription=data.author_source?`${data.description}${data.description?'\n\n':''}Procedència: ${data.author_source}`:data.description;
-      content.hemerotecaItems.push({id:publishedItemId,type:'cartells',year:data.year,month:data.month||'',day:data.day||'',title:data.title,description:cartellDescription,url:'',images:[activeUrl],imageSrc:activeUrl,createdAt:new Date().toISOString(),submittedByName:row.submitter_name||'',submittedByUserId:row.user_id||'',archiveSubmissionId:row.id});
+      content.hemerotecaItems.push({id:publishedItemId,type:'cartells',year:data.year,month:data.month||'',day:data.day||'',title:data.title,description:cartellDescription,url:'',images:[activeUrl],imageSrc:activeUrl,createdAt:new Date().toISOString(),submittedByName:upperUserName(row.submitter_name)||'',submittedByUserId:row.user_id||'',archiveSubmissionId:row.id});
     }else{
       activeUrl=await uploadImageWithBackup({file,compressed,activeBucket:'historic-media',activeFolder:String(data.year),activeName:`aportacio-${data.year}-${row.id.slice(0,8)}`,backupRoot:`historic/${data.year}/aportacions`,backupLabel:'l’aportació'});
       publishedItemId=BandaStore.uid('hist');
       content.historicItems=content.historicItems||[];
-      content.historicItems.push({id:publishedItemId,year:data.year,periodId:data.period_id,title:data.title,authorSource:data.author_source||'',description:data.description,images:[activeUrl],imageSrc:activeUrl,createdAt:new Date().toISOString(),submittedByName:row.submitter_name||'',submittedByUserId:row.user_id||'',archiveSubmissionId:row.id});
+      content.historicItems.push({id:publishedItemId,year:data.year,periodId:data.period_id,title:data.title,authorSource:data.author_source||'',description:data.description,images:[activeUrl],imageSrc:activeUrl,createdAt:new Date().toISOString(),submittedByName:upperUserName(row.submitter_name)||'',submittedByUserId:row.user_id||'',archiveSubmissionId:row.id});
     }
     if(!save(content,'Aportació validada i publicada')) throw new Error('CONTENT_SAVE_FAILED');
     await remoteSaveChain;
@@ -1634,6 +1704,12 @@ async function validateArchiveSubmission(card){
 }
 function bindArchiveReview(){
   $$('[data-archive-filter]').forEach(btn=>btn.addEventListener('click',()=>{archiveReviewFilter=btn.dataset.archiveFilter||'pending';refreshArchiveReview();}));
+  ['#archiveCropLeft','#archiveCropRight','#archiveCropTop','#archiveCropBottom'].forEach(id=>$(id)?.addEventListener('input',renderArchiveCropCanvas));
+  $('#archiveCropClose')?.addEventListener('click',closeArchiveCrop);
+  $('#archiveCropCancel')?.addEventListener('click',closeArchiveCrop);
+  $('#archiveCropReset')?.addEventListener('click',resetArchiveCrop);
+  $('#archiveCropSave')?.addEventListener('click',saveArchiveCrop);
+  $('#archiveCropModal')?.addEventListener('click',event=>{if(event.target===event.currentTarget)closeArchiveCrop();});
 }
 
 function contentHasUsefulData(value){
@@ -1988,10 +2064,10 @@ function renderUsers(){
   const list=$('#usersList'); if(!list) return;
   $('#usersCount').textContent=userProfiles.length;
   list.innerHTML=userProfiles.length?userProfiles.map(profile=>{
-    const deleteBtn=canDeleteUserProfile(profile)?`<button class="user-strip-delete" data-delete-user="${esc(profile.user_id)}" title="Eliminar usuari" aria-label="Eliminar ${esc(profile.name||profile.email||'usuari')}">×</button>`:'';
+    const deleteBtn=canDeleteUserProfile(profile)?`<button class="user-strip-delete" data-delete-user="${esc(profile.user_id)}" title="Eliminar usuari" aria-label="Eliminar ${esc(upperUserName(profile.name)||profile.email||'usuari')}">×</button>`:'';
     const bubbles=[];
     if(profile.must_change_password) bubbles.push('<span class="user-info-bubble pending">PEND. CONF.</span>');
-    return `<article class="list-item user-list-item user-strip"><div class="user-strip-main"><div class="user-strip-line1"><strong>${esc(profile.name||'Sense nom')}</strong><span class="user-strip-role">${esc(roleEditorLabel(profile.role))}</span></div><span class="user-strip-email">${esc(profile.email||'')}</span></div><div class="user-strip-actions">${bubbles.join('')}${deleteBtn}</div></article>`;
+    return `<article class="list-item user-list-item user-strip"><div class="user-strip-main"><div class="user-strip-line1"><strong>${esc(upperUserName(profile.name)||'SENSE NOM')}</strong><span class="user-strip-role">${esc(roleEditorLabel(profile.role))}</span></div><span class="user-strip-email">${esc(profile.email||'')}</span></div><div class="user-strip-actions">${bubbles.join('')}${deleteBtn}</div></article>`;
   }).join(''):'<div class="empty-state">Encara no hi ha usuaris.</div>';
   $$('[data-delete-user]').forEach(btn=>btn.onclick=()=>deleteManagedUserFromEditor(btn.dataset.deleteUser));
   fitManagedListToFour(list);
@@ -2001,7 +2077,7 @@ async function deleteManagedUserFromEditor(userId){
   if(!editorCanWrite || !userId) return;
   const profile=userProfiles.find(row=>row.user_id===userId);
   if(!profile || !canDeleteUserProfile(profile)) return;
-  const label=profile.name||profile.email||'aquest usuari';
+  const label=upperUserName(profile.name)||profile.email||'aquest usuari';
   const ok=confirm(`Vols eliminar completament ${label}?\n\nS'esborrarà el seu accés i el seu perfil. Aquesta acció no es pot desfer.`);
   if(!ok) return;
   try{
@@ -2052,7 +2128,7 @@ function bindUsers(){
   $('#createUserForm')?.addEventListener('submit',async event=>{
     event.preventDefault();
     if(!editorCanWrite) return;
-    const name=$('#newUserName').value.trim();
+    const name=$('#newUserName').value.trim().toLocaleUpperCase('ca-ES');
     const email=$('#newUserEmail').value.trim().toLowerCase();
     const role=$('#newUserRole').value;
     const status=$('#createUserStatus'), btn=$('#createUserBtn');

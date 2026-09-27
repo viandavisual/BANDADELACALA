@@ -14,7 +14,7 @@
   <link rel="manifest" href="editor/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="editor/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="editor/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="editor.css?v=0.64" />
+  <link rel="stylesheet" href="editor.css?v=0.68" />
 </head>
 <body>
   <section id="editorLoginGate" class="editor-login-gate" aria-label="Accés a l'Editor">
@@ -366,14 +366,28 @@
       <p id="editorInstallHelpText">Utilitza l’opció d’instal·lació del navegador.</p>
     </div>
   </div>
+  <div id="archiveCropModal" class="archive-crop-modal" hidden>
+    <div class="archive-crop-card" role="dialog" aria-modal="true" aria-labelledby="archiveCropTitle">
+      <div class="archive-crop-head"><div><span class="eyebrow">APORTACIONS</span><h2 id="archiveCropTitle">CROP MANUAL</h2></div><button id="archiveCropClose" class="modal-close archive-crop-close" type="button" aria-label="Tancar">×</button></div>
+      <div class="archive-crop-preview"><canvas id="archiveCropCanvas"></canvas></div>
+      <div class="archive-crop-controls">
+        <label>ESQUERRA <span id="archiveCropLeftValue">0%</span><input id="archiveCropLeft" type="range" min="0" max="45" step="1" value="0"></label>
+        <label>DRETA <span id="archiveCropRightValue">0%</span><input id="archiveCropRight" type="range" min="0" max="45" step="1" value="0"></label>
+        <label>SUPERIOR <span id="archiveCropTopValue">0%</span><input id="archiveCropTop" type="range" min="0" max="45" step="1" value="0"></label>
+        <label>INFERIOR <span id="archiveCropBottomValue">0%</span><input id="archiveCropBottom" type="range" min="0" max="45" step="1" value="0"></label>
+      </div>
+      <small id="archiveCropStatus" class="helper-copy" aria-live="polite"></small>
+      <div class="archive-crop-actions"><button id="archiveCropReset" class="secondary-btn" type="button">RESTABLIR</button><button id="archiveCropCancel" class="secondary-btn" type="button">CANCEL·LAR</button><button id="archiveCropSave" class="primary-btn" type="button">DESAR CROP</button></div>
+    </div>
+  </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="version.js?v=0.64"></script>
-  <script src="config.js?v=0.64"></script>
-  <script src="data/content-published.js?v=0.64"></script>
-  <script src="content-store.js?v=0.64"></script>
+  <script src="version.js?v=0.68"></script>
+  <script src="config.js?v=0.68"></script>
+  <script src="data/content-published.js?v=0.68"></script>
+  <script src="content-store.js?v=0.68"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.64"></script>
-  <script src="editor.js?v=0.64"></script>
+  <script src="supabase-client.js?v=0.68"></script>
+  <script src="editor.js?v=0.68"></script>
 </body>
 </html>
