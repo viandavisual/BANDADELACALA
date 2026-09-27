@@ -1,0 +1,27 @@
+BANDA DE LA CALA · v0.58 · CANVIS
+Data: 27/09/2026
+
+1. PLAYER · FONS VISUAL
+- Les fotografies del carrusel d’HISTÒRIC passen del 25% al 50% d’opacitat.
+- Es mantenen Ken Burns, ordre random, precàrrega, crossfade i fullscreen sense reinicis.
+
+2. PLAYER · PLAYLIST MOBILE
+- La columna de duració passa a tenir amplada real suficient per valors com 4:13 o 40:27.
+- La duració queda sempre dins de la seva caixa de pista.
+- Títol i autoria poden truncar-se amb el·lipsi abans d’empènyer la duració fora de la card.
+- Canvi limitat a MOBILE.
+
+3. QUINA NOTA ÉS? · CAPÇALERA MOBILE
+- La capçalera deixa de competir en dues columnes rígides.
+- Icona + logo del minijoc disposen de tot l’ample de la capçalera.
+- El logo configurat al EDITOR es redimensiona dins de l’espai disponible i no queda cobert per puntuació/sortida.
+- La descripció ocupa el 100% de l’ample útil de la caixa.
+- Puntuació i SURT DEL JOC passen a una fila pròpia sota la descripció.
+- En users no registrats, el botó de sortida aprofita tot l’ample disponible.
+
+4. PWA / CONTROL
+- Versió v0.58.
+- Caches APP/EDITOR actualitzades a v0.58.
+- Manifest IDs, scopes i start_url NO modificats.
+- Auth, rols, backup multimèdia, HISTÒRIC i configuració Supabase NO modificats.
+- No requereix SQL nou.

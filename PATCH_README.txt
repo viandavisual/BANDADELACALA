@@ -1,4 +1,4 @@
-BANDA DE LA CALA v0.57 — PATCH DES DE v0.56
+BANDA DE LA CALA v0.58 — PATCH DES DE v0.57
 
 SOBRESCRIBIR:
 - app.js
@@ -6,12 +6,14 @@ SOBRESCRIBIR:
 - version.js
 - app/index.html
 - app/sw.js
+- app/minigames/quina-nota-es/app.html
 - editor/index.html
 - editor/sw.js
+- editor.js
 - PATCH_README.txt
 
 AÑADIR:
-- V0_57_CAMBIOS.txt
+- V0_58_CAMBIOS.txt
 
 NO TOCAR:
 - manifests de APP/EDITOR
@@ -27,8 +29,7 @@ NO TOCAR:
 NO HAY SQL NUEVO.
 
 CAMBIOS PRINCIPALES:
-- PLAYER usa como fondo todas las fotos de HISTÒRIC en orden random.
-- Movimiento Ken Burns 100% → 130%, desplazamiento suave y crossfade, opacidad 25%.
-- Precarga de la siguiente imagen para evitar flashes.
-- Nuevo botón PANTALLA COMPLETA con fullscreen nativo + fallback visual.
-- El audio y el carrusel continúan sin reiniciarse al entrar/salir de fullscreen.
+- Carrusel fotográfico del PLAYER al 50% de opacidad.
+- Duraciones de las pistas contenidas dentro de sus cards en MOBILE.
+- Cabecera MOBILE de QUINA NOTA ÉS? redistribuida para que el logo no quede tapado.
+- Descripción del minijuego a todo el ancho de la caja en MOBILE.

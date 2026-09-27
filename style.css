@@ -2028,7 +2028,7 @@ body.minigame-fullscreen-open .mini-player,body.minigame-fullscreen-open .mobile
   transition:opacity 2.2s ease;
   will-change:opacity;
 }
-.player-visual-layer.is-active{opacity:.25}
+.player-visual-layer.is-active{opacity:.50}
 .player-visual-photo{
   position:absolute;
   inset:-12%;
@@ -2167,4 +2167,33 @@ body.player-fullscreen-open .mini-player{visibility:hidden!important;pointer-eve
 }
 @media(prefers-reduced-motion:reduce){
   .player-visual-layer{transition-duration:.01ms!important}
+}
+
+
+/* ============================================================
+   v0.58 · PLAYER MOBILE / duracions dins de cada pista
+   ============================================================ */
+@media(max-width:780px){
+  .track-row{
+    grid-template-columns:34px minmax(0,1fr) 42px!important;
+  }
+  .track-main{
+    min-width:0!important;
+    overflow:hidden;
+  }
+  .track-main strong,
+  .track-main small{
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .track-length{
+    min-width:38px;
+    width:38px;
+    justify-self:end;
+    text-align:right;
+    white-space:nowrap;
+  }
 }

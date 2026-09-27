@@ -309,7 +309,7 @@ async function openQuinaNotaGame(){
       }
     }
   };
-  frame.src=`app/minigames/quina-nota-es/app.html?v=0.56&ts=${Date.now()}`;
+  frame.src=`app/minigames/quina-nota-es/app.html?v=0.58&ts=${Date.now()}`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function closeOpenMinigame({resumePlayer=true}={}){
@@ -1923,7 +1923,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.57',root).href;
+    const swUrl=new URL('app/sw.js?v=0.58',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
