@@ -14,7 +14,7 @@
   <link rel="manifest" href="editor/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="editor/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="editor/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="editor.css?v=0.60" />
+  <link rel="stylesheet" href="editor.css?v=0.61" />
 </head>
 <body>
   <section id="editorLoginGate" class="editor-login-gate" aria-label="Accés a l'Editor">
@@ -73,7 +73,7 @@
           <button id="editorInstallCardBtn" type="button" class="editor-install-btn">INSTAL·LAR EDITOR</button>
         </div>
         <div class="stat-grid">
-          <button class="stat-card" data-jump="calendar"><span class="stat-events-label"><span class="stat-events-label-desktop">ESDEVENIMENTS</span><span class="stat-events-label-mobile">EVENTS</span></span><strong id="statEvents">0</strong><small id="statNextEvent">Cap activitat</small></button>
+          <button class="stat-card" data-jump="calendar"><span>EVENTS</span><strong id="statEvents">0</strong><small id="statNextEvent">Cap activitat</small></button>
           <button class="stat-card" data-jump="dresscode"><span>DRESSCODES</span><strong id="statDresscodes">0</strong><small>Configurats</small></button>
           <button class="stat-card" data-jump="player"><span>PISTES PLAYER</span><strong id="statTracks">0</strong><small id="statVisibleTracks">0 visibles</small></button>
           <button class="stat-card" data-jump="history"><span>FOTOS HISTÒRIC</span><strong id="statHistoric">0</strong><small>Entrades cronològiques</small></button>
@@ -302,10 +302,19 @@
             <div class="form-actions"><button id="createUserBtn" type="submit" class="primary-btn">CREAR USUARI</button></div>
             <small id="createUserStatus" class="user-create-status"></small>
           </form>
-          <div class="editor-card list-card">
-            <div class="card-head"><div><span class="eyebrow">USUARIS</span><h2>Comptes</h2></div><span class="count-pill" id="usersCount">0</span></div>
-            <p class="helper-copy">GESTOR pot editar l’APP. STANDARD és el compte dels músics i mai pot entrar a l’EDITOR. Els comptes autoritzats es poden eliminar amb la ×.</p>
-            <div id="usersList" class="editor-list users-list"><div class="empty-state">Carregant usuaris…</div></div>
+          <div class="editor-card list-card users-accounts-card is-collapsed-mobile" id="usersAccountsCard">
+            <div class="card-head users-accounts-head" id="usersAccountsToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="usersAccountsBody">
+              <div>
+                <span class="eyebrow users-accounts-eyebrow">USUARIS</span>
+                <h2 class="users-accounts-title-desktop">Comptes</h2>
+                <h2 class="users-accounts-title-mobile">USUARIS</h2>
+              </div>
+              <span class="count-pill" id="usersCount">0</span>
+            </div>
+            <div id="usersAccountsBody" class="users-accounts-body">
+              <p class="helper-copy">GESTOR pot editar l’APP. STANDARD és el compte dels músics i mai pot entrar a l’EDITOR. Els comptes autoritzats es poden eliminar amb la ×.</p>
+              <div id="usersList" class="editor-list users-list"><div class="empty-state">Carregant usuaris…</div></div>
+            </div>
           </div>
         </div>
       </section>
@@ -343,12 +352,12 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="version.js?v=0.60"></script>
-  <script src="config.js?v=0.60"></script>
-  <script src="data/content-published.js?v=0.60"></script>
-  <script src="content-store.js?v=0.60"></script>
+  <script src="version.js?v=0.61"></script>
+  <script src="config.js?v=0.61"></script>
+  <script src="data/content-published.js?v=0.61"></script>
+  <script src="content-store.js?v=0.61"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.60"></script>
-  <script src="editor.js?v=0.60"></script>
+  <script src="supabase-client.js?v=0.61"></script>
+  <script src="editor.js?v=0.61"></script>
 </body>
 </html>

@@ -1665,8 +1665,8 @@ function renderUsers(){
   list.innerHTML=userProfiles.length?userProfiles.map(profile=>{
     const deleteBtn=canDeleteUserProfile(profile)?`<button class="user-strip-delete" data-delete-user="${esc(profile.user_id)}" title="Eliminar usuari" aria-label="Eliminar ${esc(profile.name||profile.email||'usuari')}">×</button>`:'';
     const bubbles=[];
-    if(profile.must_change_password) bubbles.push('<span class="user-info-bubble pending">PENDENT DE CONFIGURAR</span>');
-    return `<article class="list-item user-list-item user-strip"><div class="user-strip-main"><strong>${esc(profile.name||'Sense nom')}</strong><span class="user-strip-role">${esc(roleEditorLabel(profile.role))}</span><span class="user-strip-email">${esc(profile.email||'')}</span></div><div class="user-strip-actions">${bubbles.join('')}${deleteBtn}</div></article>`;
+    if(profile.must_change_password) bubbles.push('<span class="user-info-bubble pending">PEND. CONF.</span>');
+    return `<article class="list-item user-list-item user-strip"><div class="user-strip-main"><div class="user-strip-line1"><strong>${esc(profile.name||'Sense nom')}</strong><span class="user-strip-role">${esc(roleEditorLabel(profile.role))}</span></div><span class="user-strip-email">${esc(profile.email||'')}</span></div><div class="user-strip-actions">${bubbles.join('')}${deleteBtn}</div></article>`;
   }).join(''):'<div class="empty-state">Encara no hi ha usuaris.</div>';
   $$('[data-delete-user]').forEach(btn=>btn.onclick=()=>deleteManagedUserFromEditor(btn.dataset.deleteUser));
   fitManagedListToFour(list);
@@ -1703,6 +1703,27 @@ async function loadUsers(){
 }
 
 function bindUsers(){
+  const accountsCard=$('#usersAccountsCard');
+  const accountsToggle=$('#usersAccountsToggle');
+  const mobileAccountsQuery=window.matchMedia?.('(max-width:780px)');
+  const syncAccountsDisclosure=()=>{
+    if(!accountsCard||!accountsToggle) return;
+    const isMobile=!!mobileAccountsQuery?.matches;
+    accountsToggle.setAttribute('aria-expanded',isMobile?String(!accountsCard.classList.contains('is-collapsed-mobile')):'true');
+  };
+  const toggleAccounts=()=>{
+    if(!accountsCard||!accountsToggle||!mobileAccountsQuery?.matches) return;
+    accountsCard.classList.toggle('is-collapsed-mobile');
+    syncAccountsDisclosure();
+    if(!accountsCard.classList.contains('is-collapsed-mobile')) requestAnimationFrame(()=>fitManagedListToFour($('#usersList')));
+  };
+  accountsToggle?.addEventListener('click',toggleAccounts);
+  accountsToggle?.addEventListener('keydown',event=>{
+    if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAccounts();}
+  });
+  mobileAccountsQuery?.addEventListener?.('change',syncAccountsDisclosure);
+  syncAccountsDisclosure();
+
   $('#createUserForm')?.addEventListener('submit',async event=>{
     event.preventDefault();
     if(!editorCanWrite) return;

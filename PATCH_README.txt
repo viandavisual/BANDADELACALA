@@ -1,8 +1,6 @@
-BANDA DE LA CALA · PATCH v0.60 DES DE v0.59
+BANDA DE LA CALA · PATCH v0.61 DES DE v0.60
 
 SOBREESCRIURE:
-- app.js
-- style.css
 - editor.js
 - editor.css
 - app/index.html
@@ -13,7 +11,7 @@ SOBREESCRIURE:
 - PATCH_README.txt
 
 AFEGIR:
-- V0_60_CAMBIOS.txt
+- V0_61_CAMBIOS.txt
 
 NO CAL:
 - executar SQL;
@@ -22,4 +20,4 @@ NO CAL:
 - tocar tokens/secrets;
 - modificar assets.
 
-Canvis: HISTÒRIC MOBILE sense anys duplicats, CALENDARI amb esdeveniments passats en gris, RESUM amb EVENTS en MOBILE i nova data, i correcció d'amplada d'USUARIS MOBILE.
+Canvis: RESUM mostra EVENTS amb la mateixa escala que DRESSCODES; USUARIS/COMPTES és col·lapsable per defecte en MOBILE i les tires de comptes passen a dues files amb PEND. CONF.

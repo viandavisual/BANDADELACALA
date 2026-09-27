@@ -1,0 +1,21 @@
+BANDA DE LA CALA · v0.61
+
+- EDITOR · RESUM:
+  - ESDEVENIMENTS pasa a EVENTS tanto en MOBILE como en DESKTOP;
+  - EVENTS usa exactamente la misma escala/estilo de etiqueta que DRESSCODES.
+
+- EDITOR · USUARIS MOBILE:
+  - la caja USUARIS / COMPTES queda colapsada por defecto;
+  - en estado colapsado muestra únicamente USUARIS y la bola con el total de cuentas;
+  - la cabecera se abre/cierra con un toque (y también con teclado);
+  - cada tira de usuario se reorganiza en dos filas de texto: nombre + tipo arriba, email debajo;
+  - el bubble de estado y la X permanecen a la derecha;
+  - PENDENT DE CONFIGURAR pasa a PEND. CONF.
+
+- DESKTOP:
+  - la caja de cuentas conserva su comportamiento expandido habitual;
+  - la nueva estructura de tiras mantiene la presentación horizontal existente.
+
+- PWA:
+  - version.js y caches actualizados a v0.61;
+  - manifests, IDs, start_url y scopes no modificados.
