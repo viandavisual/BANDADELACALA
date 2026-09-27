@@ -1,0 +1,32 @@
+BANDA DE LA CALA · v0.57 · CANVIS
+Data: 27/09/2026
+
+1. PLAYER · FONS VISUAL HISTÒRIC
+- La caixa principal del PLAYER reutilitza automàticament totes les fotografies publicades al Timeline d’HISTÒRIC.
+- Ordre aleatori per cicles, evitant repetir immediatament la mateixa imatge.
+- Dues capes amb precàrrega de la fotografia següent i crossfade suau.
+- Cada fotografia aplica moviment Ken Burns: escala aproximada 100% → 130% i desplaçament lent aleatori.
+- Opacitat fotogràfica fixa al 25% per preservar la llegibilitat dels controls.
+- No es dupliquen fitxers ni es crea cap repositori d’imatges nou: s’utilitzen les mateixes URLs d’HISTÒRIC.
+- Només hi ha dues imatges actives al DOM per limitar consum de memòria.
+
+2. PLAYER · PANTALLA COMPLETA
+- Nou botó PANTALLA COMPLETA a la caixa del reproductor.
+- La mateixa caixa del PLAYER entra en fullscreen natiu quan el navegador ho permet.
+- Fallback visual 100% viewport quan Fullscreen API no està disponible o és rebutjada.
+- Layout específic per desktop, mòbil i landscape baix.
+- X superior per sortir; ESC també funciona en desktop/fallback.
+- L’àudio NO es recrea ni reinicia en entrar/sortir de fullscreen.
+- El carrusel visual tampoc es reinicia al canviar entre mode normal i fullscreen.
+
+3. ACCESSIBILITAT / RENDIMENT
+- Les fotos són decoratives (aria-hidden) i no interfereixen amb els controls.
+- Es respecta prefers-reduced-motion reduint el moviment visual.
+- La següent fotografia es precàrrega abans del fundido per evitar flashes.
+
+4. PWA / CONTROL
+- Versió v0.57.
+- Caches APP/EDITOR actualitzades a v0.57.
+- Manifest IDs, scopes i start_url NO modificats.
+- Auth, rols, invitacions, MINIJOCS i backup multimèdia NO modificats.
+- No requereix SQL nou ni canvis a Supabase.
