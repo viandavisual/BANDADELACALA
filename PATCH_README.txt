@@ -1,9 +1,7 @@
-BANDA DE LA CALA v0.69 · PATCH DES DE v0.68
+BANDA DE LA CALA v0.70 · PATCH DES DE v0.69
 
 SOBRESCRIBIR:
 - editor.js
-- editor.css
-- content-store.js
 - version.js
 - app/index.html
 - app/sw.js
@@ -11,7 +9,7 @@ SOBRESCRIBIR:
 - editor/sw.js
 
 AÑADIR:
-- V0_69_CAMBIOS.txt
+- V0_70_CAMBIOS.txt
 
 NO TOCAR:
 - Supabase SQL / Edge Functions / buckets / Auth / SMTP

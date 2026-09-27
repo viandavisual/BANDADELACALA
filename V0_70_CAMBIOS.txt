@@ -1,0 +1,6 @@
+BANDA DE LA CALA · v0.70
+
+- EDITOR / APORTACIONS: la bubble de PENDENTS es carrega automàticament tan bon punt un ADMIN o GESTOR entra correctament a l'EDITOR.
+- Ja no cal entrar primer a la secció APORTACIONS perquè aparegui el comptador.
+- El comptador també es refresca quan l'EDITOR torna a primer pla.
+- No requereix SQL ni Edge Functions noves.

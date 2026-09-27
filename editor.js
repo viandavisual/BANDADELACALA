@@ -2315,7 +2315,7 @@ async function activateSupabaseEditor(session){
       supabaseActive=true; migrationPending=false;
       markSaved('DESAT A SUPABASE');
     }
-    renderAll(); updatePermissionUi(); await loadUsers();
+    renderAll(); updatePermissionUi(); await refreshArchivePendingBadge(); await loadUsers();
     BandaSupabase.subscribeContent(next=>{
       if(!supabaseActive || !contentHasUsefulData(next)) return;
       content=BandaStore.normalize(next); BandaStore.cacheRemote?.(content); renderAll(); updatePermissionUi(); markSaved('ACTUALITZAT DES DE SUPABASE');
@@ -2454,5 +2454,5 @@ async function registerEditorSW(){
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();
