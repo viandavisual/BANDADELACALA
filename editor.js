@@ -1040,6 +1040,19 @@ function historicImages(item){
   if(!images.length && item?.imageSrc) images.push(item.imageSrc);
   return images;
 }
+function historicOriginalImages(item){
+  const images=historicImages(item);
+  const originals=Array.isArray(item?.originalImages)?item.originalImages:[];
+  return images.map((src,index)=>String(originals[index]||src||''));
+}
+function historicImageCrops(item){
+  const images=historicImages(item);
+  const crops=Array.isArray(item?.imageCrops)?item.imageCrops:[];
+  return images.map((_,index)=>{
+    const crop=crops[index]&&typeof crops[index]==='object'?crops[index]:{};
+    return {left:Number(crop.left)||0,right:Number(crop.right)||0,top:Number(crop.top)||0,bottom:Number(crop.bottom)||0};
+  });
+}
 
 function renderHistoricFormPreview(){
   const wrap=$('#historicImagePreviewWrap'), grid=$('#historicImagePreviewGrid');
@@ -1052,7 +1065,8 @@ function renderHistoricFormPreview(){
     const localIndex=isNew ? index-savedCount : index;
     const removeAttr=isNew ? `data-remove-pending-historic="${localIndex}"` : `data-remove-saved-historic="${localIndex}"`;
     const removeLabel=isNew ? 'Descartar fotografia nova' : 'Eliminar fotografia definitivament';
-    return `<div class="history-image-preview-item ${isNew?'is-new':''}"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span><button class="history-image-remove-btn" type="button" ${removeAttr} title="${removeLabel}" aria-label="${removeLabel}">×</button></div>`;
+    const cropButton=isNew?'':`<button class="history-image-crop-btn" type="button" data-crop-saved-historic="${localIndex}" title="Fer crop manual">CROP</button>`;
+    return `<div class="history-image-preview-item ${isNew?'is-new':''}"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span>${cropButton}<button class="history-image-remove-btn" type="button" ${removeAttr} title="${removeLabel}" aria-label="${removeLabel}">×</button></div>`;
   }).join('');
   $$('[data-remove-pending-historic]').forEach(btn=>btn.onclick=()=>{
     const index=Number(btn.dataset.removePendingHistoric||0);
@@ -1062,6 +1076,7 @@ function renderHistoricFormPreview(){
     showToast('Fotografia nova descartada');
   });
   $$('[data-remove-saved-historic]').forEach(btn=>btn.onclick=()=>removeHistoricSavedPhoto(Number(btn.dataset.removeSavedHistoric||0)));
+  $$('[data-crop-saved-historic]').forEach(btn=>btn.onclick=()=>openHistoricCrop($('#historicId')?.value||'',Number(btn.dataset.cropSavedHistoric||0)));
 }
 
 async function downloadHistoricPhoto(url,item,index){
@@ -1102,6 +1117,8 @@ async function removeHistoricSavedPhoto(index){
     if(supabaseActive && currentSession && window.BandaSupabase?.deletePublicFile){
       showToast('Eliminant fotografia del núvol…');
       await BandaSupabase.deletePublicFile('historic-media',src);
+      const original=historicOriginalImages(item)[index];
+      if(original && original!==src) await BandaSupabase.deletePublicFile('historic-media',original);
     }
   }catch(error){
     console.error(error);
@@ -1109,6 +1126,8 @@ async function removeHistoricSavedPhoto(index){
     return;
   }
   images.splice(index,1);
+  const originals=historicOriginalImages(item); originals.splice(index,1);
+  const crops=historicImageCrops(item); crops.splice(index,1);
   if(!images.length){
     content.historicItems=(content.historicItems||[]).filter(entry=>entry.id!==id);
     editingHistoricImages=[];
@@ -1117,7 +1136,7 @@ async function removeHistoricSavedPhoto(index){
     return;
   }
   const target=(content.historicItems||[]).find(entry=>entry.id===id);
-  if(target){ target.images=[...images]; target.imageSrc=images[0]||''; }
+  if(target){ target.images=[...images]; target.imageSrc=images[0]||''; target.originalImages=originals; target.imageCrops=crops; }
   editingHistoricImages=[...images];
   save(content,'Fotografia eliminada definitivament');
   renderHistoricFormPreview();
@@ -1189,9 +1208,11 @@ async function deleteHistoric(id){
   try{
     if(supabaseActive && currentSession && window.BandaSupabase?.deletePublicFile){
       const images=historicImages(item);
+      const originals=historicOriginalImages(item);
       for(let i=0;i<images.length;i++){
         showToast(`Eliminant fotografia ${i+1}/${images.length}…`);
         await BandaSupabase.deletePublicFile('historic-media',images[i]);
+        if(originals[i] && originals[i]!==images[i]) await BandaSupabase.deletePublicFile('historic-media',originals[i]);
       }
     }
   }catch(error){
@@ -1208,7 +1229,7 @@ function historicEditorItemMarkup(item){
   const period=historicPeriodById(item.periodId);
   const images=historicImages(item);
   const thumbCols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
-  const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button></div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
+  const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button><button class="historic-crop-thumb-btn" type="button" data-crop-historic="${esc(item.id)}" data-crop-index="${index}" title="Fer crop manual">CROP</button></div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
   return `<article class="historic-editor-item">
     <div class="historic-thumb-wrap">${thumbs}</div>
     <div class="list-main"><div class="list-kicker"><span>${esc(item.year)}</span><span>·</span><span>${esc(period?.director||'Sense període')}</span><span>·</span><span>${images.length} ${images.length===1?'foto':'fotos'}</span></div>${item.title?`<h3>${esc(item.title)}</h3>`:'<h3>Sense títol</h3>'}${item.authorSource?`<p><strong>Autor / procedència:</strong> ${esc(item.authorSource)}</p>`:''}${item.description?`<p>${esc(item.description)}</p>`:''}</div>
@@ -1248,6 +1269,7 @@ function renderHistoric(){
   $$('[data-edit-historic]').forEach(btn=>btn.onclick=()=>editHistoric(btn.dataset.editHistoric));
   $$('[data-delete-historic]').forEach(btn=>btn.onclick=()=>deleteHistoric(btn.dataset.deleteHistoric));
   $$('[data-download-historic]').forEach(btn=>btn.onclick=()=>{ const item=(content.historicItems||[]).find(entry=>entry.id===btn.dataset.downloadHistoric); const images=historicImages(item); const index=Number(btn.dataset.downloadIndex||0); if(item&&images[index]) downloadHistoricPhoto(images[index],item,index); });
+  $$('[data-crop-historic]').forEach(btn=>btn.onclick=()=>openHistoricCrop(btn.dataset.cropHistoric,Number(btn.dataset.cropIndex||0)));
 }
 
 function bindHistoric(){
@@ -1315,7 +1337,11 @@ function bindHistoric(){
       }catch(error){ console.error(error); mediaUploadErrorToast(error,'No s’han pogut pujar les fotografies'); return; }
     }
     if(!images.length){ showToast('Cal seleccionar almenys una fotografia'); return; }
-    const item={id,year,periodId,title:$('#historicTitle').value.trim(),authorSource:$('#historicAuthorSource').value.trim(),description:$('#historicDescription').value.trim(),images,imageSrc:images[0]||'',createdAt:existing?.createdAt||new Date().toISOString()};
+    const originals=existing?historicOriginalImages(existing):[];
+    const crops=existing?historicImageCrops(existing):[];
+    while(originals.length<images.length) originals.push(images[originals.length]||'');
+    while(crops.length<images.length) crops.push({left:0,right:0,top:0,bottom:0});
+    const item={id,year,periodId,title:$('#historicTitle').value.trim(),authorSource:$('#historicAuthorSource').value.trim(),description:$('#historicDescription').value.trim(),images,imageSrc:images[0]||'',originalImages:originals,imageCrops:crops,createdAt:existing?.createdAt||new Date().toISOString(),submittedByName:existing?.submittedByName||'',submittedByUserId:existing?.submittedByUserId||'',archiveSubmissionId:existing?.archiveSubmissionId||''};
     content.historicItems=content.historicItems||[];
     const index=content.historicItems.findIndex(entry=>entry.id===id);
     if(index>=0) content.historicItems[index]=item; else content.historicItems.push(item);
@@ -1535,11 +1561,11 @@ function renderArchiveReview(){
   host.querySelectorAll('[data-archive-delete]').forEach(btn=>btn.onclick=()=>deleteArchiveSubmissionForever(btn.closest('.archive-review-card')));
   host.querySelectorAll('[data-archive-crop]').forEach(btn=>btn.onclick=()=>openArchiveCrop(btn.closest('.archive-review-card')));
 }
-let archiveCropState={id:'',row:null,objectUrl:'',image:null,left:0,right:0,top:0,bottom:0};
+let archiveCropState={mode:'archive',id:'',row:null,itemId:'',index:-1,currentUrl:'',sourceUrl:'',objectUrl:'',image:null,left:0,right:0,top:0,bottom:0};
 function closeArchiveCrop(){
   const modal=$('#archiveCropModal'); if(modal) modal.hidden=true;
   if(archiveCropState.objectUrl){try{URL.revokeObjectURL(archiveCropState.objectUrl);}catch(_error){}}
-  archiveCropState={id:'',row:null,objectUrl:'',image:null,left:0,right:0,top:0,bottom:0};
+  archiveCropState={mode:'archive',id:'',row:null,itemId:'',index:-1,currentUrl:'',sourceUrl:'',objectUrl:'',image:null,left:0,right:0,top:0,bottom:0};
 }
 function archiveCropValuesFromUi(){
   const read=id=>Math.max(0,Math.min(45,Number($(id)?.value)||0));
@@ -1561,6 +1587,7 @@ function renderArchiveCropCanvas(){
 async function openArchiveCrop(card){
   const data=archiveCardData(card), row=archiveRowById(data.id); if(!row) return;
   const modal=$('#archiveCropModal'), status=$('#archiveCropStatus'); if(!modal) return;
+  const eyebrow=$('#archiveCropEyebrow'); if(eyebrow) eyebrow.textContent='APORTACIONS';
   modal.hidden=false; if(status) status.textContent='Carregant original…';
   try{
     const blob=await BandaSupabase.downloadArchiveSubmission(row.storage_path);
@@ -1572,9 +1599,66 @@ async function openArchiveCrop(card){
     renderArchiveCropCanvas();
   }catch(error){console.error(error);if(status)status.textContent='No s’ha pogut carregar la imatge per fer el crop.';}
 }
+async function openHistoricCrop(itemId,index){
+  const item=(content.historicItems||[]).find(entry=>entry.id===itemId);
+  const images=historicImages(item);
+  if(!item||!images[index]) return;
+  const originals=historicOriginalImages(item), crops=historicImageCrops(item);
+  const sourceUrl=originals[index]||images[index], crop=crops[index]||{left:0,right:0,top:0,bottom:0};
+  const modal=$('#archiveCropModal'),status=$('#archiveCropStatus'); if(!modal)return;
+  const eyebrow=$('#archiveCropEyebrow'); if(eyebrow) eyebrow.textContent='HISTÒRIC';
+  modal.hidden=false; if(status)status.textContent='Carregant fotografia…';
+  try{
+    const response=await fetch(sourceUrl,{cache:'no-store'}); if(!response.ok) throw new Error(`HTTP_${response.status}`);
+    const blob=await response.blob(),url=URL.createObjectURL(blob),img=new Image();
+    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url;});
+    archiveCropState={mode:'historic',id:'',row:null,itemId,index,currentUrl:images[index],sourceUrl,objectUrl:url,image:img,left:crop.left,right:crop.right,top:crop.top,bottom:crop.bottom};
+    const map={Left:'left',Right:'right',Top:'top',Bottom:'bottom'};
+    Object.entries(map).forEach(([suffix,key])=>{const input=$(`#archiveCrop${suffix}`);if(input)input.value=String(archiveCropState[key]||0);});
+    renderArchiveCropCanvas();
+  }catch(error){console.error(error);if(status)status.textContent='No s’ha pogut carregar la fotografia per fer el crop.';}
+}
+async function historicCropFileFromState(values){
+  const image=archiveCropState.image; if(!image) throw new Error('CROP_IMAGE_REQUIRED');
+  const sx=image.naturalWidth*(values.left/100),sy=image.naturalHeight*(values.top/100);
+  const sw=image.naturalWidth*(1-(values.left+values.right)/100),sh=image.naturalHeight*(1-(values.top+values.bottom)/100);
+  if(sw<10||sh<10) throw new Error('CROP_TOO_SMALL');
+  const scale=Math.min(1,1200/sw,1200/sh),canvas=document.createElement('canvas');
+  canvas.width=Math.max(1,Math.round(sw*scale));canvas.height=Math.max(1,Math.round(sh*scale));
+  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(image,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+  const blob=await new Promise((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error('CROP_FAILED')),'image/jpeg',0.86));
+  return new File([blob],`historic-crop-${archiveCropState.itemId}-${archiveCropState.index+1}.jpg`,{type:'image/jpeg'});
+}
+async function saveHistoricCrop(values){
+  const item=(content.historicItems||[]).find(entry=>entry.id===archiveCropState.itemId); if(!item)return;
+  const images=historicImages(item),originals=historicOriginalImages(item),crops=historicImageCrops(item);
+  const index=archiveCropState.index,oldUrl=images[index],sourceUrl=archiveCropState.sourceUrl||originals[index]||oldUrl;
+  const noCrop=!(values.left||values.right||values.top||values.bottom);
+  try{
+    $('#archiveCropStatus').textContent=noCrop?'Restablint fotografia original…':'Publicant crop…';
+    let nextUrl=sourceUrl;
+    if(!noCrop){
+      if(!supabaseActive||!currentSession||!window.BandaSupabase?.uploadFile) throw new Error('MEDIA_CLOUD_REQUIRED');
+      const file=await historicCropFileFromState(values);
+      nextUrl=(await BandaSupabase.uploadFile('historic-media',file,String(item.year||'sense-any'),`historic-crop-${item.id}-${index+1}`)).url;
+    }
+    originals[index]=sourceUrl; crops[index]={...values}; images[index]=nextUrl;
+    item.images=[...images]; item.imageSrc=images[0]||''; item.originalImages=originals; item.imageCrops=crops;
+    const saved=save(content,noCrop?'Crop restablert':'CROP HISTÒRIC desat'); if(!saved) throw new Error('CONTENT_SAVE_FAILED');
+    if(supabaseActive&&currentSession) await remoteSaveChain;
+    if(oldUrl&&oldUrl!==sourceUrl&&oldUrl!==nextUrl){try{await BandaSupabase.deletePublicFile('historic-media',oldUrl);}catch(error){console.warn('No s’ha pogut netejar el crop anterior',error);}}
+    if($('#historicId')?.value===item.id){editingHistoricImages=[...images];renderHistoricFormPreview();}
+    closeArchiveCrop(); renderHistoric();
+  }catch(error){console.error(error);$('#archiveCropStatus').textContent='No s’ha pogut desar el crop de l’HISTÒRIC.';}
+}
+
 async function saveArchiveCrop(){
-  if(!archiveCropState.id) return;
   const values=archiveCropValuesFromUi();
+  if(archiveCropState.mode==='historic'){
+    if(archiveCropState.itemId && archiveCropState.index>=0) await saveHistoricCrop(values);
+    return;
+  }
+  if(!archiveCropState.id) return;
   if(values.left+values.right>=90||values.top+values.bottom>=90){$('#archiveCropStatus').textContent='El crop és massa extrem.';return;}
   try{
     $('#archiveCropStatus').textContent='Desant crop…';
@@ -1692,7 +1776,7 @@ async function validateArchiveSubmission(card){
       activeUrl=await uploadImageWithBackup({file,compressed,activeBucket:'historic-media',activeFolder:String(data.year),activeName:`aportacio-${data.year}-${row.id.slice(0,8)}`,backupRoot:`historic/${data.year}/aportacions`,backupLabel:'l’aportació'});
       publishedItemId=BandaStore.uid('hist');
       content.historicItems=content.historicItems||[];
-      content.historicItems.push({id:publishedItemId,year:data.year,periodId:data.period_id,title:data.title,authorSource:data.author_source||'',description:data.description,images:[activeUrl],imageSrc:activeUrl,createdAt:new Date().toISOString(),submittedByName:upperUserName(row.submitter_name)||'',submittedByUserId:row.user_id||'',archiveSubmissionId:row.id});
+      content.historicItems.push({id:publishedItemId,year:data.year,periodId:data.period_id,title:data.title,authorSource:data.author_source||'',description:data.description,images:[activeUrl],imageSrc:activeUrl,originalImages:[activeUrl],imageCrops:[{left:0,right:0,top:0,bottom:0}],createdAt:new Date().toISOString(),submittedByName:upperUserName(row.submitter_name)||'',submittedByUserId:row.user_id||'',archiveSubmissionId:row.id});
     }
     if(!save(content,'Aportació validada i publicada')) throw new Error('CONTENT_SAVE_FAILED');
     await remoteSaveChain;

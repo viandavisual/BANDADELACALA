@@ -1,0 +1,10 @@
+BANDA DE LA CALA · v0.69
+
+- HISTÒRIC / EDITOR: cada fotografia ja desada incorpora opció CROP individual.
+- El CROP està disponible tant des de la llista de l'HISTÒRIC com quan s'edita una entrada existent.
+- El crop és no destructiu: la primera vegada es conserva la URL original i es publica una derivada retallada.
+- Un crop posterior sempre parteix de l'original conservat i substitueix la derivada anterior.
+- RESTABLIR + DESAR CROP retorna la fotografia a l'original.
+- En eliminar una fotografia o entrada també es netegen original + derivada quan són diferents.
+- content-store preserva authorSource i les metadades de crop/original de cada fotografia.
+- No requereix SQL ni Edge Functions noves.
