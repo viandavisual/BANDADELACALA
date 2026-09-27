@@ -1,0 +1,19 @@
+BANDA DE LA CALA · v0.59
+
+CAMBIOS
+- HISTÒRIC MOBILE: el període actual mostra "ACT." en lugar de "ACTUALITAT".
+- HISTÒRIC MOBILE: las fotografías dejan de abrir el visor al tocarlas; quedan como imágenes estáticas y el USER puede usar pinch-zoom sobre la página.
+- QUINA NOTA ÉS?: precarga del reto diario al entrar en MINIJOCS y reutilización de esa precarga al abrir el juego.
+- QUINA NOTA ÉS?: audio y reto empiezan a prepararse en paralelo, evitando la espera secuencial anterior.
+- QUINA NOTA ÉS?: precarga explícita de intro, música de fondo y efectos; rutas de audio normalizadas a assets/AUDIO.
+- QUINA NOTA ÉS?: la CLAU DE SOL se desplaza 12 px hacia arriba; CLAU DE FA y CLAU DE DO permanecen intactas.
+- HOME MOBILE: "BANDA DE LA CALA" se fuerza a una sola línea con tamaño fluido adaptado al ancho disponible.
+- APP: feedback visual/táctil global al pulsar botones y controles accionables.
+- MINIJOC: el mismo feedback de pulsación se aplica dentro del iframe de QUINA NOTA ÉS?.
+
+SIN CAMBIOS
+- Supabase / SQL.
+- Roles y autenticación.
+- Backup multimedia.
+- IDs, start_url y scopes de las PWAs.
+- Arquitectura del PLAYER.

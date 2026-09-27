@@ -1,35 +1,25 @@
-BANDA DE LA CALA v0.58 — PATCH DES DE v0.57
+BANDA DE LA CALA v0.59 — PATCH DES DE v0.58
 
-SOBRESCRIBIR:
+SOBREESCRIURE
 - app.js
+- editor.js
 - style.css
 - version.js
 - app/index.html
-- app/sw.js
-- app/minigames/quina-nota-es/app.html
 - editor/index.html
+- app/sw.js
 - editor/sw.js
-- editor.js
+- app/minigames/quina-nota-es/app.html
 - PATCH_README.txt
 
-AÑADIR:
-- V0_58_CAMBIOS.txt
+AFEGIR
+- V0_59_CAMBIOS.txt
 
-NO TOCAR:
-- manifests de APP/EDITOR
-- IDs, scopes ni start_url de las PWAs
-- configuración de Supabase
-- secrets
-- Edge Function backup-band-media
-- bucket media-backup-staging
-- sistema de usuarios/auth/invitaciones
-- SMTP
-- datos de HISTÒRIC
+NO CAL TOCAR
+- Supabase / SQL
+- Edge Functions
+- manifests / IDs / scopes PWA
+- assets multimèdia
 
-NO HAY SQL NUEVO.
-
-CAMBIOS PRINCIPALES:
-- Carrusel fotográfico del PLAYER al 50% de opacidad.
-- Duraciones de las pistas contenidas dentro de sus cards en MOBILE.
-- Cabecera MOBILE de QUINA NOTA ÉS? redistribuida para que el logo no quede tapado.
-- Descripción del minijuego a todo el ancho de la caja en MOBILE.
+NOTA
+- El canvi d'editor.js és només el cache-buster del Service Worker per mantenir les dues PWAs alineades amb v0.59.

@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <base href="../../../">
   <title>QUINA NOTA ÉS? · BANDA DE LA CALA</title>
+  <link rel="preload" href="assets/AUDIO/QNE_intro.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="assets/AUDIO/QNE_BGmusic.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="assets/AUDIO/QNE_correcte.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="assets/AUDIO/QNE_error.mp3" as="audio" type="audio/mpeg">
   <style>
     :root {
       --banda-white: #ffffff;
@@ -605,6 +609,18 @@
     @media(max-width:370px){
       .game-title-image{max-width:calc(100% - 80px);max-height:64px}
     }
+
+    /* v0.59 · feedback tàctil dels botons dins del minijoc (iframe independent) */
+    button:not(:disabled){
+      -webkit-tap-highlight-color:rgba(57,58,134,.12);
+      touch-action:manipulation;
+    }
+    button:not(:disabled):active{
+      transform:translateY(2px) scale(.965)!important;
+      filter:brightness(.93) saturate(.98)!important;
+      box-shadow:inset 0 3px 10px rgba(36,33,31,.16)!important;
+      transition-duration:.045s!important;
+    }
 </style>
 </head>
 <body>
@@ -720,29 +736,38 @@
   const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
   let initData=null, challenge=null, registeredUser=false, pointsTotal=0, answerLocked=true, selectedAnswer='', entryComplete=false;
 
-  const audioIntro=new Audio('../../../assets/AUDIO/QNE_intro.mp3');
-  const audioBg=new Audio('../../../assets/AUDIO/QNE_BGmusic.mp3');
-  const audioCorrect=new Audio('../../../assets/AUDIO/QNE_correcte.mp3');
-  const audioError=new Audio('../../../assets/AUDIO/QNE_error.mp3');
+  const audioIntro=new Audio('assets/AUDIO/QNE_intro.mp3');
+  const audioBg=new Audio('assets/AUDIO/QNE_BGmusic.mp3');
+  const audioCorrect=new Audio('assets/AUDIO/QNE_correcte.mp3');
+  const audioError=new Audio('assets/AUDIO/QNE_error.mp3');
+  const allGameAudio=[audioIntro,audioBg,audioCorrect,audioError];
   audioBg.loop=true;
-  [audioIntro,audioBg,audioCorrect,audioError].forEach(a=>{a.preload='auto';a.volume=1;});
+  allGameAudio.forEach(a=>{a.preload='auto';a.volume=1;});
   let audioUnlockPending=false,introFinished=false;
-  function safePlay(a){try{const promise=a.play();promise?.catch?.(()=>{audioUnlockPending=true;});}catch(_error){audioUnlockPending=true;}}
-  function stopAudio(){[audioIntro,audioBg,audioCorrect,audioError].forEach(a=>{try{a.pause();a.currentTime=0;}catch(_error){}});}
+  function primeAudioAssets(){allGameAudio.forEach(a=>{try{if(a.readyState<2)a.load();}catch(_error){}});}
+  primeAudioAssets();
+  function safePlay(a){
+    try{
+      if(a.readyState<2)a.load();
+      const promise=a.play();
+      promise?.catch?.(()=>{audioUnlockPending=true;});
+    }catch(_error){audioUnlockPending=true;}
+  }
+  function stopAudio(){allGameAudio.forEach(a=>{try{a.pause();a.currentTime=0;}catch(_error){}});}
   function startBg(){if(introFinished)return;introFinished=true;try{audioBg.currentTime=0;}catch(_error){}safePlay(audioBg);}
-  function startAudioSequence(){stopAudio();introFinished=false;try{audioIntro.currentTime=0;}catch(_error){}safePlay(audioIntro);}
+  function startAudioSequence(){stopAudio();primeAudioAssets();introFinished=false;try{audioIntro.currentTime=0;}catch(_error){}safePlay(audioIntro);}
   audioIntro.addEventListener('ended',startBg);
   audioIntro.addEventListener('error',()=>{if(audioIntro.error?.code===3||!introFinished)startBg();});
   audioBg.addEventListener('error',()=>{if(audioBg.error?.code===3){try{audioBg.currentTime=0;}catch(_error){}safePlay(audioBg);}});
-  function setMuted(value){[audioIntro,audioBg,audioCorrect,audioError].forEach(a=>a.muted=!!value);}
-  function unlockAudio(){if(!audioUnlockPending)return;audioUnlockPending=false;safePlay(introFinished?audioBg:audioIntro);}
+  function setMuted(value){allGameAudio.forEach(a=>a.muted=!!value);}
+  function unlockAudio(){primeAudioAssets();if(!audioUnlockPending)return;audioUnlockPending=false;safePlay(introFinished?audioBg:audioIntro);}
   document.addEventListener('pointerdown',unlockAudio,{passive:true});
   document.addEventListener('keydown',unlockAudio);
   function post(payload){if(EMBEDDED)window.parent.postMessage(payload,'*');}
   const GLOBAL_SHIFT_X = 8;
   const GLOBAL_SHIFT_Y = -10;
   const clefs = [
-    {id:"treble", glyph:"𝄞", label:"CLAU DE SOL", short:"SOL", bottom:"E", size:174, x:98 + GLOBAL_SHIFT_X, y:240},
+    {id:"treble", glyph:"𝄞", label:"CLAU DE SOL", short:"SOL", bottom:"E", size:174, x:98 + GLOBAL_SHIFT_X, y:228},
     {id:"bass", glyph:"𝄢", label:"CLAU DE FA", short:"FA", bottom:"G", size:130, x:104 + GLOBAL_SHIFT_X, y:211 + GLOBAL_SHIFT_Y},
     {id:"alto", glyph:"𝄡", label:"CLAU DE DO", short:"DO", bottom:"F", size:152, x:102 + GLOBAL_SHIFT_X, y:238 + GLOBAL_SHIFT_Y}
   ];
@@ -879,7 +904,9 @@
     resultModal.classList.add("open");
     resultModal.setAttribute("aria-hidden", "false");
     triggerScreenShake();
-    safePlay(isCorrect ? audioCorrect : audioError);
+    const resultAudio=isCorrect ? audioCorrect : audioError;
+    try{resultAudio.currentTime=0;}catch(_error){}
+    safePlay(resultAudio);
 
     typeText(modalTitle, isCorrect ? "Correcte!" : "MÈU!", 24, true);
     typeText(modalText, isCorrect ? `La nota és ${answer}` : `La resposta correcta era ${answer}`, 18, true);

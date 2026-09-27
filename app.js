@@ -273,6 +273,36 @@ function sendToOpenMinigame(payload){
   if(!state.minigameOpen||!frame?.contentWindow) return;
   try{frame.contentWindow.postMessage(payload,'*');}catch(_error){}
 }
+const QUINA_NOTA_AUDIO_URLS=[
+  'assets/AUDIO/QNE_intro.mp3',
+  'assets/AUDIO/QNE_BGmusic.mp3',
+  'assets/AUDIO/QNE_correcte.mp3',
+  'assets/AUDIO/QNE_error.mp3'
+];
+function warmQuinaNotaAudio(){
+  QUINA_NOTA_AUDIO_URLS.forEach(src=>{
+    try{fetch(src,{cache:'force-cache'}).catch(()=>{});}catch(_error){}
+  });
+}
+let quinaNotaDailyPrefetch=null;
+let quinaNotaDailyPrefetchAt=0;
+let quinaNotaDailyPrefetchUser='';
+function prefetchQuinaNotaDaily({force=false}={}){
+  const userKey=state.authenticated?String(state.session?.user?.id||'registered'):'guest';
+  const fresh=quinaNotaDailyPrefetch && quinaNotaDailyPrefetchUser===userKey && (Date.now()-quinaNotaDailyPrefetchAt)<120000;
+  if(fresh&&!force) return quinaNotaDailyPrefetch;
+  quinaNotaDailyPrefetchUser=userKey;
+  quinaNotaDailyPrefetchAt=Date.now();
+  quinaNotaDailyPrefetch=(state.authenticated
+    ? BandaSupabase.getQuinaNotaState()
+    : BandaSupabase.getQuinaNotaPublicChallenge()
+  ).then(daily=>({daily,error:null}),error=>({daily:null,error}));
+  return quinaNotaDailyPrefetch;
+}
+function invalidateQuinaNotaPrefetch(){
+  quinaNotaDailyPrefetch=null;
+  quinaNotaDailyPrefetchAt=0;
+}
 async function openQuinaNotaGame(){
   if(!getQuinaNotaSettings().active) return;
   const menu=$('#gamesMenu'), panel=$('#gamePlayerPanel'), frame=$('#gamePlayerFrame');
@@ -283,11 +313,17 @@ async function openQuinaNotaGame(){
   state.minigameOpen=true;
   document.body.classList.add('minigame-fullscreen-open');
   menu.hidden=true; panel.hidden=false;
+
+  // v0.59 · Comencem a escalfar àudio i repte en el mateix gest del USER.
+  // Així iframe, MP3 i dades carreguen en paral·lel i el joc no espera una cadena seqüencial.
+  warmQuinaNotaAudio();
+  const dailyPromise=prefetchQuinaNotaDaily();
+
   frame.onload=async()=>{
     try{
-      const daily=state.authenticated
-        ? await BandaSupabase.getQuinaNotaState()
-        : await BandaSupabase.getQuinaNotaPublicChallenge();
+      const dailyResult=await dailyPromise;
+      if(dailyResult.error) throw dailyResult.error;
+      const daily=dailyResult.daily;
       const settings=getQuinaNotaSettings();
       sendToOpenMinigame({
         type:'BANDA_DE_LA_CALA_MINIGAME_INIT', game:'QUINA_NOTA_ES', registered:state.authenticated,
@@ -309,7 +345,7 @@ async function openQuinaNotaGame(){
       }
     }
   };
-  frame.src=`app/minigames/quina-nota-es/app.html?v=0.58&ts=${Date.now()}`;
+  frame.src=`app/minigames/quina-nota-es/app.html?v=0.59&ts=${Date.now()}`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function closeOpenMinigame({resumePlayer=true}={}){
@@ -342,6 +378,7 @@ function bindMinigameBridge(){
       if(!state.authenticated) return;
       try{
         const result=await BandaSupabase.submitQuinaNotaAnswer(data.answer);
+        invalidateQuinaNotaPrefetch();
         try{state.profile=await BandaSupabase.getMyProfile();}catch(_error){}
         renderUserSection(); renderHome(); renderNavigation(); renderGames();
         sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_RESULT_CONFIRMED',game:'QUINA_NOTA_ES',result});
@@ -453,6 +490,7 @@ function switchView(id, remember = true){
   else if(!target.public && !state.authenticated) id='user';
   // v0.48: qualsevol accés explícit a HISTÒRIC torna sempre a l'arrel de la secció.
   // Això evita quedar-se dins HEMEROTECA quan el USER torna a prémer HISTÒRIC.
+  if(id==='games'){ warmQuinaNotaAudio(); prefetchQuinaNotaDaily(); }
   if(id==='history'){
     const historyMain=$('#historyMainContent');
     const hemerotecaPanel=$('#hemerotecaPanel');
@@ -598,6 +636,12 @@ function historyMediaMarkup(periodId){
   const items=getHistoricItems();
   const periodItems=items.filter(item=>item.periodId===periodId);
   if(!periodItems.length) return `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
+  const mobile=!!window.matchMedia?.('(max-width: 780px)').matches;
+  const mediaMarkup=(item,src,index,extraClass,label,extra='')=>{
+    const img=`<img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${extra}`;
+    if(mobile) return `<div class="history-image-button ${extraClass} history-image-static-mobile">${img}</div>`;
+    return `<button class="history-image-button ${extraClass}" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${index}" aria-label="${esc(label)}">${img}</button>`;
+  };
   return periodItems.map(item=>{
     const side=(Math.max(0,items.findIndex(entry=>entry.id===item.id)) % 2===0)?'left':'right';
     const title=item.title ? `<h4>${esc(item.title)}</h4>` : '';
@@ -605,8 +649,9 @@ function historyMediaMarkup(periodId){
     const images=getHistoricImages(item);
     let gallery='';
     if(images.length){
-      const hero=`<button class="history-image-button history-image-hero" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="0" aria-label="Ampliar fotografia 1 de ${esc(item.year)}"><img loading="lazy" decoding="async" src="${esc(images[0])}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${images.length>1?`<span class="history-photo-count">${images.length} FOTOS</span>`:''}</button>`;
-      const strip=images.length>1?`<div class="history-media-strip" aria-label="Més fotografies">${images.slice(1).map((src,index)=>`<button class="history-image-button history-image-thumb" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${index+1}" aria-label="Ampliar fotografia ${index+2} de ${esc(item.year)}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" /></button>`).join('')}</div>`:'';
+      const count=images.length>1?`<span class="history-photo-count">${images.length} FOTOS</span>`:'';
+      const hero=mediaMarkup(item,images[0],0,'history-image-hero',`Ampliar fotografia 1 de ${item.year}`,count);
+      const strip=images.length>1?`<div class="history-media-strip" aria-label="Més fotografies">${images.slice(1).map((src,index)=>mediaMarkup(item,src,index+1,'history-image-thumb',`Ampliar fotografia ${index+2} de ${item.year}`)).join('')}</div>`:'';
       gallery=`<div class="history-media-showcase ${images.length===1?'single':''}">${hero}${strip}</div>`;
     }
     return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><div class="history-moment-meta"><span class="history-year">${esc(item.year)}</span>${images.length?`<span class="history-entry-photo-count">${images.length} ${images.length===1?'FOTO':'FOTOS'}</span>`:''}</div>${title}${desc}</div></div></article>`;
@@ -630,6 +675,8 @@ function compactHistoryTimeline(root=document){
 }
 
 function bindHistoryImagesWithin(root=document){
+  const mobile=!!window.matchMedia?.('(max-width: 780px)').matches;
+  if(mobile) return;
   root.querySelectorAll?.('[data-history-image-id]').forEach(btn=>{
     if(btn.dataset.historyBound==='1') return;
     btn.dataset.historyBound='1';
@@ -709,10 +756,11 @@ function renderHistory(){
     const endLabel=period.end ?? 'ACTUALITAT';
     const sameYear=period.end!=null && String(period.start)===String(period.end);
     const yearsLabel=sameYear ? String(startLabel) : `${startLabel}-${endLabel}`;
+    const mobileYearsLabel=sameYear ? String(startLabel) : `${startLabel}-${isCurrent?'ACT.':endLabel}`;
     const nextPeriod=displayPeriods[displayIndex+1];
     const nextButton=nextPeriod?`<button class="history-next-period" type="button" data-next-period="${esc(nextPeriod.id)}"><span>SEGÜENT PERÍODE</span><strong>↓</strong></button>`:'';
     const photoCount=historyPeriodPhotoCount(period.id);
-    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-dot" aria-hidden="true"></span><div class="history-period-inline"><span class="history-period-year history-period-years">${esc(yearsLabel)}</span><span class="history-period-director">${esc(period.director)}</span>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-photo-total" aria-label="${photoCount} ${photoCount===1?'foto':'fotos'}">${photoCount}</span><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
+    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-dot" aria-hidden="true"></span><div class="history-period-inline"><span class="history-period-year history-period-years history-period-years-desktop">${esc(yearsLabel)}</span><span class="history-period-year history-period-years history-period-years-mobile">${esc(mobileYearsLabel)}</span><span class="history-period-director">${esc(period.director)}</span>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-photo-total" aria-label="${photoCount} ${photoCount===1?'foto':'fotos'}">${photoCount}</span><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
   }).join('');
   host.onclick=event=>{
     const toggle=event.target.closest('[data-toggle-period]');
@@ -1923,7 +1971,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.58',root).href;
+    const swUrl=new URL('app/sw.js?v=0.59',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
