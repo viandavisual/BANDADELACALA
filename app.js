@@ -1776,7 +1776,58 @@ async function establishAppSession(session){
   await reloadAuthAwareContent();
 }
 
+function passwordRecoveryRequested(){
+  const params=new URLSearchParams(location.search);
+  return params.get('recovery')==='password';
+}
+
+function passwordRecoveryRedirectUrl(){
+  const url=new URL(location.href);
+  url.search='';
+  url.hash='';
+  url.searchParams.set('view','user');
+  url.searchParams.set('recovery','password');
+  return url.href;
+}
+
+function clearPasswordRecoveryUrl(){
+  try{
+    const url=new URL(location.href);
+    url.searchParams.delete('recovery');
+    url.searchParams.set('view','user');
+    history.replaceState({},'',url.href);
+  }catch(_error){}
+}
+
 function bindUserAuth(){
+  $('#openPasswordRecoveryBtn')?.addEventListener('click',()=>{
+    const box=$('#passwordRecoveryBox');
+    const email=$('#passwordRecoveryEmail');
+    const loginEmail=$('#userLoginEmail')?.value?.trim() || '';
+    if(email) email.value=loginEmail;
+    if(box) box.hidden=false;
+    $('#passwordRecoveryStatus').textContent='';
+    setTimeout(()=>email?.focus(),0);
+  });
+  $('#closePasswordRecoveryBtn')?.addEventListener('click',()=>{
+    const box=$('#passwordRecoveryBox');
+    if(box) box.hidden=true;
+    $('#passwordRecoveryStatus').textContent='';
+  });
+  $('#passwordRecoveryForm')?.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const status=$('#passwordRecoveryStatus');
+    const email=$('#passwordRecoveryEmail').value.trim();
+    if(!email){ status.textContent='Cal indicar un email.'; return; }
+    status.textContent='Enviant…';
+    try{
+      await BandaSupabase.requestPasswordReset(email,passwordRecoveryRedirectUrl());
+      status.textContent='Si aquest email correspon a un USER registrat, rebràs un missatge amb l’enllaç per recuperar l’accés.';
+    }catch(error){
+      console.error(error);
+      status.textContent='No s’ha pogut enviar la sol·licitud. Torna-ho a provar d’aquí a uns minuts.';
+    }
+  });
   $('#userLoginForm')?.addEventListener('submit',async event=>{
     event.preventDefault();
     const status=$('#userLoginStatus');
@@ -1846,14 +1897,16 @@ function bindUserAuth(){
     if(password.length<8){status.textContent='La contrasenya ha de tenir almenys 8 caràcters.';return;}
     if(password!==repeat){status.textContent='Les dues contrasenyes no coincideixen.';return;}
     const initialSetup=!!state.profile?.must_change_password;
-    status.textContent=initialSetup?'Configurant la teva contrasenya…':'Canviant contrasenya…';
+    const recovery=passwordRecoveryRequested();
+    status.textContent=recovery?'Restablint la contrasenya…':(initialSetup?'Configurant la teva contrasenya…':'Canviant contrasenya…');
     try{
       await BandaSupabase.updatePassword(password);
       $('#newUserPassword').value=''; $('#repeatUserPassword').value='';
       state.profile=await BandaSupabase.getMyProfile();
       renderUserSection();
       const details=$('#passwordDetails'); if(details) details.open=false;
-      status.textContent=initialSetup?'Contrasenya creada correctament. El teu compte ja està preparat.':'Contrasenya actualitzada correctament.';
+      if(recovery) clearPasswordRecoveryUrl();
+      status.textContent=recovery?'Contrasenya restablerta correctament. Conserves el mateix compte i tot el teu progrés.':(initialSetup?'Contrasenya creada correctament. El teu compte ja està preparat.':'Contrasenya actualitzada correctament.');
     }catch(error){ console.error(error); status.textContent='No s’ha pogut canviar la contrasenya.'; }
   });
 }
@@ -1982,7 +2035,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.59',root).href;
+    const swUrl=new URL('app/sw.js?v=0.63',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
@@ -2028,6 +2081,18 @@ async function init(){
   const requestedView=new URLSearchParams(location.search).get('view');
   renderNavigation(); renderHome(); renderUserSection();
   if(requestedView==='user'){ state.currentView='home'; switchView('user',false); }
+  if(passwordRecoveryRequested() && state.authenticated){
+    const details=$('#passwordDetails');
+    if(details) details.open=true;
+    const notice=$('#passwordSetupNotice');
+    if(notice){
+      notice.hidden=false;
+      notice.innerHTML='<strong>RECUPERACIÓ DE CONTRASENYA</strong><span>Escriu una contrasenya nova. En desar-la continuaràs utilitzant el mateix compte i conservaràs el teu progrés.</span>';
+    }
+    const status=$('#changePasswordStatus');
+    if(status) status.textContent='Has accedit des de l’enllaç de recuperació.';
+    setTimeout(()=>$('#newUserPassword')?.focus(),100);
+  }
   const backBtn = $('#backBtn');
   if(backBtn) backBtn.onclick = goBack;
 }

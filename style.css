@@ -2291,3 +2291,14 @@ a.social-link:active,
   background:#9da2a8!important;
   box-shadow:0 0 0 2px rgba(255,255,255,.92)!important;
 }
+
+/* v0.63 · Recuperació de contrasenya */
+.user-recovery-link{justify-self:center;border:0;background:transparent;color:var(--blue);font:inherit;font-size:.78rem;font-weight:850;letter-spacing:.035em;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 8px;margin-top:-2px}
+.user-recovery-link:hover{color:var(--blue-deep)}
+.password-recovery-box{margin-top:20px;padding:18px;border:1px solid rgba(57,58,134,.18);border-radius:16px;background:var(--blue-soft);text-align:center}
+.password-recovery-head{display:flex;align-items:center;justify-content:center;position:relative;min-height:30px}.password-recovery-head strong{font-size:.82rem;letter-spacing:.07em;color:var(--blue)}
+.password-recovery-close{position:absolute;right:0;top:50%;transform:translateY(-50%);width:30px;height:30px;border:0;border-radius:50%;background:#fff;color:var(--blue);font-size:20px;line-height:1;cursor:pointer}
+.password-recovery-box>p{max-width:520px;margin:10px auto 0;color:var(--muted);font-size:.84rem;line-height:1.5}
+.password-recovery-form{display:grid;gap:12px;margin-top:16px}.password-recovery-form label{display:grid;gap:6px;font-size:.78rem;font-weight:850;letter-spacing:.03em;color:var(--ink);text-align:left}.password-recovery-form input{width:100%;min-height:46px;border:1px solid var(--line);border-radius:13px;padding:0 13px;background:#fff;color:var(--ink);font:inherit;outline:none}.password-recovery-form input:focus{border-color:rgba(57,58,134,.46);box-shadow:0 0 0 3px rgba(57,58,134,.08)}
+.password-recovery-form .user-password-btn{justify-self:center}.password-recovery-form .user-auth-status{display:block;text-align:center;width:100%}
+@media(max-width:780px){.password-recovery-box{padding:16px}.user-recovery-link{font-size:.74rem}}

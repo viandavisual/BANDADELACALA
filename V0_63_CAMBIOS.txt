@@ -1,0 +1,33 @@
+BANDA DE LA CALA — v0.63
+Fecha: 27/09/2026
+
+NOVEDAD PRINCIPAL
+- Recuperación de contraseña para USERS ya existentes sin borrar ni recrear la cuenta.
+
+APP > USUARI
+- Nuevo acceso «HAS OBLIDAT LA CONTRASENYA?».
+- Permite solicitar un email de recuperación.
+- El formulario reutiliza el email escrito en login cuando existe.
+- Mensaje de respuesta deliberadamente neutro para no revelar públicamente si una dirección pertenece o no a un USER registrado.
+- Supabase solo envía el correo cuando la dirección pertenece a una cuenta existente; una dirección no registrada no crea cuenta ni recibe recuperación.
+
+FLUJO DE RECUPERACIÓN
+- El correo debe volver a APP con ?view=user&recovery=password.
+- La APP detecta la sesión de recuperación y abre automáticamente USUARI > CONTRASENYA.
+- El USER define la nueva contraseña dos veces.
+- Se actualiza la contraseña de la MISMA cuenta Auth, conservando UUID, perfil y progreso de minijuegos.
+- Al completar la recuperación se limpia el indicador recovery de la URL.
+
+SUPABASE
+- Añadido BandaSupabase.requestPasswordReset(), basado en auth.resetPasswordForEmail().
+- No requiere cambios SQL.
+- Requiere configurar/validar en Supabase la Redirect URL de la APP y personalizar el template «Reset password / Recovery» antes de producción.
+
+SEGURIDAD
+- No se añade ningún endpoint público para consultar si un email está registrado. Esto evita exponer la lista de miembros mediante enumeración de cuentas.
+
+PWA / CACHE
+- version.js -> v0.63.
+- cache APP -> banda-de-la-cala-app-v0.63.
+- referencias runtime actualizadas a v0.63.
+- manifest IDs, scopes, Auth existente, PLAYER, EDITOR y resto de sistemas estables sin cambios.

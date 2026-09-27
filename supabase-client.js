@@ -39,6 +39,16 @@
     if(error) throw error;
   }
 
+  async function requestPasswordReset(email,redirectTo){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const clean=String(email||'').trim().toLowerCase();
+    if(!clean) throw new Error('EMAIL_REQUIRED');
+    const options=redirectTo?{redirectTo}:undefined;
+    const {data,error}=await c.auth.resetPasswordForEmail(clean,options);
+    if(error) throw error;
+    return data || {};
+  }
+
   async function getMyProfile(){
     const c=getClient(); if(!c) return null;
     const currentSession=await session();
@@ -333,7 +343,7 @@
   }
 
   window.BandaSupabase={
-    enabled,getClient,session,signIn,signOut,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updateOwnGender,getQuinaNotaPublicChallenge,getQuinaNotaState,submitQuinaNotaAnswer,updatePassword,
+    enabled,getClient,session,signIn,signOut,requestPasswordReset,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updateOwnGender,getQuinaNotaPublicChallenge,getQuinaNotaState,submitQuinaNotaAnswer,updatePassword,
     loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,backupOriginalMedia,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,onAuthChange,dataUrlToFile
   };
 })();
