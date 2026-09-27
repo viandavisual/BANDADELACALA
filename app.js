@@ -293,10 +293,28 @@ function prefetchQuinaNotaDaily({force=false}={}){
   if(fresh&&!force) return quinaNotaDailyPrefetch;
   quinaNotaDailyPrefetchUser=userKey;
   quinaNotaDailyPrefetchAt=Date.now();
-  quinaNotaDailyPrefetch=(state.authenticated
-    ? BandaSupabase.getQuinaNotaState()
-    : BandaSupabase.getQuinaNotaPublicChallenge()
-  ).then(daily=>({daily,error:null}),error=>({daily:null,error}));
+
+  // v0.67 · Un minijoc MAI queda bloquejat perquè una consulta privada falli.
+  // Per a USER registrat intentem primer l'estat privat (punts + intent del dia).
+  // Si falla, recuperem almenys el repte públic del mateix dia. Si fins i tot
+  // això falla, l'iframe disposa del seu mode standalone com a últim salvavides.
+  quinaNotaDailyPrefetch=(async()=>{
+    if(!state.authenticated){
+      try{return {daily:await BandaSupabase.getQuinaNotaPublicChallenge(),error:null,degraded:false,serverChallenge:true};}
+      catch(error){return {daily:null,error,degraded:true,serverChallenge:false};}
+    }
+    try{return {daily:await BandaSupabase.getQuinaNotaState(),error:null,degraded:false,serverChallenge:true};}
+    catch(privateError){
+      console.warn('QUINA NOTA · estat privat no disponible; activant fallback públic',privateError);
+      try{
+        const daily=await BandaSupabase.getQuinaNotaPublicChallenge();
+        return {daily,error:privateError,degraded:true,serverChallenge:true};
+      }catch(publicError){
+        console.warn('QUINA NOTA · repte públic no disponible; activant fallback standalone',publicError);
+        return {daily:null,error:publicError,degraded:true,serverChallenge:false};
+      }
+    }
+  })();
   return quinaNotaDailyPrefetch;
 }
 function invalidateQuinaNotaPrefetch(){
@@ -320,32 +338,22 @@ async function openQuinaNotaGame(){
   const dailyPromise=prefetchQuinaNotaDaily();
 
   frame.onload=async()=>{
-    try{
-      const dailyResult=await dailyPromise;
-      if(dailyResult.error) throw dailyResult.error;
-      const daily=dailyResult.daily;
-      const settings=getQuinaNotaSettings();
-      sendToOpenMinigame({
-        type:'BANDA_DE_LA_CALA_MINIGAME_INIT', game:'QUINA_NOTA_ES', registered:state.authenticated,
-        user:state.authenticated?{id:state.session?.user?.id||'',name:currentUserDisplayName(),role:state.profile?.role||''}:null,
-        pointsTotal:state.authenticated?Number(daily?.pointsTotal ?? state.profile?.quina_nota_points_total ?? 0):0,
-        dailyState:daily||{}, settings, muted:state.globalMuted
-      });
-    }catch(error){
-      console.error('QUINA NOTA init',error);
-      if(!state.authenticated){
-        const settings=getQuinaNotaSettings();
-        sendToOpenMinigame({
-          type:'BANDA_DE_LA_CALA_MINIGAME_INIT', game:'QUINA_NOTA_ES', registered:false,
-          user:null, pointsTotal:0, dailyState:{}, settings, muted:state.globalMuted,
-          publicChallengeUnavailable:true
-        });
-      }else{
-        sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_INIT_ERROR',game:'QUINA_NOTA_ES',message:'No s’ha pogut carregar el repte actual. Comprova l’actualització de Supabase v0.52.'});
-      }
-    }
+    // v0.67 · Fail-safe: el joc s'inicialitza SEMPRE. Un error de xarxa/RPC no
+    // deixa mai una pantalla buida ni el missatge antic de Supabase v0.52.
+    let dailyResult={daily:null,error:null,degraded:true,serverChallenge:false};
+    try{ dailyResult=await dailyPromise; }catch(error){ dailyResult={daily:null,error,degraded:true,serverChallenge:false}; }
+    const daily=dailyResult?.daily||null;
+    const settings=getQuinaNotaSettings();
+    sendToOpenMinigame({
+      type:'BANDA_DE_LA_CALA_MINIGAME_INIT', game:'QUINA_NOTA_ES', registered:state.authenticated,
+      user:state.authenticated?{id:state.session?.user?.id||'',name:currentUserDisplayName(),role:state.profile?.role||''}:null,
+      pointsTotal:state.authenticated?Number(daily?.pointsTotal ?? state.profile?.quina_nota_points_total ?? 0):0,
+      dailyState:daily||{}, settings, muted:state.globalMuted,
+      degradedMode:!!dailyResult?.degraded,
+      scoreSyncSafe:!!dailyResult?.serverChallenge
+    });
   };
-  frame.src=`app/minigames/quina-nota-es/app.html?v=0.59&ts=${Date.now()}`;
+  frame.src=`app/minigames/quina-nota-es/app.html?v=0.67&ts=${Date.now()}`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function closeOpenMinigame({resumePlayer=true}={}){

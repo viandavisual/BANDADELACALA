@@ -734,7 +734,7 @@
   const INTRO = { lineDuration: 600, lineGap: 300, noteFade: 2000, clefFade: 600, answerGap: 200 };
   const EMBEDDED = window.self !== window.top;
   const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
-  let initData=null, challenge=null, registeredUser=false, pointsTotal=0, answerLocked=true, selectedAnswer='', entryComplete=false;
+  let initData=null, challenge=null, registeredUser=false, pointsTotal=0, answerLocked=true, selectedAnswer='', entryComplete=false, degradedMode=false, scoreSyncSafe=true;
 
   const audioIntro=new Audio('assets/AUDIO/QNE_intro.mp3');
   const audioBg=new Audio('assets/AUDIO/QNE_BGmusic.mp3');
@@ -1104,6 +1104,8 @@
     if(initData)return;
     initData=payload||{};
     registeredUser=!!payload?.registered;
+    degradedMode=!!payload?.degradedMode;
+    scoreSyncSafe=payload?.scoreSyncSafe!==false;
     setMuted(!!payload?.muted);
     pointsTotal=registeredUser?Number(payload?.pointsTotal??payload?.dailyState?.pointsTotal??0):0;
     syncPointsUnit(pointsTotal);
@@ -1140,9 +1142,20 @@
     const data=event.data||{};
     if(data.game!=='QUINA_NOTA_ES')return;
     if(data.type==='BANDA_DE_LA_CALA_MINIGAME_INIT')initialize(data);
-    else if(data.type==='BANDA_DE_LA_CALA_MINIGAME_INIT_ERROR')status.textContent=data.message||'No s’ha pogut carregar el repte.';
+    else if(data.type==='BANDA_DE_LA_CALA_MINIGAME_INIT_ERROR'){
+      // v0.67 · Últim salvavides. Fins i tot si el contenidor envia un error,
+      // el joc arrenca en standalone en lloc de quedar inutilitzable.
+      const date=madridCycleDate();
+      initialize({registered:false,pointsTotal:0,dailyState:{date,challenge:standaloneChallenge(date),alreadyPlayed:false},muted:false,degradedMode:true,scoreSyncSafe:false});
+    }
     else if(data.type==='BANDA_DE_LA_CALA_MINIGAME_RESULT_CONFIRMED')resolveVisual(data.result||{});
-    else if(data.type==='BANDA_DE_LA_CALA_MINIGAME_RESULT_ERROR'){answerLocked=false;[...document.querySelectorAll('.note-btn')].forEach(btn=>btn.disabled=false);status.textContent=data.message||'No s’ha pogut desar el resultat.';}
+    else if(data.type==='BANDA_DE_LA_CALA_MINIGAME_RESULT_ERROR'){
+      // No bloquegem ni obliguem a repetir una resposta per una incidència de xarxa.
+      // Mostrem el resultat local del repte que el USER acaba de jugar.
+      const expected=answerFor(challenge);
+      resolveVisual({correct:selectedAnswer===expected,correctAnswer:expected,pointsAwarded:0,pointsTotal});
+      status.innerHTML += '<br><small>La puntuació no s’ha pogut sincronitzar en aquest moment.</small>';
+    }
     else if(data.type==='BANDA_DE_LA_CALA_MINIGAME_MUTE')setMuted(!!data.muted);
     else if(data.type==='BANDA_DE_LA_CALA_MINIGAME_STOP')stopAudio();
   });

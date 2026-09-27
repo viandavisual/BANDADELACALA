@@ -1,0 +1,15 @@
+BANDA DE LA CALA · v0.67
+
+MINIJOCS · ARRANCADA FAIL-SAFE
+- QUINA NOTA ÉS? ja no queda bloquejat si falla temporalment la consulta privada de Supabase.
+- USER registrat: si get_quina_nota_state() falla, la APP prova automàticament el repte públic del mateix dia.
+- Si també falla el repte públic, el minijoc arrenca igualment en mode standalone com a últim salvavides.
+- Eliminat el bloqueig visual amb el missatge antic «Comprova l’actualització de Supabase v0.52».
+- El mateix iframe incorpora un segon fail-safe: un INIT_ERROR no deixa mai la pantalla inutilitzable.
+- Si el desament d’un resultat falla després de jugar, el minijoc mostra igualment el resultat local i no obliga el USER a repetir la resposta.
+- Principi de disseny a conservar en futurs minijocs: una incidència de backend mai ha d’impedir obrir/jugar el minijoc; el backend afegeix persistència, però no pot convertir-se en un punt únic de bloqueig visual.
+
+INFRAESTRUCTURA
+- No requereix SQL nou.
+- No modifica Auth, rols, HISTÒRIC, APORTACIONS, PLAYER ni manifests.
+- Caches APP/EDITOR i version.js actualitzats a v0.67.
