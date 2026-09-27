@@ -1,0 +1,16 @@
+BANDA DE LA CALA · v0.62
+
+EDITOR · SISTEMA · USER ADMIN
+- Nova caixa “Arxiu multimèdia”, visible exclusivament per a USER ADMIN.
+- Botó per descarregar tota la media activa d’HISTÒRIC en un únic ZIP.
+- Botó per descarregar totes les imatges de CARTELLS en un únic ZIP.
+- HISTÒRIC s’ordena dins del ZIP per període i any.
+- CARTELLS s’ordena dins del ZIP per any.
+- El ZIP es genera directament al navegador, sense llibreries externes ni nous serveis.
+- Si algun fitxer no es pot recuperar, el ZIP inclou _ERRORS.txt amb el detall i l’EDITOR ho indica.
+- Doble protecció ADMIN: UI oculta per a GESTOR + comprovació de rol abans de generar la descàrrega.
+
+INFRAESTRUCTURA
+- No requereix SQL nou.
+- No requereix Edge Functions nuevas.
+- No modifica manifests, IDs ni scopes PWA.

@@ -1612,6 +1612,170 @@ async function reloadSupabaseContent(){
   }catch(error){ console.error(error); showToast('No s’han pogut carregar les dades de Supabase'); }
 }
 
+
+const mediaArchiveState={busy:false};
+const MEDIA_ZIP_ENCODER=new TextEncoder();
+let MEDIA_CRC32_TABLE=null;
+
+function mediaArchiveSafePart(value,fallback='sense-nom'){
+  const clean=String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').replace(/^[-_.]+|[-_.]+$/g,'');
+  return clean||fallback;
+}
+function mediaArchiveExtension(blob,url=''){
+  const type=String(blob?.type||'').toLowerCase().split(';')[0].trim();
+  const byType={
+    'image/jpeg':'jpg','image/jpg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif','image/avif':'avif','image/bmp':'bmp','image/svg+xml':'svg',
+    'application/pdf':'pdf','video/mp4':'mp4','video/webm':'webm','audio/mpeg':'mp3','audio/mp4':'m4a','audio/wav':'wav','audio/x-wav':'wav'
+  };
+  if(byType[type]) return byType[type];
+  try{
+    const path=new URL(String(url||''),location.href).pathname;
+    const match=path.match(/\.([a-zA-Z0-9]{2,5})$/);
+    if(match) return match[1].toLowerCase().replace('jpeg','jpg');
+  }catch(_error){}
+  return 'bin';
+}
+function mediaArchiveUniquePath(path,used){
+  let candidate=path, n=2;
+  const dot=path.lastIndexOf('.');
+  const base=dot>path.lastIndexOf('/')?path.slice(0,dot):path;
+  const ext=dot>path.lastIndexOf('/')?path.slice(dot):'';
+  while(used.has(candidate)) candidate=`${base}-${n++}${ext}`;
+  used.add(candidate);
+  return candidate;
+}
+function mediaCrc32(bytes){
+  if(!MEDIA_CRC32_TABLE){
+    MEDIA_CRC32_TABLE=new Uint32Array(256);
+    for(let n=0;n<256;n++){
+      let c=n;
+      for(let k=0;k<8;k++) c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);
+      MEDIA_CRC32_TABLE[n]=c>>>0;
+    }
+  }
+  let crc=0xffffffff;
+  for(let i=0;i<bytes.length;i++) crc=MEDIA_CRC32_TABLE[(crc^bytes[i])&0xff]^(crc>>>8);
+  return (crc^0xffffffff)>>>0;
+}
+function mediaZipDosDateTime(value){
+  const date=value instanceof Date&&!Number.isNaN(value.valueOf())?value:new Date();
+  const year=Math.max(1980,date.getFullYear());
+  const dosDate=((year-1980)<<9)|((date.getMonth()+1)<<5)|date.getDate();
+  const dosTime=(date.getHours()<<11)|(date.getMinutes()<<5)|Math.floor(date.getSeconds()/2);
+  return {dosDate:dosDate&0xffff,dosTime:dosTime&0xffff};
+}
+function mediaZipLocalHeader(nameBytes,size,crc,date){
+  const out=new Uint8Array(30+nameBytes.length),view=new DataView(out.buffer);
+  view.setUint32(0,0x04034b50,true); view.setUint16(4,20,true); view.setUint16(6,0x0800,true); view.setUint16(8,0,true);
+  view.setUint16(10,date.dosTime,true); view.setUint16(12,date.dosDate,true); view.setUint32(14,crc,true); view.setUint32(18,size,true); view.setUint32(22,size,true);
+  view.setUint16(26,nameBytes.length,true); view.setUint16(28,0,true); out.set(nameBytes,30); return out;
+}
+function mediaZipCentralHeader(nameBytes,size,crc,date,offset){
+  const out=new Uint8Array(46+nameBytes.length),view=new DataView(out.buffer);
+  view.setUint32(0,0x02014b50,true); view.setUint16(4,20,true); view.setUint16(6,20,true); view.setUint16(8,0x0800,true); view.setUint16(10,0,true);
+  view.setUint16(12,date.dosTime,true); view.setUint16(14,date.dosDate,true); view.setUint32(16,crc,true); view.setUint32(20,size,true); view.setUint32(24,size,true);
+  view.setUint16(28,nameBytes.length,true); view.setUint16(30,0,true); view.setUint16(32,0,true); view.setUint16(34,0,true); view.setUint16(36,0,true); view.setUint32(38,0,true); view.setUint32(42,offset,true);
+  out.set(nameBytes,46); return out;
+}
+function buildMediaZip(files){
+  if(files.length>65535) throw new Error('TOO_MANY_FILES');
+  const localParts=[],centralParts=[];
+  let offset=0,centralSize=0;
+  for(const file of files){
+    const data=file.bytes instanceof Uint8Array?file.bytes:new Uint8Array(file.bytes);
+    if(data.byteLength>0xffffffff) throw new Error('FILE_TOO_LARGE');
+    const nameBytes=MEDIA_ZIP_ENCODER.encode(String(file.name||'fitxer.bin').replace(/^\/+/,''));
+    const crc=mediaCrc32(data),stamp=mediaZipDosDateTime(file.modifiedAt?new Date(file.modifiedAt):new Date());
+    const local=mediaZipLocalHeader(nameBytes,data.byteLength,crc,stamp);
+    if(offset+local.byteLength+data.byteLength>0xffffffff) throw new Error('ARCHIVE_TOO_LARGE');
+    const central=mediaZipCentralHeader(nameBytes,data.byteLength,crc,stamp,offset);
+    localParts.push(local,data); centralParts.push(central); centralSize+=central.byteLength; offset+=local.byteLength+data.byteLength;
+  }
+  if(offset+centralSize>0xffffffff) throw new Error('ARCHIVE_TOO_LARGE');
+  const end=new Uint8Array(22),view=new DataView(end.buffer);
+  view.setUint32(0,0x06054b50,true); view.setUint16(4,0,true); view.setUint16(6,0,true); view.setUint16(8,files.length,true); view.setUint16(10,files.length,true);
+  view.setUint32(12,centralSize,true); view.setUint32(16,offset,true); view.setUint16(20,0,true);
+  return new Blob([...localParts,...centralParts,end],{type:'application/zip'});
+}
+function downloadMediaBlob(blob,filename){
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url; a.download=filename; a.style.display='none'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+function collectHistoricMediaForArchive(){
+  const seen=new Set(),rows=[];
+  for(const item of content.historicItems||[]){
+    const period=historicPeriodById(item.periodId);
+    const periodPart=mediaArchiveSafePart(period?.years||'sense-periode','sense-periode');
+    const yearPart=mediaArchiveSafePart(item.year||'sense-any','sense-any');
+    const titlePart=mediaArchiveSafePart(item.title||'historic','historic');
+    historicImages(item).forEach((url,index)=>{
+      if(!url||seen.has(url)) return; seen.add(url);
+      rows.push({url,basePath:`HISTORIC/${periodPart}/${yearPart}/${yearPart}-${titlePart}-${String(index+1).padStart(2,'0')}`,modifiedAt:item.createdAt||content.updatedAt||null});
+    });
+  }
+  return rows;
+}
+function collectCartellsMediaForArchive(){
+  const seen=new Set(),rows=[];
+  for(const item of (content.hemerotecaItems||[]).filter(entry=>entry?.type==='cartells')){
+    const yearPart=mediaArchiveSafePart(item.year||'sense-any','sense-any');
+    const titlePart=mediaArchiveSafePart(item.title||'cartell','cartell');
+    hemerotecaImages(item).forEach((url,index)=>{
+      if(!url||seen.has(url)) return; seen.add(url);
+      rows.push({url,basePath:`CARTELLS/${yearPart}/${yearPart}-${titlePart}-${String(index+1).padStart(2,'0')}`,modifiedAt:item.createdAt||content.updatedAt||null});
+    });
+  }
+  return rows;
+}
+function setMediaArchiveBusy(busy,status=''){
+  mediaArchiveState.busy=!!busy;
+  ['downloadHistoricMediaBtn','downloadCartellsMediaBtn'].forEach(id=>{const btn=document.getElementById(id);if(btn)btn.disabled=!!busy;});
+  const statusEl=document.getElementById('mediaArchiveStatus'); if(statusEl) statusEl.textContent=status||'';
+}
+async function downloadAdminMediaArchive(kind){
+  if(!editorIsAdmin()||!currentSession){ showToast('Aquesta descàrrega està reservada al USER ADMIN'); return; }
+  if(mediaArchiveState.busy) return;
+  const isHistoric=kind==='historic';
+  const rows=isHistoric?collectHistoricMediaForArchive():collectCartellsMediaForArchive();
+  if(!rows.length){ showToast(isHistoric?'No hi ha fotografies a HISTÒRIC':'No hi ha CARTELLS per descarregar'); return; }
+  setMediaArchiveBusy(true,`Preparant 0/${rows.length}…`);
+  const files=[],errors=[],usedPaths=new Set();
+  try{
+    for(let i=0;i<rows.length;i++){
+      const row=rows[i]; setMediaArchiveBusy(true,`Descarregant ${i+1}/${rows.length}…`);
+      try{
+        const response=await fetch(row.url,{cache:'no-store'});
+        if(!response.ok) throw new Error(`HTTP_${response.status}`);
+        const blob=await response.blob();
+        const ext=mediaArchiveExtension(blob,row.url);
+        const path=mediaArchiveUniquePath(`${row.basePath}.${ext}`,usedPaths);
+        files.push({name:path,bytes:new Uint8Array(await blob.arrayBuffer()),modifiedAt:row.modifiedAt});
+      }catch(error){
+        console.error('media archive download failed',row.url,error);
+        errors.push(`${row.basePath} -> ${row.url} -> ${error?.message||String(error)}`);
+      }
+    }
+    if(errors.length){
+      const report=MEDIA_ZIP_ENCODER.encode(`BANDA DE LA CALA · FITXERS NO DESCARREGATS\n\n${errors.join('\n')}\n`);
+      files.push({name:'_ERRORS.txt',bytes:report,modifiedAt:new Date()});
+    }
+    if(!files.length) throw new Error('NO_FILES_DOWNLOADED');
+    setMediaArchiveBusy(true,'Generant ZIP…');
+    const zip=buildMediaZip(files);
+    const stamp=new Date();
+    const date=`${stamp.getFullYear()}-${String(stamp.getMonth()+1).padStart(2,'0')}-${String(stamp.getDate()).padStart(2,'0')}`;
+    const filename=isHistoric?`BANDA_DE_LA_CALA_HISTORIC_MEDIA_${date}.zip`:`BANDA_DE_LA_CALA_CARTELLS_${date}.zip`;
+    downloadMediaBlob(zip,filename);
+    const okCount=files.length-(errors.length?1:0);
+    setMediaArchiveBusy(false,errors.length?`ZIP creat · ${okCount}/${rows.length} fitxers · revisa _ERRORS.txt`:`ZIP creat · ${okCount} fitxers`);
+    showToast(errors.length?`ZIP creat amb ${errors.length} incidències`:`ZIP creat · ${okCount} fitxers`);
+  }catch(error){
+    console.error(error); setMediaArchiveBusy(false,'');
+    showToast('No s’ha pogut generar el ZIP');
+  }
+}
+
 function bindSystem(){
   $('#homeCardsTextForm')?.addEventListener('submit',event=>{
     event.preventDefault();
@@ -1643,6 +1807,8 @@ function bindSystem(){
     BandaStore.clearLocal();
     showToast('Memòria local netejada');
   };
+  $('#downloadHistoricMediaBtn')?.addEventListener('click',()=>downloadAdminMediaArchive('historic'));
+  $('#downloadCartellsMediaBtn')?.addEventListener('click',()=>downloadAdminMediaArchive('cartells'));
 }
 function roleEditorLabel(role){
   return ({admin:'USER ADMIN',gestor:'USER GESTOR',standard:'USER STANDARD'})[role] || String(role||'USER').toUpperCase();

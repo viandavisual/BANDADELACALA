@@ -842,7 +842,7 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 }
 
 /* ============================================================
-   v0.61 · RESUM EVENTS + USUARIS MOBILE COL·LAPSABLE
+   v0.62 · RESUM EVENTS + USUARIS MOBILE COL·LAPSABLE
    ============================================================ */
 .users-accounts-title-mobile{display:none!important}
 .users-accounts-head{user-select:none}
