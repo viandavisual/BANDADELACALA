@@ -14,7 +14,7 @@
   <link rel="manifest" href="editor/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="editor/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="editor/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="editor.css?v=0.53" />
+  <link rel="stylesheet" href="editor.css?v=0.56" />
 </head>
 <body>
   <section id="editorLoginGate" class="editor-login-gate" aria-label="Accés a l'Editor">
@@ -315,6 +315,17 @@
           <div class="editor-card system-card featured" id="supabaseMigrationCard" data-admin-only><span class="eyebrow">SUPABASE</span><h2>Sincronització central</h2><p id="supabaseMigrationText">L’EDITOR desa directament a Supabase. Si aquest navegador conserva dades de versions anteriors, pots migrar-les una sola vegada, incloses les imatges locals.</p><div class="stack-actions"><button id="migrateToSupabaseBtn" class="primary-btn">MIGRAR DADES LOCALS A SUPABASE</button><button id="reloadSupabaseBtn" class="secondary-btn">TORNAR A CARREGAR SUPABASE</button></div></div>
           <div class="editor-card system-card"><span class="eyebrow">CÒPIA DE SEGURETAT</span><h2>Exportar / importar</h2><p>Guarda una còpia JSON de totes les dades gestionades o recupera’n una d’anterior.</p><div class="stack-actions"><button id="exportJsonBtn" class="primary-btn">EXPORTAR JSON</button><button id="importJsonBtn" class="secondary-btn">IMPORTAR JSON</button><input id="importJsonInput" type="file" accept="application/json,.json" hidden /></div></div>
           <div class="editor-card system-card"><span class="eyebrow">CÒPIA LEGACY</span><h2>Exportar contingut publicat</h2><p>Opcionalment pots continuar generant <code>content-published.js</code> com a còpia de seguretat. Ja no és necessari per sincronitzar els dispositius.</p><div class="stack-actions"><button id="savePublishedBtn" class="secondary-btn">DESAR content-published.js</button><button id="downloadPublishedBtn" class="secondary-btn">DESCARREGAR FITXER</button></div></div>
+          <div class="editor-card system-card system-home-copy-card">
+            <span class="eyebrow">HOME APP</span><h2>Textos de les caixes</h2><p>Modifica els títols i textos de les caixes de navegació de la HOME. Els salts de línia dels camps de text es respectaran a l’APP.</p>
+            <form id="homeCardsTextForm" class="system-home-copy-form">
+              <section><h3>CALENDARI</h3><label>Títol<input id="homeCardCalendarTitle" type="text" /></label><label>Text<textarea id="homeCardCalendarText" rows="3"></textarea></label></section>
+              <section><h3>HISTÒRIC</h3><label>Títol<input id="homeCardHistoryTitle" type="text" /></label><label>Text<textarea id="homeCardHistoryText" rows="3"></textarea></label></section>
+              <section><h3>PLAYER</h3><label>Títol<input id="homeCardPlaylistTitle" type="text" /></label><label>Text<textarea id="homeCardPlaylistText" rows="3"></textarea></label></section>
+              <section><h3>MINIJOCS</h3><label>Títol<input id="homeCardGamesTitle" type="text" /></label><label>Text · USER registrat<textarea id="homeCardGamesAuthenticatedText" rows="3"></textarea></label><label>Text · sense sessió<textarea id="homeCardGamesGuestText" rows="3"></textarea></label><label>Text · inactiu<textarea id="homeCardGamesInactiveText" rows="3"></textarea></label></section>
+              <section><h3>USUARI</h3><label>Títol · sense sessió<input id="homeCardUserGuestTitle" type="text" /></label><label>Text · USER registrat<textarea id="homeCardUserAuthenticatedText" rows="3"></textarea></label><label>Text · sense sessió<textarea id="homeCardUserGuestText" rows="3"></textarea></label><small>Quan hi ha una sessió iniciada, el títol de la caixa USUARI continua sent automàticament el nom del USER.</small></section>
+              <div class="form-actions"><button class="primary-btn" type="submit">DESAR TEXTOS HOME</button></div>
+            </form>
+          </div>
           <div class="editor-card system-card"><span class="eyebrow">ESTAT</span><h2>Dades locals</h2><dl class="system-data"><div><dt>Última modificació</dt><dd id="lastUpdated">—</dd></div><div><dt>Esdeveniments</dt><dd id="systemEvents">0</dd></div><div><dt>Dresscodes</dt><dd id="systemDresscodes">0</dd></div><div><dt>Pistes</dt><dd id="systemTracks">0</dd></div><div><dt>Fotos històric</dt><dd id="systemHistoric">0</dd></div><div><dt>Hemeroteca</dt><dd id="systemHemeroteca">0</dd></div><div><dt>Entorn</dt><dd id="systemProtocol">—</dd></div></dl></div>
           <div class="editor-card system-card danger-card"><span class="eyebrow">RESTAURAR</span><h2>Netejar memòria local</h2><p>Elimina únicament l’antic esborrany local del navegador. El contingut compartit no s’esborra.</p><button id="resetLocalBtn" class="danger-btn">NETEJAR DADES LOCALS</button></div>
         </div>
@@ -332,12 +343,12 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="version.js?v=0.53"></script>
-  <script src="config.js?v=0.53"></script>
-  <script src="data/content-published.js?v=0.53"></script>
-  <script src="content-store.js?v=0.53"></script>
+  <script src="version.js?v=0.56"></script>
+  <script src="config.js?v=0.56"></script>
+  <script src="data/content-published.js?v=0.56"></script>
+  <script src="content-store.js?v=0.56"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.53"></script>
-  <script src="editor.js?v=0.53"></script>
+  <script src="supabase-client.js?v=0.56"></script>
+  <script src="editor.js?v=0.56"></script>
 </body>
 </html>

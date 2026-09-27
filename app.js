@@ -31,6 +31,7 @@ const state = {
   collapsedPeriods: new Set(),
   historyViewer: { scale:1, maxScale:1, baseWidth:0, items:[], index:0 },
   hemerotecaType: 'cartells',
+  hemerotecaOpenYears: new Set(),
   minigameOpen: false,
   minigameWasPlaying: false,
   content: window.BandaStore ? (BandaStore.loadApp ? BandaStore.loadApp() : BandaStore.load()) : {events:[],tracks:[],dresscodes:[],historicItems:[],hemerotecaItems:[],settings:{}}
@@ -245,7 +246,8 @@ function renderGames(){
     return;
   }
   const points=state.authenticated?Number(state.profile?.quina_nota_points_total||0):null;
-  const marker=state.authenticated?`<span class="game-points-bubble">${esc(`TENS ${points} PUNTS`)}</span>`:'';
+  const pointsUnit=points===1?'PUNT':'PUNTS';
+  const marker=state.authenticated?`<span class="game-points-bubble">${esc(`TENS ${points} ${pointsUnit}`)}</span>`:'';
   const icon=qne.icon
     ? `<span class="game-launch-icon game-launch-image"><img src="${esc(qne.icon)}" alt="" /></span>`
     : `<span class="game-launch-icon">${quinaNotaIconSvg()}</span>`;
@@ -307,7 +309,7 @@ async function openQuinaNotaGame(){
       }
     }
   };
-  frame.src=`app/minigames/quina-nota-es/app.html?v=0.55&ts=${Date.now()}`;
+  frame.src=`app/minigames/quina-nota-es/app.html?v=0.56&ts=${Date.now()}`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function closeOpenMinigame({resumePlayer=true}={}){
@@ -351,26 +353,46 @@ function bindMinigameBridge(){
   });
 }
 
+const HOME_CARD_COPY_DEFAULTS={
+  calendar:{title:'CALENDARI',text:'Assajos, actuacions i agenda de la banda.'},
+  history:{title:'HISTÒRIC',text:'Cronologia visual de la història de la banda.'},
+  playlist:{title:'PLAYER',text:'Reproductor de pistes i repertori d’àudio.'},
+  games:{title:'MINIJOCS',authenticatedText:'Jocs i reptes musicals de la banda.',guestText:'Jocs musicals oberts a tothom. Inicia sessió per guardar punts.',inactiveText:'Minijocs temporalment inactius.'},
+  user:{guestTitle:'USUARI',authenticatedText:'Perfil i dades del teu compte.',guestText:'Accés privat per als músics de la banda.'}
+};
+function getHomeCardCopy(){
+  const raw=state.content?.settings?.homeCards||{};
+  const clean=(value,fallback)=>typeof value==='string'&&value.trim()?value.trim():fallback;
+  return {
+    calendar:{title:clean(raw.calendar?.title,HOME_CARD_COPY_DEFAULTS.calendar.title),text:clean(raw.calendar?.text,HOME_CARD_COPY_DEFAULTS.calendar.text)},
+    history:{title:clean(raw.history?.title,HOME_CARD_COPY_DEFAULTS.history.title),text:clean(raw.history?.text,HOME_CARD_COPY_DEFAULTS.history.text)},
+    playlist:{title:clean(raw.playlist?.title,HOME_CARD_COPY_DEFAULTS.playlist.title),text:clean(raw.playlist?.text,HOME_CARD_COPY_DEFAULTS.playlist.text)},
+    games:{title:clean(raw.games?.title,HOME_CARD_COPY_DEFAULTS.games.title),authenticatedText:clean(raw.games?.authenticatedText,HOME_CARD_COPY_DEFAULTS.games.authenticatedText),guestText:clean(raw.games?.guestText,HOME_CARD_COPY_DEFAULTS.games.guestText),inactiveText:clean(raw.games?.inactiveText,HOME_CARD_COPY_DEFAULTS.games.inactiveText)},
+    user:{guestTitle:clean(raw.user?.guestTitle,HOME_CARD_COPY_DEFAULTS.user.guestTitle),authenticatedText:clean(raw.user?.authenticatedText,HOME_CARD_COPY_DEFAULTS.user.authenticatedText),guestText:clean(raw.user?.guestText,HOME_CARD_COPY_DEFAULTS.user.guestText)}
+  };
+}
 function renderHome(){
   const welcome=$('#homeWelcomeEyebrow');
   if(welcome) welcome.textContent=state.authenticated ? `${currentWelcomeLabel()} ${currentUserDisplayName()}` : 'BENVINGUT/DA';
+  const copy=getHomeCardCopy();
+  const gamesActive=getQuinaNotaSettings().active;
   const cards = state.authenticated ? [
-    { id:'calendar', icon:'calendar', title:'CALENDARI', text:'Assajos, actuacions i agenda de la banda.', status:'ACTIU' },
-    { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
-    { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
-    { id:'games', icon:'games', title:'MINIJOCS', text:getQuinaNotaSettings().active?'Jocs i reptes musicals de la banda.':'Minijocs temporalment inactius.', status:getQuinaNotaSettings().active?'ACTIU':'INACTIU' },
-    { id:'user', icon:'user', title:currentUserDisplayName(), text:'Perfil i dades del teu compte.', status:'ACTIU' }
+    { id:'calendar', icon:'calendar', title:copy.calendar.title, text:copy.calendar.text, status:'ACTIU' },
+    { id:'history', icon:'history', title:copy.history.title, text:copy.history.text, status:'ACTIU' },
+    { id:'playlist', icon:'playlist', title:copy.playlist.title, text:copy.playlist.text, status:'ACTIU' },
+    { id:'games', icon:'games', title:copy.games.title, text:gamesActive?copy.games.authenticatedText:copy.games.inactiveText, status:gamesActive?'ACTIU':'INACTIU' },
+    { id:'user', icon:'user', title:currentUserDisplayName(), text:copy.user.authenticatedText, status:'ACTIU' }
   ] : [
-    { id:'history', icon:'history', title:'HISTÒRIC', text:'Cronologia visual de la història de la banda.', status:'ACTIU' },
-    { id:'playlist', icon:'playlist', title:'PLAYER', text:'Reproductor de pistes i repertori d’àudio.', status:'ACTIU' },
-    { id:'games', icon:'games', title:'MINIJOCS', text:getQuinaNotaSettings().active?'Jocs musicals oberts a tothom. Inicia sessió per guardar punts.':'Minijocs temporalment inactius.', status:getQuinaNotaSettings().active?'ACTIU':'INACTIU' },
-    { id:'user', icon:'user', title:'USUARI', text:'Accés privat per als músics de la banda.', status:'ACCÉS' }
+    { id:'history', icon:'history', title:copy.history.title, text:copy.history.text, status:'ACTIU' },
+    { id:'playlist', icon:'playlist', title:copy.playlist.title, text:copy.playlist.text, status:'ACTIU' },
+    { id:'games', icon:'games', title:copy.games.title, text:gamesActive?copy.games.guestText:copy.games.inactiveText, status:gamesActive?'ACTIU':'INACTIU' },
+    { id:'user', icon:'user', title:copy.user.guestTitle, text:copy.user.guestText, status:'ACCÉS' }
   ];
   const homeGrid=$('#homeGrid');
   homeGrid.classList.toggle('five-cards', cards.length===5);
-  homeGrid.innerHTML = cards.map(card => `<button class="home-card" data-open="${card.id}">
+  homeGrid.innerHTML = cards.map(card => `<button class="home-card" data-open="${esc(card.id)}">
     <span class="big-icon">${iconSvg(card.icon)}</span>
-    <div>${card.status && card.status!=='ACTIU'?`<span class="status-pill">${card.status}</span>`:''}<h4>${card.title}</h4><p>${card.text}</p></div>
+    <div>${card.status && card.status!=='ACTIU'?`<span class="status-pill">${esc(card.status)}</span>`:''}<h4>${esc(card.title)}</h4><p class="preserve-lines">${esc(card.text)}</p></div>
   </button>`).join('');
   $$('#homeGrid [data-open]').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.open, true)));
   syncPlayerEqualizers();
@@ -412,7 +434,8 @@ function animateViewEntrance(id){
   });
   nodes.forEach((el,index)=>{
     el.classList.remove('piece-entering');
-    el.style.setProperty('--piece-enter-delay',`${Math.min(index,14)*42}ms`);
+    const delayIndex=id==='calendar'?index:Math.min(index,14);
+    el.style.setProperty('--piece-enter-delay',`${delayIndex*42}ms`);
     void el.offsetWidth;
     el.classList.add('piece-entering');
     el.addEventListener('animationend',()=>{
@@ -566,6 +589,9 @@ function getHistoricItems(){
 function historyPeriodItems(periodId){
   return getHistoricItems().filter(item=>item.periodId===periodId);
 }
+function historyPeriodPhotoCount(periodId){
+  return historyPeriodItems(periodId).reduce((total,item)=>total+getHistoricImages(item).length,0);
+}
 function historyMediaMarkup(periodId){
   const items=getHistoricItems();
   const periodItems=items.filter(item=>item.periodId===periodId);
@@ -683,10 +709,15 @@ function renderHistory(){
     const yearsLabel=sameYear ? String(startLabel) : `${startLabel}-${endLabel}`;
     const nextPeriod=displayPeriods[displayIndex+1];
     const nextButton=nextPeriod?`<button class="history-next-period" type="button" data-next-period="${esc(nextPeriod.id)}"><span>SEGÜENT PERÍODE</span><strong>↓</strong></button>`:'';
-    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-dot" aria-hidden="true"></span><div class="history-period-inline"><span class="history-period-year history-period-years">${esc(yearsLabel)}</span><span class="history-period-director">${esc(period.director)}</span>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
+    const photoCount=historyPeriodPhotoCount(period.id);
+    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-dot" aria-hidden="true"></span><div class="history-period-inline"><span class="history-period-year history-period-years">${esc(yearsLabel)}</span><span class="history-period-director">${esc(period.director)}</span>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-photo-total" aria-label="${photoCount} ${photoCount===1?'foto':'fotos'}">${photoCount}</span><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
   }).join('');
-  $$('[data-toggle-period]').forEach(btn=>btn.addEventListener('click',()=>toggleHistoryPeriod(btn.dataset.togglePeriod)));
-  $$('[data-next-period]').forEach(btn=>btn.addEventListener('click',()=>setHistoryPeriodOpen(btn.dataset.nextPeriod,true,{scroll:true,closeOthers:true})));
+  host.onclick=event=>{
+    const toggle=event.target.closest('[data-toggle-period]');
+    if(toggle && host.contains(toggle)){event.preventDefault();toggleHistoryPeriod(toggle.dataset.togglePeriod);return;}
+    const next=event.target.closest('[data-next-period]');
+    if(next && host.contains(next)){event.preventDefault();setHistoryPeriodOpen(next.dataset.nextPeriod,true,{scroll:true,closeOthers:true});}
+  };
   bindHistoryImagesWithin(host);
   requestAnimationFrame(()=>compactHistoryTimeline(host));
   host.querySelectorAll('img').forEach(img=>{if(!img.complete)img.addEventListener('load',()=>compactHistoryTimeline(host),{once:true});});
@@ -906,11 +937,25 @@ function renderHemeroteca(){
   if(state.hemerotecaType==='cartells'){
     const groups=new Map();
     items.forEach(item=>{const year=String(Number.parseInt(item?.year,10)||'SENSE ANY');if(!groups.has(year))groups.set(year,[]);groups.get(year).push(item);});
-    host.innerHTML=[...groups.entries()].map(([year,yearItems])=>`<details class="hemeroteca-year-group"><summary><strong>${esc(year)}</strong><span>${yearItems.length} ${yearItems.length===1?'CARTELL':'CARTELLS'}</span><i aria-hidden="true">⌄</i></summary><div class="hemeroteca-year-grid">${yearItems.map(hemerotecaCardMarkup).join('')}</div></details>`).join('');
+    host.innerHTML=[...groups.entries()].map(([year,yearItems])=>{const open=state.hemerotecaOpenYears.has(year);return `<section class="hemeroteca-year-group ${open?'is-open':''}" data-hemeroteca-year="${esc(year)}"><button type="button" class="hemeroteca-year-toggle" data-toggle-hemeroteca-year="${esc(year)}" aria-expanded="${open?'true':'false'}"><strong>${esc(year)}</strong><span>${yearItems.length} ${yearItems.length===1?'CARTELL':'CARTELLS'}</span><i aria-hidden="true">⌄</i></button><div class="hemeroteca-year-grid" ${open?'':'hidden'}>${yearItems.map(hemerotecaCardMarkup).join('')}</div></section>`;}).join('');
   }else{
     host.innerHTML=items.map(hemerotecaCardMarkup).join('');
   }
-  $$('[data-hemeroteca-image-id]').forEach(btn=>btn.addEventListener('click',()=>openHemerotecaImage(btn.dataset.hemerotecaImageId,Number(btn.dataset.hemerotecaImageIndex||0))));
+  host.onclick=event=>{
+    const toggle=event.target.closest('[data-toggle-hemeroteca-year]');
+    if(toggle && host.contains(toggle)){
+      event.preventDefault();
+      const year=toggle.dataset.toggleHemerotecaYear;
+      if(state.hemerotecaOpenYears.has(year))state.hemerotecaOpenYears.delete(year);else state.hemerotecaOpenYears.add(year);
+      const group=toggle.closest('.hemeroteca-year-group');
+      const grid=group?.querySelector('.hemeroteca-year-grid');
+      const open=state.hemerotecaOpenYears.has(year);
+      group?.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',open?'true':'false');if(grid)grid.hidden=!open;
+      return;
+    }
+    const imageButton=event.target.closest('[data-hemeroteca-image-id]');
+    if(imageButton && host.contains(imageButton))openHemerotecaImage(imageButton.dataset.hemerotecaImageId,Number(imageButton.dataset.hemerotecaImageIndex||0));
+  };
 }
 function openHemeroteca(){
   const main=$('#historyMainContent'), panel=$('#hemerotecaPanel'); if(!main||!panel)return;

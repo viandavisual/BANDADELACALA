@@ -1919,9 +1919,8 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 
 /* HEMEROTECA / CARTELLS: grups anuals col·lapsats. */
 .hemeroteca-year-group{grid-column:1/-1;width:100%;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:var(--shadow-soft);overflow:hidden}
-.hemeroteca-year-group>summary{list-style:none;min-height:62px;padding:0 18px;display:flex;align-items:center;gap:12px;cursor:pointer;background:linear-gradient(145deg,#fff,#fffaf0);color:var(--blue-deep)}
-.hemeroteca-year-group>summary::-webkit-details-marker{display:none}
-.hemeroteca-year-group>summary strong{font-size:1.12rem}.hemeroteca-year-group>summary span{margin-left:auto;color:var(--muted);font-size:.65rem;font-weight:900;letter-spacing:.08em}.hemeroteca-year-group>summary i{font-style:normal;font-size:1.2rem;transition:transform .18s ease}.hemeroteca-year-group[open]>summary i{transform:rotate(180deg)}
+.hemeroteca-year-toggle{width:100%;border:0;list-style:none;min-height:62px;padding:0 18px;display:flex;align-items:center;gap:12px;cursor:pointer;background:linear-gradient(145deg,#fff,#fffaf0);color:var(--blue-deep);text-align:left;touch-action:manipulation}
+.hemeroteca-year-toggle strong{font-size:1.12rem}.hemeroteca-year-toggle span{margin-left:auto;color:var(--muted);font-size:.65rem;font-weight:900;letter-spacing:.08em}.hemeroteca-year-toggle i{font-style:normal;font-size:1.2rem;transition:transform .18s ease}.hemeroteca-year-group.is-open>.hemeroteca-year-toggle i{transform:rotate(180deg)}
 .hemeroteca-year-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;padding:10px;border-top:1px solid var(--line)}
 .hemeroteca-year-grid .hemeroteca-card{width:100%!important;margin:0!important;display:block!important}
 
@@ -1947,7 +1946,7 @@ body.minigame-fullscreen-open .mini-player,body.minigame-fullscreen-open .mobile
   .home-social-links{gap:13px!important;margin:22px 0 20px!important}.home-social-links a{width:72px!important;height:72px!important}.home-social-links a svg{width:34px!important;height:34px!important}
   #view-calendar .month-controls .icon-btn,#view-calendar .month-controls .mini-btn{min-width:48px!important;height:48px!important;border-radius:13px!important}.month-controls .mini-btn{padding:0 14px!important}
   .history-image-dialog{height:calc(100dvh - 16px)!important;padding:9px!important;border-radius:18px!important}.history-image-stage{grid-template-columns:40px minmax(0,1fr) 40px;gap:6px}.history-image-nav{width:40px!important;border-radius:12px!important;font-size:1.85rem!important}.history-image-close{width:40px!important;height:40px!important}
-  .hemeroteca-year-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:7px}.hemeroteca-year-group>summary{min-height:54px;padding:0 13px;border-radius:0}
+  .hemeroteca-year-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:7px}.hemeroteca-year-toggle{min-height:54px;padding:0 13px;border-radius:0}
   .playback-modes .mode-btn{min-height:58px!important;padding:8px 6px!important;font-size:1.45rem!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;line-height:1!important}
   .playback-modes .mode-btn span{display:block!important;margin:5px 0 0!important;font-size:.78rem!important;letter-spacing:.045em!important}
   .user-name-form>#profileDisplayName,.user-profile-tile.user-name-form input#profileDisplayName{font-size:1.5rem!important;min-height:54px!important}
@@ -1991,3 +1990,15 @@ body.minigame-fullscreen-open .mini-player,body.minigame-fullscreen-open .mobile
 @media(max-width:780px){
   .game-launch-title-image{max-width:min(100%,150px);max-height:48px}
 }
+
+
+/* ============================================================
+   v0.56 · CALENDARI / COL·LAPSABLES / HISTÒRIC / MINIJOCS
+   ============================================================ */
+.history-period-head{touch-action:manipulation;position:relative;z-index:5}
+.history-period-photo-total{flex:0 0 auto;min-width:34px;height:28px;padding:0 8px;border-radius:999px;display:inline-flex!important;align-items:center!important;justify-content:center;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);color:var(--period-text)!important;font-size:.72rem!important;font-weight:950!important;line-height:1!important;margin:0 2px 0 auto!important}
+.history-period-chevron{margin-left:0!important}
+.hemeroteca-year-grid[hidden]{display:none!important}
+.hemeroteca-year-toggle{font:inherit;position:relative;z-index:3}
+.game-logo-icon img[hidden],.game-logo-fallback[hidden]{display:none!important}
+@media(max-width:780px){.history-period-photo-total{min-width:30px;height:25px;font-size:.62rem!important;padding:0 7px}.hemeroteca-year-toggle{min-height:54px;padding:0 13px}}

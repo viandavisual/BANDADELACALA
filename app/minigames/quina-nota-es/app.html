@@ -580,7 +580,7 @@
     }
   
     /* v0.53 · capçalera del joc */
-    .game-logo-icon{width:96px;height:96px;border-radius:24px}.game-logo-icon svg{width:60px;height:60px}
+    .game-logo-icon{width:96px;height:96px;border-radius:24px;overflow:hidden;background:transparent;border:0;box-shadow:none}.game-logo-icon svg{width:60px;height:60px}.game-logo-icon img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;background:transparent}.game-logo-fallback{width:100%;height:100%;display:grid;place-items:center}
     .game-title-image[hidden]{display:none!important}.game-title-image{display:block;max-width:min(100%,420px);max-height:98px;object-fit:contain;object-position:left center;background:transparent}
     .points-box{color:var(--banda-blue-deep)}
     .points-phrase{display:flex;align-items:baseline;justify-content:center;gap:5px;flex-wrap:wrap;font-size:13px;line-height:1.1;font-weight:800}
@@ -598,14 +598,17 @@
       <div class="hero-main">
         <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span id="brandText"></span></div>
         <div class="title-row">
-          <div class="game-logo-icon" aria-hidden="true">
-            <svg width="30" height="30" viewBox="0 0 32 32">
-              <path d="M11 7.2v14.1" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linecap="round"/>
-              <path d="M20.8 5.1v13.1" fill="none" stroke="#8B6228" stroke-width="1.7" stroke-linecap="round"/>
-              <path d="M11 7.2l9.8-2.1v4.1L11 11.3V7.2Z" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linejoin="round"/>
-              <ellipse cx="8.6" cy="22.2" rx="3.9" ry="2.8" transform="rotate(-18 8.6 22.2)" fill="#D4AC5F"/>
-              <ellipse cx="18.4" cy="19.2" rx="3.9" ry="2.8" transform="rotate(-18 18.4 19.2)" fill="#393A86"/>
-            </svg>
+          <div id="gameLogoIcon" class="game-logo-icon" aria-hidden="true">
+            <img id="gameIconImage" alt="" hidden />
+            <span id="gameIconFallback" class="game-logo-fallback">
+              <svg width="30" height="30" viewBox="0 0 32 32">
+                <path d="M11 7.2v14.1" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M20.8 5.1v13.1" fill="none" stroke="#8B6228" stroke-width="1.7" stroke-linecap="round"/>
+                <path d="M11 7.2l9.8-2.1v4.1L11 11.3V7.2Z" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linejoin="round"/>
+                <ellipse cx="8.6" cy="22.2" rx="3.9" ry="2.8" transform="rotate(-18 8.6 22.2)" fill="#D4AC5F"/>
+                <ellipse cx="18.4" cy="19.2" rx="3.9" ry="2.8" transform="rotate(-18 18.4 19.2)" fill="#393A86"/>
+              </svg>
+            </span>
           </div>
           <img id="titleImage" class="game-title-image" alt="QUINA NOTA ÉS?" hidden /><h1 id="titleText"></h1>
         </div>
@@ -615,7 +618,7 @@
       </div>
       <aside class="hero-side" aria-label="Puntuació i sortida">
         <div class="points-box">
-          <div class="points-phrase">TENS <span class="points-number" id="pointsNumber">0</span> PUNTS</div>
+          <div class="points-phrase">TENS <span class="points-number" id="pointsNumber">0</span> <span id="pointsUnit">PUNTS</span></div>
           <div class="points-label" id="pointsLabel" hidden></div>
         </div>
         <button class="exit-box" id="exitGame" type="button"></button>
@@ -673,9 +676,12 @@
   const brandText = document.getElementById("brandText");
   const titleText = document.getElementById("titleText");
   const titleImage = document.getElementById("titleImage");
+  const gameIconImage = document.getElementById("gameIconImage");
+  const gameIconFallback = document.getElementById("gameIconFallback");
   const heroSubMain = document.getElementById("heroSubMain");
   const pointsBox = document.querySelector(".points-box");
   const pointsNumber = document.getElementById("pointsNumber");
+  const pointsUnit = document.getElementById("pointsUnit");
   const pointsLabel = document.getElementById("pointsLabel");
   const boardCaption = document.getElementById("boardCaption");
 
@@ -775,6 +781,18 @@
     });
   }
 
+  function syncPointsUnit(value){
+    if(pointsUnit) pointsUnit.textContent=Number(value)===1?'PUNT':'PUNTS';
+  }
+
+  function applyConfiguredIcon(src){
+    const configured=String(src||'').trim();
+    if(!gameIconImage||!gameIconFallback)return;
+    if(!configured){gameIconImage.hidden=true;gameIconImage.removeAttribute('src');gameIconFallback.hidden=false;return;}
+    gameIconImage.hidden=false;gameIconFallback.hidden=true;gameIconImage.src=configured;
+    gameIconImage.onerror=()=>{gameIconImage.hidden=true;gameIconFallback.hidden=false;};
+  }
+
   function doExit() {
     stopAudio();
     if(EMBEDDED) {
@@ -794,6 +812,7 @@
     await sleep(100);
     if(pointsBox) pointsBox.hidden=!registeredUser;
     if(registeredUser){
+      syncPointsUnit(pointsTotal);
       animateCounter(pointsNumber, 0, pointsTotal, 1300);
     }else{
       pointsNumber.textContent="";
@@ -1002,6 +1021,7 @@
     if(registeredUser){
       pointsTotal=Number(result?.pointsTotal??pointsTotal??0);
       pointsNumber.textContent=String(pointsTotal);
+      syncPointsUnit(pointsTotal);
     }
     const isCorrect=result?.correct===true;
     const buttons=[...document.querySelectorAll('.note-btn')];
@@ -1043,6 +1063,8 @@
     registeredUser=!!payload?.registered;
     setMuted(!!payload?.muted);
     pointsTotal=registeredUser?Number(payload?.pointsTotal??payload?.dailyState?.pointsTotal??0):0;
+    syncPointsUnit(pointsTotal);
+    applyConfiguredIcon(payload?.settings?.icon);
     const configuredTitle=String(payload?.settings?.visibleName||'QUINA NOTA ÉS?').trim()||'QUINA NOTA ÉS?';
     const configuredTitleImage=String(payload?.settings?.titleImage||'').trim();
     if(titleImage && configuredTitleImage){

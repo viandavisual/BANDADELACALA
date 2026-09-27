@@ -785,3 +785,21 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
   object-position:center!important;
   filter:none!important;
 }
+
+
+/* ============================================================
+   v0.56 · SISTEMA · TEXTOS HOME
+   ============================================================ */
+.system-home-copy-card{grid-column:1/-1;min-height:0!important}
+.system-home-copy-form{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:18px}
+.system-home-copy-form>section{min-width:0;border:1px solid var(--line);border-radius:17px;background:linear-gradient(145deg,#fff,#fffaf0);padding:14px;display:flex;flex-direction:column;gap:10px}
+.system-home-copy-form h3{margin:0;color:var(--editor-page-gold-dark,#6b460f);font-size:.82rem;letter-spacing:.08em}
+.system-home-copy-form label{display:grid;gap:5px;font-size:.66rem;font-weight:900;color:var(--ink)}
+.system-home-copy-form input,.system-home-copy-form textarea{width:100%;border:1px solid var(--line);border-radius:11px;background:#fff;padding:9px 10px;color:var(--ink);outline:none}
+.system-home-copy-form textarea{resize:vertical;min-height:78px;white-space:pre-wrap}
+.system-home-copy-form input:focus,.system-home-copy-form textarea:focus{border-color:#ad7727;box-shadow:0 0 0 3px rgba(212,172,95,.18)}
+.system-home-copy-form section>small{color:var(--muted);font-size:.65rem;line-height:1.4}
+.system-home-copy-form>.form-actions{grid-column:1/-1;margin-top:2px}
+@media(max-width:1350px){.system-home-copy-form{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.system-home-copy-form{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.system-home-copy-form{grid-template-columns:1fr}}

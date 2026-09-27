@@ -1475,6 +1475,36 @@ function contentHasUsefulData(value){
   return ['events','tracks','dresscodes','historicItems','hemerotecaItems'].some(key=>Array.isArray(value[key]) && value[key].length>0) || !!value.settings?.homeHeroImage;
 }
 
+const HOME_CARD_EDITOR_DEFAULTS={
+  calendar:{title:'CALENDARI',text:'Assajos, actuacions i agenda de la banda.'},
+  history:{title:'HISTÒRIC',text:'Cronologia visual de la història de la banda.'},
+  playlist:{title:'PLAYER',text:'Reproductor de pistes i repertori d’àudio.'},
+  games:{title:'MINIJOCS',authenticatedText:'Jocs i reptes musicals de la banda.',guestText:'Jocs musicals oberts a tothom. Inicia sessió per guardar punts.',inactiveText:'Minijocs temporalment inactius.'},
+  user:{guestTitle:'USUARI',authenticatedText:'Perfil i dades del teu compte.',guestText:'Accés privat per als músics de la banda.'}
+};
+function homeCardsEditorSettings(){
+  const raw=content.settings?.homeCards||{};
+  const clean=(value,fallback)=>typeof value==='string'&&value.trim()?value.trim():fallback;
+  return {
+    calendar:{title:clean(raw.calendar?.title,HOME_CARD_EDITOR_DEFAULTS.calendar.title),text:clean(raw.calendar?.text,HOME_CARD_EDITOR_DEFAULTS.calendar.text)},
+    history:{title:clean(raw.history?.title,HOME_CARD_EDITOR_DEFAULTS.history.title),text:clean(raw.history?.text,HOME_CARD_EDITOR_DEFAULTS.history.text)},
+    playlist:{title:clean(raw.playlist?.title,HOME_CARD_EDITOR_DEFAULTS.playlist.title),text:clean(raw.playlist?.text,HOME_CARD_EDITOR_DEFAULTS.playlist.text)},
+    games:{title:clean(raw.games?.title,HOME_CARD_EDITOR_DEFAULTS.games.title),authenticatedText:clean(raw.games?.authenticatedText,HOME_CARD_EDITOR_DEFAULTS.games.authenticatedText),guestText:clean(raw.games?.guestText,HOME_CARD_EDITOR_DEFAULTS.games.guestText),inactiveText:clean(raw.games?.inactiveText,HOME_CARD_EDITOR_DEFAULTS.games.inactiveText)},
+    user:{guestTitle:clean(raw.user?.guestTitle,HOME_CARD_EDITOR_DEFAULTS.user.guestTitle),authenticatedText:clean(raw.user?.authenticatedText,HOME_CARD_EDITOR_DEFAULTS.user.authenticatedText),guestText:clean(raw.user?.guestText,HOME_CARD_EDITOR_DEFAULTS.user.guestText)}
+  };
+}
+function renderHomeCardSystemFields(){
+  const values=homeCardsEditorSettings();
+  const pairs={
+    homeCardCalendarTitle:values.calendar.title,homeCardCalendarText:values.calendar.text,
+    homeCardHistoryTitle:values.history.title,homeCardHistoryText:values.history.text,
+    homeCardPlaylistTitle:values.playlist.title,homeCardPlaylistText:values.playlist.text,
+    homeCardGamesTitle:values.games.title,homeCardGamesAuthenticatedText:values.games.authenticatedText,homeCardGamesGuestText:values.games.guestText,homeCardGamesInactiveText:values.games.inactiveText,
+    homeCardUserGuestTitle:values.user.guestTitle,homeCardUserAuthenticatedText:values.user.authenticatedText,homeCardUserGuestText:values.user.guestText
+  };
+  Object.entries(pairs).forEach(([id,value])=>{const field=document.getElementById(id);if(field&&document.activeElement!==field)field.value=value;});
+}
+
 function renderSystem(){
   const date=content.updatedAt?new Date(content.updatedAt):null;
   $('#lastUpdated').textContent=date&&!Number.isNaN(date.valueOf())?new Intl.DateTimeFormat('ca-ES',{dateStyle:'medium',timeStyle:'short'}).format(date):'—';
@@ -1497,6 +1527,7 @@ function renderSystem(){
     : (supabaseActive && !migrationPending
       ? 'Sincronització activa. Els canvis que desis aquí es publiquen a Supabase i arriben a la resta de dispositius.'
       : 'Aquest navegador conserva dades locals de versions anteriors. Migra-les una sola vegada a Supabase per convertir-les en el contingut compartit oficial.');
+  renderHomeCardSystemFields();
 }
 
 async function savePublishedFile(){
@@ -1574,6 +1605,19 @@ async function reloadSupabaseContent(){
 }
 
 function bindSystem(){
+  $('#homeCardsTextForm')?.addEventListener('submit',event=>{
+    event.preventDefault();
+    const value=id=>String(document.getElementById(id)?.value||'').trim();
+    content.settings=content.settings||{};
+    content.settings.homeCards={
+      calendar:{title:value('homeCardCalendarTitle'),text:value('homeCardCalendarText')},
+      history:{title:value('homeCardHistoryTitle'),text:value('homeCardHistoryText')},
+      playlist:{title:value('homeCardPlaylistTitle'),text:value('homeCardPlaylistText')},
+      games:{title:value('homeCardGamesTitle'),authenticatedText:value('homeCardGamesAuthenticatedText'),guestText:value('homeCardGamesGuestText'),inactiveText:value('homeCardGamesInactiveText')},
+      user:{guestTitle:value('homeCardUserGuestTitle'),authenticatedText:value('homeCardUserAuthenticatedText'),guestText:value('homeCardUserGuestText')}
+    };
+    save(content,'Textos de HOME actualitzats');
+  });
   $('#exportJsonBtn').onclick=()=>{BandaStore.exportJson(content);showToast('Còpia JSON creada');};
   $('#importJsonBtn').onclick=()=>$('#importJsonInput').click();
   $('#importJsonInput').addEventListener('change',event=>{

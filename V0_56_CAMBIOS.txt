@@ -1,0 +1,33 @@
+BANDA DE LA CALA · v0.56 · CANVIS
+Data: 27/09/2026
+
+1. CALENDARI
+- L'animació d'entrada recorre ara totes les 42 caselles del calendari de manera progressiva.
+- S'elimina el topall que feia coincidir el retard de les darreres caselles.
+
+2. MINIJOCS · QUINA NOTA ÉS?
+- L'icono de la capçalera del joc utilitza ara el mateix icono configurat al EDITOR.
+- Manté transparència PNG i fallback intern si la imatge no es pot carregar.
+- Puntuació amb singular/plural correcte: 1 PUNT / 0,2,3... PUNTS, tant a la card com dins del joc.
+
+3. HISTÒRIC
+- Toggle de períodes reforçat amb delegació d'esdeveniments: un toc col·lapsa/descol·lapsa de forma fiable.
+- Cada capçalera de període mostra el total REAL de fotografies del període a l'esquerra de la fletxa.
+
+4. HEMEROTECA
+- Els grups anuals de CARTELLS deixen de dependre del comportament natiu de <details>.
+- Toggle explícit per toc/clic, amb estat visual i contingut hidden robust.
+
+5. HOME · TEXTOS CONFIGURABLES DES DE SISTEMA
+- Nova targeta SISTEMA > HOME APP > Textos de les caixes.
+- Configurables CALENDARI, HISTÒRIC, PLAYER, MINIJOCS i USUARI.
+- MINIJOCS permet text diferent per USER registrat, sense sessió i joc inactiu.
+- USUARI permet text diferent amb/sense sessió; el títol loguejat continua sent el nom real del USER.
+- Els salts de línia escrits als textos de HOME es respecten a l'APP.
+- No requereix SQL nou: es desa dins settings.homeCards del contingut existent.
+
+6. PWA / CONTROL
+- Versió v0.56.
+- Caches APP/EDITOR actualitzades a v0.56.
+- Manifest IDs, scopes i start_url no modificats.
+- Auth, rols, invitacions, PLAYER i backup multimèdia no modificats.

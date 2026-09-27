@@ -18,6 +18,15 @@
     base.updatedAt = base.updatedAt || new Date().toISOString();
     base.settings = base.settings && typeof base.settings === 'object' ? base.settings : {};
     base.settings.homeHeroImage = typeof base.settings.homeHeroImage === 'string' ? base.settings.homeHeroImage : '';
+    const homeCards = base.settings.homeCards && typeof base.settings.homeCards === 'object' ? base.settings.homeCards : {};
+    const homeString = (value,fallback) => typeof value === 'string' && value.trim() ? value.trim() : fallback;
+    base.settings.homeCards = {
+      calendar:{title:homeString(homeCards.calendar?.title,'CALENDARI'),text:homeString(homeCards.calendar?.text,'Assajos, actuacions i agenda de la banda.')},
+      history:{title:homeString(homeCards.history?.title,'HISTÒRIC'),text:homeString(homeCards.history?.text,'Cronologia visual de la història de la banda.')},
+      playlist:{title:homeString(homeCards.playlist?.title,'PLAYER'),text:homeString(homeCards.playlist?.text,'Reproductor de pistes i repertori d’àudio.')},
+      games:{title:homeString(homeCards.games?.title,'MINIJOCS'),authenticatedText:homeString(homeCards.games?.authenticatedText,'Jocs i reptes musicals de la banda.'),guestText:homeString(homeCards.games?.guestText,'Jocs musicals oberts a tothom. Inicia sessió per guardar punts.'),inactiveText:homeString(homeCards.games?.inactiveText,'Minijocs temporalment inactius.')},
+      user:{guestTitle:homeString(homeCards.user?.guestTitle,'USUARI'),authenticatedText:homeString(homeCards.user?.authenticatedText,'Perfil i dades del teu compte.'),guestText:homeString(homeCards.user?.guestText,'Accés privat per als músics de la banda.')}
+    };
     base.settings.minigames = base.settings.minigames && typeof base.settings.minigames === 'object' ? base.settings.minigames : {};
     const qne = base.settings.minigames.quinaNota && typeof base.settings.minigames.quinaNota === 'object' ? base.settings.minigames.quinaNota : {};
     base.settings.minigames.quinaNota = {
