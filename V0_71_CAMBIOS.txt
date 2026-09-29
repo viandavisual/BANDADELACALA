@@ -1,0 +1,15 @@
+BANDA DE LA CALA · v0.71
+
+- APP / USER: nova utilitat AFINADOR exclusiva per a USER registrats.
+- Accés ubicat exactament entre PARTITURES i PUJAR FATO MULTIMEDIA AQUÍ.
+- AFINADOR funciona completament en local amb Web Audio API; no grava ni envia àudio.
+- Activació del micròfon només després d'un gest explícit del USER.
+- Detecció de pitch amb YIN, smoothing/mediana i protecció bàsica davant salts d'octava.
+- Mostra nota, octava, freqüència en Hz, desviació en cents i estat GREU / AFINAT / AGUT.
+- Tolerància inicial AFINAT: ±5 cents.
+- Referència inicial: A4 = 440 Hz, mode CONCERT / DO.
+- Arquitectura preparada per afegir més endavant Sib / Mib / Fa i altres referències A4.
+- El micròfon s'atura sempre en tancar l'afinador, canviar de secció, tancar sessió o deixar l'APP en segon pla.
+- Missatges específics per permís denegat o navegador sense suport de micròfon.
+- Disseny mobile-first amb pantalla completa en mòbil i diàleg centrat en desktop.
+- No requereix SQL, canvis a Supabase ni Edge Functions noves.

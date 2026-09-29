@@ -1,0 +1,54 @@
+/* BANDA DE LA CALA · AFINADOR v0.71 */
+.tuner-launcher{
+  width:100%;margin:16px 0 0;border:1px solid rgba(212,172,95,.48);border-radius:17px;
+  background:linear-gradient(145deg,#fff,#fbf7ed);color:var(--blue-deep);padding:16px 18px;
+  display:flex;align-items:center;justify-content:center;gap:12px;cursor:pointer;font:900 13px/1.2 inherit;
+  letter-spacing:.055em;box-shadow:0 8px 18px rgba(36,33,31,.07);transition:transform .15s ease,box-shadow .15s ease;
+}
+.tuner-launcher:active{transform:scale(.985)}
+.tuner-launcher-icon{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff;font-size:18px;box-shadow:0 0 0 4px rgba(57,58,134,.09)}
+
+.tuner-overlay[hidden]{display:none!important}
+.tuner-overlay{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;padding:20px;overflow:auto}
+.tuner-backdrop{position:absolute;inset:0;background:rgba(24,24,36,.72);backdrop-filter:blur(5px)}
+.tuner-dialog{position:relative;z-index:1;width:min(720px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:#fbfaf7;border:1px solid rgba(212,172,95,.36);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.35);padding:24px}
+.tuner-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.tuner-head .eyebrow{color:var(--gold-deep)}
+.tuner-head h2{margin:3px 0 0;font-size:2rem;line-height:1;color:var(--blue-deep)}
+.tuner-close{width:42px;height:42px;min-width:42px;border:0;border-radius:50%;display:grid;place-items:center;background:var(--blue-soft);color:var(--blue);font-size:28px;line-height:1;cursor:pointer}
+.tuner-reference{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:16px 0}
+.tuner-chip{padding:7px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:.72rem;font-weight:900;color:var(--muted);letter-spacing:.04em}
+.tuner-note-block{text-align:center;padding:8px 0 6px}
+.tuner-note-line{display:flex;align-items:flex-start;justify-content:center;gap:6px;min-height:108px}
+.tuner-note{font-size:6.1rem;line-height:.95;font-weight:950;letter-spacing:-.06em;color:var(--blue-deep)}
+.tuner-octave{font-size:1.65rem;font-weight:900;color:var(--gold-deep);padding-top:10px;min-width:18px}
+.tuner-state{display:inline-block;margin-top:6px;padding:8px 15px;border-radius:999px;background:#ececf7;color:var(--blue);font-size:.82rem;font-weight:950;letter-spacing:.08em}
+.tuner-state[data-tune="in"]{background:#e2f3e6;color:#24723a}
+.tuner-state[data-tune="low"],.tuner-state[data-tune="high"]{background:#f5ead1;color:#8b6228}
+.tuner-meter-wrap{padding:22px 12px 10px}
+.tuner-meter-labels{display:grid;grid-template-columns:1fr 1fr 1fr;margin-bottom:8px;font-size:.72rem;font-weight:900;letter-spacing:.08em;color:var(--muted)}
+.tuner-meter-labels span:nth-child(1){text-align:left}.tuner-meter-labels span:nth-child(2){text-align:center}.tuner-meter-labels span:nth-child(3){text-align:right}
+.tuner-meter{position:relative;height:38px;border-radius:20px;background:linear-gradient(90deg,#f4e7cd 0 43%,#dff0e3 43% 57%,#f4e7cd 57% 100%);box-shadow:inset 0 0 0 1px rgba(139,98,40,.15);overflow:hidden}
+.tuner-meter::before{content:"";position:absolute;left:50%;top:4px;bottom:4px;width:2px;background:rgba(39,40,95,.38);transform:translateX(-50%)}
+.tuner-needle{position:absolute;left:var(--needle-position,50%);top:3px;bottom:3px;width:4px;border-radius:4px;background:var(--blue-deep);transform:translateX(-50%);transition:left .08s linear;box-shadow:0 0 0 3px rgba(255,255,255,.65),0 2px 7px rgba(39,40,95,.28)}
+.tuner-readouts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.tuner-readout{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}
+.tuner-readout small{display:block;color:var(--muted);font-size:.68rem;font-weight:900;letter-spacing:.08em;margin-bottom:4px}
+.tuner-readout strong{font-size:1.35rem;color:var(--ink)}
+.tuner-mic-btn{width:100%;min-height:54px;border:0;border-radius:999px;background:var(--blue);color:#fff;font:950 14px/1 inherit;letter-spacing:.055em;cursor:pointer;box-shadow:0 10px 24px rgba(57,58,134,.23)}
+.tuner-mic-btn.is-active{background:#9a3434;box-shadow:0 10px 24px rgba(154,52,52,.22)}
+.tuner-mic-btn:disabled{opacity:.55;cursor:wait}
+.tuner-status{display:block;min-height:20px;text-align:center;margin:11px 0 0;color:var(--muted);font-size:.76rem;font-weight:700}
+.tuner-status[data-type="error"]{color:#a02a2a}.tuner-status[data-type="ok"]{color:#24723a}
+.tuner-privacy{margin:16px 0 0;padding:12px 14px;border-radius:14px;background:var(--blue-soft);color:#55527a;text-align:center;font-size:.72rem;line-height:1.45}
+body.tuner-open{overflow:hidden}
+
+@media(max-width:780px){
+  .tuner-overlay{padding:0;place-items:stretch}
+  .tuner-dialog{width:100%;max-height:100dvh;min-height:100dvh;border-radius:0;border:0;padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom))}
+  .tuner-head h2{font-size:1.7rem}
+  .tuner-note{font-size:5.3rem}
+  .tuner-note-line{min-height:94px}
+  .tuner-meter-wrap{padding-inline:0}
+  .tuner-readout strong{font-size:1.2rem}
+}

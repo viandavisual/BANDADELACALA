@@ -14,7 +14,8 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.70" />
+  <link rel="stylesheet" href="style.css?v=0.71" />
+  <link rel="stylesheet" href="tuner.css?v=0.71" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -286,6 +287,11 @@
               </a>
             </div>
 
+            <button id="openTunerBtn" class="tuner-launcher" type="button">
+              <span class="tuner-launcher-icon" aria-hidden="true">♪</span>
+              <span>AFINADOR</span>
+            </button>
+
             <button id="openArchiveUploadBtn" class="archive-upload-launcher" type="button">PUJAR FATO MULTIMEDIA AQUÍ</button>
 
             <section id="archiveUploadBox" class="archive-upload-box" hidden>
@@ -388,6 +394,35 @@
     </section>
   </div>
 
+  <div id="tunerOverlay" class="tuner-overlay" hidden aria-hidden="false">
+    <div id="tunerBackdrop" class="tuner-backdrop"></div>
+    <section class="tuner-dialog" role="dialog" aria-modal="true" aria-labelledby="tunerTitle">
+      <div class="tuner-head">
+        <div><span class="eyebrow">UTILITAT DE MÚSICS</span><h2 id="tunerTitle">AFINADOR</h2></div>
+        <button id="closeTunerBtn" class="tuner-close" type="button" aria-label="Tancar afinador">×</button>
+      </div>
+      <div class="tuner-reference" aria-label="Configuració de l'afinador">
+        <span class="tuner-chip">CONCERT / DO</span>
+        <span class="tuner-chip">A4 = 440 Hz</span>
+      </div>
+      <div class="tuner-note-block">
+        <div class="tuner-note-line"><strong id="tunerNote" class="tuner-note">—</strong><span id="tunerOctave" class="tuner-octave"></span></div>
+        <span id="tunerState" class="tuner-state" data-tune="idle">ESPERANT SO</span>
+      </div>
+      <div class="tuner-meter-wrap">
+        <div class="tuner-meter-labels"><span>GREU</span><span>AFINAT</span><span>AGUT</span></div>
+        <div id="tunerMeter" class="tuner-meter" data-tune="idle"><span id="tunerNeedle" class="tuner-needle" style="--needle-position:50%"></span></div>
+      </div>
+      <div class="tuner-readouts">
+        <div class="tuner-readout"><small>DESVIACIÓ</small><strong id="tunerCents">0 cents</strong></div>
+        <div class="tuner-readout"><small>FREQÜÈNCIA</small><strong id="tunerHz">— Hz</strong></div>
+      </div>
+      <button id="tunerMicBtn" class="tuner-mic-btn" type="button">ACTIVAR MICRO</button>
+      <small id="tunerStatus" class="tuner-status">Prem ACTIVAR MICRO per començar.</small>
+      <p class="tuner-privacy">El so s'analitza únicament en temps real dins del teu dispositiu. No es grava, no es guarda i no s'envia a cap servidor.</p>
+    </section>
+  </div>
+
   <div id="historyImageModal" class="history-image-modal" hidden>
     <div class="history-image-backdrop" data-close-history-image></div>
     <section class="history-image-dialog" role="dialog" aria-modal="true" aria-labelledby="historyImageTitle">
@@ -410,12 +445,13 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.70"></script>
-  <script src="config.js?v=0.70"></script>
-  <script src="data/content-published.js?v=0.70"></script>
-  <script src="content-store.js?v=0.70"></script>
+  <script src="version.js?v=0.71"></script>
+  <script src="config.js?v=0.71"></script>
+  <script src="data/content-published.js?v=0.71"></script>
+  <script src="content-store.js?v=0.71"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.70"></script>
-  <script src="app.js?v=0.70"></script>
+  <script src="supabase-client.js?v=0.71"></script>
+  <script src="tuner.js?v=0.71"></script>
+  <script src="app.js?v=0.71"></script>
 </body>
 </html>

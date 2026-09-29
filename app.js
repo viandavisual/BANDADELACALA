@@ -117,6 +117,8 @@ async function discoverAvailableAvatars(){
 function currentUserDisplayName(){
   return (String(state.profile?.name || state.session?.user?.email?.split('@')[0] || 'USER').trim() || 'USER').toLocaleUpperCase('ca-ES');
 }
+
+window.BandaAppAuth={ isAuthenticated:()=>!!state.authenticated };
 function currentAvatarKey(){ return String(state.profile?.avatar_key || '').trim(); }
 function currentUserGender(){ const value=String(state.session?.user?.user_metadata?.gender || '').trim().toLowerCase(); return ['male','female'].includes(value)?value:''; }
 function currentWelcomeLabel(){ const gender=currentUserGender(); return gender==='male'?'BENVINGUT':gender==='female'?'BENVINGUDA':'BENVINGUT/DA'; }
@@ -491,6 +493,7 @@ function animateViewEntrance(id){
 }
 
 function switchView(id, remember = true){
+  if(window.BandaTuner?.isOpen?.()) window.BandaTuner.close();
   if(id!=='playlist' && isPlayerFullscreenActive()) closePlayerFullscreen();
   if(state.minigameOpen && id!=='games') closeOpenMinigame({resumePlayer:true});
   const target=navItems.find(item=>item.id===id);
@@ -1857,6 +1860,7 @@ function bindUserAuth(){
     }
   });
   $('#userLogoutBtn')?.addEventListener('click',async()=>{
+    if(window.BandaTuner?.isOpen?.()) await window.BandaTuner.close();
     try{ await BandaSupabase.signOut(); }catch(_error){}
     state.session=null; state.profile=null; state.authenticated=false;
     state.currentView='home'; state.viewHistory=[];
@@ -2147,6 +2151,7 @@ async function init(){
   if(muteBtn) muteBtn.onclick = toggleGlobalMute;
   bindContentUpdates();
   bindUserAuth();
+  window.BandaTuner?.init?.();
   bindPwaInstall();
   registerSW();
   await initAppAuth();

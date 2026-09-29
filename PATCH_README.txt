@@ -1,19 +1,35 @@
-BANDA DE LA CALA v0.70 · PATCH DES DE v0.69
+BANDA DE LA CALA · v0.71 · PATCH DES DE v0.70
 
 SOBRESCRIBIR:
-- editor.js
-- version.js
 - app/index.html
+- app.js
 - app/sw.js
-- editor/index.html
 - editor/sw.js
+- version.js
+- PATCH_README.txt
 
 AÑADIR:
-- V0_70_CAMBIOS.txt
+- tuner.js
+- tuner.css
+- V0_71_CAMBIOS.txt
 
 NO TOCAR:
-- Supabase SQL / Edge Functions / buckets / Auth / SMTP
-- manifests PWA
+- manifests APP/EDITOR
+- Supabase / Auth / SMTP
+- Edge Functions
+- SQL
+- buckets / policies
 
-SQL: NO
-EDGE FUNCTIONS: NO
+NO REQUIERE:
+- SQL nuevo
+- Edge Functions nuevas
+
+QA RECOMENDADO:
+1. Entrar con USER registrado.
+2. Verificar AFINADOR entre PARTITURES y PUJAR FATO MULTIMEDIA.
+3. Activar micro y aceptar permiso.
+4. Probar varias notas sostenidas de instrumento/voz.
+5. Comprobar nota, cents, Hz y GREU/AFINAT/AGUT.
+6. Cerrar AFINADOR y verificar que el navegador deja de indicar uso del micrófono.
+7. Probar permiso denegado.
+8. Comprobar mobile + desktop.
