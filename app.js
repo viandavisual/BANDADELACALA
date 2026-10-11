@@ -673,24 +673,26 @@ function historyMediaMarkup(periodId){
   const periodItems=items.filter(item=>item.periodId===periodId);
   if(!periodItems.length) return `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
   const mobile=!!window.matchMedia?.('(max-width: 780px)').matches;
-  const mediaMarkup=(item,src,index,extraClass,label,extra='')=>{
-    const submitter=item.submittedByName?`<span class="history-submitter">ENVIADA PER ${esc(String(item.submittedByName).toLocaleUpperCase('ca-ES'))}</span>`:'';
+  const mediaMarkup=(item,src,viewerIndex,extraClass,label,extra='')=>{
     const author=item.authorSource?`<span class="history-author">AUTOR: ${esc(item.authorSource)}</span>`:'';
-    const img=`<img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${submitter}${author}${extra}`;
+    const img=`<img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${author}${extra}`;
     if(mobile) return `<div class="history-image-button ${extraClass} history-image-static-mobile">${img}</div>`;
-    return `<button class="history-image-button ${extraClass}" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${index}" aria-label="${esc(label)}">${img}</button>`;
+    return `<button class="history-image-button ${extraClass}" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${viewerIndex}" aria-label="${esc(label)}">${img}</button>`;
   };
   return periodItems.map(item=>{
     const side=(Math.max(0,items.findIndex(entry=>entry.id===item.id)) % 2===0)?'left':'right';
     const title=item.title ? `<h4>${esc(item.title)}</h4>` : '';
     const desc=item.description ? `<p class="preserve-lines">${esc(item.description)}</p>` : '';
     const images=getHistoricImages(item);
+    const featured=item.featuredImageSrc||images[0]||'';
+    const viewerSources=featured?[featured,...images.filter(src=>src!==featured)]:images;
     let gallery='';
-    if(images.length){
+    if(featured){
       const count=images.length>1?`<span class="history-photo-count">${images.length} FOTOS</span>`:'';
-      const hero=mediaMarkup(item,images[0],0,'history-image-hero',`Ampliar fotografia 1 de ${item.year}`,count);
-      const strip=images.length>1?`<div class="history-media-strip" aria-label="Més fotografies">${images.slice(1).map((src,index)=>mediaMarkup(item,src,index+1,'history-image-thumb',`Ampliar fotografia ${index+2} de ${item.year}`)).join('')}</div>`:'';
-      gallery=`<div class="history-media-showcase ${images.length===1?'single':''}">${hero}${strip}</div>`;
+      const hero=mediaMarkup(item,featured,0,'history-image-hero',`Ampliar imatge destacada de ${item.year}`,count);
+      const rest=viewerSources.slice(1);
+      const strip=rest.length?`<div class="history-media-strip" aria-label="Més fotografies">${rest.map((src,index)=>mediaMarkup(item,src,index+1,'history-image-thumb',`Ampliar fotografia ${index+2} de ${item.year}`)).join('')}</div>`:'';
+      gallery=`<div class="history-media-showcase ${rest.length?'':'single'}">${hero}${strip}</div>`;
     }
     return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><div class="history-moment-meta"><span class="history-year">${esc(item.year)}</span>${images.length?`<span class="history-entry-photo-count">${images.length} ${images.length===1?'FOTO':'FOTOS'}</span>`:''}</div>${title}${desc}</div></div></article>`;
   }).join('');
@@ -896,14 +898,19 @@ function historicViewerItemsForEntry(id){
   const item=getHistoricItems().find(entry=>String(entry.id||entry.imageSrc)===String(id));
   if(!item) return [];
   const images=getHistoricImages(item);
-  return images.map((src,imageIndex)=>({
-    id:String(item.id||item.imageSrc),
-    imageIndex,
-    src,
-    title:item.title||String(item.year||''),
-    caption:[String(item.year||''),item.authorSource?`Autor / procedència: ${item.authorSource}`:'',item.description].filter(Boolean).join(' · '),
-    alt:item.title||`Fotografia de ${item.year||''}`
-  }));
+  const submitters=Array.isArray(item.imageSubmitters)?item.imageSubmitters:images.map(()=>({name:item.submittedByName||''}));
+  const featured=item.featuredImageSrc||images[0]||'';
+  const ordered=featured?[featured,...images.filter(src=>src!==featured)]:images;
+  return ordered.map((src,viewerIndex)=>{
+    const originalIndex=images.indexOf(src);
+    const contributor=originalIndex>=0?(submitters[originalIndex]?.name||item.submittedByName||''):'';
+    return {
+      id:String(item.id||item.imageSrc), imageIndex:viewerIndex, src,
+      title:item.title||String(item.year||''),
+      caption:[String(item.year||''),item.authorSource?`Autor / procedència: ${item.authorSource}`:'',item.description,contributor?`Enviada per: ${String(contributor).toLocaleUpperCase('ca-ES')}`:''].filter(Boolean).join(' · '),
+      alt:item.title||`Fotografia de ${item.year||''}`
+    };
+  });
 }
 function openHistoryImage(id,index=0){
   const items=historicViewerItemsForEntry(id);
@@ -987,7 +994,7 @@ function hemerotecaViewerItems(type=state.hemerotecaType){
       imageIndex,
       src,
       title:item.title||hemerotecaTypeLabel(item.type),
-      caption:[hemerotecaDateLabel(item),item.description].filter(Boolean).join(' · '),
+      caption:[hemerotecaDateLabel(item),item.description,item.submittedByName?`Enviada per: ${String(item.submittedByName).toLocaleUpperCase('ca-ES')}`:''].filter(Boolean).join(' · '),
       alt:item.title||hemerotecaTypeLabel(item.type)
     }));
   }
@@ -1008,8 +1015,7 @@ function linkThumbMarkup(item,safeUrl){
 }
 function hemerotecaCardMarkup(item){
   const images=hemerotecaImages(item);
-  const submitter=item.submittedByName?`<span class="hemeroteca-submitter">ENVIAT PER ${esc(String(item.submittedByName).toLocaleUpperCase('ca-ES'))}</span>`:'';
-  const gallery=images.length?`<div class="hemeroteca-media ${images.length===1?'single':''}">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))}" />${submitter}</button>`).join('')}</div>`:'';
+  const gallery=images.length?`<div class="hemeroteca-media ${images.length===1?'single':''}">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))}" /></button>`).join('')}</div>`:'';
   const safeUrl=safeExternalUrl(item.url);
   const linkPreview=!images.length&&safeUrl?linkThumbMarkup(item,safeUrl):'';
   const link=safeUrl?`<a class="hemeroteca-link" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer">OBRIR ENLLAÇ ↗</a>`:'';

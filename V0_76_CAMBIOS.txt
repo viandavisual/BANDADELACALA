@@ -1,0 +1,16 @@
+BANDA DE LA CALA — v0.76
+
+CAMBIOS
+- EDITOR · HISTÒRIC/HEMEROTECA: la acción de mover imágenes entre HISTÒRIC y CARTELLS deja de superponerse sobre las fotografías. Ahora aparece de forma discreta debajo de las miniaturas.
+- EDITOR · HISTÒRIC: selección múltiple de entradas del mismo año/período para AGRUPARLAS EN UN SOLO ACTO del timeline.
+- Al agrupar, se conservan todas las fotografías, crops, originales y procedencia por imagen. Tras agrupar se abre la entrada resultante para terminar de editarla.
+- HISTÒRIC: cada minialbum puede escoger una foto existente como DESTACADA.
+- HISTÒRIC: también se puede subir una imagen independiente como portada destacada.
+- APP · HISTÒRIC: el timeline usa la imagen destacada como portada del minialbum.
+- APP: el nombre del USER que aportó una fotografía deja de mostrarse superpuesto sobre la imagen. Se muestra únicamente en el footer/caption del visor de pantalla completa.
+- HEMEROTECA: se aplica el mismo criterio de procedencia en el visor ampliado.
+
+INFRAESTRUCTURA
+- Sin SQL nuevo.
+- Sin cambios de Supabase ni Edge Functions.
+- Manifest IDs, scopes y arquitectura PWA preservados.

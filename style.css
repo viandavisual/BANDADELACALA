@@ -2390,3 +2390,6 @@ html.app-is-installed #installBtn,html.app-is-installed #homeInstallBtn,html.app
   #view-calendar .calendar-day.today.has-event{background:linear-gradient(to bottom,#c72f34 0%,#c72f34 55%,#fff 55%,#fff 100%)!important}
   #view-calendar .calendar-day.today.has-event:hover{background:linear-gradient(to bottom,#b6252b 0%,#b6252b 55%,#fbfaf7 55%,#fbfaf7 100%)!important}
 }
+
+/* v0.76 · la procedència USER només es mostra al peu del visor ampliat */
+.history-submitter,.hemeroteca-submitter{display:none!important}

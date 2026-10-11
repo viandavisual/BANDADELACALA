@@ -969,3 +969,17 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .historic-move-thumb-btn:hover{background:#8B6228}
 .historic-move-thumb-btn.hemero-to-historic{background:rgba(57,58,134,.92)}
 .historic-move-thumb-btn.hemero-to-historic:hover{background:#393A86}
+
+/* v0.76 · HISTÒRIC: agrupació, portada i transferències discretes */
+.historic-transfer-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.historic-transfer-row button{border:0;background:transparent;color:#716c67;font:800 8px/1.2 Inter,Arial,sans-serif;letter-spacing:.04em;padding:3px 2px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.historic-transfer-row button:hover{color:#393A86}
+.historic-merge-check{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#8b6228;font-size:8px;font-weight:900;letter-spacing:.05em}
+.historic-merge-check input{width:18px;height:18px;accent-color:#393A86}
+.historic-editor-item{grid-template-columns:44px 132px 1fr auto!important}
+.historic-merge-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;margin:8px 0;border-radius:13px;background:#ECECF7;border:1px solid rgba(57,58,134,.16)}
+.historic-merge-toolbar span{font-size:12px;font-weight:900;color:#393A86;margin-right:auto}
+.historic-merge-toolbar button{padding:8px 10px;font-size:10px}
+.history-image-feature-btn{position:absolute;left:7px;bottom:7px;z-index:5;border:1px solid rgba(255,255,255,.9);border-radius:999px;background:rgba(39,40,95,.88);color:#fff;padding:5px 7px;font-size:8px;font-weight:900;cursor:pointer}
+.history-image-feature-btn.is-featured{background:#D4AC5F;color:#24211F}
+@media(max-width:620px){.historic-editor-item{grid-template-columns:34px 96px 1fr!important}.historic-merge-check span{display:none}.historic-editor-item .list-actions{grid-column:2/-1}}
