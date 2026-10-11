@@ -1079,7 +1079,8 @@ function renderHistoricFormPreview(){
     const removeLabel=isNew ? 'Descartar fotografia nova' : 'Eliminar fotografia definitivament';
     const cropButton=isNew?'':`<button class="history-image-crop-btn" type="button" data-crop-saved-historic="${localIndex}" title="Fer crop manual">CROP</button>`;
     const featuredButton=isNew?'':`<button class="history-image-feature-btn ${historicFeaturedSrc===src?'is-featured':''}" type="button" data-feature-saved-historic="${localIndex}" title="Marcar com a imatge destacada">${historicFeaturedSrc===src?'★ DESTACADA':'☆ DESTACAR'}</button>`;
-    return `<div class="history-image-preview-item ${isNew?'is-new':''}"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span>${cropButton}${featuredButton}<button class="history-image-remove-btn" type="button" ${removeAttr} title="${removeLabel}" aria-label="${removeLabel}">×</button></div>`;
+    const transferControls=isNew?'':`<div class="history-image-transfer-panel"><select data-historic-transfer-target="${localIndex}" aria-label="Destí a Hemeroteca"><option value="cartells">CARTELLS</option><option value="noticies">NOTÍCIES</option><option value="entrevistes">ENTREVISTES</option></select><button type="button" data-move-saved-historic="${localIndex}">MOURE</button></div>`;
+    return `<div class="history-image-preview-item ${isNew?'is-new':''}"><div class="history-image-preview-visual"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span>${cropButton}${featuredButton}<button class="history-image-remove-btn" type="button" ${removeAttr} title="${removeLabel}" aria-label="${removeLabel}">×</button></div>${transferControls}</div>`;
   }).join('');
   $$('[data-remove-pending-historic]').forEach(btn=>btn.onclick=()=>{
     const index=Number(btn.dataset.removePendingHistoric||0);
@@ -1091,6 +1092,11 @@ function renderHistoricFormPreview(){
   $$('[data-remove-saved-historic]').forEach(btn=>btn.onclick=()=>removeHistoricSavedPhoto(Number(btn.dataset.removeSavedHistoric||0)));
   $$('[data-crop-saved-historic]').forEach(btn=>btn.onclick=()=>openHistoricCrop($('#historicId')?.value||'',Number(btn.dataset.cropSavedHistoric||0)));
   $$('[data-feature-saved-historic]').forEach(btn=>btn.onclick=()=>{const i=Number(btn.dataset.featureSavedHistoric||0);historicFeaturedSrc=editingHistoricImages[i]||'';renderHistoricFormPreview();showToast('Imatge destacada seleccionada');});
+  $$('[data-move-saved-historic]').forEach(btn=>btn.onclick=()=>{
+    const i=Number(btn.dataset.moveSavedHistoric||0);
+    const select=document.querySelector(`[data-historic-transfer-target="${i}"]`);
+    moveHistoricPhotoToHemeroteca($('#historicId')?.value||'',i,select?.value||'cartells');
+  });
 }
 
 async function downloadHistoricPhoto(url,item,index){
@@ -1247,16 +1253,19 @@ async function deleteHistoric(id){
 }
 
 
-async function moveHistoricPhotoToCartells(itemId,index){
+async function moveHistoricPhotoToHemeroteca(itemId,index,targetType='cartells'){
   if(!['admin','gestor'].includes(currentProfile?.role)){showToast('No tens permisos per moure fotografies');return;}
+  const allowed=new Set(['cartells','noticies','entrevistes']);
+  if(!allowed.has(targetType)) targetType='cartells';
   const item=(content.historicItems||[]).find(entry=>entry.id===itemId); if(!item)return;
   const images=historicImages(item); const src=images[index]; if(!src)return;
-  if(!confirm('Vols moure aquesta fotografia de l’HISTÒRIC a HEMEROTECA · CARTELLS?'))return;
+  const targetLabel=hemerotecaTypeLabel(targetType);
+  if(!confirm(`Vols moure aquesta fotografia de l’HISTÒRIC a HEMEROTECA · ${targetLabel}?`))return;
   const originals=historicOriginalImages(item); const crops=historicImageCrops(item); const submitters=historicImageSubmitters(item);
   const original=originals[index]||src; const crop=crops[index]||{left:0,right:0,top:0,bottom:0}; const submitter=submitters[index]||{};
   content.hemerotecaItems=content.hemerotecaItems||[];
   content.hemerotecaItems.push({
-    id:BandaStore.uid('hemero'),type:'cartells',year:Number.parseInt(item.year,10)||'',month:'',day:'',
+    id:BandaStore.uid('hemero'),type:targetType,year:Number.parseInt(item.year,10)||'',month:'',day:'',
     title:item.title||'',description:item.description||'',authorSource:item.authorSource||'',url:'',
     images:[src],imageSrc:src,originalImages:[original],imageCrops:[crop],createdAt:new Date().toISOString(),
     submittedByName:submitter.name||item.submittedByName||'',submittedByUserId:submitter.userId||item.submittedByUserId||'',archiveSubmissionId:submitter.archiveSubmissionId||item.archiveSubmissionId||''
@@ -1270,9 +1279,12 @@ async function moveHistoricPhotoToCartells(itemId,index){
   }else{
     item.images=[...images]; item.imageSrc=images[0]||''; item.originalImages=originals; item.imageCrops=crops; item.imageSubmitters=submitters; if(item.featuredImageSrc===src)item.featuredImageSrc=images[0]||'';
   }
-  if(save(content,'Fotografia moguda a HEMEROTECA · CARTELLS')){
-    if($('#historicId')?.value===itemId) resetHistoricForm();
+  if(save(content,`Fotografia moguda a HEMEROTECA · ${targetLabel}`)){
     renderHistoric(); renderHemerotecaEditor();
+    const stillExists=(content.historicItems||[]).some(entry=>entry.id===itemId);
+    if($('#historicId')?.value===itemId){
+      if(stillExists) editHistoric(itemId); else resetHistoricForm();
+    }
   }
 }
 
@@ -1300,8 +1312,11 @@ async function moveHemerotecaPhotoToHistoric(itemId,index){
     item.images=[...images]; item.imageSrc=images[0]||''; item.originalImages=originals; item.imageCrops=crops;
   }
   if(save(content,'Imatge moguda a HISTÒRIC')){
-    if($('#hemerotecaId')?.value===itemId) resetHemerotecaForm();
     renderHistoric(); renderHemerotecaEditor();
+    const stillExists=(content.hemerotecaItems||[]).some(entry=>entry.id===itemId);
+    if($('#hemerotecaId')?.value===itemId){
+      if(stillExists) editHemeroteca(itemId); else resetHemerotecaForm();
+    }
   }
 }
 
@@ -1309,7 +1324,7 @@ function historicEditorItemMarkup(item){
   const period=historicPeriodById(item.periodId);
   const images=historicImages(item);
   const thumbCols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
-  const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button><button class="historic-crop-thumb-btn" type="button" data-crop-historic="${esc(item.id)}" data-crop-index="${index}" title="Fer crop manual">CROP</button></div>`).join('')}</div><div class="historic-transfer-row">${images.map((_,index)=>`<button type="button" data-move-historic-cartells="${esc(item.id)}" data-move-index="${index}">FOTO ${index+1} → CARTELLS</button>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
+  const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button><button class="historic-crop-thumb-btn" type="button" data-crop-historic="${esc(item.id)}" data-crop-index="${index}" title="Fer crop manual">CROP</button></div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
   const checked=selectedHistoricMergeIds.has(item.id)?'checked':'';
   return `<article class="historic-editor-item">
     <label class="historic-merge-check" title="Seleccionar per agrupar"><input type="checkbox" data-select-historic-merge="${esc(item.id)}" ${checked}/><span>AGRUPAR</span></label>
@@ -1373,7 +1388,6 @@ function renderHistoric(){
   $$('[data-delete-historic]').forEach(btn=>btn.onclick=()=>deleteHistoric(btn.dataset.deleteHistoric));
   $$('[data-download-historic]').forEach(btn=>btn.onclick=()=>{ const item=(content.historicItems||[]).find(entry=>entry.id===btn.dataset.downloadHistoric); const images=historicImages(item); const index=Number(btn.dataset.downloadIndex||0); if(item&&images[index]) downloadHistoricPhoto(images[index],item,index); });
   $$('[data-crop-historic]').forEach(btn=>btn.onclick=()=>openHistoricCrop(btn.dataset.cropHistoric,Number(btn.dataset.cropIndex||0)));
-  $$('[data-move-historic-cartells]').forEach(btn=>btn.onclick=()=>moveHistoricPhotoToCartells(btn.dataset.moveHistoricCartells,Number(btn.dataset.moveIndex||0)));
   $$('[data-select-historic-merge]').forEach(input=>input.onchange=()=>{const id=input.dataset.selectHistoricMerge;if(input.checked)selectedHistoricMergeIds.add(id);else selectedHistoricMergeIds.delete(id);updateHistoricMergeToolbar();});
   updateHistoricMergeToolbar();
 }
@@ -1504,9 +1518,10 @@ function renderHemerotecaFormPreview(){
   const wrap=$('#hemerotecaImagePreviewWrap'),grid=$('#hemerotecaImagePreviewGrid'); if(!wrap||!grid)return;
   const savedCount=editingHemerotecaImages.length; const images=[...editingHemerotecaImages,...pendingHemerotecaImages];
   wrap.hidden=!images.length;
-  grid.innerHTML=images.map((src,index)=>{const isNew=index>=savedCount;const localIndex=isNew?index-savedCount:index;const attr=isNew?`data-remove-pending-hemero="${localIndex}"`:`data-remove-saved-hemero="${localIndex}"`;return `<div class="history-image-preview-item ${isNew?'is-new':''}"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span><button class="history-image-remove-btn" type="button" ${attr} aria-label="Eliminar imatge">×</button></div>`;}).join('');
+  grid.innerHTML=images.map((src,index)=>{const isNew=index>=savedCount;const localIndex=isNew?index-savedCount:index;const attr=isNew?`data-remove-pending-hemero="${localIndex}"`:`data-remove-saved-hemero="${localIndex}"`;const transfer=isNew?'':`<div class="history-image-transfer-panel one-action"><button type="button" data-move-saved-hemero="${localIndex}">MOURE A HISTÒRIC</button></div>`;return `<div class="history-image-preview-item ${isNew?'is-new':''}"><div class="history-image-preview-visual"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span><button class="history-image-remove-btn" type="button" ${attr} aria-label="Eliminar imatge">×</button></div>${transfer}</div>`;}).join('');
   $$('[data-remove-pending-hemero]').forEach(btn=>btn.onclick=()=>{const index=Number(btn.dataset.removePendingHemero||0);pendingHemerotecaImages.splice(index,1);pendingHemerotecaOriginalFiles.splice(index,1);renderHemerotecaFormPreview();});
   $$('[data-remove-saved-hemero]').forEach(btn=>btn.onclick=()=>removeHemerotecaSavedImage(Number(btn.dataset.removeSavedHemero||0)));
+  $$('[data-move-saved-hemero]').forEach(btn=>btn.onclick=()=>moveHemerotecaPhotoToHistoric($('#hemerotecaId')?.value||'',Number(btn.dataset.moveSavedHemero||0)));
 }
 function syncHemerotecaRuleHelp(){
   const type=$('#hemerotecaType')?.value||'cartells'; const help=$('#hemerotecaRuleHelp'); if(!help)return;
@@ -1552,7 +1567,7 @@ async function deleteHemeroteca(id){
 }
 function hemerotecaEditorItemMarkup(item){
   const images=hemerotecaImages(item);
-  const thumbs=images.length?`<div class="historic-thumb-grid" style="--thumb-cols:${Math.max(1,Math.ceil(Math.sqrt(images.length)))}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-hemero="${esc(item.id)}" data-download-index="${index}" title="Descarregar imatge" aria-label="Descarregar imatge ${index+1}">⇩</button></div>`).join('')}</div><div class="historic-transfer-row">${images.map((_,index)=>`<button type="button" data-move-hemero-historic="${esc(item.id)}" data-move-index="${index}">IMATGE ${index+1} → HISTÒRIC</button>`).join('')}</div>`:'<div class="historic-thumb"><span>▤</span></div>';
+  const thumbs=images.length?`<div class="historic-thumb-grid" style="--thumb-cols:${Math.max(1,Math.ceil(Math.sqrt(images.length)))}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-hemero="${esc(item.id)}" data-download-index="${index}" title="Descarregar imatge" aria-label="Descarregar imatge ${index+1}">⇩</button></div>`).join('')}</div>`:'<div class="historic-thumb"><span>▤</span></div>';
   const dateLabel=hemerotecaDateLabel(item);
   return `<article class="historic-editor-item hemeroteca-editor-item type-${esc(item.type)}"><div class="historic-thumb-wrap">${thumbs}</div><div class="list-main"><div class="list-kicker"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${dateLabel?`<span>·</span><span>${esc(dateLabel)}</span>`:''}${item.url?'<span>·</span><span>ENLLAÇ</span>':''}</div><h3>${esc(item.title||hemerotecaTypeLabel(item.type))}</h3>${item.description?`<p>${esc(item.description)}</p>`:''}</div><div class="list-actions"><button class="tiny-btn" data-edit-hemero="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-hemero="${esc(item.id)}" title="Eliminar">×</button></div></article>`;
 }
@@ -1584,7 +1599,6 @@ function renderHemerotecaEditor(){
   $$('[data-edit-hemero]').forEach(btn=>btn.onclick=()=>editHemeroteca(btn.dataset.editHemero));
   $$('[data-delete-hemero]').forEach(btn=>btn.onclick=()=>deleteHemeroteca(btn.dataset.deleteHemero));
   $$('[data-download-hemero]').forEach(btn=>btn.onclick=()=>{const item=(content.hemerotecaItems||[]).find(entry=>entry.id===btn.dataset.downloadHemero);const images=hemerotecaImages(item);const index=Number(btn.dataset.downloadIndex||0);if(item&&images[index])downloadHistoricPhoto(images[index],item,index);});
-  $$('[data-move-hemero-historic]').forEach(btn=>btn.onclick=()=>moveHemerotecaPhotoToHistoric(btn.dataset.moveHemeroHistoric,Number(btn.dataset.moveIndex||0)));
 }
 
 function bindHemerotecaEditor(){

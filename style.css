@@ -2393,3 +2393,17 @@ html.app-is-installed #installBtn,html.app-is-installed #homeInstallBtn,html.app
 
 /* v0.76 · la procedència USER només es mostra al peu del visor ampliat */
 .history-submitter,.hemeroteca-submitter{display:none!important}
+
+
+/* v0.77 · el tancament del visor no tapa la navegació dreta */
+.history-image-nav-next{
+  align-self:end!important;
+  height:calc(100% - 58px)!important;
+  min-height:72px!important;
+}
+@media(max-width:780px){
+  .history-image-nav-next{
+    height:calc(100% - 50px)!important;
+    min-height:64px!important;
+  }
+}

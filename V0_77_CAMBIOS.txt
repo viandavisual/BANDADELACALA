@@ -1,0 +1,15 @@
+BANDA DE LA CALA — v0.77
+
+CAMBIOS
+- EDITOR · HEMEROTECA: las tarjetas de CARTELLS / NOTÍCIES / ENTREVISTES recuperan una distribución clara equivalente a las tarjetas de HISTÒRIC: miniatura a la izquierda, información en el centro y acciones a la derecha.
+- EDITOR · HISTÒRIC/HEMEROTECA: se eliminan de los listados generales los accesos para mover imágenes entre secciones. La función queda disponible únicamente al EDITAR una entrada.
+- EDITOR · HISTÒRIC: al editar una fotografía ya guardada se puede mover individualmente a HEMEROTECA, escogiendo el destino: CARTELLS, NOTÍCIES o ENTREVISTES.
+- EDITOR · HEMEROTECA: al editar una entrada se puede mover individualmente una imagen guardada a HISTÒRIC.
+- Las transferencias conservan imagen activa, original/crop, año, título, descripción, autor/procedencia y procedencia USER cuando existe.
+- APP · visor HISTÒRIC/HEMEROTECA: la flecha DERECHA de navegación deja libre la zona superior para que el botón X de cerrar no la tape. La X conserva su ubicación actual.
+- La información del USER que aportó la imagen continúa mostrándose únicamente en el footer/caption del visor ampliado.
+
+INFRAESTRUCTURA
+- Sin SQL nuevo.
+- Sin cambios de Supabase ni Edge Functions.
+- Manifest IDs, scopes y arquitectura PWA preservados.

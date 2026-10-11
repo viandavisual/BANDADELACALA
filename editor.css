@@ -983,3 +983,60 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .history-image-feature-btn{position:absolute;left:7px;bottom:7px;z-index:5;border:1px solid rgba(255,255,255,.9);border-radius:999px;background:rgba(39,40,95,.88);color:#fff;padding:5px 7px;font-size:8px;font-weight:900;cursor:pointer}
 .history-image-feature-btn.is-featured{background:#D4AC5F;color:#24211F}
 @media(max-width:620px){.historic-editor-item{grid-template-columns:34px 96px 1fr!important}.historic-merge-check span{display:none}.historic-editor-item .list-actions{grid-column:2/-1}}
+
+
+/* v0.77 · transferències només dins l'edició + HEMEROTECA alineada */
+.history-image-preview-item{
+  overflow:visible;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+.history-image-preview-item>img{
+  flex:0 0 auto;
+  border-radius:12px 12px 0 0;
+}
+.history-image-transfer-panel{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:5px;
+  align-items:center;
+  padding:6px;
+  background:#FBFAF7;
+  border-top:1px solid #E7E2D9;
+  border-radius:0 0 12px 12px;
+}
+.history-image-transfer-panel select,
+.history-image-transfer-panel button{
+  min-width:0;
+  height:28px;
+  border:1px solid #D9D5CC;
+  border-radius:8px;
+  background:#fff;
+  color:#393A86;
+  font:800 8px/1 Inter,Arial,sans-serif;
+  letter-spacing:.03em;
+  padding:0 6px;
+}
+.history-image-transfer-panel button{
+  cursor:pointer;
+  background:#ECECF7;
+  border-color:rgba(57,58,134,.18);
+}
+.history-image-transfer-panel button:hover{background:#393A86;color:#fff}
+.history-image-transfer-panel.one-action{grid-template-columns:1fr}
+.history-image-transfer-panel.one-action button{width:100%}
+.hemeroteca-editor-item{
+  grid-template-columns:132px minmax(0,1fr) auto!important;
+}
+@media(max-width:620px){
+  .hemeroteca-editor-item{grid-template-columns:96px minmax(0,1fr)!important}
+  .hemeroteca-editor-item .list-actions{grid-column:1/-1!important;justify-content:flex-end}
+  .history-image-transfer-panel{grid-template-columns:1fr}
+  .history-image-transfer-panel button{width:100%}
+}
+
+.history-image-preview-visual{position:relative;overflow:hidden;border-radius:12px 12px 0 0;background:#f5ead1;min-height:112px}
+.history-image-preview-visual img{width:100%;height:112px;object-fit:cover;display:block;border-radius:12px 12px 0 0!important}
+.history-image-preview-visual>span{position:absolute;left:6px;bottom:6px;padding:4px 6px;border-radius:999px;background:rgba(255,255,255,.92);color:#70450e;font:700 10px/1 Arial,sans-serif;z-index:3}
+.history-image-preview-item.is-new .history-image-preview-visual>span{background:#393a86;color:#fff}
