@@ -1082,6 +1082,8 @@ function bindHemeroteca(){
 
 let homeHeroTimer=null;
 let homeHeroCurrentSrc='';
+let homeHeroActiveLayer=0;
+let homeHeroTransitionToken=0;
 function homeHistoricHeroImages(){
   const out=[];
   (state.content.historicItems||[]).forEach(item=>{
@@ -1098,32 +1100,66 @@ function pickRandomHomeHero(images){
   const candidates=images.filter(src=>src!==homeHeroCurrentSrc);
   return candidates[Math.floor(Math.random()*candidates.length)]||images[0];
 }
-function setHomeHeroSrc(el,src,{fade=false}={}){
-  if(!src||!el)return;
-  if(!fade || !homeHeroCurrentSrc){
-    el.classList.remove('is-fading');
-    el.src=src; homeHeroCurrentSrc=src;
-    return;
+function homeHeroLayers(){
+  return [$('#heroBackgroundA'),$('#heroBackgroundB')].filter(Boolean);
+}
+function resetHomeHeroLayers(src){
+  const layers=homeHeroLayers();
+  if(!layers.length||!src)return;
+  homeHeroTransitionToken++;
+  homeHeroActiveLayer=0;
+  layers.forEach((layer,index)=>{
+    layer.onload=null;
+    layer.onerror=null;
+    layer.classList.toggle('is-active',index===0);
+    if(index===0) layer.src=src;
+  });
+  homeHeroCurrentSrc=src;
+}
+function crossfadeHomeHero(src){
+  const layers=homeHeroLayers();
+  if(layers.length<2||!src||src===homeHeroCurrentSrc)return;
+  const token=++homeHeroTransitionToken;
+  const current=layers[homeHeroActiveLayer];
+  const nextIndex=homeHeroActiveLayer===0?1:0;
+  const next=layers[nextIndex];
+  next.classList.remove('is-active');
+  const startTransition=()=>{
+    if(token!==homeHeroTransitionToken)return;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      if(token!==homeHeroTransitionToken)return;
+      next.classList.add('is-active');
+      current.classList.remove('is-active');
+      homeHeroCurrentSrc=src;
+      homeHeroActiveLayer=nextIndex;
+    }));
+  };
+  next.onload=()=>{next.onload=null;startTransition();};
+  next.onerror=()=>{next.onload=null;next.onerror=null;};
+  next.src=src;
+  if(next.complete && next.naturalWidth>0){
+    next.onload=null;
+    startTransition();
   }
-  el.classList.add('is-fading');
-  window.setTimeout(()=>{
-    el.src=src; homeHeroCurrentSrc=src;
-    requestAnimationFrame(()=>el.classList.remove('is-fading'));
-  },500);
+}
+function setHomeHeroSrc(src,{fade=false}={}){
+  if(!src)return;
+  if(!fade || !homeHeroCurrentSrc){resetHomeHeroLayers(src);return;}
+  crossfadeHomeHero(src);
 }
 function applyHomeHero(){
-  const el=$('#heroBackground');
-  if(!el) return;
+  const layers=homeHeroLayers();
+  if(!layers.length) return;
   if(homeHeroTimer){clearInterval(homeHeroTimer);homeHeroTimer=null;}
   const settings=state.content.settings||{};
   const mode=['random','logo','manual'].includes(settings.homeHeroMode) ? settings.homeHeroMode : (settings.homeHeroImage?'manual':'random');
-  if(mode==='logo'){setHomeHeroSrc(el,'assets/brand/imago-banda-de-la-cala.png');return;}
-  if(mode==='manual' && settings.homeHeroImage){setHomeHeroSrc(el,settings.homeHeroImage);return;}
+  if(mode==='logo'){setHomeHeroSrc('assets/brand/imago-banda-de-la-cala.png');return;}
+  if(mode==='manual' && settings.homeHeroImage){setHomeHeroSrc(settings.homeHeroImage);return;}
   const images=homeHistoricHeroImages();
-  if(!images.length){setHomeHeroSrc(el,'assets/brand/imago-banda-de-la-cala.png');return;}
-  setHomeHeroSrc(el,pickRandomHomeHero(images));
+  if(!images.length){setHomeHeroSrc('assets/brand/imago-banda-de-la-cala.png');return;}
+  setHomeHeroSrc(pickRandomHomeHero(images));
   if(images.length>1){
-    homeHeroTimer=setInterval(()=>{const next=pickRandomHomeHero(images);if(next)setHomeHeroSrc(el,next,{fade:true});},5000);
+    homeHeroTimer=setInterval(()=>{const next=pickRandomHomeHero(images);if(next)setHomeHeroSrc(next,{fade:true});},5000);
   }
 }
 

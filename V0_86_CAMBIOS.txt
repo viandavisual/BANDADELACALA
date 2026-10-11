@@ -1,0 +1,11 @@
+BANDA DE LA CALA · v0.86
+
+APP · HOME
+- Corregida la transición de IMATGES RANDOM DE L’HISTÒRIC.
+- La portada usa ahora dos capas de imagen superpuestas.
+- Durante el fundido de 1 segundo, la imagen A y la imagen B permanecen simultáneamente en pantalla.
+- La imagen A pasa de opacidad 100% a 0% mientras la imagen B pasa de 0% a 100%.
+- La siguiente imagen se precarga antes de iniciar el fundido, evitando saltos o instantes en blanco.
+- Se mantiene el cambio automático cada 5 segundos y se evita repetir inmediatamente la misma imagen cuando hay varias disponibles.
+
+No requiere cambios SQL ni Supabase.

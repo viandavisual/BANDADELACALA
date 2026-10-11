@@ -1,10 +1,8 @@
-BANDA DE LA CALA · PATCH v0.84 DES DE v0.83
+BANDA DE LA CALA · PATCH v0.86 DES DE v0.85
 
 SOBRESCRIBIR:
 - app.js
 - style.css
-- editor.js
-- editor.css
 - version.js
 - app/index.html
 - app/sw.js
@@ -12,7 +10,7 @@ SOBRESCRIBIR:
 - editor/sw.js
 
 AÑADIR:
-- V0_84_CAMBIOS.txt
+- V0_86_CAMBIOS.txt
 
 NO TOCAR:
 - Supabase / SQL
@@ -20,7 +18,7 @@ NO TOCAR:
 - manifests
 - assets
 
+CAMBIO PRINCIPAL:
+- HOME usa dos capas superpuestas para hacer un crossfade real de 1 segundo entre fotos random del HISTÒRIC, sin salto ni instante en blanco.
+
 No requiere ninguna migración ni configuración externa.
-
-
-V0.85: veure V0_85_CAMBIOS.txt
