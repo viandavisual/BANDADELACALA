@@ -1,21 +1,22 @@
-BANDA DE LA CALA · PATCH v0.80 DES DE v0.79
+BANDA DE LA CALA · PATCH v0.81 des de v0.80
 
-SOBRESCRIBIR / AÑADIR:
-- app/index.html
+SOBRESCRIBIR:
 - app.js
-- style.css
 - version.js
-- app/sw.js
+- app/index.html
 - editor/index.html
+- app/sw.js
 - editor/sw.js
-- V0_80_CAMBIOS.txt
+- app/manifest.webmanifest
+- manifest.webmanifest
+
+AÑADIR:
+- V0_81_CAMBIOS.txt
 
 NO TOCAR:
-- manifests / IDs PWA
 - Supabase
+- SQL
+- Edge Functions
 - Auth / SMTP
 
-SQL: NO
-EDGE FUNCTIONS: NO
-
-Cambio principal: caja INSTAL·LAR APP prioritaria en HOME MOBILE por encima del hero y revisión de la detección de contexto instalado.
+Objectiu: impedir que INSTAL·LAR APP aparegui quan la APP s'executa com a PWA instal·lada.

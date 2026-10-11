@@ -2,7 +2,7 @@
   "name": "Banda de la Cala",
   "short_name": "Banda de la Cala",
   "id": "./legacy-root",
-  "start_url": "./app/",
+  "start_url": "./app/?pwa=1",
   "scope": "./app/",
   "display": "standalone",
   "background_color": "#ffffff",

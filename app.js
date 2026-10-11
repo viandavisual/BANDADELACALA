@@ -2025,20 +2025,40 @@ async function initAppAuth(){
 }
 
 
+function appHasInstalledHint(){
+  try{ return localStorage.getItem('banda-de-la-cala-app-installed-hint') === '1'; }catch(_error){ return false; }
+}
+
+function appLaunchMarkerIsInstalled(){
+  try{ return new URLSearchParams(location.search).get('pwa') === '1'; }catch(_error){ return false; }
+}
+
 function appIsStandalone(){
   try{
-    return window.matchMedia('(display-mode: standalone)').matches ||
-      window.matchMedia('(display-mode: window-controls-overlay)').matches ||
+    const installedDisplayMode =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      window.matchMedia('(display-mode: window-controls-overlay)').matches;
+    return installedDisplayMode ||
       window.navigator.standalone === true ||
-      String(document.referrer || '').startsWith('android-app://');
+      String(document.referrer || '').startsWith('android-app://') ||
+      appLaunchMarkerIsInstalled();
   }catch(_error){
-    return window.navigator.standalone === true;
+    return window.navigator.standalone === true || appLaunchMarkerIsInstalled();
   }
 }
 
 function rememberInstalledAppContext(){
   if(!appIsStandalone()) return;
   try{ localStorage.setItem('banda-de-la-cala-app-installed-hint','1'); }catch(_error){}
+}
+
+function appInstallUiMustBeHidden(){
+  // Senyals directes del context PWA + fallback persistent.
+  // beforeinstallprompt elimina aquest hint quan el navegador confirma
+  // que la instal·lació torna a estar disponible.
+  return appIsStandalone() || (appHasInstalledHint() && !appInstallPrompt);
 }
 
 function appIsIOS(){
@@ -2051,8 +2071,8 @@ function syncAppInstallUI(){
   const buttons=[$('#homeInstallBtn'),$('#mobileHomeInstallBtn'),headerBtn].filter(Boolean);
   const cards=[$('#appInstallCard'),$('#mobileAppInstallCard')].filter(Boolean);
   const statuses=[$('#appInstallStatus'),$('#mobileAppInstallStatus')].filter(Boolean);
-  const installed=appIsStandalone();
-  if(installed) rememberInstalledAppContext();
+  if(appIsStandalone()) rememberInstalledAppContext();
+  const installed=appInstallUiMustBeHidden();
   document.documentElement.classList.toggle('app-is-installed', installed);
   cards.forEach(card=>{ card.hidden=installed; });
   buttons.forEach(btn=>{ btn.hidden=installed; });
@@ -2116,7 +2136,7 @@ async function requestNativeAppInstall(){
 }
 
 async function promptAppInstall(){
-  if(appIsStandalone()){
+  if(appInstallUiMustBeHidden()){
     syncAppInstallUI();
     return;
   }
@@ -2135,7 +2155,9 @@ function bindPwaInstall(){
   window.addEventListener('appinstalled',()=>{
     if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada';
   });
-  window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change',syncAppInstallUI);
+  ['standalone','fullscreen','minimal-ui','window-controls-overlay'].forEach(mode=>{
+    window.matchMedia?.(`(display-mode: ${mode})`)?.addEventListener?.('change',syncAppInstallUI);
+  });
   window.addEventListener('pageshow',syncAppInstallUI);
   document.addEventListener('visibilitychange',()=>{ if(!document.hidden) syncAppInstallUI(); });
 }
@@ -2151,7 +2173,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.80',root).href;
+    const swUrl=new URL('app/sw.js?v=0.81',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

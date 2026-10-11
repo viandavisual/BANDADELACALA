@@ -1,0 +1,9 @@
+BANDA DE LA CALA · v0.81
+
+- Corregida la detecció del context PWA instal·lat a la APP principal.
+- INSTAL·LAR APP queda ocult dins de la PWA instal·lada.
+- Detecció reforçada amb standalone/fullscreen/minimal-ui/window-controls-overlay, navigator.standalone, android-app referrer i marcador de start_url.
+- S'utilitza també el hint persistent d'instal·lació com a fallback; beforeinstallprompt el neteja si el navegador torna a oferir instal·lació.
+- La caixa MOBILE sobre el hero continua visible només en context web no instal·lat.
+- Manifest ID i scope de l'APP es mantenen intactes.
+- Sense canvis SQL, Supabase ni Edge Functions.
