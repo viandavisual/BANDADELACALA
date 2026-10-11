@@ -2413,3 +2413,25 @@ html.app-is-installed #installBtn,html.app-is-installed #homeInstallBtn,html.app
 .event-card.event-kind-rehearsal{border-left-color:var(--blue)!important}
 .event-card.event-kind-featured{border-left-color:var(--gold)!important}
 .event-card.event-kind-other{border-left-color:#4f9b62!important}
+
+
+/* v0.79 · detall CALENDARI: tinció lateral dreta amb el color del tipus d'activitat. */
+.event-card{position:relative!important;overflow:hidden!important;isolation:isolate}
+.event-card::after{
+  content:"";
+  position:absolute;
+  top:0;right:0;bottom:0;
+  width:50%;
+  pointer-events:none;
+  z-index:0;
+}
+.event-card>*{position:relative;z-index:1}
+.event-card.event-kind-rehearsal::after{
+  background:linear-gradient(to right,rgba(57,58,134,0) 0%,rgba(57,58,134,.14) 30%,rgba(57,58,134,.52) 68%,rgba(57,58,134,.94) 100%);
+}
+.event-card.event-kind-featured::after{
+  background:linear-gradient(to right,rgba(212,172,95,0) 0%,rgba(212,172,95,.14) 30%,rgba(212,172,95,.52) 68%,rgba(212,172,95,.94) 100%);
+}
+.event-card.event-kind-other::after{
+  background:linear-gradient(to right,rgba(79,155,98,0) 0%,rgba(79,155,98,.14) 30%,rgba(79,155,98,.52) 68%,rgba(79,155,98,.94) 100%);
+}

@@ -1,25 +1,23 @@
-BANDA DE LA CALA — PATCH v0.78 desde v0.77
+BANDA DE LA CALA · PATCH v0.79 desde v0.78
 
 SOBRESCRIBIR:
-- app.js
-- editor.js
 - style.css
-- editor.css
 - version.js
 - app/index.html
-- editor/index.html
 - app/sw.js
+- editor/index.html
 - editor/sw.js
-- PATCH_README.txt
 
 AÑADIR:
-- V0_78_CAMBIOS.txt
+- V0_79_CAMBIOS.txt
+- PATCH_README.txt
 
 NO TOCAR:
+- Supabase
+- Auth / SMTP
 - manifests
-- Supabase / Auth / Storage
 - Edge Functions
-- resto de assets y configuración
+- buckets / políticas
 
 SQL: NO
 EDGE FUNCTIONS: NO

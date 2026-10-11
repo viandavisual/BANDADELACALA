@@ -1,0 +1,17 @@
+BANDA DE LA CALA · v0.79
+
+CAMBIOS
+=======
+
+APP · CALENDARI
+- El detalle de cada actividad mantiene el trazo lateral del color de su tipo.
+- Se añade una tinción/gradiente en la parte derecha de la caja con ese mismo color para identificar visualmente el tipo de actividad de un vistazo.
+- ASSAIG: azul.
+- EVENT: dorado.
+- ALTRES: verde.
+- La tinción no bloquea botones ni contenido y conserva la legibilidad del texto.
+
+INFRAESTRUCTURA
+- version.js actualizado a v0.79.
+- caches APP/EDITOR actualizadas a v0.79.
+- Sin cambios de SQL, Supabase, Auth, manifests, scopes o Edge Functions.
