@@ -1,0 +1,8 @@
+BANDA DE LA CALA · v0.82
+
+- CALENDARI: AVUI amb activitats manté la zona inferior lliure per a les barres, però la franja roja baixa ara fins per sota del número del dia perquè es llegeixi completament.
+- CALENDARI: seleccionar un dia normal ja no utilitza cap destacat daurat. La selecció és gris/neutra; el daurat queda reservat exclusivament als EVENT (CONCERT / ACTUACIÓ).
+- CALENDARI: quan hi ha diverses activitats del mateix tipus/color en un mateix dia, comparteixen una sola fila dividida en tants segments com activitats hi ha.
+- Es mantenen files separades per ASSAIG (blau), EVENT (daurat), ALTRES (verd) i activitats finalitzades (gris).
+- Sense canvis SQL, Supabase ni Edge Functions.
+- Manifest IDs, scopes i arquitectura PWA intactes.

@@ -616,15 +616,25 @@ function renderCalendar(){
       return ta.localeCompare(tb,'ca') || String(a?.title||'').localeCompare(String(b?.title||''),'ca');
     });
     const has = dayEvents.length > 0;
-    const activityBars = dayEvents.slice(0,3).map(event=>{
+    // v0.82 · Una fila per color/tipus visual. Si hi ha diverses activitats del mateix
+    // tipus, la fila es divideix en diversos segments perquè d'un cop d'ull es vegi
+    // quantes n'hi ha sense augmentar l'alçada de la casella.
+    const activityGroups=new Map();
+    dayEvents.forEach(event=>{
       const type=String(event.type||'').toUpperCase();
       const past=calendarEventHasPassed(event,today);
       const kind=past?'past':(['CONCERT','ACTUACIÓ'].includes(type)?'featured':(type==='ALTRES'?'other':'rehearsal'));
       const label=past?'FINALITZAT':(type||'ACTIVITAT');
-      return `<span class="calendar-activity-bar activity-${kind}" title="${esc(label)}${event.time?` · ${esc(event.time)}`:''}" aria-hidden="true"></span>`;
+      if(!activityGroups.has(kind)) activityGroups.set(kind,{kind,label,events:[]});
+      activityGroups.get(kind).events.push(event);
+    });
+    const activityBars=[...activityGroups.values()].map(group=>{
+      const segments=group.events.map(()=>'<span class="calendar-activity-segment"></span>').join('');
+      const times=group.events.map(event=>event.time).filter(Boolean).join(' · ');
+      const title=`${group.label}${group.events.length>1?` · ${group.events.length} activitats`:''}${times?` · ${times}`:''}`;
+      return `<span class="calendar-activity-row activity-${group.kind}" title="${esc(title)}" aria-hidden="true">${segments}</span>`;
     }).join('');
-    const moreCount=Math.max(0,dayEvents.length-3);
-    const activities=has?`<span class="calendar-activity-stack">${activityBars}</span>${moreCount?`<span class="calendar-activity-more">+${moreCount}</span>`:''}`:'';
+    const activities=has?`<span class="calendar-activity-stack">${activityBars}</span>`:'';
     const isToday = key === isoDate(today.getFullYear(),today.getMonth(),today.getDate());
     const selected = key === state.selectedDate;
     cells.push(`<button class="calendar-day ${outside?'outside':''} ${has?'has-event':''} ${isToday?'today':''} ${selected?'selected':''}" data-date="${key}" aria-label="${key}${has?` · ${dayEvents.length} activitat${dayEvents.length===1?'':'s'}`:''}"><span class="day-number">${day}</span>${activities}</button>`);
@@ -2173,7 +2183,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.81',root).href;
+    const swUrl=new URL('app/sw.js?v=0.82',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

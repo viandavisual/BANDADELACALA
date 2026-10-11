@@ -2448,3 +2448,69 @@ html.app-is-installed #installBtn,html.app-is-installed #homeInstallBtn,html.app
 html.app-is-installed #mobileAppInstallCard,html.app-is-installed #mobileHomeInstallBtn,#mobileHomeInstallBtn[hidden],#mobileAppInstallCard[hidden]{display:none!important}
 
 @media(max-width:780px){.topbar #installBtn{display:none!important}}
+
+
+/* v0.82 · CALENDARI: AVUI més llegible, selecció neutra i repeticions del mateix tipus en una sola fila. */
+/* Cada tipus/color ocupa una fila. Diverses activitats del mateix tipus comparteixen la fila en segments iguals. */
+.calendar-activity-stack{
+  display:grid!important;
+  gap:3px!important;
+}
+.calendar-activity-row{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  width:100%;
+  height:5px;
+  pointer-events:none;
+}
+.calendar-activity-segment{
+  display:block;
+  flex:1 1 0;
+  min-width:0;
+  height:100%;
+  border-radius:999px;
+  background:currentColor;
+}
+.calendar-activity-row.activity-rehearsal{color:var(--blue)}
+.calendar-activity-row.activity-featured{color:var(--gold)}
+.calendar-activity-row.activity-other{color:#4f9b62}
+.calendar-activity-row.activity-past{color:#9da2a8}
+/* Les antigues barres individuals no intervenen en el nou layout. */
+.calendar-activity-bar{display:none!important}
+.calendar-activity-more{display:none!important}
+
+/* Seleccionar un dia no té significat d'event: el destacat és gris, mai daurat. */
+.calendar-day.selected:not(.today){
+  background:#f0f1f2!important;
+  border-color:#9da2a8!important;
+  box-shadow:inset 0 0 0 2px rgba(104,109,115,.62),0 0 0 2px rgba(104,109,115,.12)!important;
+}
+.calendar-day.selected:not(.today):hover{background:#e7e9eb!important;border-color:#858b91!important}
+.calendar-day.selected.has-event:not(.today){background:#f7f7f7!important}
+
+/* AVUI amb activitats: la franja roja baixa clarament per sota de tot el número. */
+.calendar-day.today.has-event{
+  background:#fff!important;
+  position:relative;
+}
+.calendar-day.today.has-event::before{
+  content:"";
+  position:absolute;
+  left:0;right:0;top:0;
+  height:66%;
+  z-index:0;
+  background:#c72f34;
+  pointer-events:none;
+}
+.calendar-day.today.has-event:hover{background:#fbfaf7!important}
+.calendar-day.today.has-event:hover::before{background:#b6252b}
+.calendar-day.today.has-event .day-number{position:relative;z-index:2;color:#fff!important}
+
+@media(max-width:780px){
+  #view-calendar .calendar-activity-stack{gap:1.5px!important}
+  #view-calendar .calendar-activity-row{height:3px;gap:2px}
+  #view-calendar .calendar-day.today.has-event{background:#fff!important}
+  #view-calendar .calendar-day.today.has-event::before{height:64%}
+  #view-calendar .calendar-day.today.has-event:hover{background:#fbfaf7!important}
+}
