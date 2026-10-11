@@ -324,7 +324,7 @@ function renderDashboard(){
   animateStatCounter($('#statDresscodes'),(content.dresscodes||[]).length); animateStatCounter($('#statTracks'),tracks.length); $('#statVisibleTracks').textContent=`${tracks.filter(track=>track.visible!==false).length} visibles`; animateStatCounter($('#statHistoric'),(content.historicItems||[]).length);
 }
 
-function editorHistoricHeroImages(){
+function editorAllHistoricHeroImages(){
   const out=[];
   (content.historicItems||[]).forEach(item=>{
     const images=historicImages(item);
@@ -333,6 +333,41 @@ function editorHistoricHeroImages(){
     images.forEach(src=>{src=String(src||'').trim();if(src && !out.includes(src))out.push(src);});
   });
   return out;
+}
+function homeHeroExcludedImageSet(){
+  const raw=content.settings?.homeHeroExcludedImages;
+  return new Set((Array.isArray(raw)?raw:[]).map(src=>String(src||'').trim()).filter(Boolean));
+}
+function editorHistoricHeroImages(){
+  const excluded=homeHeroExcludedImageSet();
+  return editorAllHistoricHeroImages().filter(src=>!excluded.has(src));
+}
+function renderHomeRandomExclusions(){
+  const gallery=$('#homeRandomExclusionsGallery');
+  const counter=$('#homeRandomExclusionsCount');
+  if(!gallery||!counter)return;
+  const images=editorAllHistoricHeroImages();
+  const excluded=homeHeroExcludedImageSet();
+  counter.textContent=String(excluded.size);
+  counter.title=`${excluded.size} ${excluded.size===1?'imatge exclosa':'imatges excloses'}`;
+  if(!images.length){
+    gallery.innerHTML='<div class="empty-state">No hi ha fotografies disponibles a l’HISTÒRIC.</div>';
+    return;
+  }
+  gallery.innerHTML=images.map((src,index)=>{
+    const checked=excluded.has(src);
+    return `<label class="random-exclusion-thumb ${checked?'is-excluded':''}"><input type="checkbox" data-home-random-exclusion="${index}" ${checked?'checked':''} /><span class="random-exclusion-image"><img src="${esc(src)}" alt="Fotografia HISTÒRIC ${index+1}" loading="lazy" /><span class="random-exclusion-state">${checked?'EXCLOSA':'DISPONIBLE'}</span></span></label>`;
+  }).join('');
+  $$('[data-home-random-exclusion]',gallery).forEach(input=>input.addEventListener('change',()=>{
+    if(!editorIsAdmin()){showToast('Aquesta configuració està reservada al USER ADMIN');renderHomeRandomExclusions();return;}
+    const src=images[Number(input.dataset.homeRandomExclusion)];
+    if(!src)return;
+    content.settings=content.settings||{};
+    const next=homeHeroExcludedImageSet();
+    if(input.checked)next.add(src);else next.delete(src);
+    content.settings.homeHeroExcludedImages=[...next];
+    save(content,input.checked?'Imatge exclosa del banner random':'Imatge recuperada per al banner random');
+  }));
 }
 function renderHomeEditor(){
   content.settings=content.settings||{};
@@ -2189,6 +2224,7 @@ function renderSystem(){
       ? 'Sincronització activa. Els canvis que desis aquí es publiquen a Supabase i arriben a la resta de dispositius.'
       : 'Aquest navegador conserva dades locals de versions anteriors. Migra-les una sola vegada a Supabase per convertir-les en el contingut compartit oficial.');
   renderHomeCardSystemFields();
+  renderHomeRandomExclusions();
 }
 
 async function savePublishedFile(){

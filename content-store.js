@@ -22,6 +22,9 @@
     base.settings.homeHeroMode = ['random','logo','manual'].includes(rawHomeHeroMode)
       ? rawHomeHeroMode
       : 'random';
+    base.settings.homeHeroExcludedImages = Array.isArray(base.settings.homeHeroExcludedImages)
+      ? [...new Set(base.settings.homeHeroExcludedImages.map(value=>String(value||'').trim()).filter(Boolean))]
+      : [];
     const homeCards = base.settings.homeCards && typeof base.settings.homeCards === 'object' ? base.settings.homeCards : {};
     const homeString = (value,fallback) => typeof value === 'string' && value.trim() ? value.trim() : fallback;
     base.settings.homeCards = {

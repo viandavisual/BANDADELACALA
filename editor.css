@@ -1076,3 +1076,25 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .suggestion-review-section{display:grid;gap:14px}.suggestion-review-section+.suggestion-review-section{margin-top:26px;padding-top:24px;border-top:1px solid var(--line)}.suggestion-review-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}.suggestion-review-heading h2{margin:4px 0 0;font-size:1.45rem}.suggestion-list{display:grid;gap:12px}.suggestion-card{border:1px solid var(--line);border-radius:18px;background:#fff;padding:18px;box-shadow:var(--shadow-soft)}.suggestion-card-pending{border-left:5px solid var(--blue)}.suggestion-card-archived{border-left:5px solid #9da2a8;background:linear-gradient(145deg,#fff,#f8f7f4)}.suggestion-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.suggestion-card-head h3{margin:3px 0 0;font-size:1.08rem;color:var(--blue-deep)}.suggestion-card-head time{font-size:.72rem;color:var(--muted);white-space:nowrap}.suggestion-text{white-space:pre-wrap;margin:16px 0;color:var(--ink);line-height:1.6;font-size:.92rem}.suggestion-archive-meta{border-top:1px solid var(--line);padding-top:12px;color:var(--muted);font-size:.72rem;letter-spacing:.03em}.suggestion-archive-meta strong{color:var(--blue)}.suggestion-card-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.count-pill.muted{background:#eceae5;color:#77716b}.empty-state.compact{padding:18px}
 @media(max-width:820px){.archive-review-tabs{flex-wrap:wrap}.suggestion-card-head{flex-direction:column;gap:6px}.suggestion-card-head time{white-space:normal}.suggestion-card-actions{display:grid;grid-template-columns:1fr}.suggestion-card-actions button{width:100%}.archive-review-counts{flex-wrap:wrap}.archive-review-counts span{min-width:calc(33.333% - 8px)}}
 @media(max-width:520px){.archive-review-counts span{min-width:100%}.suggestion-review-heading{align-items:center}.suggestion-card{padding:15px}}
+
+/* v0.89 · ADMIN · exclusions for HOME random HISTÒRIC images */
+.system-random-exclusions-card{grid-column:1/-1;min-height:0;padding:0;overflow:hidden}
+.system-collapsible>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:86px;padding:20px 22px;cursor:pointer;user-select:none}
+.system-collapsible>summary::-webkit-details-marker{display:none}
+.system-collapsible>summary>span:first-child{display:grid;gap:6px}
+.system-collapsible>summary strong{font-size:1rem;letter-spacing:.02em;color:var(--ink)}
+.system-collapsible>summary::after{content:'+';width:34px;height:34px;border-radius:999px;border:1px solid var(--line);display:grid;place-items:center;color:var(--blue);font-size:1.2rem;font-weight:950;margin-left:auto}
+.system-collapsible[open]>summary::after{content:'−'}
+.system-collapsible-body{border-top:1px solid var(--line);padding:0 22px 22px}
+.system-collapsible-body>p{margin:18px 0;color:var(--muted)}
+.random-exclusions-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:11px}
+.random-exclusion-thumb{position:relative;display:block;cursor:pointer;border-radius:14px;overflow:hidden;border:2px solid transparent;background:var(--paper);transition:.16s ease}
+.random-exclusion-thumb:hover{transform:translateY(-1px);border-color:rgba(57,58,134,.25)}
+.random-exclusion-thumb input{position:absolute;opacity:0;pointer-events:none}
+.random-exclusion-image{display:block;position:relative;aspect-ratio:4/3;background:#ece9e3}
+.random-exclusion-image img{width:100%;height:100%;display:block;object-fit:cover}
+.random-exclusion-state{position:absolute;left:7px;bottom:7px;border-radius:999px;background:rgba(255,255,255,.9);color:var(--blue-deep);font-size:.56rem;font-weight:950;letter-spacing:.07em;padding:5px 7px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.random-exclusion-thumb.is-excluded{border-color:rgba(166,79,69,.48)}
+.random-exclusion-thumb.is-excluded img{filter:grayscale(1);opacity:.38}
+.random-exclusion-thumb.is-excluded .random-exclusion-state{background:rgba(166,79,69,.94);color:#fff}
+@media(max-width:620px){.random-exclusions-gallery{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.system-collapsible>summary{padding:17px}.system-collapsible-body{padding:0 17px 17px}}

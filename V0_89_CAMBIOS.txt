@@ -1,0 +1,18 @@
+BANDA DE LA CALA · v0.89
+
+NOU · EDITOR / SISTEMA · USER ADMIN
+- Nova caixa col·lapsable al final de SISTEMA: EXCLUSIONS · IMATGES RANDOM DE L’HISTÒRIC.
+- Mostra miniatures de totes les fotografies disponibles a HISTÒRIC.
+- CARTELLS, NOTÍCIES i ENTREVISTES queden exclosos perquè no formen part de historicItems.
+- El USER ADMIN pot marcar individualment qualsevol fotografia per excloure-la del banner random de la HOME.
+- Les fotografies excloses queden identificades visualment en gris i amb l’etiqueta EXCLOSA.
+- La selecció es desa a settings.homeHeroExcludedImages dins del contingut compartit.
+
+HOME APP
+- El mode IMATGES RANDOM DE L’HISTÒRIC filtra les fotografies marcades com a excloses abans de construir la rotació.
+- LOGOTIP BANDA i IMATGE MANUAL no es veuen afectats.
+- Si totes les fotografies queden excloses, es manté el fallback existent al logotip de la banda.
+
+PERMISOS / BACKEND
+- La nova caixa és exclusiva de USER ADMIN.
+- No requereix SQL nou, buckets nous ni Edge Functions.

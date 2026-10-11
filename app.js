@@ -1086,11 +1086,12 @@ let homeHeroActiveLayer=0;
 let homeHeroTransitionToken=0;
 function homeHistoricHeroImages(){
   const out=[];
+  const excluded=new Set((Array.isArray(state.content.settings?.homeHeroExcludedImages)?state.content.settings.homeHeroExcludedImages:[]).map(src=>String(src||'').trim()).filter(Boolean));
   (state.content.historicItems||[]).forEach(item=>{
     const images=getHistoricImages(item);
     const featured=String(item?.featuredImageSrc||'').trim();
     if(featured && !images.includes(featured)) images.unshift(featured);
-    images.forEach(src=>{src=String(src||'').trim();if(src && !out.includes(src))out.push(src);});
+    images.forEach(src=>{src=String(src||'').trim();if(src && !excluded.has(src) && !out.includes(src))out.push(src);});
   });
   return out;
 }

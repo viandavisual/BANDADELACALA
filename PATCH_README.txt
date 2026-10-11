@@ -1,18 +1,11 @@
-BANDA DE LA CALA · PATCH v0.88 DES DE v0.87
+BANDA DE LA CALA · PATCH v0.89 des de v0.88
 
-Aquest PATCH s'ha d'aplicar sobre una còpia completa de la v0.87.
-Substitueix únicament els fitxers inclosos al ZIP mantenint la mateixa estructura de carpetes.
-
-IMPORTANT · SUPABASE
-Abans d'utilitzar la nova BÚSTIA DE SUGGERIMENTS, executa una sola vegada SUPABASE_UPDATE_v0.88.sql al SQL Editor del projecte.
-Consulta SUPABASE_v0.88_PASOS.txt.
+Aplica aquest PATCH únicament sobre una còpia exacta de la v0.88 FULL.
+Substitueix els fitxers inclosos mantenint la mateixa estructura de carpetes.
 
 Canvis principals:
-- nova BÚSTIA DE SUGGERIMENTS per a USERS registrats a APP / USER;
-- nova gestió de suggeriments dins EDITOR / APORTACIONS;
-- bubble de suggeriments nous;
-- arxiu amb USER gestor + data/hora;
-- historial arxivat amb eliminació individual;
-- actualització de versió/cache a v0.88.
+- EDITOR / SISTEMA / USER ADMIN: selector de fotografies HISTÒRIC excloses del banner random HOME.
+- HOME random: respecta settings.homeHeroExcludedImages.
+- Actualització de versió/caché a v0.89.
 
-Consulta V0_88_CAMBIOS.txt per al detall.
+No requereix SQL ni canvis de Supabase.
