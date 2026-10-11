@@ -3,10 +3,12 @@ let appInstallPrompt = null;
 function captureAppInstallPrompt(event){
   event.preventDefault();
   appInstallPrompt = event;
+  try{ localStorage.removeItem('banda-de-la-cala-app-installed-hint'); }catch(_error){}
   try{ syncAppInstallUI(); }catch(_error){}
 }
 function clearAppInstallPrompt(){
   appInstallPrompt = null;
+  try{ localStorage.setItem('banda-de-la-cala-app-installed-hint','1'); }catch(_error){}
   try{ syncAppInstallUI(); }catch(_error){}
 }
 window.addEventListener('beforeinstallprompt', captureAppInstallPrompt);
@@ -2026,13 +2028,17 @@ async function initAppAuth(){
 function appIsStandalone(){
   try{
     return window.matchMedia('(display-mode: standalone)').matches ||
-      window.matchMedia('(display-mode: fullscreen)').matches ||
-      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      window.matchMedia('(display-mode: window-controls-overlay)').matches ||
       window.navigator.standalone === true ||
       String(document.referrer || '').startsWith('android-app://');
   }catch(_error){
     return window.navigator.standalone === true;
   }
+}
+
+function rememberInstalledAppContext(){
+  if(!appIsStandalone()) return;
+  try{ localStorage.setItem('banda-de-la-cala-app-installed-hint','1'); }catch(_error){}
 }
 
 function appIsIOS(){
@@ -2041,28 +2047,31 @@ function appIsIOS(){
 }
 
 function syncAppInstallUI(){
-  const headerBtn=$('#installBtn'), homeBtn=$('#homeInstallBtn'), card=$('#appInstallCard'), status=$('#appInstallStatus');
+  const headerBtn=$('#installBtn');
+  const buttons=[$('#homeInstallBtn'),$('#mobileHomeInstallBtn'),headerBtn].filter(Boolean);
+  const cards=[$('#appInstallCard'),$('#mobileAppInstallCard')].filter(Boolean);
+  const statuses=[$('#appInstallStatus'),$('#mobileAppInstallStatus')].filter(Boolean);
   const installed=appIsStandalone();
+  if(installed) rememberInstalledAppContext();
   document.documentElement.classList.toggle('app-is-installed', installed);
-  if(card) card.hidden=installed;
-  if(headerBtn) headerBtn.hidden=installed;
-  if(homeBtn) homeBtn.hidden=installed;
+  cards.forEach(card=>{ card.hidden=installed; });
+  buttons.forEach(btn=>{ btn.hidden=installed; });
   if(installed){
     appInstallPrompt=null;
-    if(status) status.textContent='APP instal·lada.';
+    statuses.forEach(status=>{ status.textContent='APP instal·lada.'; });
     return;
   }
-  [headerBtn,homeBtn].filter(Boolean).forEach(btn=>{
+  buttons.forEach(btn=>{
     btn.disabled=false;
     btn.classList.toggle('install-ready',!!appInstallPrompt);
     btn.textContent='INSTAL·LAR APP';
   });
-  if(status) status.textContent=appInstallPrompt ? 'Preparada · prem INSTAL·LAR APP.' : 'Prem INSTAL·LAR APP.';
+  const label=appInstallPrompt ? 'Preparada · prem INSTAL·LAR APP.' : (appIsIOS() ? 'Prem INSTAL·LAR APP i segueix les instruccions.' : 'Prem INSTAL·LAR APP.');
+  statuses.forEach(status=>{ status.textContent=label; });
 }
 
 function showAppInstallMessage(message){
-  const status=$('#appInstallStatus');
-  if(status) status.textContent=message;
+  [$('#appInstallStatus'),$('#mobileAppInstallStatus')].filter(Boolean).forEach(status=>{ status.textContent=message; });
 }
 
 async function waitForNativeAppInstallPrompt(timeout=1800){
@@ -2122,6 +2131,7 @@ function bindPwaInstall(){
   syncAppInstallUI();
   $('#installBtn')?.addEventListener('click',promptAppInstall);
   $('#homeInstallBtn')?.addEventListener('click',promptAppInstall);
+  $('#mobileHomeInstallBtn')?.addEventListener('click',promptAppInstall);
   window.addEventListener('appinstalled',()=>{
     if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada';
   });
@@ -2141,7 +2151,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.74',root).href;
+    const swUrl=new URL('app/sw.js?v=0.80',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

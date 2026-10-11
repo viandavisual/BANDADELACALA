@@ -14,9 +14,9 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.79" />
-  <link rel="stylesheet" href="tuner.css?v=0.79" />
-  <link rel="stylesheet" href="metronome.css?v=0.79" />
+  <link rel="stylesheet" href="style.css?v=0.80" />
+  <link rel="stylesheet" href="tuner.css?v=0.80" />
+  <link rel="stylesheet" href="metronome.css?v=0.80" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -104,6 +104,11 @@
       </header>
 
       <section id="view-home" class="view active" data-view="home">
+        <section id="mobileAppInstallCard" class="app-install-card app-install-card-mobile" aria-label="Instal·lar l'APP">
+          <img data-app-icon alt="" />
+          <div class="app-install-copy"><span class="eyebrow">PWA</span><strong>INSTAL·LA BANDA DE LA CALA</strong><small id="mobileAppInstallStatus">Prem INSTAL·LAR APP.</small></div>
+          <button id="mobileHomeInstallBtn" class="primary-btn app-install-action" type="button">INSTAL·LAR APP</button>
+        </section>
         <div class="hero-panel">
           <div id="heroMedia" class="hero-media" aria-hidden="true">
             <img id="heroBackground" class="hero-background" alt="" />
@@ -491,14 +496,14 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.79"></script>
-  <script src="config.js?v=0.79"></script>
-  <script src="data/content-published.js?v=0.79"></script>
-  <script src="content-store.js?v=0.79"></script>
+  <script src="version.js?v=0.80"></script>
+  <script src="config.js?v=0.80"></script>
+  <script src="data/content-published.js?v=0.80"></script>
+  <script src="content-store.js?v=0.80"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.79"></script>
-  <script src="metronome.js?v=0.79"></script>
-  <script src="tuner.js?v=0.79"></script>
-  <script src="app.js?v=0.79"></script>
+  <script src="supabase-client.js?v=0.80"></script>
+  <script src="metronome.js?v=0.80"></script>
+  <script src="tuner.js?v=0.80"></script>
+  <script src="app.js?v=0.80"></script>
 </body>
 </html>

@@ -2435,3 +2435,16 @@ html.app-is-installed #installBtn,html.app-is-installed #homeInstallBtn,html.app
 .event-card.event-kind-other::after{
   background:linear-gradient(to right,rgba(79,155,98,0) 0%,rgba(79,155,98,.14) 30%,rgba(79,155,98,.52) 68%,rgba(79,155,98,.94) 100%);
 }
+
+
+/* v0.80 · INSTAL·LAR APP visible i prioritari a HOME mobile */
+.app-install-card-mobile{display:none}
+@media(max-width:780px){
+  #mobileAppInstallCard.app-install-card{display:grid;margin:0 0 12px!important;border:1px solid rgba(57,58,134,.20);background:linear-gradient(135deg,#fff 0%,#ECECF7 100%);box-shadow:0 10px 28px rgba(57,58,134,.12)}
+  #appInstallCard{display:none!important}
+  #mobileAppInstallCard[hidden]{display:none!important}
+  #mobileAppInstallCard .app-install-action{grid-column:1/-1;width:100%}
+}
+html.app-is-installed #mobileAppInstallCard,html.app-is-installed #mobileHomeInstallBtn,#mobileHomeInstallBtn[hidden],#mobileAppInstallCard[hidden]{display:none!important}
+
+@media(max-width:780px){.topbar #installBtn{display:none!important}}

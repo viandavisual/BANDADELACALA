@@ -1,0 +1,11 @@
+BANDA DE LA CALA · v0.80
+
+- Revisado el sistema INSTAL·LAR APP de la APP principal.
+- En MOBILE se añade una caja específica de instalación por encima de la imagen/hero de bienvenida de HOME.
+- La caja se muestra siempre que la APP no se esté ejecutando como PWA instalada.
+- Se mantiene una caja equivalente en DESKTOP.
+- Se elimina la detección por display-mode fullscreen/minimal-ui para evitar falsos positivos de “APP instalada”.
+- La detección de PWA instalada se basa en standalone, window-controls-overlay, navigator.standalone o android-app referrer.
+- Al evento appinstalled se ocultan inmediatamente todos los accesos de instalación.
+- En iPhone/iPad el botón sigue ofreciendo las instrucciones de “Afegir a la pantalla d’inici”.
+- No requiere SQL ni cambios en Supabase.
