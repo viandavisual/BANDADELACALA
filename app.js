@@ -494,6 +494,7 @@ function animateViewEntrance(id){
 
 function switchView(id, remember = true){
   if(window.BandaTuner?.isOpen?.()) window.BandaTuner.close();
+  if(window.BandaMetronome?.isOpen?.()) window.BandaMetronome.close();
   if(id!=='playlist' && isPlayerFullscreenActive()) closePlayerFullscreen();
   if(state.minigameOpen && id!=='games') closeOpenMinigame({resumePlayer:true});
   const target=navItems.find(item=>item.id===id);
@@ -1861,6 +1862,7 @@ function bindUserAuth(){
   });
   $('#userLogoutBtn')?.addEventListener('click',async()=>{
     if(window.BandaTuner?.isOpen?.()) await window.BandaTuner.close();
+    if(window.BandaMetronome?.isOpen?.()) await window.BandaMetronome.close();
     try{ await BandaSupabase.signOut(); }catch(_error){}
     state.session=null; state.profile=null; state.authenticated=false;
     state.currentView='home'; state.viewHistory=[];
@@ -2111,7 +2113,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.63',root).href;
+    const swUrl=new URL('app/sw.js?v=0.72',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
@@ -2152,6 +2154,7 @@ async function init(){
   bindContentUpdates();
   bindUserAuth();
   window.BandaTuner?.init?.();
+  window.BandaMetronome?.init?.();
   bindPwaInstall();
   registerSW();
   await initAppAuth();

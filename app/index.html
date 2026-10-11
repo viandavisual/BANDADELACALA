@@ -15,7 +15,8 @@
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
   <link rel="stylesheet" href="style.css?v=0.71" />
-  <link rel="stylesheet" href="tuner.css?v=0.71" />
+  <link rel="stylesheet" href="tuner.css?v=0.72" />
+  <link rel="stylesheet" href="metronome.css?v=0.72" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -292,6 +293,11 @@
               <span>AFINADOR</span>
             </button>
 
+            <button id="openMetronomeBtn" class="metronome-launcher" type="button">
+              <span class="metronome-launcher-icon" aria-hidden="true">♩</span>
+              <span>METRÒNOM</span>
+            </button>
+
             <button id="openArchiveUploadBtn" class="archive-upload-launcher" type="button">PUJAR FATO MULTIMEDIA AQUÍ</button>
 
             <section id="archiveUploadBox" class="archive-upload-box" hidden>
@@ -394,6 +400,40 @@
     </section>
   </div>
 
+  <div id="metronomeOverlay" class="metronome-overlay" hidden aria-hidden="false">
+    <div id="metronomeBackdrop" class="metronome-backdrop"></div>
+    <section class="metronome-dialog" role="dialog" aria-modal="true" aria-labelledby="metronomeTitle">
+      <div class="metronome-head">
+        <div><span class="eyebrow">UTILITAT DE MÚSICS</span><h2 id="metronomeTitle">METRÒNOM</h2></div>
+        <button id="closeMetronomeBtn" class="metronome-close" type="button" aria-label="Tancar metrònom">×</button>
+      </div>
+      <div class="metronome-display">
+        <span class="metronome-kicker">TEMPO</span>
+        <div class="metronome-bpm-line"><strong id="metronomeBpmValue">120</strong><span>BPM</span></div>
+        <div id="metronomeBeatDots" class="metronome-beat-dots" aria-label="Polsos del compàs"></div>
+      </div>
+      <div class="metronome-controls">
+        <button id="metronomeMinusBtn" class="metronome-step-btn" type="button" aria-label="Baixar BPM">−</button>
+        <input id="metronomeBpmRange" type="range" min="40" max="220" step="1" value="120" aria-label="BPM" />
+        <button id="metronomePlusBtn" class="metronome-step-btn" type="button" aria-label="Pujar BPM">+</button>
+      </div>
+      <div class="metronome-options">
+        <label>COMPÀS
+          <select id="metronomeMeter">
+            <option value="2">2/4</option>
+            <option value="3">3/4</option>
+            <option value="4" selected>4/4</option>
+            <option value="6">6/8</option>
+          </select>
+        </label>
+        <button id="metronomeTapBtn" class="metronome-secondary-btn" type="button">TAP TEMPO</button>
+      </div>
+      <button id="metronomeStartBtn" class="metronome-start-btn" type="button">INICIAR</button>
+      <small id="metronomeStatus" class="metronome-status">Tria el tempo i prem INICIAR.</small>
+      <p class="metronome-note">El metrònom funciona localment al dispositiu i continua actiu mentre aquesta pantalla està oberta.</p>
+    </section>
+  </div>
+
   <div id="tunerOverlay" class="tuner-overlay" hidden aria-hidden="false">
     <div id="tunerBackdrop" class="tuner-backdrop"></div>
     <section class="tuner-dialog" role="dialog" aria-modal="true" aria-labelledby="tunerTitle">
@@ -403,7 +443,14 @@
       </div>
       <div class="tuner-reference" aria-label="Configuració de l'afinador">
         <span class="tuner-chip">CONCERT / DO</span>
-        <span class="tuner-chip">A4 = 440 Hz</span>
+        <label class="tuner-reference-select">
+          <span>REFERÈNCIA</span>
+          <select id="tunerA4Reference" aria-label="Freqüència de referència A4">
+            <option value="440" selected>A4 = 440 Hz</option>
+            <option value="441">A4 = 441 Hz</option>
+            <option value="442">A4 = 442 Hz</option>
+          </select>
+        </label>
       </div>
       <div class="tuner-note-block">
         <div class="tuner-note-line"><strong id="tunerNote" class="tuner-note">—</strong><span id="tunerOctave" class="tuner-octave"></span></div>
@@ -445,13 +492,14 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.71"></script>
-  <script src="config.js?v=0.71"></script>
-  <script src="data/content-published.js?v=0.71"></script>
-  <script src="content-store.js?v=0.71"></script>
+  <script src="version.js?v=0.72"></script>
+  <script src="config.js?v=0.72"></script>
+  <script src="data/content-published.js?v=0.72"></script>
+  <script src="content-store.js?v=0.72"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.71"></script>
-  <script src="tuner.js?v=0.71"></script>
-  <script src="app.js?v=0.71"></script>
+  <script src="supabase-client.js?v=0.72"></script>
+  <script src="metronome.js?v=0.72"></script>
+  <script src="tuner.js?v=0.72"></script>
+  <script src="app.js?v=0.72"></script>
 </body>
 </html>

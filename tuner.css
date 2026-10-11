@@ -1,4 +1,4 @@
-/* BANDA DE LA CALA · AFINADOR v0.71 */
+/* BANDA DE LA CALA · AFINADOR v0.72 */
 .tuner-launcher{
   width:100%;margin:16px 0 0;border:1px solid rgba(212,172,95,.48);border-radius:17px;
   background:linear-gradient(145deg,#fff,#fbf7ed);color:var(--blue-deep);padding:16px 18px;
@@ -18,6 +18,14 @@
 .tuner-close{width:42px;height:42px;min-width:42px;border:0;border-radius:50%;display:grid;place-items:center;background:var(--blue-soft);color:var(--blue);font-size:28px;line-height:1;cursor:pointer}
 .tuner-reference{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:16px 0}
 .tuner-chip{padding:7px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:.72rem;font-weight:900;color:var(--muted);letter-spacing:.04em}
+
+.tuner-reference-select{display:flex;align-items:center;gap:7px;padding:4px 5px 4px 9px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--muted)}
+.tuner-reference-select>span{font-size:.62rem;font-weight:950;letter-spacing:.06em}
+.tuner-reference-select select{border:0;background:var(--blue-soft);color:var(--blue-deep);font:900 .72rem/1 inherit;border-radius:999px;padding:5px 9px;outline:none}
+.tuner-overlay::after{content:"";position:fixed;inset:0;z-index:3;pointer-events:none;background:rgba(52,180,84,.18);opacity:0;transition:opacity .12s ease}
+.tuner-overlay.is-in-tune::after{opacity:1}
+.tuner-dialog{z-index:1}
+.tuner-overlay.is-in-tune .tuner-dialog{box-shadow:0 30px 80px rgba(0,0,0,.35),0 0 0 5px rgba(54,177,83,.16)}
 .tuner-note-block{text-align:center;padding:8px 0 6px}
 .tuner-note-line{display:flex;align-items:flex-start;justify-content:center;gap:6px;min-height:108px}
 .tuner-note{font-size:6.1rem;line-height:.95;font-weight:950;letter-spacing:-.06em;color:var(--blue-deep)}

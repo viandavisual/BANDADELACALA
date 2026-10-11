@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const A4_REFERENCE = 440;
+  let a4Reference = 440;
   const IN_TUNE_CENTS = 5;
   const MIN_FREQUENCY = 45;
   const MAX_FREQUENCY = 1800;
@@ -85,11 +85,11 @@
   }
 
   function frequencyToMidi(frequency) {
-    return 69 + 12 * Math.log2(frequency / A4_REFERENCE);
+    return 69 + 12 * Math.log2(frequency / a4Reference);
   }
 
   function midiToFrequency(midi) {
-    return A4_REFERENCE * Math.pow(2, (midi - 69) / 12);
+    return a4Reference * Math.pow(2, (midi - 69) / 12);
   }
 
   function noteNameFromMidi(midi, transposeMode = 'concert') {
@@ -108,6 +108,11 @@
     el.dataset.type = type;
   }
 
+  function setTuneTint(active) {
+    const overlay = $('#tunerOverlay');
+    if (overlay) overlay.classList.toggle('is-in-tune', Boolean(active));
+  }
+
   function resetDisplay() {
     const note = $('#tunerNote');
     const octave = $('#tunerOctave');
@@ -123,6 +128,7 @@
     if (state) { state.textContent = 'ESPERANT SO'; state.dataset.tune = 'idle'; }
     if (needle) needle.style.setProperty('--needle-position', '50%');
     if (meter) meter.dataset.tune = 'idle';
+    setTuneTint(false);
     frequencyHistory = [];
     lastStableMidi = null;
   }
@@ -172,6 +178,7 @@
     }
     if (needle) needle.style.setProperty('--needle-position', `${position}%`);
     if (meter) meter.dataset.tune = tune;
+    setTuneTint(tune === 'in');
   }
 
   function analyse(timestamp = 0) {
@@ -184,6 +191,7 @@
         renderPitch(detected);
         setStatus('MICRÒFON ACTIU · anàlisi local', 'ok');
       } else {
+        setTuneTint(false);
         setStatus('MICRÒFON ACTIU · toca una nota sostinguda', 'ok');
       }
     }
@@ -284,6 +292,13 @@
     $('#openTunerBtn')?.addEventListener('click', open);
     $('#closeTunerBtn')?.addEventListener('click', close);
     $('#tunerMicBtn')?.addEventListener('click', () => running ? stop() : start());
+    $('#tunerA4Reference')?.addEventListener('change', event => {
+      a4Reference = Number(event.target.value) || 440;
+      frequencyHistory = [];
+      lastStableMidi = null;
+      resetDisplay();
+      setStatus(`Referència canviada: A4 = ${a4Reference} Hz.`);
+    });
     $('#tunerBackdrop')?.addEventListener('click', close);
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && !$('#tunerOverlay')?.hidden) close();
@@ -299,6 +314,6 @@
     close,
     stop,
     isOpen: () => !$('#tunerOverlay')?.hidden,
-    config: { A4_REFERENCE, IN_TUNE_CENTS, TRANSPOSE_SEMITONES }
+    config: { get A4_REFERENCE(){ return a4Reference; }, IN_TUNE_CENTS, TRANSPOSE_SEMITONES }
   };
 })();

@@ -1,0 +1,10 @@
+BANDA DE LA CALA · v0.72
+
+- AFINADOR: selector de referència A4 = 440 / 441 / 442 Hz.
+- AFINADOR: tinció verda de tota la pantalla mentre la nota està dins de ±5 cents; desapareix immediatament quan deixa d'estar afinada o no hi ha detecció.
+- USER: nou botó METRÒNOM just sota AFINADOR, exclusiu per a USER registrats.
+- METRÒNOM: 40–220 BPM, +/- BPM, slider, TAP TEMPO, compassos 2/4, 3/4, 4/4 i 6/8, accent al primer pols i indicador visual.
+- METRÒNOM: àudio generat localment amb Web Audio API i neteja en sortir/segon pla.
+- PWA APP: corregida la visibilitat del botó INSTAL·LAR APP en pantalles MOBILE estretes; ja no s'oculta sota 440 px.
+- Service Worker/cache actualitzats a v0.72.
+- Sense SQL ni canvis de Supabase.
