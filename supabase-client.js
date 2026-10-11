@@ -450,6 +450,61 @@
     return true;
   }
 
+  async function createSuggestion(suggestion){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const currentSession=await session(); if(!currentSession) throw new Error('AUTH_REQUIRED');
+    const text=String(suggestion||'').trim();
+    if(!text) throw new Error('SUGGESTION_REQUIRED');
+    if(text.length>2000) throw new Error('SUGGESTION_TOO_LONG');
+    const profile=await getMyProfile().catch(()=>null);
+    const row={
+      user_id:currentSession.user.id,
+      submitter_name:String(profile?.name||currentSession.user.user_metadata?.name||currentSession.user.email||'USER').trim().toLocaleUpperCase('ca-ES'),
+      submitter_email:String(currentSession.user.email||'').trim(),
+      suggestion:text,
+      status:'pending'
+    };
+    const {error}=await c.from('app_suggestions').insert(row);
+    if(error) throw error;
+    return true;
+  }
+
+  async function listSuggestions(status='pending'){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const clean=String(status||'pending').toLowerCase();
+    if(!['pending','archived'].includes(clean)) throw new Error('INVALID_SUGGESTION_STATUS');
+    const {data,error}=await c.from('app_suggestions').select('*').eq('status',clean).order(clean==='archived'?'archived_at':'created_at',{ascending:false});
+    if(error) throw error;
+    return data||[];
+  }
+
+  async function countSuggestions(status='pending'){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const clean=String(status||'pending').toLowerCase();
+    const {count,error}=await c.from('app_suggestions').select('id',{count:'exact',head:true}).eq('status',clean);
+    if(error) throw error;
+    return Number(count)||0;
+  }
+
+  async function archiveSuggestion(id){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const currentSession=await session(); if(!currentSession) throw new Error('AUTH_REQUIRED');
+    const profile=await getMyProfile().catch(()=>null);
+    const archivedByName=String(profile?.name||currentSession.user.user_metadata?.name||currentSession.user.email||'USER GESTOR').trim().toLocaleUpperCase('ca-ES');
+    const patch={status:'archived',archived_at:new Date().toISOString(),archived_by:currentSession.user.id,archived_by_name:archivedByName};
+    const {data,error}=await c.from('app_suggestions').update(patch).eq('id',String(id||'')).select('*').single();
+    if(error) throw error;
+    return data;
+  }
+
+  async function deleteSuggestion(id){
+    const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
+    const currentSession=await session(); if(!currentSession) throw new Error('AUTH_REQUIRED');
+    const {error}=await c.from('app_suggestions').delete().eq('id',String(id||''));
+    if(error) throw error;
+    return true;
+  }
+
   function onAuthChange(callback){
     const c=getClient(); if(!c) return null;
     return c.auth.onAuthStateChange((_event,s)=>callback(s));
@@ -457,6 +512,6 @@
 
   window.BandaSupabase={
     enabled,getClient,session,signIn,signOut,requestPasswordReset,getMyProfile,listProfiles,createManagedUser,deleteManagedUser,updateOwnProfile,updateOwnGender,getQuinaNotaPublicChallenge,getQuinaNotaState,submitQuinaNotaAnswer,updatePassword,
-    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,backupOriginalMedia,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,createArchiveSubmission,listArchiveSubmissions,countArchiveSubmissions,updateArchiveSubmission,downloadArchiveSubmission,moveArchiveSubmission,deleteArchiveSubmission,onAuthChange,dataUrlToFile
+    loadContent,saveContent,subscribeContent,uploadFile,uploadDataUrl,backupOriginalMedia,listPublicFiles,deletePublicFile,storagePathFromPublicUrl,createArchiveSubmission,listArchiveSubmissions,countArchiveSubmissions,updateArchiveSubmission,downloadArchiveSubmission,moveArchiveSubmission,deleteArchiveSubmission,createSuggestion,listSuggestions,countSuggestions,archiveSuggestion,deleteSuggestion,onAuthChange,dataUrlToFile
   };
 })();

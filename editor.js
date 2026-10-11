@@ -46,6 +46,9 @@ let hemerotecaEditorFilter = 'all';
 let archiveReviewFilter = 'pending';
 let archiveSubmissions = [];
 let archiveCounts = {pending:0,rejected:0};
+let suggestionCounts = {pending:0,archived:0};
+let suggestionsPending = [];
+let suggestionsArchived = [];
 const openHistoricEditorPeriods=new Set();
 const openHemerotecaEditorSections=new Set();
 const openCartellsEditorPeriods=new Set();
@@ -1815,11 +1818,57 @@ function archiveReviewCard(row){
     </div>
   </article>`;
 }
+function suggestionDate(value){
+  const d=new Date(value||'');
+  return Number.isNaN(d.getTime())?'':new Intl.DateTimeFormat('ca-ES',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(d);
+}
+function suggestionPendingCard(row){
+  return `<article class="suggestion-card suggestion-card-pending" data-suggestion-id="${esc(row.id)}">
+    <div class="suggestion-card-head"><div><span class="eyebrow">NOU SUGGERIMENT</span><h3>${esc(upperUserName(row.submitter_name)||row.submitter_email||'USER')}</h3></div><time>${esc(suggestionDate(row.created_at))}</time></div>
+    <p class="suggestion-text">${esc(row.suggestion||'')}</p>
+    <div class="suggestion-card-actions"><button class="primary-btn" type="button" data-suggestion-archive>ARXIVAR</button></div>
+  </article>`;
+}
+function suggestionArchivedCard(row){
+  const archivedBy=upperUserName(row.archived_by_name)||'USER GESTOR';
+  return `<article class="suggestion-card suggestion-card-archived" data-suggestion-id="${esc(row.id)}">
+    <div class="suggestion-card-head"><div><span class="eyebrow">ARXIVAT</span><h3>${esc(upperUserName(row.submitter_name)||row.submitter_email||'USER')}</h3></div><time>${esc(suggestionDate(row.created_at))}</time></div>
+    <p class="suggestion-text">${esc(row.suggestion||'')}</p>
+    <div class="suggestion-archive-meta">ARXIVAT PER <strong>${esc(archivedBy)}</strong> · ${esc(suggestionDate(row.archived_at))}</div>
+    <div class="suggestion-card-actions"><button class="danger-btn" type="button" data-suggestion-delete>ELIMINAR DEFINITIVAMENT</button></div>
+  </article>`;
+}
+function syncSuggestionBadge(){
+  const count=Math.max(0,Number(suggestionCounts.pending)||0);
+  const tabBadge=$('#suggestionTabBadge');
+  if(tabBadge){tabBadge.textContent=count>99?'99+':String(count);tabBadge.hidden=count<1;tabBadge.setAttribute('aria-label',`${count} suggeriments nous`);}
+  const countNode=$('#suggestionPendingCount'); if(countNode) countNode.textContent=String(count);
+}
+function renderSuggestionsReview(){
+  const host=$('#archiveReviewList'); if(!host) return;
+  const pendingHtml=suggestionsPending.length?suggestionsPending.map(suggestionPendingCard).join(''):'<div class="empty-state">No hi ha suggeriments nous.</div>';
+  const archivedHtml=suggestionsArchived.length?suggestionsArchived.map(suggestionArchivedCard).join(''):'<div class="empty-state compact">Encara no hi ha suggeriments arxivats.</div>';
+  host.innerHTML=`<section class="suggestion-review-section"><div class="suggestion-review-heading"><div><span class="eyebrow">BÚSTIA DE SUGGERIMENTS</span><h2>Nous suggeriments</h2></div><span class="count-pill">${suggestionsPending.length}</span></div><div class="suggestion-list">${pendingHtml}</div></section><section class="suggestion-review-section suggestion-archive-history"><div class="suggestion-review-heading"><div><span class="eyebrow">HISTORIAL</span><h2>Suggeriments arxivats</h2></div><span class="count-pill muted">${suggestionsArchived.length}</span></div><div class="suggestion-list">${archivedHtml}</div></section>`;
+  host.querySelectorAll('[data-suggestion-archive]').forEach(btn=>btn.onclick=()=>archiveSuggestionFromEditor(btn.closest('[data-suggestion-id]')?.dataset.suggestionId));
+  host.querySelectorAll('[data-suggestion-delete]').forEach(btn=>btn.onclick=()=>deleteSuggestionFromEditor(btn.closest('[data-suggestion-id]')?.dataset.suggestionId));
+}
+async function archiveSuggestionFromEditor(id){
+  if(!id||!confirm('Vols arxivar aquest suggeriment?')) return;
+  try{showToast('Arxivant suggeriment…');await BandaSupabase.archiveSuggestion(id);showToast('Suggeriment arxivat');await refreshArchiveReview();}
+  catch(error){console.error(error);showToast('No s’ha pogut arxivar el suggeriment');}
+}
+async function deleteSuggestionFromEditor(id){
+  if(!id||!confirm('Vols ELIMINAR DEFINITIVAMENT aquest suggeriment arxivat? Aquesta acció no es pot desfer.')) return;
+  try{showToast('Eliminant suggeriment…');await BandaSupabase.deleteSuggestion(id);showToast('Suggeriment eliminat definitivament');await refreshArchiveReview();}
+  catch(error){console.error(error);showToast('No s’ha pogut eliminar el suggeriment');}
+}
 function renderArchiveReview(){
   const host=$('#archiveReviewList'); if(!host) return;
   $('#archivePendingCount').textContent=String(archiveCounts.pending||0);
   $('#archiveRejectedCount').textContent=String(archiveCounts.rejected||0);
+  syncSuggestionBadge();
   $$('[data-archive-filter]').forEach(btn=>btn.classList.toggle('active',btn.dataset.archiveFilter===archiveReviewFilter));
+  if(archiveReviewFilter==='suggestions'){ renderSuggestionsReview(); return; }
   if(!archiveSubmissions.length){ host.innerHTML=`<div class="empty-state">No hi ha aportacions ${archiveReviewFilter==='pending'?'pendents':'rebutjades'}.</div>`; return; }
   host.innerHTML=archiveSubmissions.map(archiveReviewCard).join('');
   host.querySelectorAll('[data-archive-field="media_type"]').forEach(select=>select.addEventListener('change',()=>{
@@ -1962,17 +2011,20 @@ async function cropArchiveFile(file,row){
 }
 function syncArchiveNavBadge(){
   const badge=$('#archiveNavBadge'); if(!badge) return;
-  const count=Math.max(0,Number(archiveCounts.pending)||0);
+  const count=Math.max(0,(Number(archiveCounts.pending)||0)+(Number(suggestionCounts.pending)||0));
   badge.textContent=count>99?'99+':String(count);
   badge.hidden=count<1;
-  badge.setAttribute('aria-label',`${count} aportacions pendents`);
+  badge.setAttribute('aria-label',`${count} aportacions o suggeriments pendents`);
 }
 async function refreshArchivePendingBadge(){
   if(!currentSession || !['admin','gestor'].includes(currentProfile?.role) || !window.BandaSupabase?.countArchiveSubmissions) return;
   try{
-    const pending=await BandaSupabase.countArchiveSubmissions('pending');
-    archiveCounts.pending=pending;
-    syncArchiveNavBadge();
+    const [pending,suggestions]=await Promise.all([
+      BandaSupabase.countArchiveSubmissions('pending'),
+      BandaSupabase.countSuggestions?BandaSupabase.countSuggestions('pending').catch(()=>0):Promise.resolve(0)
+    ]);
+    archiveCounts.pending=pending; suggestionCounts.pending=suggestions;
+    syncArchiveNavBadge(); syncSuggestionBadge();
   }catch(error){ console.error(error); }
 }
 async function deleteArchiveSubmissionForever(card){
@@ -1988,14 +2040,21 @@ async function deleteArchiveSubmissionForever(card){
 
 async function refreshArchiveReview(){
   if(!currentSession || !['admin','gestor'].includes(currentProfile?.role) || !window.BandaSupabase?.listArchiveSubmissions) return;
-  const status=$('#archiveReviewStatus'); if(status) status.textContent='Carregant aportacions…';
+  const status=$('#archiveReviewStatus'); if(status) status.textContent=archiveReviewFilter==='suggestions'?'Carregant suggeriments…':'Carregant aportacions…';
   try{
-    const [pending,rejected]=await Promise.all([BandaSupabase.listArchiveSubmissions('pending'),BandaSupabase.listArchiveSubmissions('rejected')]);
+    const [pending,rejected,suggestionPending,suggestionArchived]=await Promise.all([
+      BandaSupabase.listArchiveSubmissions('pending'),
+      BandaSupabase.listArchiveSubmissions('rejected'),
+      BandaSupabase.listSuggestions?BandaSupabase.listSuggestions('pending').catch(()=>[]):Promise.resolve([]),
+      BandaSupabase.listSuggestions?BandaSupabase.listSuggestions('archived').catch(()=>[]):Promise.resolve([])
+    ]);
     archiveCounts={pending:pending.length,rejected:rejected.length};
-    syncArchiveNavBadge();
-    archiveSubmissions=archiveReviewFilter==='pending'?pending:rejected;
+    suggestionCounts={pending:suggestionPending.length,archived:suggestionArchived.length};
+    suggestionsPending=suggestionPending; suggestionsArchived=suggestionArchived;
+    syncArchiveNavBadge(); syncSuggestionBadge();
+    archiveSubmissions=archiveReviewFilter==='pending'?pending:(archiveReviewFilter==='rejected'?rejected:[]);
     renderArchiveReview(); if(status) status.textContent='';
-  }catch(error){ console.error(error); if(status) status.textContent='No s’han pogut carregar les aportacions. Comprova que has aplicat SUPABASE_UPDATE_v0.64.sql.'; }
+  }catch(error){ console.error(error); if(status) status.textContent='No s’han pogut carregar les aportacions o els suggeriments. Comprova que has aplicat SUPABASE_UPDATE_v0.88.sql.'; }
 }
 function archiveCardData(card){
   const value=name=>card?.querySelector(`[data-archive-field="${name}"]`)?.value??'';

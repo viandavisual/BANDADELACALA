@@ -1,0 +1,14 @@
+BANDA DE LA CALA · v0.88 · SUPABASE
+
+1. Entra al projecte de Supabase de BANDA DE LA CALA.
+2. Obre SQL Editor.
+3. Crea una query nova.
+4. Copia i executa tot el contingut de SUPABASE_UPDATE_v0.88.sql.
+5. Comprova que finalitza sense errors.
+
+Aquesta actualització crea la taula app_suggestions i les polítiques RLS necessàries perquè:
+- qualsevol USER registrat pugui enviar un suggeriment propi;
+- ADMIN/GESTOR pugui veure, arxivar i eliminar suggeriments;
+- un USER normal no pugui modificar, arxivar ni eliminar suggeriments.
+
+No cal crear buckets ni desplegar Edge Functions.

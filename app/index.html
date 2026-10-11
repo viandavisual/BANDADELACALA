@@ -14,9 +14,9 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.87" />
-  <link rel="stylesheet" href="tuner.css?v=0.87" />
-  <link rel="stylesheet" href="metronome.css?v=0.87" />
+  <link rel="stylesheet" href="style.css?v=0.88" />
+  <link rel="stylesheet" href="tuner.css?v=0.88" />
+  <link rel="stylesheet" href="metronome.css?v=0.88" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -377,6 +377,26 @@
                 </form>
               </details>
             </div>
+
+            <button id="openSuggestionBoxBtn" class="suggestion-launcher" type="button" aria-expanded="false" aria-controls="suggestionBox">BÚSTIA DE SUGGERIMENTS</button>
+            <section id="suggestionBox" class="suggestion-box" hidden>
+              <div class="suggestion-box-head">
+                <div><span class="eyebrow">BÚSTIA DE SUGGERIMENTS</span><h3>AJUDA'NS A MILLORAR L'APP</h3></div>
+                <button id="closeSuggestionBoxBtn" class="suggestion-box-close" type="button" aria-label="Tancar">×</button>
+              </div>
+              <p class="suggestion-box-intro">Envia una idea, una millora o qualsevol detall que creguis que pot fer més útil l'app de la Banda de la Cala.</p>
+              <form id="suggestionForm" class="suggestion-form">
+                <label>USER
+                  <input id="suggestionUserName" type="text" readonly aria-readonly="true" />
+                </label>
+                <label>Suggeriment *
+                  <textarea id="suggestionText" rows="5" maxlength="2000" required placeholder="Escriu aquí el teu suggeriment…"></textarea>
+                </label>
+                <button class="user-password-btn" type="submit">ENVIAR SUGGERIMENT</button>
+                <small id="suggestionStatus" class="user-auth-status" aria-live="polite"></small>
+              </form>
+            </section>
+
             <div class="band-logo-block user-band-logo" aria-label="Logo de la Banda de la Cala"><img src="assets/bandalogo.jpg" alt="Banda de la Cala" /></div>
             <button id="userLogoutBtn" class="user-logout-btn" type="button">TANCAR SESSIÓ</button>
           </section>
@@ -499,14 +519,14 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.87"></script>
-  <script src="config.js?v=0.87"></script>
-  <script src="data/content-published.js?v=0.87"></script>
-  <script src="content-store.js?v=0.87"></script>
+  <script src="version.js?v=0.88"></script>
+  <script src="config.js?v=0.88"></script>
+  <script src="data/content-published.js?v=0.88"></script>
+  <script src="content-store.js?v=0.88"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.87"></script>
-  <script src="metronome.js?v=0.87"></script>
-  <script src="tuner.js?v=0.87"></script>
-  <script src="app.js?v=0.87"></script>
+  <script src="supabase-client.js?v=0.88"></script>
+  <script src="metronome.js?v=0.88"></script>
+  <script src="tuner.js?v=0.88"></script>
+  <script src="app.js?v=0.88"></script>
 </body>
 </html>

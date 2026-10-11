@@ -1870,6 +1870,7 @@ function renderUserSection(){
   $('#userProfileEmail').textContent=state.session?.user?.email || state.profile?.email || '';
   $('#userProfileRole').textContent=roleLabel(state.profile?.role);
   const nameInput=$('#profileDisplayName'); if(nameInput) nameInput.value=currentUserDisplayName();
+  const suggestionUser=$('#suggestionUserName'); if(suggestionUser) suggestionUser.value=currentUserDisplayName();
   const selectedGender=currentUserGender();
   $$('[data-profile-gender]').forEach(btn=>{ const active=btn.dataset.profileGender===selectedGender; btn.classList.toggle('selected',active); btn.setAttribute('aria-pressed',active?'true':'false'); });
   renderAvatarChoices();
@@ -2034,6 +2035,38 @@ function bindUserAuth(){
       if(recovery) clearPasswordRecoveryUrl();
       status.textContent=recovery?'Contrasenya restablerta correctament. Conserves el mateix compte i tot el teu progrés.':(initialSetup?'Contrasenya creada correctament. El teu compte ja està preparat.':'Contrasenya actualitzada correctament.');
     }catch(error){ console.error(error); status.textContent='No s’ha pogut canviar la contrasenya.'; }
+  });
+
+  $('#openSuggestionBoxBtn')?.addEventListener('click',()=>{
+    const box=$('#suggestionBox'), btn=$('#openSuggestionBoxBtn'); if(!box) return;
+    const willOpen=box.hidden; box.hidden=!willOpen;
+    if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
+    const status=$('#suggestionStatus'); if(status) status.textContent='';
+    const user=$('#suggestionUserName'); if(user) user.value=currentUserDisplayName();
+    if(willOpen) box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+  $('#closeSuggestionBoxBtn')?.addEventListener('click',()=>{
+    const box=$('#suggestionBox'), btn=$('#openSuggestionBoxBtn'); if(box) box.hidden=true;
+    if(btn) btn.setAttribute('aria-expanded','false');
+    const status=$('#suggestionStatus'); if(status) status.textContent='';
+  });
+  $('#suggestionForm')?.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const form=event.currentTarget, status=$('#suggestionStatus');
+    const text=String($('#suggestionText')?.value||'').trim();
+    if(!state.authenticated){ if(status) status.textContent='Cal iniciar sessió.'; return; }
+    if(!text){ if(status) status.textContent='Escriu un suggeriment abans d’enviar-lo.'; return; }
+    const submitBtn=form?.querySelector('button[type="submit"]'); if(submitBtn) submitBtn.disabled=true;
+    if(status) status.textContent='Enviant suggeriment…';
+    try{
+      await BandaSupabase.createSuggestion(text);
+      form?.reset();
+      const user=$('#suggestionUserName'); if(user) user.value=currentUserDisplayName();
+      if(status) status.textContent='Suggeriment enviat correctament. Gràcies!';
+    }catch(error){
+      console.error(error);
+      if(status) status.textContent=String(error?.message||'')==='SUGGESTION_TOO_LONG'?'El suggeriment és massa llarg.':'No s’ha pogut enviar el suggeriment. Comprova que s’ha aplicat l’actualització v0.88 de Supabase.';
+    }finally{ if(submitBtn) submitBtn.disabled=false; }
   });
 
   $('#openArchiveUploadBtn')?.addEventListener('click',()=>{

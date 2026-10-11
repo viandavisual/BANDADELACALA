@@ -1,0 +1,12 @@
+BANDA DE LA CALA · v0.88
+
+- APP / USER: nova BÚSTIA DE SUGGERIMENTS exclusiva per a USERS registrats, situada just abans del separador superior del bandalogo.jpg.
+- La microsecció es desplega/plega des del botó BÚSTIA DE SUGGERIMENTS i identifica automàticament el USER loguejat.
+- El formulari admet només text (màxim 2.000 caràcters), sense imatges ni adjunts.
+- EDITOR / APORTACIONS: nou botó BÚSTIA DE SUGGERIMENTS a la dreta de REBUTJATS.
+- El botó mostra una bubble amb la quantitat de suggeriments nous. La bubble general d'APORTACIONS suma aportacions multimèdia pendents + suggeriments nous.
+- Els suggeriments nous mostren USER, data/hora i text, i poden marcar-se com ARXIVATS.
+- En arxivar es desa el USER ADMIN/GESTOR que ho ha fet i la data/hora exacta.
+- A la part inferior hi ha l'historial de suggeriments arxivats, amb eliminació definitiva individual.
+- SUPABASE: nova taula app_suggestions amb RLS. Cal executar SUPABASE_UPDATE_v0.88.sql una sola vegada.
+- No cal cap bucket nou ni Edge Function nova.
