@@ -18,6 +18,10 @@
     base.updatedAt = base.updatedAt || new Date().toISOString();
     base.settings = base.settings && typeof base.settings === 'object' ? base.settings : {};
     base.settings.homeHeroImage = typeof base.settings.homeHeroImage === 'string' ? base.settings.homeHeroImage : '';
+    const rawHomeHeroMode = typeof base.settings.homeHeroMode === 'string' ? base.settings.homeHeroMode : '';
+    base.settings.homeHeroMode = ['random','logo','manual'].includes(rawHomeHeroMode)
+      ? rawHomeHeroMode
+      : 'random';
     const homeCards = base.settings.homeCards && typeof base.settings.homeCards === 'object' ? base.settings.homeCards : {};
     const homeString = (value,fallback) => typeof value === 'string' && value.trim() ? value.trim() : fallback;
     base.settings.homeCards = {

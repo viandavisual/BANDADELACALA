@@ -320,11 +320,28 @@ function renderDashboard(){
   animateStatCounter($('#statDresscodes'),(content.dresscodes||[]).length); animateStatCounter($('#statTracks'),tracks.length); $('#statVisibleTracks').textContent=`${tracks.filter(track=>track.visible!==false).length} visibles`; animateStatCounter($('#statHistoric'),(content.historicItems||[]).length);
 }
 
+function editorHistoricHeroImages(){
+  const out=[];
+  (content.historicItems||[]).forEach(item=>{
+    const images=historicImages(item);
+    const featured=String(item?.featuredImageSrc||'').trim();
+    if(featured && !images.includes(featured))images.unshift(featured);
+    images.forEach(src=>{src=String(src||'').trim();if(src && !out.includes(src))out.push(src);});
+  });
+  return out;
+}
 function renderHomeEditor(){
-  const src=content.settings?.homeHeroImage || CFG.logo || 'assets/brand/logo-banda-de-la-cala.png';
+  content.settings=content.settings||{};
+  const heroMode=['random','logo','manual'].includes(content.settings.homeHeroMode) ? content.settings.homeHeroMode : (content.settings.homeHeroImage?'manual':'random');
+  const historic=editorHistoricHeroImages();
+  const src=heroMode==='logo' ? 'assets/brand/imago-banda-de-la-cala.png' : (heroMode==='manual' && content.settings.homeHeroImage ? content.settings.homeHeroImage : (historic[0]||'assets/brand/imago-banda-de-la-cala.png'));
   const previewImage=$('#homeHeroPreview'); if(previewImage) previewImage.src=src;
   const mode=$('#homePreviewMode');
   if(mode) mode.textContent=window.matchMedia('(max-width: 780px)').matches?'MOBILE · MATEIXA COMPOSICIÓ DE L’APP':'DESKTOP · MATEIXA COMPOSICIÓ DE L’APP';
+  const status=$('#homeHeroModeStatus');
+  if(status)status.textContent=heroMode==='random' ? `ACTIU · IMATGES RANDOM DE L’HISTÒRIC${historic.length?` · ${historic.length} disponibles`:' · sense fotos disponibles (es mostrarà el logotip)'}` : (heroMode==='logo'?'ACTIU · LOGOTIP BANDA':'ACTIU · IMATGE MANUAL');
+  $('#randomHomeHero')?.classList.toggle('is-active',heroMode==='random');
+  $('#logoHomeHero')?.classList.toggle('is-active',heroMode==='logo');
 }
 function quinaNotaEditorSettings(){
   content.settings=content.settings||{};
@@ -488,12 +505,13 @@ function bindHomeEditor(){
         activeBucket:'app-images',activeFolder:'home',activeName:'home-hero',
         backupRoot:'home',backupLabel:'la imatge de HOME'
       });
-      content.settings=content.settings||{}; content.settings.homeHeroImage=imageSrc;
-      save(content,'Imatge de HOME actualitzada');
+      content.settings=content.settings||{}; content.settings.homeHeroImage=imageSrc; content.settings.homeHeroMode='manual';
+      save(content,'Imatge manual de HOME actualitzada');
     }catch(error){ console.error(error); mediaUploadErrorToast(error,'No s’ha pogut processar o pujar la imatge'); }
     event.target.value='';
   });
-  $('#clearHomeHero').onclick=()=>{ content.settings=content.settings||{}; content.settings.homeHeroImage=''; save(content,'Imatge per defecte restaurada'); };
+  $('#randomHomeHero').onclick=()=>{ content.settings=content.settings||{}; content.settings.homeHeroMode='random'; save(content,'HOME configurada amb imatges random de l’HISTÒRIC'); };
+  $('#logoHomeHero').onclick=()=>{ content.settings=content.settings||{}; content.settings.homeHeroMode='logo'; save(content,'HOME configurada amb el logotip de la banda'); };
 }
 
 function renderEventDresscodeOptions(selected=''){

@@ -657,7 +657,8 @@ function selectDate(date){
     const dresscode=dresscodeAllowed?(state.content.dresscodes||[]).find(item=>item.id===event.dresscodeId):null;
     const type=String(event.type||'').toUpperCase();
     const eventKind=['CONCERT','ACTUACIÓ'].includes(type)?'featured':(type==='ALTRES'?'other':'rehearsal');
-    return `<article class="event-card event-kind-${eventKind}"><span class="event-type">${esc(event.type)}</span><h4>${esc(String(event.title||'').toUpperCase())}</h4>${event.time?`<p class="event-meta-line">${eventMetaIcon('time')}<span>${esc(event.time)}</span></p>`:''}${event.place?`<p class="event-meta-line">${eventMetaIcon('place')}<span>${esc(event.place)}</span></p>`:''}${event.notes?`<p class="preserve-lines">${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
+    const isPast=calendarEventHasPassed(event,new Date());
+    return `<article class="event-card event-kind-${eventKind}${isPast?' is-past':''}"><span class="event-type">${esc(event.type)}</span><h4>${esc(String(event.title||'').toUpperCase())}</h4>${event.time?`<p class="event-meta-line">${eventMetaIcon('time')}<span>${esc(event.time)}</span></p>`:''}${event.place?`<p class="event-meta-line">${eventMetaIcon('place')}<span>${esc(event.place)}</span></p>`:''}${event.notes?`<p class="preserve-lines">${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
   }).join('') : '<p class="empty-copy">No hi ha cap activitat prevista per aquest dia.</p>';
   $$('[data-dresscode]').forEach(btn=>btn.addEventListener('click',()=>openDresscode(btn.dataset.dresscode)));
 }
@@ -1079,11 +1080,51 @@ function bindHemeroteca(){
   $$('[data-hemeroteca-type]').forEach(btn=>btn.addEventListener('click',()=>{state.hemerotecaType=btn.dataset.hemerotecaType;renderHemeroteca();}));
 }
 
+let homeHeroTimer=null;
+let homeHeroCurrentSrc='';
+function homeHistoricHeroImages(){
+  const out=[];
+  (state.content.historicItems||[]).forEach(item=>{
+    const images=getHistoricImages(item);
+    const featured=String(item?.featuredImageSrc||'').trim();
+    if(featured && !images.includes(featured)) images.unshift(featured);
+    images.forEach(src=>{src=String(src||'').trim();if(src && !out.includes(src))out.push(src);});
+  });
+  return out;
+}
+function pickRandomHomeHero(images){
+  if(!images.length)return '';
+  if(images.length===1)return images[0];
+  const candidates=images.filter(src=>src!==homeHeroCurrentSrc);
+  return candidates[Math.floor(Math.random()*candidates.length)]||images[0];
+}
+function setHomeHeroSrc(el,src,{fade=false}={}){
+  if(!src||!el)return;
+  if(!fade || !homeHeroCurrentSrc){
+    el.classList.remove('is-fading');
+    el.src=src; homeHeroCurrentSrc=src;
+    return;
+  }
+  el.classList.add('is-fading');
+  window.setTimeout(()=>{
+    el.src=src; homeHeroCurrentSrc=src;
+    requestAnimationFrame(()=>el.classList.remove('is-fading'));
+  },500);
+}
 function applyHomeHero(){
   const el=$('#heroBackground');
   if(!el) return;
-  const src=state.content.settings?.homeHeroImage || CFG.logo || 'assets/brand/logo-banda-de-la-cala.png';
-  el.src=src;
+  if(homeHeroTimer){clearInterval(homeHeroTimer);homeHeroTimer=null;}
+  const settings=state.content.settings||{};
+  const mode=['random','logo','manual'].includes(settings.homeHeroMode) ? settings.homeHeroMode : (settings.homeHeroImage?'manual':'random');
+  if(mode==='logo'){setHomeHeroSrc(el,'assets/brand/imago-banda-de-la-cala.png');return;}
+  if(mode==='manual' && settings.homeHeroImage){setHomeHeroSrc(el,settings.homeHeroImage);return;}
+  const images=homeHistoricHeroImages();
+  if(!images.length){setHomeHeroSrc(el,'assets/brand/imago-banda-de-la-cala.png');return;}
+  setHomeHeroSrc(el,pickRandomHomeHero(images));
+  if(images.length>1){
+    homeHeroTimer=setInterval(()=>{const next=pickRandomHomeHero(images);if(next)setHomeHeroSrc(el,next,{fade:true});},5000);
+  }
 }
 
 const DRESSCODE_VIEW_ORDER=['shirt','bottom','socks','jacket','footwear','tie'];

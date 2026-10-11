@@ -3,6 +3,7 @@ window.BANDA_PUBLISHED_CONTENT = {
   updatedAt: "2026-09-22T15:34:00.000Z",
   settings: {
     homeHeroImage: "",
+    homeHeroMode: "random",
     minigames: {
       quinaNota: {
         active: true,

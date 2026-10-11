@@ -1,0 +1,23 @@
+BANDA DE LA CALA · v0.85
+
+APP · CALENDARI
+- Les fitxes de detall d'activitats que ja han caducat es mostren amb el tractament GRIS CADUCAT: traç lateral gris, degradat dret gris i etiqueta de tipus en gris.
+- El canvi depèn de data + hora, igual que els segments del calendari.
+
+APP · HOME
+- Nou comportament per defecte: IMATGES RANDOM DE L'HISTÒRIC.
+- Només usa fotografies de les entrades HISTÒRIC; CARTELLS, NOTÍCIES i ENTREVISTES queden exclosos.
+- Canvia de fotografia cada 5 segons evitant repetir immediatament la mateixa quan hi ha més d'una disponible.
+- Transició fade total d'1 segon (0,5 s sortida + 0,5 s entrada).
+- Si no hi ha fotografies HISTÒRIC disponibles, utilitza el logotip de la banda com a fallback.
+
+EDITOR · HOME
+- Selector IMATGES RANDOM DE L'HISTÒRIC (opció per defecte).
+- Selector LOGOTIP BANDA amb el nou imagotip incorporat a assets/brand/imago-banda-de-la-cala.png.
+- Es manté la possibilitat de carregar una imatge manual, que activa automàticament el mode IMATGE MANUAL.
+- La previsualització i l'estat indiquen el mode actiu.
+
+ARQUITECTURA
+- Nou settings.homeHeroMode: random | logo | manual.
+- Compatibilitat: contingut antic sense homeHeroMode adopta RANDOM com a nou mode per defecte. Les imatges manuals antigues es conserven a settings.homeHeroImage, però no s’activen fins que es torna a carregar una imatge manual.
+- Sense canvis SQL, Supabase ni Edge Functions.

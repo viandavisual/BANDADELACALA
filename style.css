@@ -2548,3 +2548,13 @@ html.app-is-installed #mobileAppInstallCard,html.app-is-installed #mobileHomeIns
   .user-music-tools-row .tuner-launcher-icon,
   .user-music-tools-row .metronome-launcher-icon{width:30px;height:30px;min-width:30px}
 }
+
+
+/* ============================================================
+   v0.85 · HOME random HISTÒRIC + detall CALENDARI caducat
+   ============================================================ */
+.hero-background{transition:opacity .5s ease!important}
+.hero-background.is-fading{opacity:0!important}
+.event-card.is-past{border-left-color:#9da2a8!important}
+.event-card.is-past::after{background:linear-gradient(to right,rgba(157,162,168,0) 0%,rgba(157,162,168,.14) 30%,rgba(157,162,168,.48) 68%,rgba(157,162,168,.88) 100%)!important}
+.event-card.is-past .event-type{color:#737980!important}

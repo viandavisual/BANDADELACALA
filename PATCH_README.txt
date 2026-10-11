@@ -21,3 +21,6 @@ NO TOCAR:
 - assets
 
 No requiere ninguna migración ni configuración externa.
+
+
+V0.85: veure V0_85_CAMBIOS.txt

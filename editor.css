@@ -1060,3 +1060,10 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 
 /* v0.84 · CALENDARI: ALTRES en verd al llistat d'AGENDA */
 .event-strip-other{--event-accent:#4f9b62}
+
+
+/* v0.85 · selector de portada HOME */
+.home-hero-mode-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 16px}
+.home-hero-mode-actions .secondary-btn{width:100%;min-height:46px}
+.home-hero-mode-actions .secondary-btn.is-active{background:var(--blue)!important;color:#fff!important;border-color:var(--blue)!important}
+@media(max-width:620px){.home-hero-mode-actions{grid-template-columns:1fr}}
