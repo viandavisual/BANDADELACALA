@@ -60,3 +60,6 @@ body.tuner-open{overflow:hidden}
   .tuner-meter-wrap{padding-inline:0}
   .tuner-readout strong{font-size:1.2rem}
 }
+
+/* v0.73 · X sempre circular */
+.tuner-close{width:42px!important;height:42px!important;min-width:42px!important;max-width:42px!important;min-height:42px!important;max-height:42px!important;flex:0 0 42px!important;aspect-ratio:1/1!important;border-radius:999px!important;padding:0!important;box-sizing:border-box!important;line-height:1!important}

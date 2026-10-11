@@ -1,0 +1,36 @@
+BANDA DE LA CALA — v0.73
+Fecha: 11/10/2026
+
+CAMBIOS
+
+1. CALENDARI · TIPUS ALTRES
+- Los eventos activos de tipo ALTRES se muestran en verde en el calendario.
+- Se añade ALTRES en verde a la leyenda situada bajo el calendario.
+- Se mantiene la regla existente de eventos finalizados en gris.
+- Si una fecha combina ALTRES con CONCERT/ACTUACIÓ, se preserva la prioridad visual del evento destacado dorado.
+
+2. METRÒNOM
+- Eliminado TAP TEMPO.
+- El botón activo cambia de DETENIR a ATURAR.
+- El selector COMPÀS ocupa ahora el ancho disponible.
+
+3. BOTONES X DE CIERRE
+- Reforzada la geometría circular de los botones X de cierre en APP y EDITOR.
+- Se fijan aspect-ratio, dimensiones, padding, flex-shrink y border-radius para impedir óvalos en MOBILE.
+- Afecta a afinador, metrónomo, dresscode, recuperación de contraseña, subida multimedia, visor de HISTÒRIC, fullscreen PLAYER y modales del EDITOR.
+
+4. INSTAL·LAR APP
+- La detección de ejecución como PWA instalada vuelve a comprobarse al entrar, al volver de segundo plano y en pageshow.
+- Cuando la APP se ejecuta instalada/standalone se ocultan forzosamente el botón INSTAL·LAR APP y la tarjeta de instalación.
+- Se corrige el conflicto CSS mobile que podía hacer visible un botón con atributo hidden.
+- Se preservan manifest ID, scope, beforeinstallprompt y arquitectura de instalación existente.
+
+5. SIDEBAR DESKTOP
+- Eliminado el texto inferior PWA preparada.
+- La línea separadora se sitúa ahora debajo de los iconos de redes sociales y encima de App development.
+
+INFRAESTRUCTURA
+- No requiere SQL.
+- No requiere cambios en Supabase.
+- No requiere nuevas Edge Functions.
+- Caches APP/EDITOR actualizadas a v0.73.

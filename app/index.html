@@ -14,9 +14,9 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.71" />
-  <link rel="stylesheet" href="tuner.css?v=0.72" />
-  <link rel="stylesheet" href="metronome.css?v=0.72" />
+  <link rel="stylesheet" href="style.css?v=0.73" />
+  <link rel="stylesheet" href="tuner.css?v=0.73" />
+  <link rel="stylesheet" href="metronome.css?v=0.73" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -75,7 +75,6 @@
           <div>App development: <a class="vianda-link" href="https://www.viandavisual.com" target="_blank" rel="noopener noreferrer">Vianda Visual</a></div>
           <div>© 2026 · <span data-app-version></span></div>
         </div>
-        <div class="pwa-status" id="pwaStatus">PWA preparada</div>
       </div>
     </aside>
 
@@ -158,6 +157,7 @@
               <span><i class="legend-dot today-dot" aria-hidden="true"></i>AVUI</span>
               <span><i class="legend-dot rehearsal-dot" aria-hidden="true"></i>ASSAIG</span>
               <span><i class="legend-dot event-dot" aria-hidden="true"></i>EVENT</span>
+              <span><i class="legend-dot other-dot" aria-hidden="true"></i>ALTRES</span>
             </div>
           </div>
           <div class="panel events-panel">
@@ -426,7 +426,6 @@
             <option value="6">6/8</option>
           </select>
         </label>
-        <button id="metronomeTapBtn" class="metronome-secondary-btn" type="button">TAP TEMPO</button>
       </div>
       <button id="metronomeStartBtn" class="metronome-start-btn" type="button">INICIAR</button>
       <small id="metronomeStatus" class="metronome-status">Tria el tempo i prem INICIAR.</small>
@@ -492,14 +491,14 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.72"></script>
-  <script src="config.js?v=0.72"></script>
-  <script src="data/content-published.js?v=0.72"></script>
-  <script src="content-store.js?v=0.72"></script>
+  <script src="version.js?v=0.73"></script>
+  <script src="config.js?v=0.73"></script>
+  <script src="data/content-published.js?v=0.73"></script>
+  <script src="content-store.js?v=0.73"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.72"></script>
-  <script src="metronome.js?v=0.72"></script>
-  <script src="tuner.js?v=0.72"></script>
-  <script src="app.js?v=0.72"></script>
+  <script src="supabase-client.js?v=0.73"></script>
+  <script src="metronome.js?v=0.73"></script>
+  <script src="tuner.js?v=0.73"></script>
+  <script src="app.js?v=0.73"></script>
 </body>
 </html>

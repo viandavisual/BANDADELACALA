@@ -958,3 +958,8 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .history-image-preview-item{position:relative}
 .history-image-crop-btn{position:absolute;left:8px;bottom:8px;z-index:4;border:1px solid rgba(255,255,255,.92);border-radius:999px;background:rgba(39,40,95,.9);color:#fff;font-size:9px;font-weight:900;letter-spacing:.08em;padding:5px 9px;cursor:pointer}
 .history-image-crop-btn:hover{background:#393A86}
+
+
+/* v0.73 · X de tancament sempre circular en MOBILE i DESKTOP */
+.modal-close,.archive-crop-close{width:38px!important;height:38px!important;min-width:38px!important;max-width:38px!important;min-height:38px!important;max-height:38px!important;flex:0 0 38px!important;aspect-ratio:1/1!important;border-radius:999px!important;padding:0!important;box-sizing:border-box!important;display:grid!important;place-items:center!important;line-height:1!important}
+.archive-crop-close{width:42px!important;height:42px!important;min-width:42px!important;max-width:42px!important;min-height:42px!important;max-height:42px!important;flex-basis:42px!important}

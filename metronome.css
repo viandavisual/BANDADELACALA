@@ -28,7 +28,7 @@
 .metronome-controls{display:grid;grid-template-columns:50px 1fr 50px;align-items:center;gap:12px;margin:14px 0}
 .metronome-controls input[type="range"]{width:100%;accent-color:var(--blue)}
 .metronome-step-btn{width:50px;height:50px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--blue-deep);font-size:28px;font-weight:800;cursor:pointer}
-.metronome-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.metronome-options{display:grid;grid-template-columns:1fr;gap:12px;margin:18px 0}
 .metronome-options label{display:grid;gap:6px;font-size:.69rem;font-weight:900;letter-spacing:.08em;color:var(--muted)}
 .metronome-options select{width:100%;min-height:48px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);padding:0 12px;font:800 14px/1 inherit}
 .metronome-secondary-btn{min-height:48px;align-self:end;border:1px solid rgba(57,58,134,.25);border-radius:13px;background:var(--blue-soft);color:var(--blue);font:900 12px/1 inherit;letter-spacing:.05em;cursor:pointer}
@@ -40,3 +40,6 @@ body.metronome-open{overflow:hidden}
 @media(max-width:780px){
   .metronome-overlay{padding:0;place-items:stretch}.metronome-dialog{width:100%;max-height:100dvh;min-height:100dvh;border-radius:0;border:0;padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom))}.metronome-head h2{font-size:1.7rem}.metronome-bpm-line strong{font-size:4.4rem}
 }
+
+/* v0.73 · X sempre circular */
+.metronome-close{width:42px!important;height:42px!important;min-width:42px!important;max-width:42px!important;min-height:42px!important;max-height:42px!important;flex:0 0 42px!important;aspect-ratio:1/1!important;border-radius:999px!important;padding:0!important;box-sizing:border-box!important;line-height:1!important}

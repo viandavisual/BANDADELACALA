@@ -612,8 +612,10 @@ function renderCalendar(){
     const has = dayEvents.length > 0;
     const activeEvents = dayEvents.filter(event => !calendarEventHasPassed(event,today));
     const allPassed = has && activeEvents.length===0;
-    const featured = (allPassed?dayEvents:activeEvents).some(event => ['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase()));
-    const eventClass = has ? (allPassed ? 'event-past' : (featured ? 'event-featured' : 'event-normal')) : '';
+    const visibleEvents = allPassed ? dayEvents : activeEvents;
+    const featured = visibleEvents.some(event => ['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase()));
+    const altres = visibleEvents.some(event => String(event.type||'').toUpperCase() === 'ALTRES');
+    const eventClass = has ? (allPassed ? 'event-past' : (featured ? 'event-featured' : (altres ? 'event-other' : 'event-normal'))) : '';
     const isToday = key === isoDate(today.getFullYear(),today.getMonth(),today.getDate());
     const selected = key === state.selectedDate;
     cells.push(`<button class="calendar-day ${outside?'outside':''} ${has?'has-event':''} ${eventClass} ${isToday?'today':''} ${selected?'selected':''}" data-date="${key}" aria-label="${key}"><span class="day-number">${day}</span></button>`);
@@ -2022,10 +2024,15 @@ function appIsIOS(){
 function syncAppInstallUI(){
   const headerBtn=$('#installBtn'), homeBtn=$('#homeInstallBtn'), card=$('#appInstallCard'), status=$('#appInstallStatus');
   const installed=appIsStandalone();
+  document.documentElement.classList.toggle('app-is-installed', installed);
   if(card) card.hidden=installed;
   if(headerBtn) headerBtn.hidden=installed;
   if(homeBtn) homeBtn.hidden=installed;
-  if(installed) return;
+  if(installed){
+    appInstallPrompt=null;
+    if(status) status.textContent='APP instal·lada.';
+    return;
+  }
   [headerBtn,homeBtn].filter(Boolean).forEach(btn=>{
     btn.disabled=false;
     btn.classList.toggle('install-ready',!!appInstallPrompt);
@@ -2100,6 +2107,8 @@ function bindPwaInstall(){
     if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada';
   });
   window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change',syncAppInstallUI);
+  window.addEventListener('pageshow',syncAppInstallUI);
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) syncAppInstallUI(); });
 }
 
 async function registerSW(){
@@ -2113,7 +2122,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.72',root).href;
+    const swUrl=new URL('app/sw.js?v=0.73',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

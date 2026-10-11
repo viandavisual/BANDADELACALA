@@ -13,7 +13,6 @@
   let beatsPerBar = 4;
   let currentBeat = 0;
   let nextNoteTime = 0;
-  let tapTimes = [];
   let initialized = false;
 
   const $ = selector => document.querySelector(selector);
@@ -101,7 +100,7 @@
       timerId = window.setInterval(scheduler, LOOKAHEAD_MS);
       scheduler();
       const btn = $('#metronomeStartBtn');
-      if (btn) { btn.textContent = 'DETENIR'; btn.classList.add('is-active'); }
+      if (btn) { btn.textContent = 'ATURAR'; btn.classList.add('is-active'); }
       setStatus(`${bpm} BPM · ${beatsPerBar === 6 ? '6/8' : beatsPerBar + '/4'}`);
     } catch (error) {
       console.warn('METRÒNOM', error);
@@ -123,24 +122,6 @@
     if (!options.keepMessage) setStatus('Metrònom aturat.');
   }
 
-  function tapTempo() {
-    const now = performance.now();
-    tapTimes = tapTimes.filter(t => now - t < 2400);
-    tapTimes.push(now);
-    if (tapTimes.length >= 2) {
-      const intervals = [];
-      for (let i = 1; i < tapTimes.length; i++) intervals.push(tapTimes[i] - tapTimes[i - 1]);
-      const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-      setBpm(60000 / avg);
-      setStatus(`TAP TEMPO · ${bpm} BPM`);
-      if (running && audioContext) {
-        currentBeat = 0;
-        nextNoteTime = audioContext.currentTime + 0.05;
-      }
-    } else {
-      setStatus('Torna a tocar TAP seguint el pols.');
-    }
-  }
 
   function open() {
     if (!isAuthenticated()) return false;
@@ -181,7 +162,6 @@
       if (running && audioContext) nextNoteTime = audioContext.currentTime + 0.05;
       setStatus(`${bpm} BPM · ${beatsPerBar === 6 ? '6/8' : beatsPerBar + '/4'}`);
     });
-    $('#metronomeTapBtn')?.addEventListener('click', tapTempo);
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && !$('#metronomeOverlay')?.hidden) close();
     });
