@@ -2407,3 +2407,9 @@ html.app-is-installed #installBtn,html.app-is-installed #homeInstallBtn,html.app
     min-height:64px!important;
   }
 }
+
+/* v0.78 · detall CALENDARI: traç lateral amb el color del tipus d'activitat. */
+.event-card{border-left-width:5px!important}
+.event-card.event-kind-rehearsal{border-left-color:var(--blue)!important}
+.event-card.event-kind-featured{border-left-color:var(--gold)!important}
+.event-card.event-kind-other{border-left-color:#4f9b62!important}

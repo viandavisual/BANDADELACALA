@@ -644,7 +644,9 @@ function selectDate(date){
   $('#eventList').innerHTML = list.length ? list.map(event => {
     const dresscodeAllowed=['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase());
     const dresscode=dresscodeAllowed?(state.content.dresscodes||[]).find(item=>item.id===event.dresscodeId):null;
-    return `<article class="event-card"><span class="event-type">${esc(event.type)}</span><h4>${esc(event.title)}</h4>${event.time?`<p class="event-meta-line">${eventMetaIcon('time')}<span>${esc(event.time)}</span></p>`:''}${event.place?`<p class="event-meta-line">${eventMetaIcon('place')}<span>${esc(event.place)}</span></p>`:''}${event.notes?`<p class="preserve-lines">${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
+    const type=String(event.type||'').toUpperCase();
+    const eventKind=['CONCERT','ACTUACIÓ'].includes(type)?'featured':(type==='ALTRES'?'other':'rehearsal');
+    return `<article class="event-card event-kind-${eventKind}"><span class="event-type">${esc(event.type)}</span><h4>${esc(event.title)}</h4>${event.time?`<p class="event-meta-line">${eventMetaIcon('time')}<span>${esc(event.time)}</span></p>`:''}${event.place?`<p class="event-meta-line">${eventMetaIcon('place')}<span>${esc(event.place)}</span></p>`:''}${event.notes?`<p class="preserve-lines">${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
   }).join('') : '<p class="empty-copy">No hi ha cap activitat prevista per aquest dia.</p>';
   $$('[data-dresscode]').forEach(btn=>btn.addEventListener('click',()=>openDresscode(btn.dataset.dresscode)));
 }

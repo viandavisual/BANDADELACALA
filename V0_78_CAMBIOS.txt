@@ -1,0 +1,6 @@
+BANDA DE LA CALA · v0.78
+
+- CALENDARI: cada activitat del detall diari mostra un traç lateral amb el color del seu tipus (ASSAIG, EVENT o ALTRES).
+- EDITOR > HISTÒRIC > HEMEROTECA > CARTELLS: CARTELLS s'organitza en subseccions col·lapsables pels mateixos períodes històrics del projecte.
+- EDITOR: en editar una imatge de qualsevol secció (HISTÒRIC, CARTELLS, NOTÍCIES o ENTREVISTES) es pot moure directament a qualsevol de les altres seccions disponibles, evitant passos intermedis.
+- No requereix SQL nou ni Edge Functions noves.

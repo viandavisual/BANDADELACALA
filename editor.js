@@ -48,6 +48,7 @@ let archiveSubmissions = [];
 let archiveCounts = {pending:0,rejected:0};
 const openHistoricEditorPeriods=new Set();
 const openHemerotecaEditorSections=new Set();
+const openCartellsEditorPeriods=new Set();
 let trackListResizeObserver=null;
 const eventListResizeObservers=new Map();
 let eventExpiryTimer=null;
@@ -1288,36 +1289,57 @@ async function moveHistoricPhotoToHemeroteca(itemId,index,targetType='cartells')
   }
 }
 
-async function moveHemerotecaPhotoToHistoric(itemId,index){
+async function moveHemerotecaPhotoToDestination(itemId,index,target='historic'){
   if(!['admin','gestor'].includes(currentProfile?.role)){showToast('No tens permisos per moure fotografies');return;}
   const item=(content.hemerotecaItems||[]).find(entry=>entry.id===itemId); if(!item)return;
+  const allowed=new Set(['historic','cartells','noticies','entrevistes']);
+  if(!allowed.has(target))return;
+  if(target===item.type){showToast('La imatge ja és en aquesta secció');return;}
   const images=hemerotecaImages(item); const src=images[index]; if(!src)return;
-  const year=Number.parseInt(item.year,10);
-  const period=historicPeriods().find(period=>Number.isInteger(year)&&yearFitsPeriod(year,period));
-  if(!period){showToast('No s’ha pogut determinar el període HISTÒRIC per aquest any');return;}
-  if(!confirm('Vols moure aquesta imatge de l’HEMEROTECA a l’HISTÒRIC?'))return;
   const originals=hemerotecaOriginalImages(item); const crops=hemerotecaImageCrops(item);
   const original=originals[index]||src; const crop=crops[index]||{left:0,right:0,top:0,bottom:0};
-  content.historicItems=content.historicItems||[];
-  content.historicItems.push({
-    id:BandaStore.uid('hist'),year,periodId:period.id,title:item.title||'',authorSource:item.authorSource||'',description:item.description||'',
-    images:[src],imageSrc:src,featuredImageSrc:src,originalImages:[original],imageCrops:[crop],imageSubmitters:[{name:item.submittedByName||'',userId:item.submittedByUserId||'',archiveSubmissionId:item.archiveSubmissionId||''}],createdAt:new Date().toISOString(),
-    submittedByName:item.submittedByName||'',submittedByUserId:item.submittedByUserId||'',archiveSubmissionId:item.archiveSubmissionId||''
-  });
+  const year=Number.parseInt(item.year,10);
+  if(!Number.isInteger(year)){showToast('Aquesta imatge necessita un ANY vàlid abans de moure-la');return;}
+
+  if(target==='historic'){
+    const period=historicPeriods().find(period=>yearFitsPeriod(year,period));
+    if(!period){showToast('No s’ha pogut determinar el període HISTÒRIC per aquest any');return;}
+    if(!confirm('Vols moure aquesta imatge de l’HEMEROTECA a l’HISTÒRIC?'))return;
+    content.historicItems=content.historicItems||[];
+    content.historicItems.push({
+      id:BandaStore.uid('hist'),year,periodId:period.id,title:item.title||'',authorSource:item.authorSource||'',description:item.description||'',
+      images:[src],imageSrc:src,featuredImageSrc:src,originalImages:[original],imageCrops:[crop],imageSubmitters:[{name:item.submittedByName||'',userId:item.submittedByUserId||'',archiveSubmissionId:item.archiveSubmissionId||''}],createdAt:new Date().toISOString(),
+      submittedByName:item.submittedByName||'',submittedByUserId:item.submittedByUserId||'',archiveSubmissionId:item.archiveSubmissionId||''
+    });
+  }else{
+    const targetLabel=hemerotecaTypeLabel(target);
+    if(!confirm(`Vols moure aquesta imatge a HEMEROTECA · ${targetLabel}?`))return;
+    content.hemerotecaItems=content.hemerotecaItems||[];
+    content.hemerotecaItems.push({
+      id:BandaStore.uid('hemero'),type:target,year,month:item.month||'',day:item.day||'',title:item.title||'',description:item.description||'',authorSource:item.authorSource||'',url:'',
+      images:[src],imageSrc:src,originalImages:[original],imageCrops:[crop],createdAt:new Date().toISOString(),
+      submittedByName:item.submittedByName||'',submittedByUserId:item.submittedByUserId||'',archiveSubmissionId:item.archiveSubmissionId||''
+    });
+  }
+
   images.splice(index,1); originals.splice(index,1); crops.splice(index,1);
-  const mustRemove=!images.length && (item.type==='cartells' || !item.url);
+  const mustRemove=!images.length && (item.type==='cartells' || !String(item.url||'').trim());
   if(mustRemove){
     content.hemerotecaItems=(content.hemerotecaItems||[]).filter(entry=>entry.id!==itemId);
   }else{
     item.images=[...images]; item.imageSrc=images[0]||''; item.originalImages=originals; item.imageCrops=crops;
   }
-  if(save(content,'Imatge moguda a HISTÒRIC')){
+  const targetLabel=target==='historic'?'HISTÒRIC':`HEMEROTECA · ${hemerotecaTypeLabel(target)}`;
+  if(save(content,`Imatge moguda a ${targetLabel}`)){
     renderHistoric(); renderHemerotecaEditor();
     const stillExists=(content.hemerotecaItems||[]).some(entry=>entry.id===itemId);
     if($('#hemerotecaId')?.value===itemId){
       if(stillExists) editHemeroteca(itemId); else resetHemerotecaForm();
     }
   }
+}
+async function moveHemerotecaPhotoToHistoric(itemId,index){
+  return moveHemerotecaPhotoToDestination(itemId,index,'historic');
 }
 
 function historicEditorItemMarkup(item){
@@ -1517,12 +1539,29 @@ function hemerotecaSortValue(item){return (Number(item?.year)||0)*10000+(Number(
 function renderHemerotecaFormPreview(){
   const wrap=$('#hemerotecaImagePreviewWrap'),grid=$('#hemerotecaImagePreviewGrid'); if(!wrap||!grid)return;
   const savedCount=editingHemerotecaImages.length; const images=[...editingHemerotecaImages,...pendingHemerotecaImages];
+  const currentType=$('#hemerotecaType')?.value||'cartells';
   wrap.hidden=!images.length;
-  grid.innerHTML=images.map((src,index)=>{const isNew=index>=savedCount;const localIndex=isNew?index-savedCount:index;const attr=isNew?`data-remove-pending-hemero="${localIndex}"`:`data-remove-saved-hemero="${localIndex}"`;const transfer=isNew?'':`<div class="history-image-transfer-panel one-action"><button type="button" data-move-saved-hemero="${localIndex}">MOURE A HISTÒRIC</button></div>`;return `<div class="history-image-preview-item ${isNew?'is-new':''}"><div class="history-image-preview-visual"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span><button class="history-image-remove-btn" type="button" ${attr} aria-label="Eliminar imatge">×</button></div>${transfer}</div>`;}).join('');
+  grid.innerHTML=images.map((src,index)=>{
+    const isNew=index>=savedCount; const localIndex=isNew?index-savedCount:index;
+    const attr=isNew?`data-remove-pending-hemero="${localIndex}"`:`data-remove-saved-hemero="${localIndex}"`;
+    let transfer='';
+    if(!isNew){
+      const destinations=[
+        ['historic','HISTÒRIC'],['cartells','CARTELLS'],['noticies','NOTÍCIES'],['entrevistes','ENTREVISTES']
+      ].filter(([value])=>value!==currentType);
+      transfer=`<div class="history-image-transfer-panel"><select data-hemero-transfer-target="${localIndex}" aria-label="Moure imatge a una altra secció">${destinations.map(([value,label])=>`<option value="${value}">${label}</option>`).join('')}</select><button type="button" data-move-saved-hemero="${localIndex}">MOURE</button></div>`;
+    }
+    return `<div class="history-image-preview-item ${isNew?'is-new':''}"><div class="history-image-preview-visual"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span><button class="history-image-remove-btn" type="button" ${attr} aria-label="Eliminar imatge">×</button></div>${transfer}</div>`;
+  }).join('');
   $$('[data-remove-pending-hemero]').forEach(btn=>btn.onclick=()=>{const index=Number(btn.dataset.removePendingHemero||0);pendingHemerotecaImages.splice(index,1);pendingHemerotecaOriginalFiles.splice(index,1);renderHemerotecaFormPreview();});
   $$('[data-remove-saved-hemero]').forEach(btn=>btn.onclick=()=>removeHemerotecaSavedImage(Number(btn.dataset.removeSavedHemero||0)));
-  $$('[data-move-saved-hemero]').forEach(btn=>btn.onclick=()=>moveHemerotecaPhotoToHistoric($('#hemerotecaId')?.value||'',Number(btn.dataset.moveSavedHemero||0)));
+  $$('[data-move-saved-hemero]').forEach(btn=>btn.onclick=()=>{
+    const index=Number(btn.dataset.moveSavedHemero||0);
+    const select=document.querySelector(`[data-hemero-transfer-target="${index}"]`);
+    moveHemerotecaPhotoToDestination($('#hemerotecaId')?.value||'',index,select?.value||'historic');
+  });
 }
+
 function syncHemerotecaRuleHelp(){
   const type=$('#hemerotecaType')?.value||'cartells'; const help=$('#hemerotecaRuleHelp'); if(!help)return;
   help.textContent=type==='cartells'?'CARTELLS necessita almenys una imatge. Pots afegir-ne més d’una si vols conservar diferents versions o detalls.':type==='noticies'?'NOTÍCIES admet retalls/imatges, un enllaç web actual o totes dues coses.':'ENTREVISTES admet un enllaç, imatges/documentació o totes dues coses.';
@@ -1580,20 +1619,44 @@ function renderHemerotecaEditor(){
     {id:'noticies',label:'NOTÍCIES'},
     {id:'entrevistes',label:'ENTREVISTES'}
   ];
+  const cartellsPeriodsMarkup=(items)=>{
+    const periods=historicPeriods();
+    const buckets=periods.map(period=>({id:period.id,label:historicPeriodLabel(period),items:items.filter(item=>yearFitsPeriod(Number(item.year)||0,period))}));
+    const assigned=new Set(buckets.flatMap(bucket=>bucket.items.map(item=>item.id)));
+    const unassigned=items.filter(item=>!assigned.has(item.id));
+    if(unassigned.length)buckets.push({id:'sense-periode',label:'SENSE PERÍODE',items:unassigned});
+    return buckets.map(bucket=>{
+      const open=openCartellsEditorPeriods.has(bucket.id);
+      return `<section class="cartells-period-group ${open?'is-open':''}" data-cartells-period="${esc(bucket.id)}">
+        <button type="button" class="cartells-period-head" data-toggle-cartells-period="${esc(bucket.id)}" aria-expanded="${open?'true':'false'}">
+          <span><strong>${esc(bucket.label)}</strong><small>${bucket.items.length?`${bucket.items.length} ${bucket.items.length===1?'cartell':'cartells'}`:'Sense cartells'}</small></span>
+          <span class="editor-collapse-count">${bucket.items.length}</span><span class="editor-collapse-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div class="cartells-period-body" ${open?'':'hidden'}>${bucket.items.length?bucket.items.map(hemerotecaEditorItemMarkup).join(''):'<div class="empty-state compact">Encara no hi ha cap cartell en aquest període.</div>'}</div>
+      </section>`;
+    }).join('');
+  };
   host.innerHTML=groups.map(group=>{
     const items=all.filter(item=>item.type===group.id);
     const open=openHemerotecaEditorSections.has(group.id);
+    const body=group.id==='cartells'?cartellsPeriodsMarkup(items):(items.length?items.map(hemerotecaEditorItemMarkup).join(''):'<div class="empty-state compact">Encara no hi ha cap document en aquesta categoria.</div>');
     return `<section class="editor-collapse-group hemeroteca-collapse-group type-${group.id} ${open?'is-open':''}" data-hemero-editor-group="${group.id}">
       <button type="button" class="editor-collapse-head" data-toggle-hemero-editor="${group.id}" aria-expanded="${open?'true':'false'}">
         <span class="editor-collapse-main"><strong>${group.label}</strong><span>${items.length?`${items.length} ${items.length===1?'document':'documents'}`:'Sense documents'}</span></span>
         <span class="editor-collapse-count">${items.length}</span><span class="editor-collapse-chevron" aria-hidden="true">⌄</span>
       </button>
-      <div class="editor-collapse-body" ${open?'':'hidden'}>${items.length?items.map(hemerotecaEditorItemMarkup).join(''):'<div class="empty-state compact">Encara no hi ha cap document en aquesta categoria.</div>'}</div>
+      <div class="editor-collapse-body" ${open?'':'hidden'}>${body}</div>
     </section>`;
   }).join('');
   $$('[data-toggle-hemero-editor]').forEach(btn=>btn.onclick=()=>{
     const id=btn.dataset.toggleHemeroEditor;
     if(openHemerotecaEditorSections.has(id)) openHemerotecaEditorSections.delete(id); else openHemerotecaEditorSections.add(id);
+    renderHemerotecaEditor();
+  });
+  $$('[data-toggle-cartells-period]').forEach(btn=>btn.onclick=(event)=>{
+    event.stopPropagation();
+    const id=btn.dataset.toggleCartellsPeriod;
+    if(openCartellsEditorPeriods.has(id)) openCartellsEditorPeriods.delete(id); else openCartellsEditorPeriods.add(id);
     renderHemerotecaEditor();
   });
   $$('[data-edit-hemero]').forEach(btn=>btn.onclick=()=>editHemeroteca(btn.dataset.editHemero));
@@ -1602,7 +1665,7 @@ function renderHemerotecaEditor(){
 }
 
 function bindHemerotecaEditor(){
-  $('#hemerotecaYear').max=String(new Date().getFullYear());$('#hemerotecaType').addEventListener('change',syncHemerotecaRuleHelp);
+  $('#hemerotecaYear').max=String(new Date().getFullYear());$('#hemerotecaType').addEventListener('change',()=>{syncHemerotecaRuleHelp();renderHemerotecaFormPreview();});
   $('#hemerotecaImageFile').addEventListener('change',async event=>{
     const files=[...(event.target.files||[])]; if(!files.length)return;
     const added=[];

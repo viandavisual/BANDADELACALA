@@ -1040,3 +1040,19 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .history-image-preview-visual img{width:100%;height:112px;object-fit:cover;display:block;border-radius:12px 12px 0 0!important}
 .history-image-preview-visual>span{position:absolute;left:6px;bottom:6px;padding:4px 6px;border-radius:999px;background:rgba(255,255,255,.92);color:#70450e;font:700 10px/1 Arial,sans-serif;z-index:3}
 .history-image-preview-item.is-new .history-image-preview-visual>span{background:#393a86;color:#fff}
+
+
+/* ============================================================
+   v0.78 · HEMEROTECA / CARTELLS per períodes
+   ============================================================ */
+.cartells-period-group{border:1px solid rgba(212,172,95,.28);border-radius:12px;background:#fff;overflow:hidden}
+.cartells-period-head{width:100%;border:0;background:#fffaf0;color:var(--ink);display:grid;grid-template-columns:minmax(0,1fr) auto 22px;gap:9px;align-items:center;text-align:left;padding:10px 12px;cursor:pointer}
+.cartells-period-head:hover{background:#f8efd9}
+.cartells-period-head>span:first-child{min-width:0}
+.cartells-period-head strong{display:block;color:var(--gold-deep);font-size:.78rem}
+.cartells-period-head small{display:block;margin-top:2px;color:var(--muted);font-size:.66rem}
+.cartells-period-group.is-open>.cartells-period-head .editor-collapse-chevron{transform:rotate(180deg)}
+.cartells-period-body{display:grid;gap:9px;padding:9px;border-top:1px solid rgba(212,172,95,.22);background:#fffdf8}
+.cartells-period-body[hidden]{display:none!important}
+.cartells-period-body .historic-editor-item{margin:0}
+@media(max-width:620px){.cartells-period-head{grid-template-columns:minmax(0,1fr) auto 20px;padding:9px 10px}.cartells-period-head strong{font-size:.72rem}.cartells-period-head small{font-size:.61rem}}
