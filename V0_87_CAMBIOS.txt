@@ -1,0 +1,6 @@
+BANDA DE LA CALA · v0.87
+
+- EDITOR / CALENDARI: corregit el col·lapse de l'AGENDA quan arriba a 10 o més esdeveniments. La finestra mostra 9,5 tires i la resta queda accessible mitjançant scroll, sense comprimir ni inutilitzar els controls.
+- EDITOR / RESUM: la caixa EVENTS mostra només els esdeveniments de l'AGENDA que encara no han caducat segons data i hora.
+- El PRÒXIM ESDEVENIMENT del RESUM també parteix de la mateixa AGENDA no caducada.
+- Sense canvis d'SQL, Supabase ni Edge Functions.

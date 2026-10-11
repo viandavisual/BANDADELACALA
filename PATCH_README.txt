@@ -1,24 +1,11 @@
-BANDA DE LA CALA · PATCH v0.86 DES DE v0.85
+BANDA DE LA CALA · PATCH v0.87 DES DE v0.86
 
-SOBRESCRIBIR:
-- app.js
-- style.css
-- version.js
-- app/index.html
-- app/sw.js
-- editor/index.html
-- editor/sw.js
+Aquest PATCH s'ha d'aplicar sobre una còpia completa de la v0.86.
+Substitueix únicament els fitxers inclosos al ZIP mantenint la mateixa estructura de carpetes.
 
-AÑADIR:
-- V0_86_CAMBIOS.txt
+Canvis principals:
+- correcció de l'AGENDA del CALENDARI amb 10+ esdeveniments;
+- RESUM / EVENTS compta només agenda no caducada;
+- actualització de versió/cache a v0.87.
 
-NO TOCAR:
-- Supabase / SQL
-- Edge Functions
-- manifests
-- assets
-
-CAMBIO PRINCIPAL:
-- HOME usa dos capas superpuestas para hacer un crossfade real de 1 segundo entre fotos random del HISTÒRIC, sin salto ni instante en blanco.
-
-No requiere ninguna migración ni configuración externa.
+Consulta V0_87_CAMBIOS.txt per al detall.

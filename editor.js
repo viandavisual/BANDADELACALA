@@ -314,9 +314,10 @@ function initManagedListViewports(){
 }
 
 function renderDashboard(){
-  const events=[...(content.events||[])].sort((a,b)=>`${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
-  const tracks=content.tracks||[]; const now=new Date(); const today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`; const next=events.find(event=>event.date>=today);
-  animateStatCounter($('#statEvents'),events.length); $('#statNextEvent').textContent=next?`${formatDashboardEventDate(next.date)} · ${next.title}`:'Cap activitat futura';
+  const {agenda}=splitEventsByStatus();
+  const tracks=content.tracks||[];
+  const next=agenda[0];
+  animateStatCounter($('#statEvents'),agenda.length); $('#statNextEvent').textContent=next?`${formatDashboardEventDate(next.date)} · ${next.title}`:'Cap activitat futura';
   animateStatCounter($('#statDresscodes'),(content.dresscodes||[]).length); animateStatCounter($('#statTracks'),tracks.length); $('#statVisibleTracks').textContent=`${tracks.filter(track=>track.visible!==false).length} visibles`; animateStatCounter($('#statHistoric'),(content.historicItems||[]).length);
 }
 
@@ -625,27 +626,30 @@ function fitEventListNineAndHalf(hostOrSelector='#eventEditorList'){
     const oldObserver=eventListResizeObservers.get(host);
     if(oldObserver){oldObserver.disconnect();eventListResizeObservers.delete(host);}
     const previousScroll=host.scrollTop;
-    if(items.length<10){
-      host.style.height='';
-      host.style.maxHeight='';
-      host.classList.remove('event-scroll-preview');
-      return;
-    }
-    host.classList.add('event-scroll-preview');
+    host.style.height='';
+    host.style.maxHeight='';
+    host.classList.remove('event-scroll-preview');
+    if(items.length<10) return;
+
+    /* v0.87: l'alçada es calcula a partir de la tira tancada, no de l'article complet.
+       Això evita el bucle de ResizeObserver que podia comprimir tota l'AGENDA
+       en arribar a 10 elements. Les tires obertes continuen funcionant dins del scroll. */
+    const summaryHeights=items.slice(0,10).map(item=>{
+      const summary=item.querySelector('.event-strip-summary');
+      const actions=item.querySelector('.event-strip-actions');
+      return Math.max(48, summary?.getBoundingClientRect().height||0, actions?.getBoundingClientRect().height||0);
+    });
+    const representative=summaryHeights.filter(Boolean).reduce((sum,h)=>sum+h,0)/Math.max(1,summaryHeights.length);
     const gap=parseFloat(getComputedStyle(host).rowGap||getComputedStyle(host).gap)||0;
-    const heights=items.slice(0,10).map(item=>item.getBoundingClientRect().height);
-    const visibleHeight=heights.slice(0,9).reduce((sum,h)=>sum+h,0)+(gap*9)+(heights[9]*.5);
+    const visibleHeight=(representative*9.5)+(gap*9);
     const px=`${Math.ceil(visibleHeight)}px`;
+    host.classList.add('event-scroll-preview');
     host.style.height=px;
     host.style.maxHeight=px;
     host.scrollTop=Math.min(previousScroll,Math.max(0,host.scrollHeight-host.clientHeight));
-    if('ResizeObserver' in window){
-      const observer=new ResizeObserver(()=>fitEventListNineAndHalf(host));
-      eventListResizeObservers.set(host,observer);
-      items.slice(0,10).forEach(item=>observer.observe(item));
-    }
   });
 }
+
 function eventStripMarkup(event,{expired=false}={}){
   const type=String(event.type||'').toUpperCase();
   const eventClass=type==='ASSAIG'?'event-strip-rehearsal':(type==='ALTRES'?'event-strip-other':'event-strip-featured');
