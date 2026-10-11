@@ -2516,5 +2516,35 @@ html.app-is-installed #mobileAppInstallCard,html.app-is-installed #mobileHomeIns
 }
 
 
-/* v0.83 · CALENDARI: eliminat definitivament l'antic indicador circular de les caselles. */
+/* v0.84 · CALENDARI: eliminat definitivament l'antic indicador circular de les caselles. */
 #view-calendar .calendar-day::after{display:none!important;content:none!important;box-shadow:none!important}
+
+
+/* ============================================================
+   v0.84 · CALENDARI segments caducats + eines USER en una fila
+   ============================================================ */
+/* Una activitat caducada manté la seva posició dins de la fila del seu tipus,
+   però el seu segment passa a gris. */
+.calendar-activity-segment.is-past{background:#9da2a8!important}
+
+/* AFINADOR + METRÒNOM comparteixen fila dins de USER. */
+.user-music-tools-row{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  width:100%;
+  margin-top:16px;
+}
+.user-music-tools-row .tuner-launcher,
+.user-music-tools-row .metronome-launcher{
+  width:100%;
+  min-width:0;
+  margin:0!important;
+}
+@media(max-width:420px){
+  .user-music-tools-row{gap:8px}
+  .user-music-tools-row .tuner-launcher,
+  .user-music-tools-row .metronome-launcher{padding-left:10px;padding-right:10px;font-size:11px}
+  .user-music-tools-row .tuner-launcher-icon,
+  .user-music-tools-row .metronome-launcher-icon{width:30px;height:30px;min-width:30px}
+}

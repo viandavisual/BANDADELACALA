@@ -241,11 +241,13 @@ function observeManagedListGeometry(host,items){
     managedListResizeObservers.set(host,observer);
   }
   observer.disconnect();
-  if(items.length<5) return;
-  const fourth=items[3];
+  const isUsers=host?.id==='usersList';
+  const required=isUsers?10:5;
+  if(items.length<required) return;
+  const lastObserved=items[isUsers?9:3];
   const allChildren=[...host.children];
-  const fourthIndex=allChildren.indexOf(fourth);
-  allChildren.slice(0,Math.max(0,fourthIndex+1)).forEach(child=>observer.observe(child));
+  const lastIndex=allChildren.indexOf(lastObserved);
+  allChildren.slice(0,Math.max(0,lastIndex+1)).forEach(child=>observer.observe(child));
 }
 function fitManagedListToFour(host){
   if(!host) return;
@@ -254,22 +256,43 @@ function fitManagedListToFour(host){
     host._managedFitFrame=0;
     const items=managedMaterialItems(host);
     observeManagedListGeometry(host,items);
+
+    /* USUARIS v0.84: 9 targetes completes + mitja desena targeta visibles. */
+    if(host.id==='usersList'){
+      if(items.length<10){
+        host.style.height='';
+        host.style.maxHeight='';
+        host.classList.remove('managed-scroll-list');
+        return;
+      }
+      const previousScroll=host.scrollTop;
+      host.classList.add('managed-scroll-list');
+      host.style.height='auto';
+      host.style.maxHeight='none';
+      void host.offsetWidth;
+      const gap=parseFloat(getComputedStyle(host).rowGap||getComputedStyle(host).gap)||0;
+      const heights=items.slice(0,10).map(item=>item.getBoundingClientRect().height);
+      const visibleHeight=heights.slice(0,9).reduce((sum,h)=>sum+h,0)+(gap*9)+(heights[9]*.5);
+      const px=`${Math.ceil(visibleHeight)}px`;
+      host.style.height=px;
+      host.style.maxHeight=px;
+      host.scrollTop=Math.min(previousScroll,Math.max(0,host.scrollHeight-host.clientHeight));
+      return;
+    }
+
     if(items.length<=4){
+      host.style.height='';
       host.style.maxHeight='';
       host.classList.remove('managed-scroll-list');
       return;
     }
 
-    /*
-     * La finestra visible acaba EXACTAMENT després de la quarta targeta real.
-     * No comptem capçalera de període com a element, però la seva alçada sí queda
-     * inclosa si està situada abans d'aquesta quarta targeta. Així HISTÒRIC i
-     * HEMEROTECA poden tenir targetes/alçades diferents sense retallar la quarta.
-     */
+    /* HISTÒRIC / HEMEROTECA / DRESSCODE: 4 targetes completes. */
     const previousScroll=host.scrollTop;
     host.classList.add('managed-scroll-list');
+    host.style.height='';
     host.style.maxHeight='none';
-    void host.offsetWidth; // aplica scrollbar-gutter abans de mesurar amplades/alçades
+    void host.offsetWidth;
     const hostRect=host.getBoundingClientRect();
     const fourthRect=items[3].getBoundingClientRect();
     const visibleHeight=Math.max(1,fourthRect.bottom-hostRect.top+host.scrollTop);

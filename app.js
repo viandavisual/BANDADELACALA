@@ -622,15 +622,14 @@ function renderCalendar(){
     const activityGroups=new Map();
     dayEvents.forEach(event=>{
       const type=String(event.type||'').toUpperCase();
-      const past=calendarEventHasPassed(event,today);
-      const kind=past?'past':(['CONCERT','ACTUACIÓ'].includes(type)?'featured':(type==='ALTRES'?'other':'rehearsal'));
-      const label=past?'FINALITZAT':(type||'ACTIVITAT');
+      const kind=['CONCERT','ACTUACIÓ'].includes(type)?'featured':(type==='ALTRES'?'other':'rehearsal');
+      const label=type||'ACTIVITAT';
       if(!activityGroups.has(kind)) activityGroups.set(kind,{kind,label,events:[]});
-      activityGroups.get(kind).events.push(event);
+      activityGroups.get(kind).events.push({event,past:calendarEventHasPassed(event,today)});
     });
     const activityBars=[...activityGroups.values()].map(group=>{
-      const segments=group.events.map(()=>'<span class="calendar-activity-segment"></span>').join('');
-      const times=group.events.map(event=>event.time).filter(Boolean).join(' · ');
+      const segments=group.events.map(item=>`<span class="calendar-activity-segment${item.past?' is-past':''}"></span>`).join('');
+      const times=group.events.map(item=>item.event.time).filter(Boolean).join(' · ');
       const title=`${group.label}${group.events.length>1?` · ${group.events.length} activitats`:''}${times?` · ${times}`:''}`;
       return `<span class="calendar-activity-row activity-${group.kind}" title="${esc(title)}" aria-hidden="true">${segments}</span>`;
     }).join('');

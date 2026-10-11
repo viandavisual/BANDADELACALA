@@ -1,0 +1,19 @@
+BANDA DE LA CALA · v0.84
+
+1. CALENDARI · múltiples activitats del mateix tipus
+- Quan una activitat caduca però n'hi ha una altra del mateix tipus encara pendent, la fila no es divideix.
+- El segment corresponent a l'activitat caducada es manté al mateix lloc i passa a gris.
+- Els segments pendents conserven el color del tipus d'activitat.
+- Es preserva l'ordre horari dins de la fila.
+
+2. APP / USER
+- AFINADOR i METRÒNOM passen a compartir la mateixa fila, amb dues caixes d'amplada equivalent.
+- El layout es manté compacte i usable en MOBILE.
+
+3. EDITOR / USUARIS
+- La llista de comptes mostra 9 targetes completes i mitja desena targeta abans d'activar l'scroll.
+- La resta d'usuaris continuen accessibles mitjançant scroll dins de la mateixa zona.
+
+4. INFRAESTRUCTURA
+- No requereix SQL, canvis de Supabase ni Edge Functions.
+- APP i EDITOR actualitzats a v0.84 mantenint IDs PWA, scopes i manifests.
