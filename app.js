@@ -608,17 +608,24 @@ function renderCalendar(){
     if(cellMonth<0){cellMonth=11;cellYear--;}
     if(cellMonth>11){cellMonth=0;cellYear++;}
     const key = isoDate(cellYear,cellMonth,day);
-    const dayEvents = events.filter(event => event.date === key);
+    const dayEvents = events.filter(event => event.date === key).sort((a,b)=>{
+      const ta=/^\d{1,2}:\d{2}$/.test(String(a?.time||''))?String(a.time).padStart(5,'0'):'99:99';
+      const tb=/^\d{1,2}:\d{2}$/.test(String(b?.time||''))?String(b.time).padStart(5,'0'):'99:99';
+      return ta.localeCompare(tb,'ca') || String(a?.title||'').localeCompare(String(b?.title||''),'ca');
+    });
     const has = dayEvents.length > 0;
-    const activeEvents = dayEvents.filter(event => !calendarEventHasPassed(event,today));
-    const allPassed = has && activeEvents.length===0;
-    const visibleEvents = allPassed ? dayEvents : activeEvents;
-    const featured = visibleEvents.some(event => ['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase()));
-    const altres = visibleEvents.some(event => String(event.type||'').toUpperCase() === 'ALTRES');
-    const eventClass = has ? (allPassed ? 'event-past' : (featured ? 'event-featured' : (altres ? 'event-other' : 'event-normal'))) : '';
+    const activityBars = dayEvents.slice(0,3).map(event=>{
+      const type=String(event.type||'').toUpperCase();
+      const past=calendarEventHasPassed(event,today);
+      const kind=past?'past':(['CONCERT','ACTUACIÓ'].includes(type)?'featured':(type==='ALTRES'?'other':'rehearsal'));
+      const label=past?'FINALITZAT':(type||'ACTIVITAT');
+      return `<span class="calendar-activity-bar activity-${kind}" title="${esc(label)}${event.time?` · ${esc(event.time)}`:''}" aria-hidden="true"></span>`;
+    }).join('');
+    const moreCount=Math.max(0,dayEvents.length-3);
+    const activities=has?`<span class="calendar-activity-stack">${activityBars}</span>${moreCount?`<span class="calendar-activity-more">+${moreCount}</span>`:''}`:'';
     const isToday = key === isoDate(today.getFullYear(),today.getMonth(),today.getDate());
     const selected = key === state.selectedDate;
-    cells.push(`<button class="calendar-day ${outside?'outside':''} ${has?'has-event':''} ${eventClass} ${isToday?'today':''} ${selected?'selected':''}" data-date="${key}" aria-label="${key}"><span class="day-number">${day}</span></button>`);
+    cells.push(`<button class="calendar-day ${outside?'outside':''} ${has?'has-event':''} ${isToday?'today':''} ${selected?'selected':''}" data-date="${key}" aria-label="${key}${has?` · ${dayEvents.length} activitat${dayEvents.length===1?'':'s'}`:''}"><span class="day-number">${day}</span>${activities}</button>`);
   }
   $('#calendarGrid').innerHTML = cells.join('');
   $$('#calendarGrid [data-date]').forEach(btn => btn.addEventListener('click', () => selectDate(btn.dataset.date)));
@@ -629,7 +636,11 @@ function selectDate(date){
   renderCalendar();
   const parsed = new Date(date+'T12:00:00');
   $('#selectedDateTitle').textContent = new Intl.DateTimeFormat('ca-ES',{weekday:'long',day:'numeric',month:'long'}).format(parsed).replace(/^./,char=>char.toUpperCase());
-  const list = getEvents().filter(event => event.date === date);
+  const list = getEvents().filter(event => event.date === date).sort((a,b)=>{
+    const ta=/^\d{1,2}:\d{2}$/.test(String(a?.time||''))?String(a.time).padStart(5,'0'):'99:99';
+    const tb=/^\d{1,2}:\d{2}$/.test(String(b?.time||''))?String(b.time).padStart(5,'0'):'99:99';
+    return ta.localeCompare(tb,'ca') || String(a?.title||'').localeCompare(String(b?.title||''),'ca');
+  });
   $('#eventList').innerHTML = list.length ? list.map(event => {
     const dresscodeAllowed=['CONCERT','ACTUACIÓ'].includes(String(event.type||'').toUpperCase());
     const dresscode=dresscodeAllowed?(state.content.dresscodes||[]).find(item=>item.id===event.dresscodeId):null;
@@ -2122,7 +2133,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.73',root).href;
+    const swUrl=new URL('app/sw.js?v=0.74',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

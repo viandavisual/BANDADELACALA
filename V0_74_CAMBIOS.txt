@@ -1,0 +1,15 @@
+BANDA DE LA CALA — v0.74
+
+CAMBIOS
+- CALENDARI multi-activitat: cada activitat del mateix dia es representa con una barra de color independiente, ordenada por hora.
+- Colores: ASSAIG azul, EVENT (CONCERT/ACTUACIÓ) dorado, ALTRES verde y actividades finalizadas gris.
+- Hasta 3 barras visibles; si hay más actividades se muestra +N.
+- AVUI sin actividades conserva el rojo en toda la casilla.
+- AVUI con actividades muestra rojo solo en la parte superior y reserva la parte inferior neutra para las barras.
+- El detalle diario se ordena cronológicamente por hora.
+- METRÒNOM: botones − / + reforzados como círculos 1:1 en MOBILE y DESKTOP.
+
+INFRAESTRUCTURA
+- Sin SQL nuevo.
+- Sin cambios de Supabase ni Edge Functions.
+- Manifest IDs, scopes y arquitectura PWA preservados.

@@ -1,4 +1,4 @@
-/* BANDA DE LA CALA · METRÒNOM v0.72 */
+/* BANDA DE LA CALA · METRÒNOM v0.74 */
 .metronome-launcher{
   width:100%;margin:10px 0 0;border:1px solid rgba(57,58,134,.22);border-radius:17px;
   background:linear-gradient(145deg,#fff,#f4f4fb);color:var(--blue-deep);padding:16px 18px;
@@ -43,3 +43,19 @@ body.metronome-open{overflow:hidden}
 
 /* v0.73 · X sempre circular */
 .metronome-close{width:42px!important;height:42px!important;min-width:42px!important;max-width:42px!important;min-height:42px!important;max-height:42px!important;flex:0 0 42px!important;aspect-ratio:1/1!important;border-radius:999px!important;padding:0!important;box-sizing:border-box!important;line-height:1!important}
+
+
+/* v0.74 · Els botons − / + són cercles reals també en MOBILE. */
+.metronome-step-btn{
+  width:50px!important;height:50px!important;
+  min-width:50px!important;max-width:50px!important;
+  min-height:50px!important;max-height:50px!important;
+  aspect-ratio:1/1!important;border-radius:999px!important;
+  padding:0!important;box-sizing:border-box!important;
+  display:grid!important;place-items:center!important;
+  line-height:1!important;justify-self:center!important;
+}
+@media(max-width:780px){
+  .metronome-controls{grid-template-columns:50px minmax(0,1fr) 50px!important}
+  .metronome-step-btn{width:50px!important;height:50px!important;min-width:50px!important;max-width:50px!important;min-height:50px!important;max-height:50px!important}
+}

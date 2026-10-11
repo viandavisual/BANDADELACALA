@@ -2339,3 +2339,54 @@ html.app-is-installed #installBtn,html.app-is-installed #homeInstallBtn,html.app
 .password-recovery-close{min-width:30px!important;max-width:30px!important;min-height:30px!important;max-height:30px!important}
 .archive-upload-close{min-width:36px!important;max-width:36px!important;min-height:36px!important;max-height:36px!important}
 @media(max-width:780px){.history-image-close{min-width:40px!important;max-width:40px!important;min-height:40px!important;max-height:40px!important}.player-fullscreen-close{min-width:46px!important;max-width:46px!important;min-height:46px!important;max-height:46px!important}}
+
+
+/* v0.74 · CALENDARI multi-activitat: el color representa cada activitat, no el dia complet. */
+.calendar-day.has-event{
+  background:#fff!important;
+  border-color:var(--line)!important;
+  color:var(--ink)!important;
+  overflow:hidden;
+}
+.calendar-day.has-event:hover{background:var(--paper)!important;border-color:rgba(212,172,95,.45)!important}
+.calendar-day.has-event .day-number{position:relative;z-index:2;color:var(--ink)!important}
+.calendar-day.has-event:after{display:none!important}
+.calendar-activity-stack{
+  position:absolute;left:8px;right:8px;bottom:7px;z-index:2;
+  display:grid;gap:3px;pointer-events:none;
+}
+.calendar-activity-bar{display:block;width:100%;height:5px;border-radius:999px;background:var(--blue)}
+.calendar-activity-bar.activity-rehearsal{background:var(--blue)}
+.calendar-activity-bar.activity-featured{background:var(--gold)}
+.calendar-activity-bar.activity-other{background:#4f9b62}
+.calendar-activity-bar.activity-past{background:#9da2a8}
+.calendar-activity-more{
+  position:absolute;right:7px;bottom:2px;z-index:3;padding:1px 3px;border-radius:5px;
+  background:rgba(255,255,255,.92);color:#686d73;font-size:.5rem;font-weight:950;line-height:1;
+}
+/* AVUI sense activitats conserva la casella roja completa. */
+.calendar-day.today:not(.has-event){
+  background:#c72f34!important;border-color:#9f2026!important;color:#fff!important;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.22),0 0 0 2px rgba(159,32,38,.12)!important;
+}
+.calendar-day.today:not(.has-event):hover{background:#b6252b!important}
+.calendar-day.today:not(.has-event) .day-number{color:#fff!important}
+/* AVUI amb activitats: només la zona superior és roja; la zona inferior queda neutra per llegir les barres. */
+.calendar-day.today.has-event{
+  background:linear-gradient(to bottom,#c72f34 0%,#c72f34 56%,#fff 56%,#fff 100%)!important;
+  border-color:#9f2026!important;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.16),0 0 0 2px rgba(159,32,38,.12)!important;
+}
+.calendar-day.today.has-event:hover{
+  background:linear-gradient(to bottom,#b6252b 0%,#b6252b 56%,#fbfaf7 56%,#fbfaf7 100%)!important;
+}
+.calendar-day.today.has-event .day-number{color:#fff!important}
+.calendar-day.selected{box-shadow:inset 0 0 0 2px rgba(212,172,95,.85),0 0 0 2px rgba(212,172,95,.16)!important}
+.calendar-day.today.selected{box-shadow:inset 0 0 0 2px rgba(255,255,255,.38),0 0 0 3px rgba(199,47,52,.2)!important}
+@media(max-width:780px){
+  #view-calendar .calendar-activity-stack{left:4px;right:4px;bottom:3px;gap:1.5px}
+  #view-calendar .calendar-activity-bar{height:3px}
+  #view-calendar .calendar-activity-more{right:3px;bottom:1px;font-size:.42rem;padding:0 2px}
+  #view-calendar .calendar-day.today.has-event{background:linear-gradient(to bottom,#c72f34 0%,#c72f34 55%,#fff 55%,#fff 100%)!important}
+  #view-calendar .calendar-day.today.has-event:hover{background:linear-gradient(to bottom,#b6252b 0%,#b6252b 55%,#fbfaf7 55%,#fbfaf7 100%)!important}
+}
