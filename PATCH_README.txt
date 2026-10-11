@@ -1,22 +1,25 @@
-BANDA DE LA CALA · PATCH v0.82 des de v0.81
+BANDA DE LA CALA v0.83 — PATCH des de v0.82
 
 SOBRESCRIBIR:
 - app.js
 - style.css
-- version.js
-- app/index.html
+- editor.js
+- editor.css
 - editor/index.html
+- app/index.html
+- version.js
 - app/sw.js
 - editor/sw.js
+- PATCH_README.txt
 
 AÑADIR:
-- V0_82_CAMBIOS.txt
+- V0_83_CAMBIOS.txt
 
 NO TOCAR:
-- Supabase
-- SQL
+- manifests PWA
+- Supabase / SQL
 - Edge Functions
-- Auth / SMTP
-- manifests / IDs PWA
+- configuració Auth / SMTP
 
-Objectiu: millorar la lectura visual del CALENDARI (AVUI, selecció neutra i múltiples activitats del mateix tipus en una sola fila).
+SQL: NO
+EDGE FUNCTIONS: NO

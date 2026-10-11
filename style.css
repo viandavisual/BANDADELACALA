@@ -2514,3 +2514,7 @@ html.app-is-installed #mobileAppInstallCard,html.app-is-installed #mobileHomeIns
   #view-calendar .calendar-day.today.has-event::before{height:64%}
   #view-calendar .calendar-day.today.has-event:hover{background:#fbfaf7!important}
 }
+
+
+/* v0.83 · CALENDARI: eliminat definitivament l'antic indicador circular de les caselles. */
+#view-calendar .calendar-day::after{display:none!important;content:none!important;box-shadow:none!important}

@@ -1,0 +1,7 @@
+BANDA DE LA CALA v0.83
+
+- APP / CALENDARI: els títols dels esdeveniments es mostren sempre en MAJÚSCULES.
+- EDITOR / CALENDARI: els esdeveniments de tipus ALTRES del llistat AGENDA utilitzen accent VERD.
+- EDITOR / DRESSCODE: el camp TÍTOL d'un nou dresscode queda buit per defecte i és obligatori introduir-lo abans de desar.
+- APP / CALENDARI: eliminat definitivament l'antic petit indicador circular de les caselles del calendari.
+- Versió i caches PWA actualitzats a v0.83.

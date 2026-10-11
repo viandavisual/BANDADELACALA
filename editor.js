@@ -606,8 +606,9 @@ function fitEventListNineAndHalf(hostOrSelector='#eventEditorList'){
   });
 }
 function eventStripMarkup(event,{expired=false}={}){
-  const rehearsal=String(event.type||'').toUpperCase()==='ASSAIG';
-  return `<article class="event-strip ${rehearsal?'event-strip-rehearsal':'event-strip-featured'} ${expired?'event-strip-expired':''}" data-event-strip="${esc(event.id)}">
+  const type=String(event.type||'').toUpperCase();
+  const eventClass=type==='ASSAIG'?'event-strip-rehearsal':(type==='ALTRES'?'event-strip-other':'event-strip-featured');
+  return `<article class="event-strip ${eventClass} ${expired?'event-strip-expired':''}" data-event-strip="${esc(event.id)}">
     <button type="button" class="event-strip-summary" data-toggle-event="${esc(event.id)}" aria-expanded="false">
       <span class="event-strip-title">${esc(event.title)}</span>
       <span class="event-strip-date">${esc(formatDateNumeric(event.date))}${event.time?` · ${esc(event.time)}`:''}</span>
@@ -651,7 +652,7 @@ function bindEventForm(){
     const item={
       id,
       type,
-      title:eventTitleFromForm(),
+      title:String(eventTitleFromForm()||'').trim().toUpperCase(),
       date:$('#eventDate').value,
       time:$('#eventTime').value,
       place:eventPlaceFromForm(),
@@ -757,7 +758,7 @@ function resetDresscodeForm(){
   $('#dresscodeForm').reset();
   $('#dresscodeId').value='';
   $('#dresscodeFormTitle').textContent='Nou dresscode';
-  $('#dresscodeTitle').value='Dress code - diada';
+  $('#dresscodeTitle').value='';
   $('#dresscodeSubtitle').value='Uniforme de banda';
   $('#dresscodeOther').value='';
   renderDressItems('boys',normalizeDressItems([], 'boys'));
@@ -829,10 +830,12 @@ function bindDresscodes(){
     const id=$('#dresscodeId').value||BandaStore.uid('dress');
     const boysItems=collectDressItems('boys'), girlsItems=collectDressItems('girls');
     const previous=(content.dresscodes||[]).find(d=>d.id===id);
+    const title=$('#dresscodeTitle').value.trim();
+    if(!title){showToast('Cal indicar un títol per al dresscode');$('#dresscodeTitle').focus();return;}
     const item={
       id,
       eventId:'',
-      title:$('#dresscodeTitle').value.trim()||'Dress code',
+      title,
       subtitle:$('#dresscodeSubtitle').value.trim()||'Uniforme de banda',
       boysItems,
       girlsItems,

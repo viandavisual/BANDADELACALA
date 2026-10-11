@@ -1056,3 +1056,7 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .cartells-period-body[hidden]{display:none!important}
 .cartells-period-body .historic-editor-item{margin:0}
 @media(max-width:620px){.cartells-period-head{grid-template-columns:minmax(0,1fr) auto 20px;padding:9px 10px}.cartells-period-head strong{font-size:.72rem}.cartells-period-head small{font-size:.61rem}}
+
+
+/* v0.83 · CALENDARI: ALTRES en verd al llistat d'AGENDA */
+.event-strip-other{--event-accent:#4f9b62}
