@@ -230,7 +230,7 @@
       sourceNode.connect(analyser);
       running = true;
       lastAnalysisAt = 0;
-      if (btn) { btn.disabled = false; btn.textContent = 'DETENIR MICRO'; btn.classList.add('is-active'); }
+      if (btn) { btn.disabled = false; btn.textContent = 'ATURAR MICRO'; btn.classList.add('is-active'); }
       analyse();
     } catch (error) {
       console.warn('AFINADOR: no s’ha pogut activar el micròfon', error);

@@ -1,22 +1,26 @@
-BANDA DE LA CALA v0.74 — PATCH desde v0.73
+BANDA DE LA CALA — PATCH v0.75 desde v0.74
 
-SOBRESCRIBIR:
-- app.js
-- style.css
-- metronome.css
-- version.js
+SOBRESCRIBIR
 - app/index.html
 - editor/index.html
 - app/sw.js
 - editor/sw.js
+- version.js
+- tuner.js
+- metronome.js
+- editor.js
+- editor.css
+- content-store.js
+- PATCH_README.txt
 
-AÑADIR:
-- V0_74_CAMBIOS.txt
+AÑADIR
+- V0_75_CAMBIOS.txt
 
-NO TOCAR:
+NO TOCAR
 - manifests
-- Supabase
+- Supabase/Auth/SMTP
 - Edge Functions
-- assets/media
+- buckets y policies
 
-SQL: no aplica.
+SQL
+- No aplica.

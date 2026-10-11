@@ -963,3 +963,9 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 /* v0.73 · X de tancament sempre circular en MOBILE i DESKTOP */
 .modal-close,.archive-crop-close{width:38px!important;height:38px!important;min-width:38px!important;max-width:38px!important;min-height:38px!important;max-height:38px!important;flex:0 0 38px!important;aspect-ratio:1/1!important;border-radius:999px!important;padding:0!important;box-sizing:border-box!important;display:grid!important;place-items:center!important;line-height:1!important}
 .archive-crop-close{width:42px!important;height:42px!important;min-width:42px!important;max-width:42px!important;min-height:42px!important;max-height:42px!important;flex-basis:42px!important}
+
+/* v0.75 · moviment manual HISTÒRIC ↔ HEMEROTECA */
+.historic-move-thumb-btn{position:absolute;left:7px;top:7px;z-index:4;border:1px solid rgba(255,255,255,.9);border-radius:999px;background:rgba(139,98,40,.92);color:#fff;font-size:8px;font-weight:950;letter-spacing:.05em;padding:5px 7px;box-shadow:0 3px 10px rgba(0,0,0,.2);cursor:pointer;white-space:nowrap}
+.historic-move-thumb-btn:hover{background:#8B6228}
+.historic-move-thumb-btn.hemero-to-historic{background:rgba(57,58,134,.92)}
+.historic-move-thumb-btn.hemero-to-historic:hover{background:#393A86}

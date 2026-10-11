@@ -1,0 +1,14 @@
+BANDA DE LA CALA — v0.75
+
+CAMBIOS
+- AFINADOR: "DETENIR MICRO" pasa a "ATURAR MICRO".
+- METRÒNOM: reforzado el arranque de audio en MOBILE/iOS/PWA mediante activación explícita de la sesión de audio desde el gesto del USER y desbloqueo adicional de Web Audio. Debe sonar aunque PLAYER no esté reproduciendo.
+- EDITOR · HISTÒRIC: cada fotografía puede moverse directamente a HEMEROTECA · CARTELLS.
+- EDITOR · HEMEROTECA: cada imagen puede moverse directamente a HISTÒRIC. El período se deduce automáticamente a partir del año.
+- El movimiento no duplica ni vuelve a subir el archivo: cambia su ubicación lógica en el contenido y conserva URL, original/crop y procedencia cuando están disponibles.
+- Si al mover la última imagen una entrada origen deja de ser válida, la entrada vacía se elimina automáticamente.
+
+INFRAESTRUCTURA
+- Sin SQL nuevo.
+- Sin cambios de Supabase ni Edge Functions.
+- Manifest IDs, scopes y arquitectura PWA preservados.
