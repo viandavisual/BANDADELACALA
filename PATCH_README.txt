@@ -1,11 +1,10 @@
-BANDA DE LA CALA · PATCH v0.89 des de v0.88
+BANDA DE LA CALA · PATCH v0.90 des de v0.89
 
-Aplica aquest PATCH únicament sobre una còpia exacta de la v0.88 FULL.
-Substitueix els fitxers inclosos mantenint la mateixa estructura de carpetes.
+Aplicar aquest PATCH exclusivament sobre una instal·lació v0.89 completa.
 
-Canvis principals:
-- EDITOR / SISTEMA / USER ADMIN: selector de fotografies HISTÒRIC excloses del banner random HOME.
-- HOME random: respecta settings.homeHeroExcludedImages.
-- Actualització de versió/caché a v0.89.
+CANVIS
+- Fix DESKTOP del timeline d'HISTÒRIC: eix, nodes i targetes queden geomètricament ancorats.
+- MOBILE no es modifica.
+- Actualització de versió/caché a v0.90.
 
-No requereix SQL ni canvis de Supabase.
+No requereix SQL ni canvis de backend.

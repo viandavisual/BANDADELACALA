@@ -1,0 +1,16 @@
+BANDA DE LA CALA · v0.90
+
+APP · HISTÒRIC · DESKTOP
+- Correcció exclusiva per DESKTOP de la geometria del timeline.
+- L'eix vertical central queda blindat i no es pot desplaçar encara que una entrada contingui moltes fotografies.
+- Cada node queda ancorat exactament sobre l'eix central.
+- Les targetes de l'esquerra i de la dreta mantenen sempre una separació fixa respecte de l'eix.
+- Les galeries/minialbums grans ja no poden ampliar el grid ni desmaquetar els moments següents.
+- Es manté intacta l'alternança esquerra/dreta i la compactació vertical existent.
+
+MOBILE
+- Sense canvis.
+- Es conserva exactament l'estructura actual amb la línia vertical a l'esquerra.
+
+BACKEND
+- No requereix SQL, Supabase, buckets ni Edge Functions.

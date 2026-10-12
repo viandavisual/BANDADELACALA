@@ -2574,3 +2574,56 @@ html.app-is-installed #mobileAppInstallCard,html.app-is-installed #mobileHomeIns
 .suggestion-box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.suggestion-box-head h3{margin:2px 0 0;color:#27285f;font-size:21px}.suggestion-box-close{width:36px;height:36px;min-width:36px;aspect-ratio:1/1;padding:0;border:0;border-radius:999px;background:#ececf7;color:#393A86;font-size:24px;display:grid;place-items:center;line-height:1;cursor:pointer}
 .suggestion-box-intro{margin:10px 0 16px;color:#716c67;line-height:1.5}.suggestion-form{display:grid;gap:13px}.suggestion-form label{display:grid;gap:7px;color:#393A86;font-size:12px;font-weight:850}.suggestion-form input,.suggestion-form textarea{width:100%;box-sizing:border-box;border:1px solid #dcd7cf;border-radius:12px;background:#fff;padding:12px 13px;color:#24211f;font:600 14px/1.4 inherit}.suggestion-form input[readonly]{background:#f0eee9;color:#716c67}.suggestion-form textarea{resize:vertical;min-height:120px}.suggestion-form .user-password-btn{justify-self:start}
 @media(max-width:620px){.suggestion-box{padding:15px}.suggestion-box-head h3{font-size:19px}.suggestion-form .user-password-btn{width:100%}}
+
+/* ======================================================================
+   v0.90 · HISTÒRIC DESKTOP · eix central blindat
+   ----------------------------------------------------------------------
+   Fix exclusiu per desktop. Cada entrada ocupa tota l'amplada estructural
+   del timeline i la targeta es col·loca dins d'una de les dues meitats.
+   D'aquesta manera el contingut intern (incloses galeries grans) no pot
+   eixamplar el grid ni desplaçar l'eix o els nodes.
+   MOBILE (<=780px) queda sense canvis.
+   ====================================================================== */
+@media(min-width:781px){
+  .history-period-items{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .history-period-items>.history-item{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    padding:0!important;
+    justify-self:stretch!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    box-sizing:border-box!important;
+  }
+  .history-period-items>.history-item .history-node{
+    left:calc(50% - 6.5px)!important;
+    right:auto!important;
+  }
+  .history-period-items>.history-item.left .history-card{
+    grid-column:1!important;
+    justify-self:end!important;
+    width:min(calc(100% - 34px),470px)!important;
+    max-width:470px!important;
+    margin:0 34px 0 0!important;
+  }
+  .history-period-items>.history-item.right .history-card{
+    grid-column:2!important;
+    justify-self:start!important;
+    width:min(calc(100% - 34px),470px)!important;
+    max-width:470px!important;
+    margin:0 0 0 34px!important;
+  }
+  .history-card,
+  .history-media-showcase,
+  .history-media-strip{
+    min-width:0!important;
+    max-width:100%!important;
+    box-sizing:border-box!important;
+  }
+}
