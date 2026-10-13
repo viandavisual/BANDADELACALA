@@ -14,9 +14,9 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.90" />
-  <link rel="stylesheet" href="tuner.css?v=0.90" />
-  <link rel="stylesheet" href="metronome.css?v=0.90" />
+  <link rel="stylesheet" href="style.css?v=0.92" />
+  <link rel="stylesheet" href="tuner.css?v=0.92" />
+  <link rel="stylesheet" href="metronome.css?v=0.92" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -176,9 +176,14 @@
       <section id="view-history" class="view" data-view="history">
         <div id="historyMainContent">
           <div class="history-intro panel">
-            <span class="eyebrow">MEMÒRIA DE LA BANDA</span>
-            <h3>Històric</h3>
-            <p>Una cronologia visual de la Banda de la Cala, ordenada pels diferents períodes de direcció.</p>
+            <div class="archive-title-row">
+              <div>
+                <span class="eyebrow">MEMÒRIA DE LA BANDA</span>
+                <h3>Històric</h3>
+                <p>Una cronologia visual de la Banda de la Cala, ordenada pels diferents períodes de direcció.</p>
+              </div>
+              <div id="historyTotalPhotos" class="archive-total-badge" aria-label="Total de fotografies publicades">0 Fotos</div>
+            </div>
           </div>
           <div id="historyTimeline" class="history-timeline" aria-live="polite"></div>
           <div class="hemeroteca-launch-wrap">
@@ -190,7 +195,10 @@
             <button id="closeHemerotecaBtn" class="hemeroteca-back" type="button" aria-label="Tornar a l'Històric">← HISTÒRIC</button>
           </div>
           <div class="hemeroteca-head panel">
-            <div><span class="eyebrow">ARXIU DOCUMENTAL</span><h3>Hemeroteca</h3><p>Cartells, notícies i entrevistes conservats al llarg de la història de la Banda de la Cala.</p></div>
+            <div class="archive-title-row">
+              <div><span class="eyebrow">ARXIU DOCUMENTAL</span><h3>Hemeroteca</h3><p>Cartells, notícies i entrevistes conservats al llarg de la història de la Banda de la Cala.</p></div>
+              <div id="hemerotecaTotalCartells" class="archive-total-badge" aria-label="Total de cartells disponibles">0 Cartells</div>
+            </div>
           </div>
           <div class="hemeroteca-tabs" role="tablist" aria-label="Tipus de contingut de l'hemeroteca">
             <button class="hemeroteca-tab active" type="button" data-hemeroteca-type="cartells" role="tab" aria-selected="true">CARTELLS</button>
@@ -519,14 +527,14 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.90"></script>
-  <script src="config.js?v=0.90"></script>
-  <script src="data/content-published.js?v=0.90"></script>
-  <script src="content-store.js?v=0.90"></script>
+  <script src="version.js?v=0.92"></script>
+  <script src="config.js?v=0.92"></script>
+  <script src="data/content-published.js?v=0.92"></script>
+  <script src="content-store.js?v=0.92"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.90"></script>
-  <script src="metronome.js?v=0.90"></script>
-  <script src="tuner.js?v=0.90"></script>
-  <script src="app.js?v=0.90"></script>
+  <script src="supabase-client.js?v=0.92"></script>
+  <script src="metronome.js?v=0.92"></script>
+  <script src="tuner.js?v=0.92"></script>
+  <script src="app.js?v=0.92"></script>
 </body>
 </html>

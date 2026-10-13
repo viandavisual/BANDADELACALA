@@ -1,15 +1,13 @@
-BANDA DE LA CALA · PATCH v0.91 DES DE v0.90
-Aplica aquest PATCH únicament sobre una còpia exacta de la v0.90 FULL.
-Inclou suport PDF a NOTÍCIES i slider multipàgina de notícies.
-No requereix SQL.
+BANDA DE LA CALA · PATCH v0.92 DES DE v0.91
 
-BANDA DE LA CALA · PATCH v0.90 des de v0.89
+Aquest PATCH s’ha d’aplicar exclusivament sobre la versió FULL v0.91.
 
-Aplicar aquest PATCH exclusivament sobre una instal·lació v0.89 completa.
+Inclou:
+- portada seleccionable per a NOTÍCIES amb diverses imatges;
+- comptador total de FOTOS a HISTÒRIC;
+- comptador total de CARTELLS a HEMEROTECA;
+- RESUM amb recompte real d’imatges publicades;
+- PLAYER sincronitzat amb les exclusions d’imatges random de HOME;
+- actualització de versió/cache PWA a v0.92.
 
-CANVIS
-- Fix DESKTOP del timeline d'HISTÒRIC: eix, nodes i targetes queden geomètricament ancorats.
-- MOBILE no es modifica.
-- Actualització de versió/caché a v0.90.
-
-No requereix SQL ni canvis de backend.
+No cal executar SQL ni modificar Supabase.

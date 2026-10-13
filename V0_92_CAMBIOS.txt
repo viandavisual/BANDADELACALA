@@ -1,0 +1,25 @@
+BANDA DE LA CALA · v0.92
+
+Canvis respecte v0.91:
+
+1. HEMEROTECA · NOTÍCIES
+- Les notícies amb diverses imatges permeten triar quina fotografia és la PORTADA.
+- La portada seleccionada és la primera diapositiva visible a l’APP.
+- La selecció es conserva en editar i publicar l’entrada.
+
+2. APP · HISTÒRIC
+- La capçalera mostra el recompte total de fotografies publicades al timeline: XX Fotos.
+- El recompte suma totes les fotografies de totes les entrades, no el nombre d’actes.
+
+3. APP · HEMEROTECA
+- La capçalera mostra el recompte total d’entrades CARTELLS disponibles: XX Cartells.
+
+4. EDITOR · RESUM
+- FOTOS HISTÒRIC mostra ara el nombre real d’imatges publicades.
+- El text inferior passa de “Entrades cronològiques” a “Imatges publicades”.
+
+5. APP · PLAYER
+- El fons fotogràfic del PLAYER utilitza exactament el mateix conjunt d’imatges de l’HISTÒRIC autoritzades per a la HOME.
+- Les fotografies excloses del banner random des d’EDITOR/SISTEMA també queden excloses del PLAYER.
+
+No requereix SQL, buckets ni Edge Functions noves.

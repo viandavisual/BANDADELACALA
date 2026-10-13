@@ -2641,3 +2641,10 @@ html.app-is-installed #mobileAppInstallCard,html.app-is-installed #mobileHomeIns
 .hemeroteca-pdf-icon{width:48px;height:48px;display:grid;place-items:center;flex:0 0 48px;border-radius:12px;background:var(--blue);color:#fff;font-size:.7rem;font-weight:950;letter-spacing:.05em}
 .hemeroteca-pdf-link strong,.hemeroteca-pdf-link small{display:block}.hemeroteca-pdf-link strong{font-size:.82rem;line-height:1.25;word-break:break-word}.hemeroteca-pdf-link small{margin-top:4px;color:var(--blue);font-size:.62rem;font-weight:900;letter-spacing:.04em}
 @media(max-width:780px){.hemeroteca-slider .hemeroteca-slide img{max-height:430px}.hemeroteca-slider-nav{width:36px;height:50px}.hemeroteca-slider-nav.prev{left:6px}.hemeroteca-slider-nav.next{right:6px}}
+
+/* v0.92 · Comptadors de l'arxiu dins les capçaleres HISTÒRIC / HEMEROTECA */
+.archive-title-row{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%}
+.archive-title-row>div:first-child{min-width:0}
+.archive-total-badge{flex:0 0 auto;min-width:116px;min-height:54px;padding:0 18px;border:1px solid rgba(212,172,95,.45);border-radius:16px;background:linear-gradient(145deg,#fffaf0,#f5ead2);color:var(--gold-deep);display:grid;place-items:center;font-size:.82rem;font-weight:950;letter-spacing:.045em;white-space:nowrap;box-shadow:0 7px 18px rgba(139,98,40,.08)}
+@media(max-width:780px){.archive-title-row{gap:12px;align-items:flex-start}.archive-total-badge{min-width:94px;min-height:46px;padding:0 12px;border-radius:13px;font-size:.7rem}}
+@media(max-width:480px){.archive-title-row{display:grid;grid-template-columns:minmax(0,1fr) auto}.archive-total-badge{min-width:82px;padding:0 9px;font-size:.64rem}}

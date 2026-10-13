@@ -796,6 +796,8 @@ function toggleHistoryPeriod(periodId){
 function renderHistory(){
   const host=$('#historyTimeline');
   if(!host) return;
+  const photoTotal=(state.content.historicItems||[]).reduce((sum,item)=>sum+getHistoricImages(item).length,0);
+  const totalBadge=$('#historyTotalPhotos'); if(totalBadge) totalBadge.textContent=`${photoTotal} ${photoTotal===1?'Foto':'Fotos'}`;
   const periods=getHistoricPeriods();
   if(!periods.length){host.innerHTML='<div class="history-empty panel">No hi ha períodes configurats.</div>';return;}
   const displayPeriods=[...periods].reverse();
@@ -980,6 +982,12 @@ function hemerotecaImages(item){
   if(!images.length&&item?.imageSrc) images.push(item.imageSrc);
   return images;
 }
+function hemerotecaDisplayImages(item){
+  const images=hemerotecaImages(item);
+  if(item?.type!=='noticies'||images.length<2)return images;
+  const featured=Math.max(0,Math.min(images.length-1,Number.parseInt(item?.featuredImageIndex,10)||0));
+  return featured?[images[featured],...images.filter((_,index)=>index!==featured)]:images;
+}
 function hemerotecaDocuments(item){
   return Array.isArray(item?.documents)?item.documents.filter(doc=>doc&&typeof doc.url==='string'&&doc.url.trim()).map(doc=>({url:doc.url,name:doc.name||'document.pdf',mime:doc.mime||'application/pdf'})):[];
 }
@@ -1005,7 +1013,7 @@ function getHemerotecaItems(type=state.hemerotecaType){
 function hemerotecaViewerItems(type=state.hemerotecaType){
   const out=[];
   for(const item of getHemerotecaItems(type)){
-    const images=hemerotecaImages(item);
+    const images=hemerotecaDisplayImages(item);
     images.forEach((src,imageIndex)=>out.push({
       id:String(item.id),
       imageIndex,
@@ -1031,7 +1039,7 @@ function linkThumbMarkup(item,safeUrl){
   return `<a class="hemeroteca-link-thumb" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Obrir ${esc(item.title||host||'enllaç')}"><span class="hemeroteca-link-thumb-icon">${favicon?`<img src="${esc(favicon)}" alt="" loading="lazy" />`:'↗'}</span><span><strong>${esc(item.title||host||'ENLLAÇ')}</strong><small>${esc(host||'OBRIR ENLLAÇ')} ↗</small></span></a>`;
 }
 function hemerotecaCardMarkup(item){
-  const images=hemerotecaImages(item);
+  const images=hemerotecaDisplayImages(item);
   const documents=hemerotecaDocuments(item);
   let gallery='';
   if(images.length){
@@ -1051,6 +1059,8 @@ function hemerotecaCardMarkup(item){
 
 function renderHemeroteca(){
   const host=$('#hemerotecaGrid'); if(!host)return;
+  const cartellTotal=(state.content.hemerotecaItems||[]).filter(item=>item?.type==='cartells').length;
+  const totalBadge=$('#hemerotecaTotalCartells'); if(totalBadge) totalBadge.textContent=`${cartellTotal} ${cartellTotal===1?'Cartell':'Cartells'}`;
   const panel=$('#hemerotecaPanel');
   if(panel) panel.dataset.hemerotecaType=state.hemerotecaType;
   $$('[data-hemeroteca-type]').forEach(btn=>{const active=btn.dataset.hemerotecaType===state.hemerotecaType;btn.classList.toggle('active',active);btn.setAttribute('aria-selected',active?'true':'false');});
@@ -1289,16 +1299,7 @@ const playerVisualState={
 };
 
 function getPlayerHistoricImages(){
-  const seen=new Set();
-  const result=[];
-  getHistoricItems().forEach(item=>{
-    getHistoricImages(item).forEach(src=>{
-      const url=String(src||'').trim();
-      if(!url || seen.has(url)) return;
-      seen.add(url); result.push(url);
-    });
-  });
-  return result;
+  return homeHistoricHeroImages().slice();
 }
 function shufflePlayerVisualDeck(values){
   const deck=[...(values||[])];
