@@ -1,0 +1,8 @@
+BANDA DE LA CALA · v0.95
+
+- HOME pública · PROPER CONCERT: icono en blanco, etiqueta PROPER CONCERT al 50% de tamaño y nombre del concierto al doble de tamaño y en blanco.
+- APP / USER: al completar el alta y guardar la contraseña privada, la caja COMPTE NOU desaparece inmediatamente.
+- EDITOR / HISTÒRIC: la acción DESTACAR se compacta a una sola estrella; se recoloca para no solaparse con CROP.
+- EDITOR / HISTÒRIC · listado: CROP pasa a mostrarse como un pequeño icono de tijeras sobre cada miniatura.
+- EDITOR / APORTACIONS / REBUTJATS: cada elemento rechazado se muestra como una fila colapsada por defecto, con miniatura, año y metadatos resumidos; al desplegarla aparecen la ficha completa y sus acciones.
+- No requiere SQL ni cambios en Supabase.

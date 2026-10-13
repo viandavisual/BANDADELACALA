@@ -1167,7 +1167,7 @@ function renderHistoricFormPreview(){
     const removeAttr=isNew ? `data-remove-pending-historic="${localIndex}"` : `data-remove-saved-historic="${localIndex}"`;
     const removeLabel=isNew ? 'Descartar fotografia nova' : 'Eliminar fotografia definitivament';
     const cropButton=isNew?'':`<button class="history-image-crop-btn" type="button" data-crop-saved-historic="${localIndex}" title="Fer crop manual">CROP</button>`;
-    const featuredButton=isNew?'':`<button class="history-image-feature-btn ${historicFeaturedSrc===src?'is-featured':''}" type="button" data-feature-saved-historic="${localIndex}" title="Marcar com a imatge destacada">${historicFeaturedSrc===src?'★ DESTACADA':'☆ DESTACAR'}</button>`;
+    const featuredButton=isNew?'':`<button class="history-image-feature-btn ${historicFeaturedSrc===src?'is-featured':''}" type="button" data-feature-saved-historic="${localIndex}" title="Marcar com a imatge destacada">${historicFeaturedSrc===src?'★':'☆'}</button>`;
     const transferControls=isNew?'':`<div class="history-image-transfer-panel"><select data-historic-transfer-target="${localIndex}" aria-label="Destí a Hemeroteca"><option value="cartells">CARTELLS</option><option value="noticies">NOTÍCIES</option><option value="entrevistes">ENTREVISTES</option></select><button type="button" data-move-saved-historic="${localIndex}">MOURE</button></div>`;
     return `<div class="history-image-preview-item ${isNew?'is-new':''}"><div class="history-image-preview-visual"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span>${cropButton}${featuredButton}<button class="history-image-remove-btn" type="button" ${removeAttr} title="${removeLabel}" aria-label="${removeLabel}">×</button></div>${transferControls}</div>`;
   }).join('');
@@ -1436,7 +1436,7 @@ function historicEditorItemMarkup(item){
   const period=historicPeriodById(item.periodId);
   const images=historicImages(item);
   const thumbCols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
-  const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button><button class="historic-crop-thumb-btn" type="button" data-crop-historic="${esc(item.id)}" data-crop-index="${index}" title="Fer crop manual">CROP</button></div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
+  const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button><button class="historic-crop-thumb-btn" type="button" data-crop-historic="${esc(item.id)}" data-crop-index="${index}" title="Fer crop manual" aria-label="Fer crop manual">✂</button></div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
   const checked=selectedHistoricMergeIds.has(item.id)?'checked':'';
   return `<article class="historic-editor-item">
     <label class="historic-merge-check" title="Seleccionar per agrupar"><input type="checkbox" data-select-historic-merge="${esc(item.id)}" ${checked}/><span>AGRUPAR</span></label>
@@ -1895,10 +1895,11 @@ function archiveReviewCard(row){
   const rejected=row.status==='rejected';
   const type=row.media_type==='cartell'?'cartell':'photo';
   const guessed=type==='photo' ? (historicPeriods().filter(period=>yearFitsPeriod(Number(row.year),period))[0]?.id||'') : '';
-  return `<article class="archive-review-card" data-archive-id="${esc(row.id)}">
-    <div class="archive-review-media">${row.preview_url?`<img src="${esc(row.preview_url)}" alt="Material enviat" loading="lazy" />`:'<div class="empty-state">Sense previsualització</div>'}<span>ENVIAT PER ${esc(upperUserName(row.submitter_name)||row.submitter_email||'USER')}</span></div>
-    <div class="archive-review-form">
-      <div class="archive-review-meta"><strong>${type==='cartell'?'CARTELL':'FOTO HISTÒRIC'}</strong><span>${esc(archiveSubmissionDate(row))}</span></div>
+  const preview=row.preview_url?`<img src="${esc(row.preview_url)}" alt="Material enviat" loading="lazy" />`:'<div class="empty-state">Sense previsualització</div>';
+  const submittedBy=esc(upperUserName(row.submitter_name)||row.submitter_email||'USER');
+  const date=esc(archiveSubmissionDate(row));
+  const form=`<div class="archive-review-form">
+      <div class="archive-review-meta"><strong>${type==='cartell'?'CARTELL':'FOTO HISTÒRIC'}</strong><span>${date}</span></div>
       <div class="form-row"><label>Tipus<select data-archive-field="media_type"><option value="photo" ${type==='photo'?'selected':''}>FOTO HISTÒRIC</option><option value="cartell" ${type==='cartell'?'selected':''}>CARTELL</option></select></label><label>Any *<input data-archive-field="year" type="number" min="1900" max="2100" value="${esc(row.year||'')}" required /></label></div>
       <div class="form-row"><label>Mes<input data-archive-field="month" type="number" min="1" max="12" value="${esc(row.month||'')}" placeholder="Opcional" /></label><label>Dia<input data-archive-field="day" type="number" min="1" max="31" value="${esc(row.day||'')}" placeholder="Opcional" /></label></div>
       <label class="archive-period-field" ${type==='cartell'?'hidden':''}>Període HISTÒRIC *<select data-archive-field="period_id">${archivePeriodOptions(row.year,guessed)}</select></label>
@@ -1908,7 +1909,25 @@ function archiveReviewCard(row){
       ${rejected?`<label>Nota interna del rebuig<textarea data-archive-field="rejection_note" rows="2" maxlength="500" placeholder="Opcional">${esc(row.rejection_note||'')}</textarea></label>`:''}
       <div class="archive-crop-summary">${[row.crop_left,row.crop_right,row.crop_top,row.crop_bottom].some(v=>Number(v)>0)?'<strong>CROP CONFIGURAT</strong><span>Es conservarà l’original complet al backup.</span>':'<span>Sense crop manual.</span>'}</div>
       <div class="archive-review-actions"><button class="secondary-btn archive-crop-btn" type="button" data-archive-crop>CROP</button>${rejected?'<button class="secondary-btn" type="button" data-archive-restore>TORNAR A PENDENTS</button>':'<button class="primary-btn" type="button" data-archive-validate>VALIDAR</button><button class="danger-btn" type="button" data-archive-reject>REBUTJAR</button>'}<button class="danger-btn archive-delete-forever" type="button" data-archive-delete>ELIMINAR DEFINITIVAMENT</button></div>
-    </div>
+    </div>`;
+  if(rejected){
+    const extra=[row.title,row.author_source,row.description].filter(Boolean).map(value=>esc(value)).join(' · ');
+    return `<details class="archive-review-card archive-rejected-item" data-archive-id="${esc(row.id)}">
+      <summary class="archive-rejected-summary">
+        <span class="archive-rejected-thumb">${preview}</span>
+        <span class="archive-rejected-summary-copy"><strong>${esc(row.year||'SENSE ANY')}</strong><span>${type==='cartell'?'CARTELL':'FOTO HISTÒRIC'} · ${submittedBy}${extra?` · ${extra}`:''}</span></span>
+        <span class="archive-rejected-date">${date}</span>
+        <span class="archive-rejected-toggle" aria-hidden="true">+</span>
+      </summary>
+      <div class="archive-rejected-expanded">
+        <div class="archive-review-media">${preview}<span>ENVIAT PER ${submittedBy}</span></div>
+        ${form}
+      </div>
+    </details>`;
+  }
+  return `<article class="archive-review-card" data-archive-id="${esc(row.id)}">
+    <div class="archive-review-media">${preview}<span>ENVIAT PER ${submittedBy}</span></div>
+    ${form}
   </article>`;
 }
 function suggestionDate(value){
@@ -2875,7 +2894,7 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.94',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.95',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

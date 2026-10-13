@@ -357,7 +357,7 @@ async function openQuinaNotaGame(){
       scoreSyncSafe:!!dailyResult?.serverChallenge
     });
   };
-  frame.src=`app/minigames/quina-nota-es/app.html?v=0.94&ts=${Date.now()}`;
+  frame.src=`app/minigames/quina-nota-es/app.html?v=0.95&ts=${Date.now()}`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function closeOpenMinigame({resumePlayer=true}={}){
@@ -2087,6 +2087,10 @@ function bindUserAuth(){
       await BandaSupabase.updatePassword(password);
       $('#newUserPassword').value=''; $('#repeatUserPassword').value='';
       state.profile=await BandaSupabase.getMyProfile();
+      // v0.95 · En completar el registre, COMPTE NOU ha de desaparèixer immediatament.
+      // La RPC ja persisteix el canvi; aquest fallback evita que una resposta de perfil
+      // momentàniament desfasada mantingui l'avís visible en la mateixa sessió.
+      if(initialSetup && state.profile) state.profile.must_change_password=false;
       renderUserSection();
       const details=$('#passwordDetails'); if(details) details.open=false;
       if(recovery) clearPasswordRecoveryUrl();
@@ -2342,7 +2346,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.94',root).href;
+    const swUrl=new URL('app/sw.js?v=0.95',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
