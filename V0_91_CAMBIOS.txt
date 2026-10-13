@@ -1,0 +1,16 @@
+BANDA DE LA CALA · v0.91
+
+CANVIS
+- EDITOR / HEMEROTECA / NOTÍCIES: ara accepta fitxers PDF, a més d’imatges i enllaços.
+- Els PDF només són vàlids a NOTÍCIES. Es desen al bucket historic-media dins hemeroteca/noticies/<any>/pdf i mantenen el flux de còpia de seguretat existent.
+- APP / HISTÒRIC / HEMEROTECA / NOTÍCIES: quan una notícia té més d’una imatge, les pàgines ja no apareixen una sota l’altra. Es mostren en un slider d’una sola pàgina visible, amb navegació esquerra/dreta i suport de swipe/scroll horitzontal.
+- Les notícies amb PDF mostren un accés clar per obrir el document.
+- El model de contingut conserva una llista documents per entrada d’hemeroteca.
+
+NO REQUEREIX
+- SQL nou.
+- Buckets nous.
+- Edge Functions noves.
+
+BASE
+- Construïda directament sobre v0.90.

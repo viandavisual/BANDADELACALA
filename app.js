@@ -980,6 +980,9 @@ function hemerotecaImages(item){
   if(!images.length&&item?.imageSrc) images.push(item.imageSrc);
   return images;
 }
+function hemerotecaDocuments(item){
+  return Array.isArray(item?.documents)?item.documents.filter(doc=>doc&&typeof doc.url==='string'&&doc.url.trim()).map(doc=>({url:doc.url,name:doc.name||'document.pdf',mime:doc.mime||'application/pdf'})):[];
+}
 function hemerotecaTypeLabel(type){return ({cartells:'CARTELLS',noticies:'NOTÍCIES',entrevistes:'ENTREVISTES'})[type]||'HEMEROTECA';}
 const HEMEROTECA_MONTHS=['','gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'];
 function hemerotecaDateLabel(item){
@@ -1029,13 +1032,23 @@ function linkThumbMarkup(item,safeUrl){
 }
 function hemerotecaCardMarkup(item){
   const images=hemerotecaImages(item);
-  const gallery=images.length?`<div class="hemeroteca-media ${images.length===1?'single':''}">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))}" /></button>`).join('')}</div>`:'';
+  const documents=hemerotecaDocuments(item);
+  let gallery='';
+  if(images.length){
+    if(item.type==='noticies'&&images.length>1){
+      gallery=`<div class="hemeroteca-slider" data-hemeroteca-slider="${esc(item.id)}"><div class="hemeroteca-slider-track">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button hemeroteca-slide" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))} · pàgina ${index+1}" /></button>`).join('')}</div><button type="button" class="hemeroteca-slider-nav prev" data-hemeroteca-slide-step="-1" aria-label="Pàgina anterior">‹</button><button type="button" class="hemeroteca-slider-nav next" data-hemeroteca-slide-step="1" aria-label="Pàgina següent">›</button><span class="hemeroteca-slider-count">1 / ${images.length}</span></div>`;
+    }else{
+      gallery=`<div class="hemeroteca-media ${images.length===1?'single':''}">${images.map((src,index)=>`<button type="button" class="hemeroteca-image-button" data-hemeroteca-image-id="${esc(item.id)}" data-hemeroteca-image-index="${index}"><img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title||hemerotecaTypeLabel(item.type))}" /></button>`).join('')}</div>`;
+    }
+  }
+  const pdfMarkup=documents.map((doc,index)=>`<a class="hemeroteca-pdf-link" href="${esc(doc.url)}" target="_blank" rel="noopener noreferrer"><span class="hemeroteca-pdf-icon">PDF</span><span><strong>${esc(doc.name||`Document ${index+1}.pdf`)}</strong><small>OBRIR DOCUMENT ↗</small></span></a>`).join('');
   const safeUrl=safeExternalUrl(item.url);
-  const linkPreview=!images.length&&safeUrl?linkThumbMarkup(item,safeUrl):'';
+  const linkPreview=!images.length&&!documents.length&&safeUrl?linkThumbMarkup(item,safeUrl):'';
   const link=safeUrl?`<a class="hemeroteca-link" href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer">OBRIR ENLLAÇ ↗</a>`:'';
   const dateLabel=hemerotecaDateLabel(item);
-  return `<article class="hemeroteca-card type-${esc(item.type)}">${gallery}${linkPreview}<div class="hemeroteca-card-copy"><div class="hemeroteca-card-meta"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${dateLabel?`<strong>${esc(dateLabel)}</strong>`:''}</div><h4>${esc(item.title||hemerotecaTypeLabel(item.type))}</h4>${item.description?`<p class="preserve-lines">${esc(item.description)}</p>`:''}${link}</div></article>`;
+  return `<article class="hemeroteca-card type-${esc(item.type)}">${gallery}${pdfMarkup}${linkPreview}<div class="hemeroteca-card-copy"><div class="hemeroteca-card-meta"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${dateLabel?`<strong>${esc(dateLabel)}</strong>`:''}</div><h4>${esc(item.title||hemerotecaTypeLabel(item.type))}</h4>${item.description?`<p class="preserve-lines">${esc(item.description)}</p>`:''}${link}</div></article>`;
 }
+
 function renderHemeroteca(){
   const host=$('#hemerotecaGrid'); if(!host)return;
   const panel=$('#hemerotecaPanel');
@@ -1060,6 +1073,18 @@ function renderHemeroteca(){
       const grid=group?.querySelector('.hemeroteca-year-grid');
       const open=state.hemerotecaOpenYears.has(year);
       group?.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',open?'true':'false');if(grid)grid.hidden=!open;
+      return;
+    }
+    const sliderNav=event.target.closest('[data-hemeroteca-slide-step]');
+    if(sliderNav && host.contains(sliderNav)){
+      event.preventDefault(); event.stopPropagation();
+      const slider=sliderNav.closest('[data-hemeroteca-slider]');
+      const track=slider?.querySelector('.hemeroteca-slider-track'); if(!slider||!track)return;
+      const slides=[...track.querySelectorAll('.hemeroteca-slide')]; if(!slides.length)return;
+      const current=Math.max(0,Math.min(slides.length-1,Math.round(track.scrollLeft/Math.max(1,track.clientWidth))));
+      const next=Math.max(0,Math.min(slides.length-1,current+Number(sliderNav.dataset.hemerotecaSlideStep||0)));
+      track.scrollTo({left:next*track.clientWidth,behavior:'smooth'});
+      const count=slider.querySelector('.hemeroteca-slider-count'); if(count)count.textContent=`${next+1} / ${slides.length}`;
       return;
     }
     const imageButton=event.target.closest('[data-hemeroteca-image-id]');

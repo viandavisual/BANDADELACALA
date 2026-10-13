@@ -113,6 +113,7 @@
         imageSrc: images[0] || '',
         originalImages: Array.isArray(item.originalImages) ? images.map((src,i)=>typeof item.originalImages[i]==='string'&&item.originalImages[i]?item.originalImages[i]:src) : images.slice(),
         imageCrops: Array.isArray(item.imageCrops) ? images.map((_,i)=>{const c=item.imageCrops[i]&&typeof item.imageCrops[i]==='object'?item.imageCrops[i]:{};return {left:Number(c.left)||0,right:Number(c.right)||0,top:Number(c.top)||0,bottom:Number(c.bottom)||0};}) : images.map(()=>({left:0,right:0,top:0,bottom:0})),
+        documents: Array.isArray(item.documents) ? item.documents.filter(doc=>doc&&typeof doc.url==='string'&&doc.url.trim()).map(doc=>({url:doc.url,name:typeof doc.name==='string'&&doc.name.trim()?doc.name.trim():'document.pdf',mime:typeof doc.mime==='string'&&doc.mime.trim()?doc.mime.trim():'application/pdf'})) : [],
         createdAt: item.createdAt || '',
         submittedByName: item.submittedByName || '',
         submittedByUserId: item.submittedByUserId || '',

@@ -41,6 +41,7 @@ let pendingHistoricOriginalFiles = [];
 let editingHistoricImages = [];
 let pendingHemerotecaImages = [];
 let pendingHemerotecaOriginalFiles = [];
+let pendingHemerotecaDocuments = [];
 let editingHemerotecaImages = [];
 let hemerotecaEditorFilter = 'all';
 let archiveReviewFilter = 'pending';
@@ -1409,7 +1410,7 @@ async function moveHemerotecaPhotoToDestination(itemId,index,target='historic'){
   }
 
   images.splice(index,1); originals.splice(index,1); crops.splice(index,1);
-  const mustRemove=!images.length && (item.type==='cartells' || !String(item.url||'').trim());
+  const mustRemove=!images.length && (item.type==='cartells' || (!String(item.url||'').trim() && !hemerotecaDocuments(item).length));
   if(mustRemove){
     content.hemerotecaItems=(content.hemerotecaItems||[]).filter(entry=>entry.id!==itemId);
   }else{
@@ -1600,6 +1601,9 @@ function hemerotecaImages(item){
   if(!images.length&&item?.imageSrc) images.push(item.imageSrc);
   return images;
 }
+function hemerotecaDocuments(item){
+  return Array.isArray(item?.documents)?item.documents.filter(doc=>doc&&typeof doc.url==='string'&&doc.url.trim()).map(doc=>({url:doc.url,name:doc.name||'document.pdf',mime:doc.mime||'application/pdf'})):[];
+}
 function hemerotecaOriginalImages(item){
   const images=hemerotecaImages(item);
   const originals=Array.isArray(item?.originalImages)?item.originalImages:[];
@@ -1626,8 +1630,10 @@ function renderHemerotecaFormPreview(){
   const wrap=$('#hemerotecaImagePreviewWrap'),grid=$('#hemerotecaImagePreviewGrid'); if(!wrap||!grid)return;
   const savedCount=editingHemerotecaImages.length; const images=[...editingHemerotecaImages,...pendingHemerotecaImages];
   const currentType=$('#hemerotecaType')?.value||'cartells';
-  wrap.hidden=!images.length;
-  grid.innerHTML=images.map((src,index)=>{
+  const existing=(content.hemerotecaItems||[]).find(entry=>entry.id===($('#hemerotecaId')?.value||''));
+  const savedDocuments=hemerotecaDocuments(existing);
+  wrap.hidden=!images.length&&!savedDocuments.length&&!pendingHemerotecaDocuments.length;
+  const imageMarkup=images.map((src,index)=>{
     const isNew=index>=savedCount; const localIndex=isNew?index-savedCount:index;
     const attr=isNew?`data-remove-pending-hemero="${localIndex}"`:`data-remove-saved-hemero="${localIndex}"`;
     let transfer='';
@@ -1639,8 +1645,13 @@ function renderHemerotecaFormPreview(){
     }
     return `<div class="history-image-preview-item ${isNew?'is-new':''}"><div class="history-image-preview-visual"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span><button class="history-image-remove-btn" type="button" ${attr} aria-label="Eliminar imatge">×</button></div>${transfer}</div>`;
   }).join('');
+  const savedDocMarkup=savedDocuments.map((doc,index)=>`<div class="history-image-preview-item hemeroteca-document-preview"><div class="hemeroteca-document-tile"><strong>PDF</strong><span>${esc(doc.name||`Document ${index+1}.pdf`)}</span><button class="history-image-remove-btn" type="button" data-remove-saved-hemero-doc="${index}" aria-label="Eliminar PDF">×</button></div></div>`).join('');
+  const pendingDocMarkup=pendingHemerotecaDocuments.map((file,index)=>`<div class="history-image-preview-item hemeroteca-document-preview is-new"><div class="hemeroteca-document-tile"><strong>PDF</strong><span>${esc(file.name||`Document ${index+1}.pdf`)}</span><button class="history-image-remove-btn" type="button" data-remove-pending-hemero-doc="${index}" aria-label="Eliminar PDF">×</button></div></div>`).join('');
+  grid.innerHTML=imageMarkup+savedDocMarkup+pendingDocMarkup;
   $$('[data-remove-pending-hemero]').forEach(btn=>btn.onclick=()=>{const index=Number(btn.dataset.removePendingHemero||0);pendingHemerotecaImages.splice(index,1);pendingHemerotecaOriginalFiles.splice(index,1);renderHemerotecaFormPreview();});
   $$('[data-remove-saved-hemero]').forEach(btn=>btn.onclick=()=>removeHemerotecaSavedImage(Number(btn.dataset.removeSavedHemero||0)));
+  $$('[data-remove-pending-hemero-doc]').forEach(btn=>btn.onclick=()=>{pendingHemerotecaDocuments.splice(Number(btn.dataset.removePendingHemeroDoc||0),1);renderHemerotecaFormPreview();});
+  $$('[data-remove-saved-hemero-doc]').forEach(btn=>btn.onclick=()=>removeHemerotecaSavedDocument(Number(btn.dataset.removeSavedHemeroDoc||0)));
   $$('[data-move-saved-hemero]').forEach(btn=>btn.onclick=()=>{
     const index=Number(btn.dataset.moveSavedHemero||0);
     const select=document.querySelector(`[data-hemero-transfer-target="${index}"]`);
@@ -1650,22 +1661,22 @@ function renderHemerotecaFormPreview(){
 
 function syncHemerotecaRuleHelp(){
   const type=$('#hemerotecaType')?.value||'cartells'; const help=$('#hemerotecaRuleHelp'); if(!help)return;
-  help.textContent=type==='cartells'?'CARTELLS necessita almenys una imatge. Pots afegir-ne més d’una si vols conservar diferents versions o detalls.':type==='noticies'?'NOTÍCIES admet retalls/imatges, un enllaç web actual o totes dues coses.':'ENTREVISTES admet un enllaç, imatges/documentació o totes dues coses.';
+  help.textContent=type==='cartells'?'CARTELLS necessita almenys una imatge. Pots afegir-ne més d’una si vols conservar diferents versions o detalls.':type==='noticies'?'NOTÍCIES admet imatges, PDFs, un enllaç web o una combinació d’aquests elements. Si hi ha diverses imatges, a l’APP es mostraran com diapositives.':'ENTREVISTES admet un enllaç, imatges/documentació o totes dues coses.';
 }
 function resetHemerotecaForm(){
-  const form=$('#hemerotecaForm'); if(!form)return; form.reset(); pendingHemerotecaImages=[];pendingHemerotecaOriginalFiles=[];editingHemerotecaImages=[];
-  $('#hemerotecaId').value='';$('#hemerotecaFormTitle').textContent='Nova entrada';$('#hemerotecaType').value='cartells';$('#hemerotecaYear').max=String(new Date().getFullYear());$('#hemerotecaMonth').value='';$('#hemerotecaDay').value='';renderHemerotecaFormPreview();syncHemerotecaRuleHelp();
+  const form=$('#hemerotecaForm'); if(!form)return; form.reset(); pendingHemerotecaImages=[];pendingHemerotecaOriginalFiles=[];pendingHemerotecaDocuments=[];editingHemerotecaImages=[];
+  $('#hemerotecaId').value='';$('#hemerotecaFormTitle').textContent='Nova entrada';$('#hemerotecaType').value='cartells';$('#hemerotecaYear').max=String(new Date().getFullYear());$('#hemerotecaMonth').value='';$('#hemerotecaDay').value='';renderHemerotecaFormPreview();syncHemerotecaRuleHelp();syncHemerotecaFileAccept();
 }
 function editHemeroteca(id){
   const item=(content.hemerotecaItems||[]).find(entry=>entry.id===id); if(!item)return;
-  pendingHemerotecaImages=[];pendingHemerotecaOriginalFiles=[];editingHemerotecaImages=hemerotecaImages(item);$('#hemerotecaId').value=item.id;$('#hemerotecaType').value=item.type||'cartells';$('#hemerotecaYear').value=item.year||'';$('#hemerotecaMonth').value=item.month||'';$('#hemerotecaDay').value=item.day||'';$('#hemerotecaTitle').value=item.title||'';$('#hemerotecaDescription').value=item.description||'';$('#hemerotecaUrl').value=item.url||'';$('#hemerotecaFormTitle').textContent='Editar entrada';renderHemerotecaFormPreview();syncHemerotecaRuleHelp();$('#hemerotecaForm').scrollIntoView({behavior:'smooth',block:'start'});
+  pendingHemerotecaImages=[];pendingHemerotecaOriginalFiles=[];pendingHemerotecaDocuments=[];editingHemerotecaImages=hemerotecaImages(item);$('#hemerotecaId').value=item.id;$('#hemerotecaType').value=item.type||'cartells';$('#hemerotecaYear').value=item.year||'';$('#hemerotecaMonth').value=item.month||'';$('#hemerotecaDay').value=item.day||'';$('#hemerotecaTitle').value=item.title||'';$('#hemerotecaDescription').value=item.description||'';$('#hemerotecaUrl').value=item.url||'';$('#hemerotecaFormTitle').textContent='Editar entrada';renderHemerotecaFormPreview();syncHemerotecaRuleHelp();syncHemerotecaFileAccept();$('#hemerotecaForm').scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function removeHemerotecaSavedImage(index){
   const id=$('#hemerotecaId')?.value||''; const item=(content.hemerotecaItems||[]).find(entry=>entry.id===id); if(!item)return;
   const images=hemerotecaImages(item); const src=images[index]; if(!src)return;
-  const remaining=images.length-1; const hasUrl=!!String(item.url||'').trim();
+  const remaining=images.length-1; const hasUrl=!!String(item.url||'').trim(); const hasDocuments=hemerotecaDocuments(item).length>0;
   if(item.type==='cartells'&&!remaining){showToast('Un CARTELL ha de conservar almenys una imatge. Elimina l’entrada completa si ja no la vols.');return;}
-  if(item.type!=='cartells'&&!remaining&&!hasUrl){showToast('Aquesta entrada necessita conservar una imatge o tenir un enllaç. Afegeix primer l’enllaç o elimina l’entrada completa.');return;}
+  if(item.type!=='cartells'&&!remaining&&!hasUrl&&!hasDocuments){showToast('Aquesta entrada necessita conservar una imatge, document o enllaç.');return;}
   if(!confirm('Vols eliminar definitivament aquesta imatge?'))return;
   const originals=hemerotecaOriginalImages(item); const crops=hemerotecaImageCrops(item);
   try{
@@ -1676,6 +1687,17 @@ async function removeHemerotecaSavedImage(index){
   }catch(error){console.error(error);showToast('No s’ha pogut eliminar la imatge de Storage');return;}
   originals.splice(index,1); crops.splice(index,1); images.splice(index,1); item.images=images;item.imageSrc=images[0]||'';item.originalImages=originals;item.imageCrops=crops;editingHemerotecaImages=[...images];save(content,'Imatge de l’Hemeroteca eliminada');renderHemerotecaFormPreview();
 }
+async function removeHemerotecaSavedDocument(index){
+  const id=$('#hemerotecaId')?.value||''; const item=(content.hemerotecaItems||[]).find(entry=>entry.id===id); if(!item)return;
+  const documents=hemerotecaDocuments(item); const doc=documents[index]; if(!doc)return;
+  const images=hemerotecaImages(item); const hasUrl=!!String(item.url||'').trim();
+  if(item.type==='noticies'&&!images.length&&documents.length===1&&!hasUrl){showToast('Aquesta notícia necessita conservar almenys una imatge, PDF o enllaç.');return;}
+  if(!confirm(`Vols eliminar el PDF «${doc.name||'document.pdf'}»?`))return;
+  try{if(supabaseActive&&currentSession&&window.BandaSupabase?.deletePublicFile)await BandaSupabase.deletePublicFile('historic-media',doc.url);}catch(error){console.error(error);showToast('No s’ha pogut eliminar el PDF de Storage');return;}
+  documents.splice(index,1); item.documents=documents;
+  if(save(content,'PDF de l’Hemeroteca eliminat'))renderHemerotecaFormPreview();
+}
+
 async function deleteHemeroteca(id){
   const item=(content.hemerotecaItems||[]).find(entry=>entry.id===id); if(!item)return;
   if(!confirm(`Vols eliminar aquesta entrada de ${hemerotecaTypeLabel(item.type)}?`))return;
@@ -1694,7 +1716,8 @@ function hemerotecaEditorItemMarkup(item){
   const images=hemerotecaImages(item);
   const thumbs=images.length?`<div class="historic-thumb-grid" style="--thumb-cols:${Math.max(1,Math.ceil(Math.sqrt(images.length)))}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-hemero="${esc(item.id)}" data-download-index="${index}" title="Descarregar imatge" aria-label="Descarregar imatge ${index+1}">⇩</button></div>`).join('')}</div>`:'<div class="historic-thumb"><span>▤</span></div>';
   const dateLabel=hemerotecaDateLabel(item);
-  return `<article class="historic-editor-item hemeroteca-editor-item type-${esc(item.type)}"><div class="historic-thumb-wrap">${thumbs}</div><div class="list-main"><div class="list-kicker"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${dateLabel?`<span>·</span><span>${esc(dateLabel)}</span>`:''}${item.url?'<span>·</span><span>ENLLAÇ</span>':''}</div><h3>${esc(item.title||hemerotecaTypeLabel(item.type))}</h3>${item.description?`<p>${esc(item.description)}</p>`:''}</div><div class="list-actions"><button class="tiny-btn" data-edit-hemero="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-hemero="${esc(item.id)}" title="Eliminar">×</button></div></article>`;
+  const documents=hemerotecaDocuments(item);
+  return `<article class="historic-editor-item hemeroteca-editor-item type-${esc(item.type)}"><div class="historic-thumb-wrap">${thumbs}</div><div class="list-main"><div class="list-kicker"><span>${esc(hemerotecaTypeLabel(item.type))}</span>${dateLabel?`<span>·</span><span>${esc(dateLabel)}</span>`:''}${item.url?'<span>·</span><span>ENLLAÇ</span>':''}${documents.length?`<span>·</span><span>${documents.length} PDF</span>`:''}</div><h3>${esc(item.title||hemerotecaTypeLabel(item.type))}</h3>${item.description?`<p>${esc(item.description)}</p>`:''}</div><div class="list-actions"><button class="tiny-btn" data-edit-hemero="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-hemero="${esc(item.id)}" title="Eliminar">×</button></div></article>`;
 }
 function renderHemerotecaEditor(){
   const all=[...(content.hemerotecaItems||[])].sort((a,b)=>{const da=hemerotecaSortValue(a),db=hemerotecaSortValue(b);if(da!==db)return db-da;return String(b.createdAt||'').localeCompare(String(a.createdAt||''));});
@@ -1750,14 +1773,28 @@ function renderHemerotecaEditor(){
   $$('[data-download-hemero]').forEach(btn=>btn.onclick=()=>{const item=(content.hemerotecaItems||[]).find(entry=>entry.id===btn.dataset.downloadHemero);const images=hemerotecaImages(item);const index=Number(btn.dataset.downloadIndex||0);if(item&&images[index])downloadHistoricPhoto(images[index],item,index);});
 }
 
+function syncHemerotecaFileAccept(){
+  const input=$('#hemerotecaImageFile'); if(!input)return;
+  const type=$('#hemerotecaType')?.value||'cartells';
+  input.accept=type==='noticies'?'image/*,application/pdf':'image/*';
+  const label=$('#hemerotecaFileLabel'); if(label)label.firstChild.textContent=type==='noticies'?'Imatges / PDF ':'Imatges ';
+}
+
 function bindHemerotecaEditor(){
-  $('#hemerotecaYear').max=String(new Date().getFullYear());$('#hemerotecaType').addEventListener('change',()=>{syncHemerotecaRuleHelp();renderHemerotecaFormPreview();});
+  $('#hemerotecaYear').max=String(new Date().getFullYear());$('#hemerotecaType').addEventListener('change',()=>{syncHemerotecaRuleHelp();syncHemerotecaFileAccept();renderHemerotecaFormPreview();});
   $('#hemerotecaImageFile').addEventListener('change',async event=>{
     const files=[...(event.target.files||[])]; if(!files.length)return;
     const added=[];
     try{
       showToast(`Preparant ${files.length} ${files.length===1?'imatge':'imatges'}…`);
       for(const file of files){
+        const isPdf=file.type==='application/pdf'||/\.pdf$/i.test(file.name||'');
+        if(isPdf){
+          if(($('#hemerotecaType')?.value||'')!=='noticies'){showToast('Els PDF només es poden afegir a NOTÍCIES');continue;}
+          pendingHemerotecaDocuments.push(file);
+          continue;
+        }
+        if(!String(file.type||'').startsWith('image/')){showToast(`Format no admès: ${file.name||'fitxer'}`);continue;}
         const compressed=await compressHistoricImage(file);
         pendingHemerotecaImages.push(compressed);
         pendingHemerotecaOriginalFiles.push(file);
@@ -1774,7 +1811,7 @@ function bindHemerotecaEditor(){
       showToast('No s’han pogut preparar totes les imatges');
     }finally{event.target.value='';}
   });
-  $('#clearPendingHemerotecaImages')?.addEventListener('click',()=>{pendingHemerotecaImages=[];pendingHemerotecaOriginalFiles=[];renderHemerotecaFormPreview();});
+  $('#clearPendingHemerotecaImages')?.addEventListener('click',()=>{pendingHemerotecaImages=[];pendingHemerotecaOriginalFiles=[];pendingHemerotecaDocuments=[];renderHemerotecaFormPreview();});
   $('#hemerotecaForm').addEventListener('submit',async event=>{
     event.preventDefault();
     const id=$('#hemerotecaId').value||BandaStore.uid('hemero');
@@ -1797,6 +1834,8 @@ function bindHemerotecaEditor(){
     const images=existing?hemerotecaImages(existing):[];
     const originals=existing?hemerotecaOriginalImages(existing):[];
     const crops=existing?hemerotecaImageCrops(existing):[];
+    const documents=existing?hemerotecaDocuments(existing):[];
+    if(type!=='noticies'&&(documents.length||pendingHemerotecaDocuments.length)){showToast('Els PDF només es poden desar a NOTÍCIES');return;}
     try{
       if(pendingHemerotecaImages.length && !cloudMediaReady()) throw new Error('MEDIA_CLOUD_REQUIRED');
       for(let i=0;i<pendingHemerotecaImages.length;i++){
@@ -1810,16 +1849,25 @@ function bindHemerotecaEditor(){
         });
         images.push(src); originals.push(src); crops.push({left:0,right:0,top:0,bottom:0});
       }
+      if(pendingHemerotecaDocuments.length){
+        if(type!=='noticies') throw new Error('PDF_ONLY_NOTICIES');
+        if(!cloudMediaReady()) throw new Error('MEDIA_CLOUD_REQUIRED');
+        for(let i=0;i<pendingHemerotecaDocuments.length;i++){
+          const file=pendingHemerotecaDocuments[i];
+          const src=await uploadImageWithBackup({file,compressed:'',activeFile:file,activeBucket:'historic-media',activeFolder:`hemeroteca/noticies/${year}/pdf`,activeName:`noticia-${year}-${documents.length+i+1}`,backupRoot:`hemeroteca/noticies/${year}/pdf`,backupLabel:`el PDF ${i+1}/${pendingHemerotecaDocuments.length}`});
+          documents.push({url:src,name:file.name||`noticia-${year}-${i+1}.pdf`,mime:file.type||'application/pdf'});
+        }
+      }
     }catch(error){console.error(error);mediaUploadErrorToast(error,'No s’han pogut pujar les imatges');return;}
     if(type==='cartells'&&!images.length){showToast('CARTELLS necessita almenys una imatge');return;}
-    if(type!=='cartells'&&!images.length&&!url){showToast('Afegeix almenys una imatge o un enllaç');return;}
-    const item={id,type,year,month,day,title:$('#hemerotecaTitle').value.trim(),description:$('#hemerotecaDescription').value.trim(),authorSource:existing?.authorSource||'',url,images,imageSrc:images[0]||'',originalImages:originals,imageCrops:crops,createdAt:existing?.createdAt||new Date().toISOString(),submittedByName:existing?.submittedByName||'',submittedByUserId:existing?.submittedByUserId||'',archiveSubmissionId:existing?.archiveSubmissionId||''};
+    if(type!=='cartells'&&!images.length&&!documents.length&&!url){showToast(type==='noticies'?'Afegeix almenys una imatge, PDF o enllaç':'Afegeix almenys una imatge o un enllaç');return;}
+    const item={id,type,year,month,day,title:$('#hemerotecaTitle').value.trim(),description:$('#hemerotecaDescription').value.trim(),authorSource:existing?.authorSource||'',url,images,imageSrc:images[0]||'',originalImages:originals,imageCrops:crops,documents,createdAt:existing?.createdAt||new Date().toISOString(),submittedByName:existing?.submittedByName||'',submittedByUserId:existing?.submittedByUserId||'',archiveSubmissionId:existing?.archiveSubmissionId||''};
     content.hemerotecaItems=content.hemerotecaItems||[];
     const index=content.hemerotecaItems.findIndex(entry=>entry.id===id);
     if(index>=0)content.hemerotecaItems[index]=item;else content.hemerotecaItems.push(item);
     if(save(content,index>=0?'Entrada de l’Hemeroteca actualitzada':'Entrada afegida a l’Hemeroteca'))resetHemerotecaForm();
   });
-  $('#newHemerotecaBtn').onclick=resetHemerotecaForm;$('#cancelHemerotecaEdit').onclick=resetHemerotecaForm;$$('[data-hemeroteca-editor-filter]').forEach(btn=>btn.onclick=()=>{hemerotecaEditorFilter=btn.dataset.hemerotecaEditorFilter;renderHemerotecaEditor();});syncHemerotecaRuleHelp();
+  $('#newHemerotecaBtn').onclick=resetHemerotecaForm;$('#cancelHemerotecaEdit').onclick=resetHemerotecaForm;$$('[data-hemeroteca-editor-filter]').forEach(btn=>btn.onclick=()=>{hemerotecaEditorFilter=btn.dataset.hemerotecaEditorFilter;renderHemerotecaEditor();});syncHemerotecaRuleHelp();syncHemerotecaFileAccept();
 }
 
 
