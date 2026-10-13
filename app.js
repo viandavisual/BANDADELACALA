@@ -357,7 +357,7 @@ async function openQuinaNotaGame(){
       scoreSyncSafe:!!dailyResult?.serverChallenge
     });
   };
-  frame.src=`app/minigames/quina-nota-es/app.html?v=0.93&ts=${Date.now()}`;
+  frame.src=`app/minigames/quina-nota-es/app.html?v=0.94&ts=${Date.now()}`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function closeOpenMinigame({resumePlayer=true}={}){
@@ -444,7 +444,8 @@ function publicConcertCardMarkup(){
   const moment=publicConcertMoment(event);
   const dateLabel=moment?new Intl.DateTimeFormat('ca-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).format(moment):String(event.date||'');
   const details=[dateLabel,event.time,event.place].filter(Boolean).join(' · ');
-  return `<article class="home-card home-concert-card"><span class="big-icon">${iconSvg('calendar')}</span><div><span class="status-pill">OBERT A TOTHOM</span><h4>PROPER CONCERT: ${esc(String(event.title||'').toUpperCase())}</h4><p>${esc(details)}</p></div></article>`;
+  const place=String(event.place||'').trim();
+  return `<article class="home-card home-concert-card"><span class="big-icon">${iconSvg('calendar')}</span><div><h4 class="home-concert-heading">PROPER CONCERT</h4><p class="home-concert-title">${esc(String(event.title||'').toUpperCase())}</p><p class="home-concert-datetime">${esc([dateLabel,event.time].filter(Boolean).join(' · '))}</p><p class="home-concert-place">${esc(place)}</p></div></article>`;
 }
 function renderHome(){
   const welcome=$('#homeWelcomeEyebrow');
@@ -462,7 +463,7 @@ function renderHome(){
     { id:'history', icon:'history', title:copy.history.title, text:copy.history.text, status:'ACTIU' },
     { id:'playlist', icon:'playlist', title:copy.playlist.title, text:copy.playlist.text, status:'ACTIU' },
     { id:'games', icon:'games', title:copy.games.title, text:gamesActive?copy.games.guestText:copy.games.inactiveText, status:gamesActive?'ACTIU':'INACTIU' },
-    { id:'user', icon:'user', title:copy.user.guestTitle, text:copy.user.guestText, status:'ACCÉS' }
+    { id:'user', icon:'user', title:copy.user.guestTitle, text:copy.user.guestText, status:'' }
   ];
   const homeGrid=$('#homeGrid');
   homeGrid.classList.toggle('five-cards', cards.length===5);
@@ -2243,24 +2244,19 @@ function appIsIOS(){
 
 function syncAppInstallUI(){
   const buttons=[$('#homeFooterInstallBtn')].filter(Boolean);
-  const cards=[];
   const statuses=[];
-  if(appIsStandalone()) rememberInstalledAppContext();
-  const installed=appInstallUiMustBeHidden();
+  const installed=appIsStandalone();
+  if(installed) rememberInstalledAppContext();
   document.documentElement.classList.toggle('app-is-installed', installed);
-  cards.forEach(card=>{ card.hidden=installed; });
-  buttons.forEach(btn=>{ btn.hidden=installed; });
-  if(installed){
-    appInstallPrompt=null;
-    statuses.forEach(status=>{ status.textContent='APP instal·lada.'; });
-    return;
-  }
   buttons.forEach(btn=>{
+    btn.hidden=false;
     btn.disabled=false;
-    btn.classList.toggle('install-ready',!!appInstallPrompt);
+    btn.classList.toggle('install-ready',!!appInstallPrompt && !installed);
     btn.textContent='INSTAL·LAR APP';
   });
-  const label=appInstallPrompt ? 'Preparada · prem INSTAL·LAR APP.' : (appIsIOS() ? 'Prem INSTAL·LAR APP i segueix les instruccions.' : 'Prem INSTAL·LAR APP.');
+  const label=installed
+    ? 'APP instal·lada.'
+    : (appInstallPrompt ? 'Preparada · prem INSTAL·LAR APP.' : (appIsIOS() ? 'Prem INSTAL·LAR APP i segueix les instruccions.' : 'Prem INSTAL·LAR APP.'));
   statuses.forEach(status=>{ status.textContent=label; });
 }
 
@@ -2310,7 +2306,8 @@ async function requestNativeAppInstall(){
 }
 
 async function promptAppInstall(){
-  if(appInstallUiMustBeHidden()){
+  if(appIsStandalone()){
+    alert('L’APP ja està instal·lada en aquest dispositiu.');
     syncAppInstallUI();
     return;
   }
@@ -2345,7 +2342,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.83',root).href;
+    const swUrl=new URL('app/sw.js?v=0.94',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

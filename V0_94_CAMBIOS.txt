@@ -1,0 +1,8 @@
+BANDA DE LA CALA · v0.94
+
+- INSTAL·LAR APP queda sempre visible a HOME, tant per USERS registrats com no registrats, sota les xarxes socials i sobre App development.
+- El botó d’instal·lació ja no s’oculta dins la PWA; si ja està instal·lada, informa que l’APP ja està instal·lada.
+- HOME pública: PROPER CONCERT elimina la bubble OBERT A TOTHOM i passa a quatre files: títol de secció, nom del concert, data + hora i lloc.
+- La caixa PROPER CONCERT usa el mateix daurat identificatiu dels CONCERTS del CALENDARI.
+- HOME pública: la caixa USUARI elimina la bubble ACCÉS.
+- No requereix SQL ni canvis a Supabase.
