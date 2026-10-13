@@ -1,0 +1,8 @@
+BANDA DE LA CALA · SUPABASE v0.93
+
+1. Obre Supabase > SQL Editor.
+2. Executa una sola vegada SUPABASE_UPDATE_v0.93.sql.
+3. No cal crear cap bucket ni desplegar cap Edge Function.
+4. Després publica la v0.93 de la web.
+
+Aquesta actualització regenera app_public_content perquè els USERS no registrats rebin HEMEROTECA, les exclusions de fotos HOME/PLAYER i només les dades públiques necessàries dels CONCERTS.

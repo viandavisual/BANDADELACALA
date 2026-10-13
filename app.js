@@ -357,7 +357,7 @@ async function openQuinaNotaGame(){
       scoreSyncSafe:!!dailyResult?.serverChallenge
     });
   };
-  frame.src=`app/minigames/quina-nota-es/app.html?v=0.67&ts=${Date.now()}`;
+  frame.src=`app/minigames/quina-nota-es/app.html?v=0.93&ts=${Date.now()}`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function closeOpenMinigame({resumePlayer=true}={}){
@@ -420,6 +420,32 @@ function getHomeCardCopy(){
     user:{guestTitle:clean(raw.user?.guestTitle,HOME_CARD_COPY_DEFAULTS.user.guestTitle),authenticatedText:clean(raw.user?.authenticatedText,HOME_CARD_COPY_DEFAULTS.user.authenticatedText),guestText:clean(raw.user?.guestText,HOME_CARD_COPY_DEFAULTS.user.guestText)}
   };
 }
+function publicConcertMoment(event){
+  const date=String(event?.date||'').trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const time=String(event?.time||'').trim();
+  const hasTime=/^\d{1,2}:\d{2}$/.test(time);
+  const moment=new Date(`${date}T${hasTime?time:'23:59:59.999'}`);
+  return Number.isFinite(moment.getTime())?moment:null;
+}
+function getNextPublicConcert(){
+  const now=new Date();
+  return [...(state.content.events||[])]
+    .filter(event=>String(event?.type||'').toUpperCase()==='CONCERT')
+    .map(event=>({event,moment:publicConcertMoment(event)}))
+    .filter(row=>row.moment && row.moment.getTime()>=now.getTime())
+    .sort((a,b)=>a.moment-b.moment)[0]?.event||null;
+}
+function publicConcertCardMarkup(){
+  const event=getNextPublicConcert();
+  if(!event){
+    return `<article class="home-card home-concert-card is-empty"><span class="big-icon">${iconSvg('calendar')}</span><div><h4>PROPER CONCERT</h4><p>Encara no hi ha cap concert programat.</p></div></article>`;
+  }
+  const moment=publicConcertMoment(event);
+  const dateLabel=moment?new Intl.DateTimeFormat('ca-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).format(moment):String(event.date||'');
+  const details=[dateLabel,event.time,event.place].filter(Boolean).join(' · ');
+  return `<article class="home-card home-concert-card"><span class="big-icon">${iconSvg('calendar')}</span><div><span class="status-pill">OBERT A TOTHOM</span><h4>PROPER CONCERT: ${esc(String(event.title||'').toUpperCase())}</h4><p>${esc(details)}</p></div></article>`;
+}
 function renderHome(){
   const welcome=$('#homeWelcomeEyebrow');
   if(welcome) welcome.textContent=state.authenticated ? `${currentWelcomeLabel()} ${currentUserDisplayName()}` : 'BENVINGUT/DA';
@@ -432,6 +458,7 @@ function renderHome(){
     { id:'games', icon:'games', title:copy.games.title, text:gamesActive?copy.games.authenticatedText:copy.games.inactiveText, status:gamesActive?'ACTIU':'INACTIU' },
     { id:'user', icon:'user', title:currentUserDisplayName(), text:copy.user.authenticatedText, status:'ACTIU' }
   ] : [
+    { customMarkup:publicConcertCardMarkup() },
     { id:'history', icon:'history', title:copy.history.title, text:copy.history.text, status:'ACTIU' },
     { id:'playlist', icon:'playlist', title:copy.playlist.title, text:copy.playlist.text, status:'ACTIU' },
     { id:'games', icon:'games', title:copy.games.title, text:gamesActive?copy.games.guestText:copy.games.inactiveText, status:gamesActive?'ACTIU':'INACTIU' },
@@ -439,7 +466,7 @@ function renderHome(){
   ];
   const homeGrid=$('#homeGrid');
   homeGrid.classList.toggle('five-cards', cards.length===5);
-  homeGrid.innerHTML = cards.map(card => `<button class="home-card" data-open="${esc(card.id)}">
+  homeGrid.innerHTML = cards.map(card => card.customMarkup || `<button class="home-card" data-open="${esc(card.id)}">
     <span class="big-icon">${iconSvg(card.icon)}</span>
     <div>${card.status && card.status!=='ACTIU'?`<span class="status-pill">${esc(card.status)}</span>`:''}<h4>${esc(card.title)}</h4><p class="preserve-lines">${esc(card.text)}</p></div>
   </button>`).join('');
@@ -1806,7 +1833,9 @@ function toggleGlobalMute(){
 }
 function publicOnlyCopy(source){
   const clean=BandaStore.normalize(source||BandaStore.defaults());
-  clean.events=[];
+  clean.events=(clean.events||[]).filter(event=>String(event?.type||'').toUpperCase()==='CONCERT').map(event=>({
+    id:event.id||'', type:'CONCERT', title:event.title||'', date:event.date||'', time:event.time||'', place:event.place||''
+  }));
   clean.dresscodes=[];
   return clean;
 }
@@ -2201,10 +2230,10 @@ function rememberInstalledAppContext(){
 }
 
 function appInstallUiMustBeHidden(){
-  // Senyals directes del context PWA + fallback persistent.
-  // beforeinstallprompt elimina aquest hint quan el navegador confirma
-  // que la instal·lació torna a estar disponible.
-  return appIsStandalone() || (appHasInstalledHint() && !appInstallPrompt);
+  // v0.93 · El botó només s'oculta quan ESTEM executant realment la PWA.
+  // No fem servir cap hint persistent per decidir visibilitat: podia provocar
+  // falsos positius i amagar INSTAL·LAR APP al navegador d'alguns gestors.
+  return appIsStandalone();
 }
 
 function appIsIOS(){
@@ -2213,10 +2242,9 @@ function appIsIOS(){
 }
 
 function syncAppInstallUI(){
-  const headerBtn=$('#installBtn');
-  const buttons=[$('#homeInstallBtn'),$('#mobileHomeInstallBtn'),headerBtn].filter(Boolean);
-  const cards=[$('#appInstallCard'),$('#mobileAppInstallCard')].filter(Boolean);
-  const statuses=[$('#appInstallStatus'),$('#mobileAppInstallStatus')].filter(Boolean);
+  const buttons=[$('#homeFooterInstallBtn')].filter(Boolean);
+  const cards=[];
+  const statuses=[];
   if(appIsStandalone()) rememberInstalledAppContext();
   const installed=appInstallUiMustBeHidden();
   document.documentElement.classList.toggle('app-is-installed', installed);
@@ -2237,7 +2265,7 @@ function syncAppInstallUI(){
 }
 
 function showAppInstallMessage(message){
-  [$('#appInstallStatus'),$('#mobileAppInstallStatus')].filter(Boolean).forEach(status=>{ status.textContent=message; });
+  const btn=$('#homeFooterInstallBtn'); if(btn) btn.title=message;
 }
 
 async function waitForNativeAppInstallPrompt(timeout=1800){
@@ -2295,9 +2323,7 @@ async function promptAppInstall(){
 
 function bindPwaInstall(){
   syncAppInstallUI();
-  $('#installBtn')?.addEventListener('click',promptAppInstall);
-  $('#homeInstallBtn')?.addEventListener('click',promptAppInstall);
-  $('#mobileHomeInstallBtn')?.addEventListener('click',promptAppInstall);
+  $('#homeFooterInstallBtn')?.addEventListener('click',promptAppInstall);
   window.addEventListener('appinstalled',()=>{
     if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada';
   });

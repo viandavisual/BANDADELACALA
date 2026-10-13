@@ -849,7 +849,7 @@
     await sleep(130);
     if(!titleText.hidden) typeText(titleText, String(initData?.settings?.visibleName||"QUINA NOTA ÉS?"), 26, true);
     await sleep(180);
-    typeText(heroSubMain, "Observa el pentagrama, identifica la nota i tria la resposta correcta. Tens un únic intent. Si l’encertes, guanyes +1 punt.", 14, true);
+    typeText(heroSubMain, registeredUser ? "Observa el pentagrama, identifica la nota i tria la resposta correcta. Tens un únic intent. Si l’encertes, guanyes +1 punt." : "Observa el pentagrama, identifica la nota i tria la resposta correcta. Tens un únic intent. Només els USUARIS REGISTRATS poden acumular punts.", 14, true);
     await sleep(100);
     if(pointsBox) pointsBox.hidden=!registeredUser;
     if(registeredUser){
@@ -912,7 +912,7 @@
     typeText(modalText, isCorrect ? `La nota és ${answer}` : `La resposta correcta era ${answer}`, 18, true);
     typeText(modalSubtext, isCorrect ? "Molt bé!" : "No passa res!", 18, true);
     const tail=isCorrect
-      ? (registeredUser && awarded>0 ? "Guanyes +1 punt musical!" : registeredUser ? "Aquest repte ja estava puntuat." : "Has encertat! Inicia sessió per guardar punts.")
+      ? (registeredUser && awarded>0 ? "Guanyes +1 punt musical!" : registeredUser ? "Aquest repte ja estava puntuat." : "Has encertat! Només els USUARIS REGISTRATS poden acumular punts.")
       : (registeredUser ? "El pròxim repte arriba a les 03:00 🙂" : "Pots jugar, però sense sessió no es guarda el progrés.");
     typeText(modalSubtext2, tail, 16, true);
     typeText(closeModal, "D'ACORD", 22, true);

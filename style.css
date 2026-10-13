@@ -2648,3 +2648,13 @@ html.app-is-installed #mobileAppInstallCard,html.app-is-installed #mobileHomeIns
 .archive-total-badge{flex:0 0 auto;min-width:116px;min-height:54px;padding:0 18px;border:1px solid rgba(212,172,95,.45);border-radius:16px;background:linear-gradient(145deg,#fffaf0,#f5ead2);color:var(--gold-deep);display:grid;place-items:center;font-size:.82rem;font-weight:950;letter-spacing:.045em;white-space:nowrap;box-shadow:0 7px 18px rgba(139,98,40,.08)}
 @media(max-width:780px){.archive-title-row{gap:12px;align-items:flex-start}.archive-total-badge{min-width:94px;min-height:46px;padding:0 12px;border-radius:13px;font-size:.7rem}}
 @media(max-width:480px){.archive-title-row{display:grid;grid-template-columns:minmax(0,1fr) auto}.archive-total-badge{min-width:82px;padding:0 9px;font-size:.64rem}}
+
+
+/* v0.93 · Instal·lació fixa a HOME i proper concert públic */
+.home-install-credit-stack{width:max-content;max-width:100%;margin:0 auto;text-align:center}
+.home-footer-install-btn{display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;margin:0 auto 11px;min-height:42px;padding:10px 14px;white-space:nowrap}
+.home-footer-install-btn[hidden]{display:none!important}
+.home-concert-card{cursor:default}
+.home-concert-card:hover{transform:none;border-color:var(--line);box-shadow:var(--shadow-soft)}
+.home-concert-card h4{line-height:1.25}
+@media(max-width:780px){.home-install-credit-stack{max-width:calc(100vw - 28px)}.home-footer-install-btn{min-height:44px}}

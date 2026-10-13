@@ -1,0 +1,8 @@
+BANDA DE LA CALA · v0.93
+
+- HOME/PLAYER públics respecten homeHeroExcludedImages també sense sessió iniciada.
+- INSTAL·LAR APP passa a una ubicació fixa sota les xarxes socials de HOME i sobre App development; s'oculta únicament dins la PWA instal·lada.
+- HEMEROTECA queda disponible també per a USERS no registrats mitjançant la còpia pública de Supabase.
+- HOME pública incorpora PROPER CONCERT abans d'HISTÒRIC, mostrant títol, data, hora i lloc del CONCERT futur més proper.
+- QUINA NOTA ÉS?: els convidats no veuen puntuació i la descripció interna indica que només els USERS REGISTRATS poden acumular punts.
+- Requereix executar SUPABASE_UPDATE_v0.93.sql una vegada.

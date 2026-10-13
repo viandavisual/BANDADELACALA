@@ -1,13 +1,13 @@
-BANDA DE LA CALA · PATCH v0.92 DES DE v0.91
+BANDA DE LA CALA · PATCH v0.93 des de v0.92
 
-Aquest PATCH s’ha d’aplicar exclusivament sobre la versió FULL v0.91.
+1. Aplica aquest PATCH damunt d'una còpia exacta de la v0.92.
+2. Mantén l'estructura de carpetes.
+3. Executa una sola vegada SUPABASE_UPDATE_v0.93.sql al SQL Editor de Supabase.
+4. Publica els fitxers actualitzats.
 
-Inclou:
-- portada seleccionable per a NOTÍCIES amb diverses imatges;
-- comptador total de FOTOS a HISTÒRIC;
-- comptador total de CARTELLS a HEMEROTECA;
-- RESUM amb recompte real d’imatges publicades;
-- PLAYER sincronitzat amb les exclusions d’imatges random de HOME;
-- actualització de versió/cache PWA a v0.92.
-
-No cal executar SQL ni modificar Supabase.
+CANVIS PRINCIPALS
+- HOME/PLAYER públics respecten les exclusions d'imatges de l'HISTÒRIC.
+- HEMEROTECA disponible també sense login.
+- HOME pública mostra PROPER CONCERT amb títol, data, hora i lloc.
+- INSTAL·LAR APP queda fix sota les xarxes socials de HOME i sobre App development, visible al navegador i ocult només dins la PWA instal·lada.
+- QUINA NOTA ÉS? no mostra puntuació a convidats i indica que només USERS REGISTRATS acumulen punts.
