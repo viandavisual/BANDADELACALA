@@ -1,0 +1,6 @@
+BANDA DE LA CALA · v0.96
+
+- HOME pública · PROPER CONCERT: se reajusta la jerarquía tipográfica.
+- La etiqueta PROPER CONCERT aumenta ligeramente respecto a v0.95.
+- El nombre del concierto reduce su tamaño respecto a v0.95 para equilibrar la caja.
+- Sin cambios funcionales, SQL ni Supabase.
