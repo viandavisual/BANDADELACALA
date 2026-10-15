@@ -827,6 +827,17 @@ function renderHistory(){
   const photoTotal=(state.content.historicItems||[]).reduce((sum,item)=>sum+getHistoricImages(item).length,0);
   const totalBadge=$('#historyTotalPhotos'); if(totalBadge) totalBadge.textContent=`${photoTotal} ${photoTotal===1?'Foto':'Fotos'}`;
   const periods=getHistoricPeriods();
+  const toggleAll=$('#historyToggleAllBtn');
+  if(toggleAll){
+    const anyCollapsed=periods.some(period=>state.collapsedPeriods.has(period.id));
+    toggleAll.textContent=anyCollapsed?'DESPLEGAR TOT':'COLAPSAR TOT';
+    toggleAll.onclick=()=>{
+      const shouldExpand=periods.some(period=>state.collapsedPeriods.has(period.id));
+      state.collapsedPeriods=shouldExpand?new Set():new Set(periods.map(period=>period.id));
+      try{localStorage.setItem('banda-history-collapsed-v021',JSON.stringify([...state.collapsedPeriods]));}catch(_error){}
+      renderHistory();
+    };
+  }
   if(!periods.length){host.innerHTML='<div class="history-empty panel">No hi ha períodes configurats.</div>';return;}
   const displayPeriods=[...periods].reverse();
   host.innerHTML=displayPeriods.map((period,displayIndex)=>{

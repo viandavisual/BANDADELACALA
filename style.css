@@ -2676,3 +2676,25 @@ html.app-is-installed #mobileAppInstallCard,html.app-is-installed #mobileHomeIns
 .home-concert-card .big-icon .blue-fill,.home-concert-card .big-icon .gold-fill{fill:#fff!important}
 .home-concert-card .home-concert-heading{font-size:.68em!important;line-height:1.2!important;margin:4px 0 8px!important}
 .home-concert-card .home-concert-title{font-size:1.48rem!important;line-height:1.16!important;color:#fff!important;margin:0 0 9px!important}
+
+
+/* ============================================================
+   v0.97 · capçalera HISTÒRIC: desplegar/col·lapsar tot
+   ============================================================ */
+.archive-title-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex:0 0 auto}
+.history-toggle-all{
+  min-height:42px;padding:0 13px;border:1px solid rgba(57,58,134,.2);border-radius:13px;background:#f3f3f8;
+  color:var(--blue-deep);font-size:.68rem;font-weight:950;letter-spacing:.045em;white-space:nowrap;cursor:pointer;
+}
+.history-toggle-all:hover{background:#e9e9f4}
+.archive-total-badge{font-size:.95rem!important}
+@media(max-width:780px){
+  .archive-title-actions{gap:6px}
+  .history-toggle-all{min-height:38px;padding:0 9px;border-radius:11px;font-size:.58rem}
+  .archive-total-badge{font-size:.78rem!important}
+}
+@media(max-width:480px){
+  .archive-title-actions{grid-column:2;display:grid;grid-template-columns:1fr;gap:5px;justify-items:stretch}
+  .history-toggle-all{min-height:32px;padding:0 7px;font-size:.52rem}
+  .archive-total-badge{font-size:.72rem!important;min-height:38px!important}
+}

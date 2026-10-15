@@ -1140,3 +1140,23 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
   .archive-rejected-date{display:none}
   .archive-rejected-expanded{grid-template-columns:1fr}
 }
+
+
+/* ============================================================
+   v0.97 · controls HISTÒRIC compactes + crop massiu EXCLUSIONS
+   ============================================================ */
+.history-image-crop-btn{
+  width:28px!important;height:28px!important;min-width:28px!important;padding:0!important;
+  display:grid!important;place-items:center!important;font-size:14px!important;line-height:1!important;
+  letter-spacing:0!important;left:8px!important;bottom:8px!important;
+}
+.history-image-feature-btn{left:44px!important;bottom:8px!important;}
+.historic-crop-thumb-btn{left:5px!important;bottom:5px!important;width:23px!important;height:23px!important;min-width:23px!important;font-size:12px!important;}
+.random-exclusion-thumb{position:relative;display:block}
+.random-exclusion-choice{display:block;cursor:pointer}
+.random-exclusion-crop{
+  position:absolute;left:6px;top:6px;z-index:6;width:28px;height:28px;min-width:28px;padding:0;
+  border:1px solid rgba(255,255,255,.9);border-radius:999px;background:rgba(39,40,95,.9);color:#fff;
+  display:grid;place-items:center;font-size:14px;line-height:1;box-shadow:0 3px 10px rgba(0,0,0,.22);cursor:pointer;
+}
+.random-exclusion-crop:hover{background:#393A86}

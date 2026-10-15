@@ -336,6 +336,26 @@ function editorAllHistoricHeroImages(){
   });
   return out;
 }
+function editorHistoricImageRefsNewestFirst(){
+  const rows=[];
+  (content.historicItems||[]).forEach((item,itemOrder)=>{
+    const images=historicImages(item);
+    images.forEach((src,index)=>{
+      src=String(src||'').trim();
+      if(src) rows.push({src,itemId:item.id,index,createdAt:item.createdAt||'',year:Number(item.year)||0,itemOrder,indexOrder:index});
+    });
+    const featured=String(item?.featuredImageSrc||'').trim();
+    if(featured && !images.includes(featured)) rows.push({src:featured,itemId:item.id,index:-1,createdAt:item.createdAt||'',year:Number(item.year)||0,itemOrder,indexOrder:999999});
+  });
+  const seen=new Set();
+  return rows.sort((a,b)=>{
+    const ta=Date.parse(a.createdAt)||0,tb=Date.parse(b.createdAt)||0;
+    if(ta!==tb)return tb-ta;
+    if(a.year!==b.year)return b.year-a.year;
+    if(a.itemOrder!==b.itemOrder)return b.itemOrder-a.itemOrder;
+    return b.indexOrder-a.indexOrder;
+  }).filter(row=>{if(seen.has(row.src))return false;seen.add(row.src);return true;});
+}
 function homeHeroExcludedImageSet(){
   const raw=content.settings?.homeHeroExcludedImages;
   return new Set((Array.isArray(raw)?raw:[]).map(src=>String(src||'').trim()).filter(Boolean));
@@ -348,27 +368,35 @@ function renderHomeRandomExclusions(){
   const gallery=$('#homeRandomExclusionsGallery');
   const counter=$('#homeRandomExclusionsCount');
   if(!gallery||!counter)return;
-  const images=editorAllHistoricHeroImages();
+  const refs=editorHistoricImageRefsNewestFirst();
   const excluded=homeHeroExcludedImageSet();
   counter.textContent=String(excluded.size);
   counter.title=`${excluded.size} ${excluded.size===1?'imatge exclosa':'imatges excloses'}`;
-  if(!images.length){
+  if(!refs.length){
     gallery.innerHTML='<div class="empty-state">No hi ha fotografies disponibles a l’HISTÒRIC.</div>';
     return;
   }
-  gallery.innerHTML=images.map((src,index)=>{
-    const checked=excluded.has(src);
-    return `<label class="random-exclusion-thumb ${checked?'is-excluded':''}"><input type="checkbox" data-home-random-exclusion="${index}" ${checked?'checked':''} /><span class="random-exclusion-image"><img src="${esc(src)}" alt="Fotografia HISTÒRIC ${index+1}" loading="lazy" /><span class="random-exclusion-state">${checked?'EXCLOSA':'DISPONIBLE'}</span></span></label>`;
+  gallery.innerHTML=refs.map((ref,index)=>{
+    const checked=excluded.has(ref.src);
+    const crop=ref.index>=0?`<button class="random-exclusion-crop" type="button" data-home-random-crop="${index}" title="Fer crop" aria-label="Fer crop">✂</button>`:'';
+    return `<div class="random-exclusion-thumb ${checked?'is-excluded':''}"><label class="random-exclusion-choice"><input type="checkbox" data-home-random-exclusion="${index}" ${checked?'checked':''} /><span class="random-exclusion-image"><img src="${esc(ref.src)}" alt="Fotografia HISTÒRIC ${index+1}" loading="lazy" /><span class="random-exclusion-state">${checked?'EXCLOSA':'DISPONIBLE'}</span></span></label>${crop}</div>`;
   }).join('');
   $$('[data-home-random-exclusion]',gallery).forEach(input=>input.addEventListener('change',()=>{
     if(!editorIsAdmin()){showToast('Aquesta configuració està reservada al USER ADMIN');renderHomeRandomExclusions();return;}
-    const src=images[Number(input.dataset.homeRandomExclusion)];
-    if(!src)return;
+    const ref=refs[Number(input.dataset.homeRandomExclusion)];
+    if(!ref?.src)return;
     content.settings=content.settings||{};
     const next=homeHeroExcludedImageSet();
-    if(input.checked)next.add(src);else next.delete(src);
+    if(input.checked)next.add(ref.src);else next.delete(ref.src);
     content.settings.homeHeroExcludedImages=[...next];
     save(content,input.checked?'Imatge exclosa del banner random':'Imatge recuperada per al banner random');
+    renderHomeRandomExclusions();
+  }));
+  $$('[data-home-random-crop]',gallery).forEach(btn=>btn.addEventListener('click',event=>{
+    event.preventDefault();event.stopPropagation();
+    if(!editorIsAdmin()){showToast('Aquesta configuració està reservada al USER ADMIN');return;}
+    const ref=refs[Number(btn.dataset.homeRandomCrop)];
+    if(ref?.itemId && ref.index>=0)openHistoricCrop(ref.itemId,ref.index);
   }));
 }
 function renderHomeEditor(){
@@ -1166,10 +1194,11 @@ function renderHistoricFormPreview(){
     const localIndex=isNew ? index-savedCount : index;
     const removeAttr=isNew ? `data-remove-pending-historic="${localIndex}"` : `data-remove-saved-historic="${localIndex}"`;
     const removeLabel=isNew ? 'Descartar fotografia nova' : 'Eliminar fotografia definitivament';
-    const cropButton=isNew?'':`<button class="history-image-crop-btn" type="button" data-crop-saved-historic="${localIndex}" title="Fer crop manual">CROP</button>`;
+    const cropButton=isNew?'':`<button class="history-image-crop-btn" type="button" data-crop-saved-historic="${localIndex}" title="Fer crop manual" aria-label="Fer crop manual">✂</button>`;
     const featuredButton=isNew?'':`<button class="history-image-feature-btn ${historicFeaturedSrc===src?'is-featured':''}" type="button" data-feature-saved-historic="${localIndex}" title="Marcar com a imatge destacada">${historicFeaturedSrc===src?'★':'☆'}</button>`;
     const transferControls=isNew?'':`<div class="history-image-transfer-panel"><select data-historic-transfer-target="${localIndex}" aria-label="Destí a Hemeroteca"><option value="cartells">CARTELLS</option><option value="noticies">NOTÍCIES</option><option value="entrevistes">ENTREVISTES</option></select><button type="button" data-move-saved-historic="${localIndex}">MOURE</button></div>`;
-    return `<div class="history-image-preview-item ${isNew?'is-new':''}"><div class="history-image-preview-visual"><img src="${esc(src)}" alt="Previsualització ${index+1}" /><span>${isNew?'NOVA':'DESADA'}</span>${cropButton}${featuredButton}<button class="history-image-remove-btn" type="button" ${removeAttr} title="${removeLabel}" aria-label="${removeLabel}">×</button></div>${transferControls}</div>`;
+    const stateBubble=isNew?'<span>NOVA</span>':'';
+    return `<div class="history-image-preview-item ${isNew?'is-new':''}"><div class="history-image-preview-visual"><img src="${esc(src)}" alt="Previsualització ${index+1}" />${stateBubble}${cropButton}${featuredButton}<button class="history-image-remove-btn" type="button" ${removeAttr} title="${removeLabel}" aria-label="${removeLabel}">×</button></div>${transferControls}</div>`;
   }).join('');
   $$('[data-remove-pending-historic]').forEach(btn=>btn.onclick=()=>{
     const index=Number(btn.dataset.removePendingHistoric||0);
@@ -1436,7 +1465,8 @@ function historicEditorItemMarkup(item){
   const period=historicPeriodById(item.periodId);
   const images=historicImages(item);
   const thumbCols=Math.max(1,Math.ceil(Math.sqrt(images.length||1)));
-  const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" /><button class="historic-download-btn" type="button" data-download-historic="${esc(item.id)}" data-download-index="${index}" title="Descarregar fotografia" aria-label="Descarregar fotografia ${index+1}">⇩</button><button class="historic-crop-thumb-btn" type="button" data-crop-historic="${esc(item.id)}" data-crop-index="${index}" title="Fer crop manual" aria-label="Fer crop manual">✂</button></div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
+  const showListCrop=images.length<3;
+  const thumbs=images.length ? `<div class="historic-thumb-grid" style="--thumb-cols:${thumbCols}">${images.map((src,index)=>`<div class="historic-thumb-cell"><img src="${esc(src)}" alt="" loading="lazy" />${showListCrop?`<button class="historic-crop-thumb-btn" type="button" data-crop-historic="${esc(item.id)}" data-crop-index="${index}" title="Fer crop manual" aria-label="Fer crop manual">✂</button>`:''}</div>`).join('')}</div>` : '<div class="historic-thumb"><span>◷</span></div>';
   const checked=selectedHistoricMergeIds.has(item.id)?'checked':'';
   return `<article class="historic-editor-item">
     <label class="historic-merge-check" title="Seleccionar per agrupar"><input type="checkbox" data-select-historic-merge="${esc(item.id)}" ${checked}/><span>AGRUPAR</span></label>
@@ -1498,7 +1528,6 @@ function renderHistoric(){
   });
   $$('[data-edit-historic]').forEach(btn=>btn.onclick=()=>editHistoric(btn.dataset.editHistoric));
   $$('[data-delete-historic]').forEach(btn=>btn.onclick=()=>deleteHistoric(btn.dataset.deleteHistoric));
-  $$('[data-download-historic]').forEach(btn=>btn.onclick=()=>{ const item=(content.historicItems||[]).find(entry=>entry.id===btn.dataset.downloadHistoric); const images=historicImages(item); const index=Number(btn.dataset.downloadIndex||0); if(item&&images[index]) downloadHistoricPhoto(images[index],item,index); });
   $$('[data-crop-historic]').forEach(btn=>btn.onclick=()=>openHistoricCrop(btn.dataset.cropHistoric,Number(btn.dataset.cropIndex||0)));
   $$('[data-select-historic-merge]').forEach(input=>input.onchange=()=>{const id=input.dataset.selectHistoricMerge;if(input.checked)selectedHistoricMergeIds.add(id);else selectedHistoricMergeIds.delete(id);updateHistoricMergeToolbar();});
   updateHistoricMergeToolbar();
@@ -2080,11 +2109,17 @@ async function saveHistoricCrop(values){
     originals[index]=sourceUrl; crops[index]={...values}; images[index]=nextUrl;
     item.images=[...images]; item.imageSrc=images[0]||''; item.originalImages=originals; item.imageCrops=crops;
     if(item.featuredImageSrc===oldUrl || (!item.featuredImageSrc && index===0)) item.featuredImageSrc=nextUrl;
+    content.settings=content.settings||{};
+    const excluded=homeHeroExcludedImageSet();
+    if(excluded.has(oldUrl)){
+      excluded.delete(oldUrl);excluded.add(nextUrl);
+      content.settings.homeHeroExcludedImages=[...excluded];
+    }
     const saved=save(content,noCrop?'Crop restablert':'CROP HISTÒRIC desat'); if(!saved) throw new Error('CONTENT_SAVE_FAILED');
     if(supabaseActive&&currentSession) await remoteSaveChain;
     if(oldUrl&&oldUrl!==sourceUrl&&oldUrl!==nextUrl){try{await BandaSupabase.deletePublicFile('historic-media',oldUrl);}catch(error){console.warn('No s’ha pogut netejar el crop anterior',error);}}
     if($('#historicId')?.value===item.id){editingHistoricImages=[...images];renderHistoricFormPreview();}
-    closeArchiveCrop(); renderHistoric();
+    closeArchiveCrop(); renderHistoric(); renderHomeRandomExclusions(); renderHomeEditor();
   }catch(error){console.error(error);$('#archiveCropStatus').textContent='No s’ha pogut desar el crop de l’HISTÒRIC.';}
 }
 

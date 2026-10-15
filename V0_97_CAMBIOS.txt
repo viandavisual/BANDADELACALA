@@ -1,0 +1,12 @@
+BANDA DE LA CALA · v0.97
+
+- EDITOR/HISTÒRIC: eliminat el botó de descàrrega de les miniatures del llistat.
+- EDITOR/HISTÒRIC: el CROP del llistat només apareix en entrades d’1 o 2 fotos; amb 3 o més fotos es fa des d’EDITAR ENTRADA.
+- EDITAR ENTRADA: eliminada la bubble DESADA; CROP passa a icona de tisores i es manté l’estrella de destacada.
+- EDITOR/SISTEMA/EXCLUSIONS: fotos ordenades de més noves a més antigues i nou accés de CROP amb tisores per a l’ADMIN.
+- Els CROPS fets des d’EXCLUSIONS actualitzen la mateixa foto a la resta de l’APP/EDITOR i preserven l’estat exclosa/no exclosa.
+- EDITOR/SISTEMA: intercanviades les posicions d’Arxiu multimèdia i Netejar memòria local.
+- APP/HISTÒRIC: nou switch DESPLEGAR TOT / COLAPSAR TOT a l’esquerra del recompte de fotos.
+- APP/HISTÒRIC: recompte XX Fotos lleugerament més gran.
+
+No requereix SQL ni canvis de Supabase.

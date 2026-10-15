@@ -1,8 +1,5 @@
-BANDA DE LA CALA · PATCH v0.96 desde v0.95
+BANDA DE LA CALA · PATCH v0.97 des de v0.96
 
-Cambios:
-- Ajuste tipográfico de la caja PROPER CONCERT de la HOME pública.
-
-Aplicación:
-- Sustituir los archivos incluidos respetando su ruta.
-- No requiere SQL ni cambios en Supabase.
+Aplica aquest PATCH exclusivament sobre una còpia completa v0.96.
+Substitueix els fitxers inclosos mantenint la mateixa estructura de carpetes.
+No requereix SQL ni canvis de Supabase.
