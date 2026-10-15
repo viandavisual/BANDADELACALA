@@ -2109,13 +2109,24 @@ function bindUserAuth(){
     }catch(error){ console.error(error); status.textContent='No s’ha pogut canviar la contrasenya.'; }
   });
 
+  function scrollElementBelowTopbar(element, extraOffset = 12){
+    if(!element) return;
+    const topbar=document.querySelector('.topbar');
+    const topbarHeight=topbar ? topbar.getBoundingClientRect().height : 0;
+    const styles=topbar ? getComputedStyle(topbar) : null;
+    const stickyOffset=topbarHeight + (styles ? (Number.parseFloat(styles.marginBottom||'0')||0) : 0) + extraOffset;
+    const absoluteTop=window.scrollY + element.getBoundingClientRect().top;
+    const target=Math.max(0, absoluteTop - stickyOffset);
+    window.scrollTo({top:target, behavior:'smooth'});
+  }
+
   $('#openSuggestionBoxBtn')?.addEventListener('click',()=>{
     const box=$('#suggestionBox'), btn=$('#openSuggestionBoxBtn'); if(!box) return;
     const willOpen=box.hidden; box.hidden=!willOpen;
     if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
     const status=$('#suggestionStatus'); if(status) status.textContent='';
     const user=$('#suggestionUserName'); if(user) user.value=currentUserDisplayName();
-    if(willOpen) box.scrollIntoView({behavior:'smooth',block:'nearest'});
+    if(willOpen) requestAnimationFrame(()=>scrollElementBelowTopbar(box,14));
   });
   $('#closeSuggestionBoxBtn')?.addEventListener('click',()=>{
     const box=$('#suggestionBox'), btn=$('#openSuggestionBoxBtn'); if(box) box.hidden=true;
@@ -2145,7 +2156,7 @@ function bindUserAuth(){
     const box=$('#archiveUploadBox'); if(!box) return;
     box.hidden=false;
     $('#archiveUploadStatus').textContent='';
-    box.scrollIntoView({behavior:'smooth',block:'start'});
+    requestAnimationFrame(()=>scrollElementBelowTopbar(box,14));
   });
   $('#closeArchiveUploadBtn')?.addEventListener('click',()=>{
     const box=$('#archiveUploadBox'); if(box) box.hidden=true;

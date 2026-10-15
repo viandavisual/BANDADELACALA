@@ -10,7 +10,9 @@
 .metronome-overlay[hidden]{display:none!important}
 .metronome-overlay{position:fixed;inset:0;z-index:5000;display:grid;place-items:center;padding:20px;overflow:auto}
 .metronome-backdrop{position:absolute;inset:0;background:rgba(24,24,36,.72);backdrop-filter:blur(5px)}
-.metronome-dialog{position:relative;z-index:1;width:min(620px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:#fbfaf7;border:1px solid rgba(212,172,95,.36);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.35);padding:24px}
+.metronome-dialog{position:relative;z-index:1;width:min(620px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:#fbfaf7;border:1px solid rgba(212,172,95,.36);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.35);padding:24px;isolation:isolate}
+.metronome-dialog::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:url('assets/brand/imago-banda-de-la-cala.png') center 58%/74% auto no-repeat;opacity:.11;filter:saturate(1.05)}
+.metronome-dialog>*{position:relative;z-index:1}
 .metronome-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--line)}
 .metronome-head .eyebrow{color:var(--gold-deep)}
 .metronome-head h2{margin:3px 0 0;font-size:2rem;line-height:1;color:var(--blue-deep)}

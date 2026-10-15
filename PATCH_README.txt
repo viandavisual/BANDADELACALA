@@ -1,5 +1,1 @@
-BANDA DE LA CALA · PATCH v0.97 des de v0.96
-
-Aplica aquest PATCH exclusivament sobre una còpia completa v0.96.
-Substitueix els fitxers inclosos mantenint la mateixa estructura de carpetes.
-No requereix SQL ni canvis de Supabase.
+PATCH v0.98 des de v0.97\n\nCopia aquests fitxers sobre la v0.97 per obtenir la v0.98.\n

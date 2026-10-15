@@ -1,0 +1,8 @@
+BANDA DE LA CALA · v0.98
+
+- APP / AFINADOR: s'afegeix l'imagotip de la banda com a fons suau dins la caixa de l'eina, mantenint tota la lectura clara.
+- APP / METRÒNOM: s'afegeix el mateix fons corporatiu dins la caixa del metrònom, amb contrast preservat.
+- APP / USER / BÚSTIA DE SUGGERIMENTS: la caixa/botó passa a blau clar i incorpora una icona de carta al principi del títol.
+- APP / USER / PUJAR FATO MULTIMÈDIA AQUÍ: es corregeix el desplaçament automàtic en desplegar la caixa perquè ja no quedi tapada pel header fix.
+- APP / USER / BÚSTIA DE SUGGERIMENTS: el desplaçament d'obertura també respecta millor l'alçada del header.
+- APP: s'actualitzen versions i caché a v0.98.
