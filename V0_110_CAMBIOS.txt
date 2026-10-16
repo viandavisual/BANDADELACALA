@@ -1,0 +1,12 @@
+BANDA DE LA CALA · v0.110
+
+- APP + EDITOR: nou assistent d'instal·lació/recuperació pensat per a usuaris no tècnics.
+- S'elimina definitivament document.referrer android-app:// com a criteri d'APP instal·lada; només es considera instal·lació real quan el context s'executa en display-mode d'app o navigator.standalone.
+- APP: start_url torna a './' i desapareix el marcador ?pwa=1, que ja no és necessari.
+- APP + EDITOR: els manifests s'autoreferencien amb related_applications (platform webapp) i mantenen prefer_related_applications=false, permetent aprofitar getInstalledRelatedApps() quan el navegador ho suporta.
+- Si hi ha prompt natiu, l'assistent mostra un únic botó INSTAL·LAR ARA.
+- En Android, si es detecta una instal·lació relacionada però no s'està executant en mode APP, l'assistent ho tracta com a possible instal·lació residual i guia l'usuari per eliminar-la des de Configuració → Aplicacions.
+- Si Chrome no ofereix el prompt, l'assistent pot preparar l'entorn automàticament: actualitza el Service Worker, elimina només caches antigues de la mateixa PWA i recarrega una sola vegada; no esborra sessió, dades d'usuari ni progrés.
+- En tornar de la recàrrega, l'assistent es reobre automàticament i indica el següent pas.
+- S'afegeix un bloc INFORMACIÓ TÈCNICA plegat per defecte amb estat de mode APP, prompt natiu, instal·lació relacionada, manifest, Service Worker i HTTPS. Serveix per suport amb una sola captura sense molestar l'usuari normal.
+- Els missatges continuen adaptant-se a Android, iOS/iPadOS, Windows i macOS, tant a APP com a EDITOR.

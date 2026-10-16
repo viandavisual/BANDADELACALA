@@ -3,7 +3,7 @@
   "short_name": "Banda de la Cala",
   "description": "Aplicació PWA de la Banda de la Cala de l’Ametlla de Mar.",
   "lang": "ca",
-  "start_url": "./?pwa=1",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -23,5 +23,12 @@
       "purpose": "any maskable"
     }
   ],
-  "id": "/banda-de-la-cala-app"
+  "id": "/banda-de-la-cala-app",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "id": "/banda-de-la-cala-app"
+    }
+  ]
 }

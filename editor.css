@@ -1188,3 +1188,13 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .editor-install-help-text{text-align:left;color:var(--muted);line-height:1.55;font-size:17px}
 .editor-install-help-text p{margin:0 0 10px}.editor-install-help-text ol{margin:8px 0 0;padding-left:22px}.editor-install-help-text li+li{margin-top:7px}
 @media(max-width:620px){.editor-install-help-text{font-size:15px}.editor-install-help-device{font-size:11px!important}}
+
+
+/* v0.110 · assistent d'instal·lació EDITOR */
+.editor-install-assistant-actions{margin-top:18px;display:flex;justify-content:center}
+.editor-install-assistant-primary{width:100%;min-height:48px}
+.editor-install-assistant-tech{margin-top:16px;border-top:1px solid var(--line);padding-top:12px;text-align:left}
+.editor-install-assistant-tech summary{cursor:pointer;text-align:center;color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.08em}
+.editor-install-assistant-tech-body{margin-top:10px;font-size:12px;color:var(--muted)}
+.editor-install-assistant-tech-body dl{margin:0;display:grid;gap:6px}.editor-install-assistant-tech-body dl>div{display:flex;justify-content:space-between;gap:12px;padding:6px 8px;border-radius:9px;background:#f7f1e8}
+.editor-install-assistant-tech-body dt{font-weight:800}.editor-install-assistant-tech-body dd{margin:0;text-align:right;font-weight:800;color:var(--editor-page-gold-dark)}

@@ -23,5 +23,12 @@
       "purpose": "any maskable"
     }
   ],
-  "id": "/banda-de-la-cala-editor"
+  "id": "/banda-de-la-cala-editor",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "id": "/banda-de-la-cala-editor"
+    }
+  ]
 }

@@ -1,4 +1,4 @@
-// PWA INSTALL v0.109 — auditoria robusta APP.
+// PWA INSTALL v0.110 — auditoria robusta APP.
 let appInstallPrompt = null;
 function captureAppInstallPrompt(event){
   event.preventDefault();
@@ -2464,8 +2464,7 @@ function appIsStandalone(){
       window.matchMedia('(display-mode: fullscreen)').matches ||
       window.matchMedia('(display-mode: minimal-ui)').matches ||
       window.matchMedia('(display-mode: window-controls-overlay)').matches ||
-      window.navigator.standalone === true ||
-      String(document.referrer || '').startsWith('android-app://');
+      window.navigator.standalone === true;
   }catch(_error){
     return window.navigator.standalone === true;
   }
@@ -2482,56 +2481,103 @@ function appDeviceInfo(){
   const firefox=/firefox\//i.test(ua) || /fxios/i.test(ua);
   const chrome=!edge && !samsung && (/chrome\//i.test(ua) || /crios/i.test(ua));
   const safari=!chrome && !edge && !firefox && /safari\//i.test(ua);
-  let os=android?'Android':ios?'iOS / iPadOS':windows?'Windows':mac?'macOS':'Dispositiu';
-  let browser=samsung?'Samsung Internet':edge?'Microsoft Edge':chrome?'Chrome':firefox?'Firefox':safari?'Safari':'Navegador';
+  const os=android?'Android':ios?'iOS / iPadOS':windows?'Windows':mac?'macOS':'Dispositiu';
+  const browser=samsung?'Samsung Internet':edge?'Microsoft Edge':chrome?'Chrome':firefox?'Firefox':safari?'Safari':'Navegador';
   return {ua,ios,android,windows,mac,samsung,edge,firefox,chrome,safari,os,browser};
 }
 
-function appInstallHelpMarkup(reason='manual'){
-  const d=appDeviceInfo();
-  const standalone=appIsStandalone();
-  const nativeReady=!!appInstallPrompt;
-  let title='Instal·lació al dispositiu';
-  let html='';
-  if(standalone){
-    title='APP instal·lada';
-    html='<p>Estàs executant <strong>BANDA DE LA CALA</strong> com a aplicació instal·lada.</p>';
-  }else if(d.ios){
-    if(d.safari){
-      html='<p>Per instal·lar-la en aquest dispositiu:</p><ol><li>Prem el botó <strong>Compartir</strong> de Safari.</li><li>Tria <strong>Afegir a la pantalla d’inici</strong>.</li><li>Activa <strong>Obrir com a app web</strong>, si apareix.</li><li>Prem <strong>Afegir</strong>.</li></ol>';
-    }else{
-      html='<p>A iPhone/iPad, obre aquesta pàgina amb <strong>Safari</strong> i després:</p><ol><li>Prem <strong>Compartir</strong>.</li><li>Tria <strong>Afegir a la pantalla d’inici</strong>.</li><li>Prem <strong>Afegir</strong>.</li></ol>';
-    }
-  }else if(d.android){
-    if(nativeReady){
-      html='<p>Chrome/Android té preparada la instal·lació nativa. Tanca aquesta ajuda i torna a prémer <strong>INSTAL·LAR APP</strong>.</p>';
-    }else if(d.samsung){
-      html='<p>Obre el menú de <strong>Samsung Internet</strong> i tria <strong>Afegir pàgina a → Pantalla d’inici</strong> o l’opció equivalent d’instal·lació.</p>';
-    }else{
-      html='<p>El navegador no està oferint ara mateix el diàleg automàtic.</p><ol><li>Obre el menú <strong>⋮</strong> del navegador.</li><li>Busca <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.</li><li>Si Android diu que ja està instal·lada però no la trobes, revisa <strong>Configuració → Aplicacions</strong>, busca <strong>Banda de la Cala</strong>, desinstal·la aquella instal·lació residual i torna-ho a provar.</li></ol>';
-    }
-  }else if(d.windows || d.mac){
-    if(d.chrome || d.edge){
-      html='<p>Busca la icona d’instal·lació a la barra d’adreces o obre el menú del navegador i tria <strong>Instal·lar BANDA DE LA CALA</strong>.</p>';
-    }else if(d.safari && d.mac){
-      html='<p>A Safari, utilitza <strong>Fitxer → Afegir al Dock</strong> si aquesta opció està disponible.</p>';
-    }else{
-      html='<p>Utilitza l’opció <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong> del teu navegador.</p>';
-    }
-  }else{
-    html='<p>Utilitza l’opció <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong> del teu navegador.</p>';
-  }
-  return {title,html,device:`Dispositiu detectat: ${d.os} · ${d.browser} · ${standalone?'executant com a APP':nativeReady?'instal·lació nativa disponible':'mode navegador'}`};
+async function appInstalledRelatedApps(){
+  if(typeof navigator.getInstalledRelatedApps!=='function') return {supported:false,apps:[]};
+  try{
+    const apps=await navigator.getInstalledRelatedApps();
+    return {supported:true,apps:Array.isArray(apps)?apps:[]};
+  }catch(_error){ return {supported:true,apps:[]}; }
 }
 
-function showAppInstallHelp(reason='manual'){
+async function appInstallSignals(){
+  const related=await appInstalledRelatedApps();
+  let swControlled=!!navigator.serviceWorker?.controller, swReady=false, manifestOk=false;
+  try{
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      const expectedScope=new URL('./',location.href).href;
+      swReady=regs.some(reg=>String(reg.scope||'')===expectedScope);
+    }
+  }catch(_error){}
+  try{
+    const manifest=document.querySelector('link[rel="manifest"]')?.href;
+    if(manifest){ const response=await fetch(manifest,{cache:'no-store'}); manifestOk=response.ok; }
+  }catch(_error){}
+  return {
+    standalone:appIsStandalone(),
+    nativeReady:!!appInstallPrompt,
+    relatedSupported:related.supported,
+    relatedApps:related.apps,
+    relatedInstalled:related.apps.some(item=>item?.platform==='webapp' || String(item?.id||'')==='/banda-de-la-cala-app'),
+    swControlled,swReady,manifestOk,secure:window.isSecureContext===true
+  };
+}
+
+function appInstallTechMarkup(signals){
+  const yn=value=>value?'SÍ':'NO';
+  const related=signals.relatedSupported?(signals.relatedInstalled?'INSTAL·LACIÓ DETECTADA':'CAP INSTAL·LACIÓ DETECTADA'):'NO DISPONIBLE EN AQUEST NAVEGADOR';
+  return `<dl><div><dt>Mode APP real</dt><dd>${yn(signals.standalone)}</dd></div><div><dt>Diàleg natiu</dt><dd>${signals.nativeReady?'DISPONIBLE':'NO DISPONIBLE'}</dd></div><div><dt>Instal·lació relacionada</dt><dd>${related}</dd></div><div><dt>Manifest</dt><dd>${signals.manifestOk?'OK':'NO VERIFICAT'}</dd></div><div><dt>Service Worker</dt><dd>${signals.swReady||signals.swControlled?'OK':'NO VERIFICAT'}</dd></div><div><dt>HTTPS</dt><dd>${yn(signals.secure)}</dd></div></dl>`;
+}
+
+function appInstallHelpMarkup(reason='manual',signals={}){
+  const d=appDeviceInfo();
+  let title='Instal·lació al dispositiu',html='',action='',label='';
+  if(signals.standalone){
+    title='APP instal·lada';
+    html='<p>Perfecte. Estàs executant <strong>BANDA DE LA CALA</strong> com a aplicació instal·lada.</p>';
+  }else if(d.ios){
+    title='Instal·lar BANDA DE LA CALA';
+    html=d.safari?'<p>Només has de fer això:</p><ol><li>Prem <strong>Compartir</strong> a Safari.</li><li>Tria <strong>Afegir a la pantalla d’inici</strong>.</li><li>Activa <strong>Obrir com a app web</strong>, si apareix.</li><li>Prem <strong>Afegir</strong>.</li></ol>':'<p>Per instal·lar-la a iPhone/iPad, obre aquesta pàgina amb <strong>Safari</strong> i tria <strong>Compartir → Afegir a la pantalla d’inici</strong>.</p>';
+  }else if(signals.nativeReady){
+    title='Tot preparat';
+    html='<p>El dispositiu ja està preparat per instal·lar <strong>BANDA DE LA CALA</strong>.</p>';
+    action='native'; label='INSTAL·LAR ARA';
+  }else if(d.android && signals.relatedInstalled){
+    title='Hem trobat una instal·lació antiga';
+    html='<p>Android encara conserva una instal·lació de <strong>BANDA DE LA CALA</strong>, però aquesta pàgina no s’està executant com a APP.</p><p><strong>Solució:</strong></p><ol><li>Obre <strong>Configuració → Aplicacions</strong>.</li><li>Busca <strong>Banda de la Cala</strong> i prem <strong>Desinstal·lar</strong>.</li><li>Torna aquí i prem el botó de sota.</li></ol>';
+    action='recheck'; label='JA ESTÀ · CONTINUAR';
+  }else if(d.android && reason==='after-repair'){
+    title='Últim pas';
+    html='<p>Chrome encara no ofereix el botó automàtic. No passa res:</p><ol><li>Obre el menú <strong>⋮</strong> de Chrome.</li><li>Prem <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.</li></ol><p>Si Chrome diu que ja està instal·lada però no la trobes, ves a <strong>Configuració → Aplicacions</strong>, elimina <strong>Banda de la Cala</strong> i torna aquí.</p>';
+    action='recheck'; label='TORNAR A COMPROVAR';
+  }else if(d.android){
+    title='Prepararem la instal·lació';
+    html='<p>No cal que facis res tècnic. Revisarem l’APP i tornarem a carregar-la una vegada perquè Chrome pugui oferir la instal·lació correctament.</p>';
+    action='repair'; label='PREPARAR I TORNAR A PROVAR';
+  }else if(d.windows||d.mac){
+    title='Instal·lar BANDA DE LA CALA';
+    html=(d.chrome||d.edge)?'<p>Obre el menú del navegador o la icona d’instal·lació de la barra d’adreces i tria <strong>Instal·lar BANDA DE LA CALA</strong>.</p>':(d.safari&&d.mac?'<p>A Safari, utilitza <strong>Fitxer → Afegir al Dock</strong>.</p>':'<p>Utilitza l’opció <strong>Instal·lar aplicació</strong> del navegador.</p>');
+  }else{
+    html='<p>Utilitza l’opció <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong> del navegador.</p>';
+  }
+  return {title,html,action,label,device:`Dispositiu detectat: ${d.os} · ${d.browser} · ${signals.standalone?'executant com a APP':signals.nativeReady?'instal·lació preparada':'mode navegador'}`};
+}
+
+async function showAppInstallHelp(reason='manual'){
   const modal=$('#appInstallHelp'); if(!modal) return;
-  const info=appInstallHelpMarkup(reason);
-  const title=$('#appInstallHelpTitle'), device=$('#appInstallHelpDevice'), text=$('#appInstallHelpText');
+  const title=$('#appInstallHelpTitle'),device=$('#appInstallHelpDevice'),text=$('#appInstallHelpText'),primary=$('#appInstallPrimaryAction'),tech=$('#appInstallTech');
+  if(title) title.textContent='Comprovant instal·lació…';
+  if(device) device.textContent='Un moment…';
+  if(text) text.innerHTML='<p>Estem revisant automàticament aquest dispositiu.</p>';
+  if(primary) primary.hidden=true;
+  modal.hidden=false;
+  const signals=await appInstallSignals();
+  const info=appInstallHelpMarkup(reason,signals);
   if(title) title.textContent=info.title;
   if(device) device.textContent=info.device;
   if(text) text.innerHTML=info.html;
-  modal.hidden=false;
+  if(tech) tech.innerHTML=appInstallTechMarkup(signals);
+  if(primary){
+    primary.hidden=!info.action;
+    primary.disabled=false;
+    primary.textContent=info.label||'CONTINUAR';
+    primary.dataset.action=info.action||'';
+  }
 }
 function closeAppInstallHelp(){ const modal=$('#appInstallHelp'); if(modal) modal.hidden=true; }
 
@@ -2544,11 +2590,11 @@ function syncAppInstallUI(){
     btn.disabled=false;
     btn.classList.toggle('install-ready',!!appInstallPrompt && !installed);
     btn.textContent='INSTAL·LAR APP';
-    btn.title=installed?'APP instal·lada':(appInstallPrompt?'Instal·lació disponible':'Veure opcions d’instal·lació');
+    btn.title=installed?'APP instal·lada':(appInstallPrompt?'Instal·lació disponible':'Obrir assistent d’instal·lació');
   });
 }
 
-async function waitForNativeAppInstallPrompt(timeout=1200){
+async function waitForNativeAppInstallPrompt(timeout=1500){
   if(appInstallPrompt) return appInstallPrompt;
   return await new Promise(resolve=>{
     let done=false,timer=0;
@@ -2572,42 +2618,84 @@ async function requestNativeAppInstall(){
     const choice=await prompt.userChoice;
     if(appInstallPrompt===prompt) appInstallPrompt=null;
     syncAppInstallUI();
-    if(choice?.outcome==='accepted') return true;
-    return false;
+    return choice?.outcome==='accepted';
   }catch(error){ console.warn('APP install',error); return false; }
 }
 
-async function promptAppInstall(){
-  if(appIsStandalone()){
-    showAppInstallHelp('installed');
-    return;
+async function repairAppInstallEnvironment(){
+  const primary=$('#appInstallPrimaryAction');
+  if(primary){ primary.disabled=true; primary.textContent='PREPARANT…'; }
+  try{
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      const expectedScope=new URL('./',location.href).href;
+      for(const reg of regs){ if(String(reg.scope||'')===expectedScope){ try{ await reg.update(); }catch(_error){} } }
+    }
+    if('caches' in window){
+      const keys=await caches.keys();
+      await Promise.all(keys.filter(key=>key.startsWith('banda-de-la-cala-app-') && key!=='banda-de-la-cala-app-v0.110').map(key=>caches.delete(key)));
+    }
+  }catch(_error){}
+  const prompt=await waitForNativeAppInstallPrompt(1800);
+  if(prompt){ await showAppInstallHelp('native-ready'); return; }
+  try{ sessionStorage.setItem('bdc-app-install-assistant','1'); }catch(_error){}
+  location.reload();
+}
+
+async function handleAppInstallPrimary(){
+  const action=$('#appInstallPrimaryAction')?.dataset.action||'';
+  if(action==='native'){
+    const accepted=await requestNativeAppInstall();
+    if(!accepted) await showAppInstallHelp('manual');
+  }else if(action==='repair'){
+    await repairAppInstallEnvironment();
+  }else if(action==='recheck'){
+    const prompt=await waitForNativeAppInstallPrompt(1200);
+    await showAppInstallHelp(prompt?'native-ready':'after-repair');
   }
+}
+
+async function promptAppInstall(){
+  if(appIsStandalone()){ await showAppInstallHelp('installed'); return; }
   const d=appDeviceInfo();
-  if(d.ios){ showAppInstallHelp('ios'); return; }
+  if(d.ios){ await showAppInstallHelp('ios'); return; }
   if(appInstallPrompt){
     const accepted=await requestNativeAppInstall();
-    if(!accepted && !appInstallPrompt) syncAppInstallUI();
+    if(!accepted) await showAppInstallHelp('manual');
     return;
   }
-  const accepted=await requestNativeAppInstall();
-  if(!accepted) showAppInstallHelp('fallback');
+  const prompt=await waitForNativeAppInstallPrompt(900);
+  if(prompt){
+    const accepted=await requestNativeAppInstall();
+    if(!accepted) await showAppInstallHelp('manual');
+    return;
+  }
+  await showAppInstallHelp('manual');
 }
 
 function bindPwaInstall(){
   syncAppInstallUI();
   $('#homeFooterInstallBtn')?.addEventListener('click',promptAppInstall);
+  $('#appInstallPrimaryAction')?.addEventListener('click',handleAppInstallPrimary);
   $('#closeAppInstallHelp')?.addEventListener('click',closeAppInstallHelp);
   $('#appInstallHelpBackdrop')?.addEventListener('click',closeAppInstallHelp);
   window.addEventListener('appinstalled',()=>{
     appInstallPrompt=null;
     syncAppInstallUI();
     if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada';
+    showAppInstallHelp('installed');
   });
   ['standalone','fullscreen','minimal-ui','window-controls-overlay'].forEach(mode=>{
     window.matchMedia?.(`(display-mode: ${mode})`)?.addEventListener?.('change',syncAppInstallUI);
   });
   window.addEventListener('pageshow',syncAppInstallUI);
   document.addEventListener('visibilitychange',()=>{ if(!document.hidden) syncAppInstallUI(); });
+  try{
+    if(sessionStorage.getItem('bdc-app-install-assistant')==='1'){
+      sessionStorage.removeItem('bdc-app-install-assistant');
+      setTimeout(()=>showAppInstallHelp('after-repair'),900);
+    }
+  }catch(_error){}
 }
 
 async function registerSW(){
@@ -2621,7 +2709,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.109',root).href;
+    const swUrl=new URL('app/sw.js?v=0.110',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
