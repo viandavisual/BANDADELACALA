@@ -2189,14 +2189,27 @@ function bindUserAuth(){
   });
 
   $('#openArchiveUploadBtn')?.addEventListener('click',()=>{
-    const box=$('#archiveUploadBox'); if(!box) return;
-    box.hidden=false;
+    const box=$('#archiveUploadBox'), btn=$('#openArchiveUploadBtn'); if(!box) return;
+    const willOpen=box.hidden; box.hidden=!willOpen;
+    if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
     $('#archiveUploadStatus').textContent='';
-    requestAnimationFrame(()=>scrollElementBelowTopbar(box,14));
+    if(willOpen) requestAnimationFrame(()=>scrollElementBelowTopbar(box,14));
   });
   $('#closeArchiveUploadBtn')?.addEventListener('click',()=>{
-    const box=$('#archiveUploadBox'); if(box) box.hidden=true;
+    const box=$('#archiveUploadBox'), btn=$('#openArchiveUploadBtn'); if(box) box.hidden=true;
+    if(btn) btn.setAttribute('aria-expanded','false');
     $('#archiveUploadStatus').textContent='';
+  });
+
+  $('#openUserOptionsBtn')?.addEventListener('click',()=>{
+    const box=$('#userOptionsBox'), btn=$('#openUserOptionsBtn'); if(!box) return;
+    const willOpen=box.hidden; box.hidden=!willOpen;
+    if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
+    if(willOpen) requestAnimationFrame(()=>scrollElementBelowTopbar(box,14));
+  });
+  $('#closeUserOptionsBtn')?.addEventListener('click',()=>{
+    const box=$('#userOptionsBox'), btn=$('#openUserOptionsBtn'); if(box) box.hidden=true;
+    if(btn) btn.setAttribute('aria-expanded','false');
   });
   $('#archiveUploadFile')?.addEventListener('change',event=>{
     const preview=$('#archiveUploadPreview');

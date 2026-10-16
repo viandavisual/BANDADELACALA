@@ -1,3 +1,3 @@
-PATCH v0.101 des de v0.100
+PATCH v0.102 des de v0.101
 
-Copia aquests fitxers sobre la v0.100 per obtenir la v0.101.
+Copia aquests fitxers sobre la v0.101 per obtenir la v0.102.

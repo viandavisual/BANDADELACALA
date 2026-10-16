@@ -14,9 +14,9 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.101" />
-  <link rel="stylesheet" href="tuner.css?v=0.101" />
-  <link rel="stylesheet" href="metronome.css?v=0.101" />
+  <link rel="stylesheet" href="style.css?v=0.102" />
+  <link rel="stylesheet" href="tuner.css?v=0.102" />
+  <link rel="stylesheet" href="metronome.css?v=0.102" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -284,14 +284,23 @@
             </div>
             <div id="passwordSetupNotice" class="password-setup-notice" hidden><strong>COMPTE NOU</strong><span>Per completar l’alta, tria ara la contrasenya privada que vulguis utilitzar. Aquesta contrasenya només la coneixeràs tu.</span></div>
 
-            <div id="userDriveBox" class="user-settings-box user-drive-box">
-              <div class="user-settings-title"><span class="eyebrow">PARTITURES</span><h4>Ja no hi ha excusa</h4></div>
-              <a class="drive-scores-btn" href="https://drive.google.com/drive/folders/1KMBoe27wYKPcb-BmHFdJxxXQwAL9FbXq" target="_blank" rel="noopener noreferrer">
-                <span class="drive-scores-icon" aria-hidden="true">
-                  <svg viewBox="0 0 42 34"><path d="M8 6h18v22H8zM13 2h18v22" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M18 9v9.2a3.2 3.2 0 1 1-2-3V8l10-2v9.2a3.2 3.2 0 1 1-2-3V7.2Z" fill="currentColor"/></svg>
+            <div class="user-tools-grid user-tools-grid-primary" aria-label="Eines musicals i partitures">
+              <a id="userDriveBox" class="user-tool-tile user-tool-link user-tool-partitures" href="https://drive.google.com/drive/folders/1KMBoe27wYKPcb-BmHFdJxxXQwAL9FbXq" target="_blank" rel="noopener noreferrer">
+                <span class="user-tool-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32"><path d="M7 6h14v20H7zM11 3h14v20"/><path d="M14 10v9.2a3 3 0 1 1-2-2.8V9l9-2v8.2a3 3 0 1 1-2-2.8V8.2Z"/></svg>
                 </span>
-                <span>PARTITURES ENTRA AQUÍ</span>
+                <span class="user-tool-title">PARTITURES</span>
               </a>
+
+              <button id="openTunerBtn" class="user-tool-tile tuner-launcher" type="button">
+                <span class="user-tool-icon" aria-hidden="true">♪</span>
+                <span class="user-tool-title">AFINADOR</span>
+              </button>
+
+              <button id="openMetronomeBtn" class="user-tool-tile metronome-launcher" type="button">
+                <span class="user-tool-icon" aria-hidden="true">♩</span>
+                <span class="user-tool-title">METRÒNOM</span>
+              </button>
             </div>
 
             <details id="userDemosBox" class="user-settings-box user-demos-box">
@@ -302,21 +311,30 @@
               <div id="userDemosList" class="user-demos-list"></div>
             </details>
 
-            <div class="user-music-tools-row">
-              <button id="openTunerBtn" class="tuner-launcher" type="button">
-                <span class="tuner-launcher-icon" aria-hidden="true">♪</span>
-                <span>AFINADOR</span>
+            <div class="user-tools-grid user-tools-grid-secondary" aria-label="Accions del perfil">
+              <button id="openArchiveUploadBtn" class="user-tool-tile archive-upload-launcher" type="button" aria-expanded="false" aria-controls="archiveUploadBox">
+                <span class="user-tool-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32"><path d="M6 7h20v18H6z"/><path d="m8.5 21 5.2-6 4 4 2.8-3 3 5"/><circle cx="21" cy="11" r="2"/></svg>
+                </span>
+                <span class="user-tool-title">PUJAR FATO MULTIMEDIA</span>
               </button>
 
-              <button id="openMetronomeBtn" class="metronome-launcher" type="button">
-                <span class="metronome-launcher-icon" aria-hidden="true">♩</span>
-                <span>METRÒNOM</span>
+              <button id="openUserOptionsBtn" class="user-tool-tile user-options-launcher" type="button" aria-expanded="false" aria-controls="userOptionsBox">
+                <span class="user-tool-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32"><path d="M16 11.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z"/><path d="m13.5 4.7.8-2.2h3.4l.8 2.2 2.1.9 2.1-1 2.4 2.4-1 2.1.9 2.1 2.2.8v3.4l-2.2.8-.9 2.1 1 2.1-2.4 2.4-2.1-1-2.1.9-.8 2.2h-3.4l-.8-2.2-2.1-.9-2.1 1-2.4-2.4 1-2.1-.9-2.1-2.2-.8V13l2.2-.8.9-2.1-1-2.1 2.4-2.4 2.1 1Z"/></svg>
+                </span>
+                <span class="user-tool-title">OPCIONS D'USUARI</span>
+              </button>
+
+              <button id="openSuggestionBoxBtn" class="user-tool-tile suggestion-launcher" type="button" aria-expanded="false" aria-controls="suggestionBox">
+                <span class="user-tool-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32"><rect x="4" y="7" width="24" height="18" rx="2"/><path d="m5.5 9 10.5 8 10.5-8"/></svg>
+                </span>
+                <span class="user-tool-title">BÚSTIA DE SUGGERIMENTS</span>
               </button>
             </div>
 
-            <button id="openArchiveUploadBtn" class="archive-upload-launcher" type="button">PUJAR FATO MULTIMEDIA AQUÍ</button>
-
-            <section id="archiveUploadBox" class="archive-upload-box" hidden>
+            <section id="archiveUploadBox" class="archive-upload-box user-expansion-box" hidden>
               <div class="archive-upload-head">
                 <div><span class="eyebrow">ARXIU DE LA BANDA</span><h3>ENVIA EL TEU MATERIAL</h3></div>
                 <button id="closeArchiveUploadBtn" class="archive-upload-close" type="button" aria-label="Tancar">×</button>
@@ -344,50 +362,55 @@
               </form>
             </section>
 
-            <div class="user-settings-grid" aria-label="Configuració del perfil">
-              <details id="avatarProfileDetails" class="user-settings-box user-profile-tile user-avatar-form">
-                <summary><strong>AVATAR</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
-                <form id="avatarProfileForm" class="avatar-profile-body">
-                  <div id="avatarChoices" class="avatar-choices"></div>
-                  <button class="user-password-btn" type="submit">DESAR AVATAR</button>
-                  <small id="avatarProfileStatus" class="user-auth-status"></small>
-                </form>
-              </details>
+            <section id="userOptionsBox" class="user-options-box user-expansion-box" hidden>
+              <div class="user-options-head">
+                <div><span class="eyebrow">PERFIL</span><h3>OPCIONS D'USUARI</h3></div>
+                <button id="closeUserOptionsBtn" class="user-options-close" type="button" aria-label="Tancar">×</button>
+              </div>
+              <div class="user-settings-grid" aria-label="Configuració del perfil">
+                <details id="avatarProfileDetails" class="user-settings-box user-profile-tile user-avatar-form">
+                  <summary><strong>AVATAR</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+                  <form id="avatarProfileForm" class="avatar-profile-body">
+                    <div id="avatarChoices" class="avatar-choices"></div>
+                    <button class="user-password-btn" type="submit">DESAR AVATAR</button>
+                    <small id="avatarProfileStatus" class="user-auth-status"></small>
+                  </form>
+                </details>
 
-              <details id="nameProfileDetails" class="user-settings-box user-profile-tile user-name-form">
-                <summary><strong>NOM</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
-                <form id="nameProfileForm" class="user-profile-tile-body">
-                  <h4>Canvia'l aquí</h4>
-                  <input id="profileDisplayName" type="text" maxlength="120" required aria-label="Nom" />
-                  <button class="user-password-btn" type="submit">DESAR NOM</button>
-                  <small id="nameProfileStatus" class="user-auth-status"></small>
-                </form>
-              </details>
+                <details id="nameProfileDetails" class="user-settings-box user-profile-tile user-name-form">
+                  <summary><strong>NOM</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+                  <form id="nameProfileForm" class="user-profile-tile-body">
+                    <h4>Canvia'l aquí</h4>
+                    <input id="profileDisplayName" type="text" maxlength="120" required aria-label="Nom" />
+                    <button class="user-password-btn" type="submit">DESAR NOM</button>
+                    <small id="nameProfileStatus" class="user-auth-status"></small>
+                  </form>
+                </details>
 
-              <details id="genderProfileDetails" class="user-settings-box user-profile-tile user-gender-box">
-                <summary><strong>GÈNERE</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
-                <div id="genderProfileBox" class="user-profile-tile-body">
-                  <div class="gender-choice-row" role="group" aria-label="Gènere">
-                    <button class="gender-choice-btn" type="button" data-profile-gender="male" aria-pressed="false"><span aria-hidden="true">♂</span><strong>MASCULÍ</strong></button>
-                    <button class="gender-choice-btn" type="button" data-profile-gender="female" aria-pressed="false"><span aria-hidden="true">♀</span><strong>FEMENÍ</strong></button>
+                <details id="genderProfileDetails" class="user-settings-box user-profile-tile user-gender-box">
+                  <summary><strong>GÈNERE</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+                  <div id="genderProfileBox" class="user-profile-tile-body">
+                    <div class="gender-choice-row" role="group" aria-label="Gènere">
+                      <button class="gender-choice-btn" type="button" data-profile-gender="male" aria-pressed="false"><span aria-hidden="true">♂</span><strong>MASCULÍ</strong></button>
+                      <button class="gender-choice-btn" type="button" data-profile-gender="female" aria-pressed="false"><span aria-hidden="true">♀</span><strong>FEMENÍ</strong></button>
+                    </div>
+                    <small id="genderProfileStatus" class="user-auth-status"></small>
                   </div>
-                  <small id="genderProfileStatus" class="user-auth-status"></small>
-                </div>
-              </details>
+                </details>
 
-              <details id="passwordDetails" class="user-settings-box user-profile-tile user-password-details">
-                <summary><strong>CONTRASENYA</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
-                <form id="changePasswordForm" class="change-password-form user-profile-tile-body">
-                  <label>Nova contrasenya<input id="newUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
-                  <label>Repetir contrasenya<input id="repeatUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
-                  <button class="user-password-btn" type="submit">DESAR CONTRASENYA</button>
-                  <small id="changePasswordStatus" class="user-auth-status"></small>
-                </form>
-              </details>
-            </div>
+                <details id="passwordDetails" class="user-settings-box user-profile-tile user-password-details">
+                  <summary><strong>CONTRASENYA</strong><span class="details-chevron" aria-hidden="true">⌄</span></summary>
+                  <form id="changePasswordForm" class="change-password-form user-profile-tile-body">
+                    <label>Nova contrasenya<input id="newUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+                    <label>Repetir contrasenya<input id="repeatUserPassword" type="password" autocomplete="new-password" minlength="8" required /></label>
+                    <button class="user-password-btn" type="submit">DESAR CONTRASENYA</button>
+                    <small id="changePasswordStatus" class="user-auth-status"></small>
+                  </form>
+                </details>
+              </div>
+            </section>
 
-            <button id="openSuggestionBoxBtn" class="suggestion-launcher" type="button" aria-expanded="false" aria-controls="suggestionBox">BÚSTIA DE SUGGERIMENTS</button>
-            <section id="suggestionBox" class="suggestion-box" hidden>
+            <section id="suggestionBox" class="suggestion-box user-expansion-box" hidden>
               <div class="suggestion-box-head">
                 <div><span class="eyebrow">BÚSTIA DE SUGGERIMENTS</span><h3>AJUDA'NS A MILLORAR L'APP</h3></div>
                 <button id="closeSuggestionBoxBtn" class="suggestion-box-close" type="button" aria-label="Tancar">×</button>
@@ -526,14 +549,14 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.101"></script>
-  <script src="config.js?v=0.101"></script>
-  <script src="data/content-published.js?v=0.101"></script>
-  <script src="content-store.js?v=0.101"></script>
+  <script src="version.js?v=0.102"></script>
+  <script src="config.js?v=0.102"></script>
+  <script src="data/content-published.js?v=0.102"></script>
+  <script src="content-store.js?v=0.102"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.101"></script>
-  <script src="metronome.js?v=0.101"></script>
-  <script src="tuner.js?v=0.101"></script>
-  <script src="app.js?v=0.101"></script>
+  <script src="supabase-client.js?v=0.102"></script>
+  <script src="metronome.js?v=0.102"></script>
+  <script src="tuner.js?v=0.102"></script>
+  <script src="app.js?v=0.102"></script>
 </body>
 </html>
