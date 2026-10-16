@@ -1,1 +1,3 @@
-PATCH v0.98 des de v0.97\n\nCopia aquests fitxers sobre la v0.97 per obtenir la v0.98.\n
+PATCH v0.99 des de v0.98
+
+Copia aquests fitxers sobre la v0.98 per obtenir la v0.99. No requereix SQL nou.

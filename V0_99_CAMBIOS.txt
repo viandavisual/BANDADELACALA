@@ -1,0 +1,10 @@
+BANDA DE LA CALA · v0.99
+
+- APP / USER REGISTRAT: nova caixa col·lapsable DEMOS PROPER CONCERT just sota PARTITURES.
+- La caixa mostra una llista de vídeos amb títol + miniatura de YouTube i cada element obre el vídeo original.
+- La funció només es mostra dins l'àrea privada del USER registrat.
+- EDITOR: nova secció DEMOS accessible a USER ADMIN i USER GESTOR.
+- EDITOR / DEMOS: permet afegir, editar, eliminar i ordenar tants vídeos com calgui mitjançant TÍTOL + enllaç de YouTube.
+- Suport per URLs youtube.com/watch, youtu.be, shorts, embed i live.
+- Les demos es desen dins el contingut compartit existent; no cal SQL nou ni buckets nous.
+- Versions i caches PWA actualitzades a v0.99.

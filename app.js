@@ -1866,6 +1866,7 @@ function refreshContent(next){
   renderHistory();
   renderHemeroteca();
   renderGames();
+  if(state.authenticated) renderUserDemos();
   syncPlayerVisualCarousel();
 }
 
@@ -1928,6 +1929,31 @@ function renderAvatarChoices(){
   host.innerHTML=AVAILABLE_AVATARS.map(avatar=>`<label class="avatar-choice"><input type="radio" name="profileAvatar" value="${esc(avatar.key)}" ${selected===avatar.key?'checked':''}/><span class="avatar-choice-frame"><img src="${esc(avatar.src)}" alt="${esc(avatar.label)}" onerror="this.classList.add('avatar-missing')" /><span>${esc(avatar.label)}</span></span></label>`).join('');
 }
 
+function youtubeVideoId(url){
+  const raw=String(url||'').trim();
+  if(!raw) return '';
+  try{
+    const parsed=new URL(raw,/^https?:/i.test(raw)?undefined:'https://www.youtube.com');
+    const host=parsed.hostname.replace(/^www\./,'').toLowerCase();
+    if(host==='youtu.be') return parsed.pathname.split('/').filter(Boolean)[0]||'';
+    if(host.endsWith('youtube.com')){
+      if(parsed.searchParams.get('v')) return parsed.searchParams.get('v')||'';
+      const parts=parsed.pathname.split('/').filter(Boolean);
+      if(['shorts','embed','live'].includes(parts[0])) return parts[1]||'';
+    }
+  }catch(_error){}
+  return '';
+}
+function renderUserDemos(){
+  const host=$('#userDemosList'); if(!host) return;
+  const demos=(state.content?.demos||[]).filter(item=>item?.title&&item?.url);
+  host.innerHTML=demos.length?demos.map(item=>{
+    const videoId=item.videoId||youtubeVideoId(item.url);
+    const thumb=videoId?`https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`:'';
+    return `<a class="user-demo-item" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer"><span class="user-demo-thumb">${thumb?`<img loading="lazy" decoding="async" src="${esc(thumb)}" alt="" />`:'<span class="user-demo-thumb-fallback">▶</span>'}<span class="user-demo-play" aria-hidden="true">▶</span></span><strong>${esc(item.title)}</strong></a>`;
+  }).join(''):'<p class="user-demos-empty">Encara no hi ha demos preparades per al proper concert.</p>';
+}
+
 function renderUserSection(){
   const login=$('#userLoginCard'), profile=$('#userProfileCard');
   if(!login||!profile) return;
@@ -1943,6 +1969,7 @@ function renderUserSection(){
   $$('[data-profile-gender]').forEach(btn=>{ const active=btn.dataset.profileGender===selectedGender; btn.classList.toggle('selected',active); btn.setAttribute('aria-pressed',active?'true':'false'); });
   renderAvatarChoices();
   renderUserAvatar();
+  renderUserDemos();
   const needsPassword=!!state.profile?.must_change_password;
   const temp=$('#passwordSetupNotice');
   if(temp) temp.hidden=!needsPassword;

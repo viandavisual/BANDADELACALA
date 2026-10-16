@@ -60,6 +60,12 @@
       src: String(track.src || '').replace(/^assets\/audio\//i,'assets/AUDIO/'),
       visible: track.visible !== false
     })) : [];
+    base.demos = Array.isArray(base.demos) ? base.demos.map((demo,index)=>({
+      id: demo.id || uid(`demo${index}`),
+      title: demo.title || 'Demo sense títol',
+      url: typeof demo.url === 'string' ? demo.url.trim() : '',
+      videoId: typeof demo.videoId === 'string' ? demo.videoId.trim() : ''
+    })).filter(demo=>demo.url) : [];
     base.dresscodes = Array.isArray(base.dresscodes) ? base.dresscodes.map((item,index)=>({
       id: item.id || uid(`dress${index}`),
       eventId: item.eventId || '',

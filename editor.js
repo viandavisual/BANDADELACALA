@@ -121,6 +121,7 @@ const views = {
   calendar:{eyebrow:'CONTINGUT',title:'CALENDARI'},
   dresscode:{eyebrow:'CONTINGUT',title:'DRESSCODE'},
   player:{eyebrow:'CONTINGUT',title:'PLAYER'},
+  demos:{eyebrow:'CONTINGUT',title:'DEMOS'},
   history:{eyebrow:'CONTINGUT',title:'HISTÒRIC'},
   archive:{eyebrow:'GESTIÓ',title:'APORTACIONS'},
   games:{eyebrow:'CONTINGUT',title:'MINIJOCS'},
@@ -1028,6 +1029,80 @@ function renderTracks(){
 }
 
 function bindTrackForm(){ $('#trackForm').addEventListener('submit',event=>{event.preventDefault();const id=$('#trackId').value||BandaStore.uid('trk');const item={id,title:$('#trackTitle').value.trim(),meta:$('#trackMeta').value.trim(),src:$('#trackSrc').value.trim(),visible:$('#trackVisible').checked};if(!item.title||!item.src){showToast('Cal indicar títol i ruta/URL');return;}const index=content.tracks.findIndex(t=>t.id===id);if(index>=0)content.tracks[index]=item;else content.tracks.push(item);save(content,index>=0?'Pista actualitzada':'Pista afegida');resetTrackForm();}); $('#newTrackBtn').onclick=resetTrackForm; $('#cancelTrackEdit').onclick=resetTrackForm; $('#trackSrc').addEventListener('change',updateTrackPreview); }
+
+function youtubeVideoId(url){
+  const raw=String(url||'').trim();
+  if(!raw) return '';
+  try{
+    const parsed=new URL(raw,/^https?:/i.test(raw)?undefined:'https://www.youtube.com');
+    const host=parsed.hostname.replace(/^www\./,'').toLowerCase();
+    if(host==='youtu.be') return parsed.pathname.split('/').filter(Boolean)[0]||'';
+    if(host.endsWith('youtube.com')){
+      if(parsed.searchParams.get('v')) return parsed.searchParams.get('v')||'';
+      const parts=parsed.pathname.split('/').filter(Boolean);
+      if(['shorts','embed','live'].includes(parts[0])) return parts[1]||'';
+    }
+  }catch(_error){}
+  return '';
+}
+function demoThumbnail(videoId){ return videoId?`https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`:''; }
+function resetDemoForm(){
+  $('#demoForm')?.reset();
+  if($('#demoId')) $('#demoId').value='';
+  if($('#demoFormTitle')) $('#demoFormTitle').textContent='Nou vídeo';
+  renderDemoPreview();
+}
+function renderDemoPreview(){
+  const host=$('#demoPreview'); if(!host) return;
+  const url=$('#demoUrl')?.value?.trim()||'';
+  const id=youtubeVideoId(url);
+  if(!id){host.hidden=true;host.innerHTML='';return;}
+  host.innerHTML=`<img src="${esc(demoThumbnail(id))}" alt="Miniatura del vídeo" /><span>VÍDEO YOUTUBE DETECTAT</span>`;
+  host.hidden=false;
+}
+function editDemo(id){
+  const item=(content.demos||[]).find(d=>d.id===id); if(!item) return;
+  $('#demoId').value=item.id; $('#demoTitle').value=item.title||''; $('#demoUrl').value=item.url||'';
+  $('#demoFormTitle').textContent='Editar vídeo'; renderDemoPreview();
+  $('#demoForm').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function deleteDemo(id){
+  const item=(content.demos||[]).find(d=>d.id===id); if(!item) return;
+  if(!confirm(`Vols eliminar “${item.title}”?`)) return;
+  content.demos=(content.demos||[]).filter(d=>d.id!==id); save(content,'Demo eliminada'); resetDemoForm();
+}
+function moveDemo(id,delta){
+  const list=content.demos||[]; const index=list.findIndex(d=>d.id===id); const target=index+delta;
+  if(index<0||target<0||target>=list.length) return;
+  [list[index],list[target]]=[list[target],list[index]]; save(content,'Ordre de demos actualitzat');
+}
+function renderDemos(){
+  const list=content.demos||[]; const count=$('#demoCountEditor'); if(count) count.textContent=list.length;
+  const host=$('#demoEditorList'); if(!host) return;
+  host.innerHTML=list.length?list.map((item,index)=>{
+    const id=item.videoId||youtubeVideoId(item.url); const thumb=demoThumbnail(id);
+    return `<article class="list-item demo-editor-item"><span class="demo-editor-thumb">${thumb?`<img loading="lazy" src="${esc(thumb)}" alt="" />`:'<span>▶</span>'}</span><div class="list-main"><div class="list-kicker"><span>#${String(index+1).padStart(2,'0')}</span><span>YOUTUBE</span></div><h3>${esc(item.title)}</h3><p>${esc(item.url)}</p></div><div class="list-actions"><button class="tiny-btn" data-up-demo="${esc(item.id)}" title="Pujar">↑</button><button class="tiny-btn" data-down-demo="${esc(item.id)}" title="Baixar">↓</button><button class="tiny-btn" data-edit-demo="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-demo="${esc(item.id)}" title="Eliminar">×</button></div></article>`;
+  }).join(''):'<div class="empty-state">Encara no hi ha cap demo configurada.</div>';
+  $$('[data-up-demo]').forEach(btn=>btn.onclick=()=>moveDemo(btn.dataset.upDemo,-1));
+  $$('[data-down-demo]').forEach(btn=>btn.onclick=()=>moveDemo(btn.dataset.downDemo,1));
+  $$('[data-edit-demo]').forEach(btn=>btn.onclick=()=>editDemo(btn.dataset.editDemo));
+  $$('[data-delete-demo]').forEach(btn=>btn.onclick=()=>deleteDemo(btn.dataset.deleteDemo));
+}
+function bindDemos(){
+  $('#demoForm')?.addEventListener('submit',event=>{
+    event.preventDefault();
+    const title=$('#demoTitle').value.trim(), url=$('#demoUrl').value.trim(), videoId=youtubeVideoId(url);
+    if(!title){showToast('Cal indicar un títol');return;}
+    if(!videoId){showToast('Cal indicar un enllaç de YouTube vàlid');$('#demoUrl').focus();return;}
+    const id=$('#demoId').value||BandaStore.uid('demo'); const item={id,title,url,videoId};
+    const index=(content.demos||[]).findIndex(d=>d.id===id); if(!Array.isArray(content.demos)) content.demos=[];
+    if(index>=0) content.demos[index]=item; else content.demos.push(item);
+    save(content,index>=0?'Demo actualitzada':'Demo afegida'); resetDemoForm();
+  });
+  $('#newDemoBtn')?.addEventListener('click',resetDemoForm);
+  $('#cancelDemoEdit')?.addEventListener('click',resetDemoForm);
+  $('#demoUrl')?.addEventListener('input',renderDemoPreview);
+}
 
 function renderAudioLibrary(files=audioLibrary){
   audioLibrary=(files||[]).map(item=>typeof item==='string'?{name:item,url:`assets/AUDIO/${item}`,source:'GITHUB'}:item)
@@ -2719,7 +2794,7 @@ function bindUsers(){
   });
 }
 
-function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); }
+function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderDemos(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{ if(supabaseActive) return; content=BandaStore.normalize(event.detail);renderAll();}); }
 
 function setEditorAccess({session=null,profile=null}={}){
@@ -2936,5 +3011,5 @@ async function registerEditorSW(){
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();

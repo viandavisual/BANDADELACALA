@@ -1160,3 +1160,16 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
   display:grid;place-items:center;font-size:14px;line-height:1;box-shadow:0 3px 10px rgba(0,0,0,.22);cursor:pointer;
 }
 .random-exclusion-crop:hover{background:#393A86}
+
+
+/* ============================================================
+   v0.99 · DEMOS PROPER CONCERT
+   ============================================================ */
+.demo-editor-preview{margin:14px 0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--paper)}
+.demo-editor-preview img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#111}
+.demo-editor-preview span{display:block;padding:9px 12px;color:var(--blue);font-size:.65rem;font-weight:950;letter-spacing:.08em;text-align:center}
+.demo-editor-item{grid-template-columns:112px minmax(0,1fr) auto!important}
+.demo-editor-thumb{display:grid;place-items:center;width:112px;aspect-ratio:16/9;border-radius:11px;overflow:hidden;background:#171717;color:#fff;font-size:1.4rem}
+.demo-editor-thumb img{width:100%;height:100%;display:block;object-fit:cover}
+.demo-editor-item .list-main p{word-break:break-all}
+@media(max-width:640px){.demo-editor-item{grid-template-columns:84px minmax(0,1fr)!important}.demo-editor-thumb{width:84px}.demo-editor-item .list-actions{grid-column:1/-1;justify-content:flex-end}}
