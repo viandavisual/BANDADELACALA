@@ -1,0 +1,6 @@
+BANDA DE LA CALA · v0.105
+
+- APP / PLAYER: s'afegeix Screen Wake Lock exclusivament quan el PLAYER està reproduint àudio en mode PANTALLA COMPLETA.
+- En sortir de pantalla completa, pausar, acabar la pista, perdre reproducció o enviar l'APP a segon pla, el Wake Lock s'allibera.
+- Si es torna a primer pla mentre continua reproduint-se a pantalla completa, es torna a sol·licitar el Wake Lock quan el dispositiu ho permet.
+- PLAYER: els botons REPETIR 1, REPETIR TOT i RANDOM mostren només el text; s'eliminen els símbols/icones anteriors.

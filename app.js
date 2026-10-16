@@ -1480,6 +1480,41 @@ function syncPlayerVisualCarousel(){
   else stopPlayerVisualCarousel();
 }
 
+
+let playerFullscreenWakeLock=null;
+
+function playerIsActivelyPlaying(){
+  const player=audio();
+  return Boolean(
+    player &&
+    player.dataset.playlistTrack==='1' &&
+    state.currentTrack>=0 &&
+    !player.paused &&
+    !player.ended
+  );
+}
+async function requestPlayerFullscreenWakeLock(){
+  if(!isPlayerFullscreenActive() || !playerIsActivelyPlaying() || document.visibilityState!=='visible' || !('wakeLock' in navigator)) return;
+  try{
+    if(playerFullscreenWakeLock && !playerFullscreenWakeLock.released) return;
+    playerFullscreenWakeLock=await navigator.wakeLock.request('screen');
+    playerFullscreenWakeLock.addEventListener('release',()=>{playerFullscreenWakeLock=null;},{once:true});
+  }catch(error){
+    console.info('PLAYER: wake lock no disponible',error);
+  }
+}
+async function releasePlayerFullscreenWakeLock(){
+  const lock=playerFullscreenWakeLock;
+  playerFullscreenWakeLock=null;
+  if(lock && !lock.released){
+    try{ await lock.release(); }catch(_error){}
+  }
+}
+function syncPlayerFullscreenWakeLock(){
+  if(isPlayerFullscreenActive() && playerIsActivelyPlaying()) requestPlayerFullscreenWakeLock();
+  else releasePlayerFullscreenWakeLock();
+}
+
 function isPlayerFullscreenActive(){
   const card=$('#playerCard');
   if(!card) return false;
@@ -1497,6 +1532,7 @@ function updatePlayerFullscreenUi(){
   }
   if(close) close.hidden=!active;
   if(active) startPlayerVisualCarousel();
+  syncPlayerFullscreenWakeLock();
 }
 async function openPlayerFullscreen(){
   const card=$('#playerCard'); if(!card) return;
@@ -1530,6 +1566,10 @@ function bindPlayerFullscreen(){
   });
   document.addEventListener('keydown',event=>{
     if(event.key==='Escape' && $('#playerCard')?.classList.contains('player-fallback-fullscreen')) closePlayerFullscreen();
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') syncPlayerFullscreenWakeLock();
+    else releasePlayerFullscreenWakeLock();
   });
   updatePlayerFullscreenUi();
 }
@@ -1590,6 +1630,7 @@ function playerHandleEnded(){
 
   state.playlistAudioPlaying=false;
   syncPlayerEqualizers(false);
+  syncPlayerFullscreenWakeLock();
 
   if(state.playbackMode==='one'){
     player.currentTime=0;
@@ -1794,27 +1835,31 @@ function bindPlayer(){
     state.playlistAudioPlaying=true;
     syncPlayerEqualizers();
     setPlayIcon();
+    syncPlayerFullscreenWakeLock();
   });
   player.addEventListener('playing',()=>{
     state.playlistAudioPlaying=true;
     syncPlayerEqualizers();
     setPlayIcon();
+    syncPlayerFullscreenWakeLock();
   });
   player.addEventListener('pause',()=>{
     state.playlistAudioPlaying=false;
     syncPlayerEqualizers(false);
     setPlayIcon();
+    syncPlayerFullscreenWakeLock();
   });
-  player.addEventListener('waiting',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
-  player.addEventListener('stalled',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); });
+  player.addEventListener('waiting',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); syncPlayerFullscreenWakeLock(); });
+  player.addEventListener('stalled',()=>{ state.playlistAudioPlaying=false; syncPlayerEqualizers(false); syncPlayerFullscreenWakeLock(); });
   player.addEventListener('canplay',()=>{ syncPlayerEqualizers(); });
   player.addEventListener('seeked',()=>{ syncPlayerEqualizers(); });
   player.addEventListener('volumechange',()=>{ syncPlayerEqualizers(); });
-  player.addEventListener('emptied',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); });
+  player.addEventListener('emptied',()=>{ state.playlistAudioPlaying=false; setPlayIcon(); syncPlayerFullscreenWakeLock(); });
   player.addEventListener('error',()=>{
     state.playlistAudioPlaying=false;
     syncPlayerEqualizers(false);
     setPlayIcon();
+    syncPlayerFullscreenWakeLock();
     playerHandleDecodeFallback();
   });
 

@@ -2840,3 +2840,10 @@ body.demo-video-open{overflow:hidden}
   .demo-player-host{border-radius:12px}
   .demo-player-note{font-size:.62rem}
 }
+
+/* v0.105 · PLAYER · modes només amb text */
+.player-card .playback-modes .mode-btn{
+  font-weight:900!important;
+  letter-spacing:.055em!important;
+  line-height:1.1!important;
+}
