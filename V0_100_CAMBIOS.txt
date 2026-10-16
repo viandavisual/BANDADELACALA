@@ -1,0 +1,10 @@
+BANDA DE LA CALA · v0.100
+
+- APP / USER / DEMOS PROPER CONCERT: eliminat el text PREPARACIÓ.
+- El títol de la caixa queda centrat verticalment i horitzontalment i incorpora icona d'auriculars.
+- Els vídeos de DEMOS es poden reproduir directament dins de l'APP mitjançant YouTube embed, sense sortir de la PWA.
+- El TÍTOL de cada demo passa a ser opcional.
+- EDITOR / DEMOS: nou control per mostrar o ocultar la caixa DEMOS PROPER CONCERT a l'APP.
+- APP / AFINADOR i METRÒNOM: eliminat el text UTILITAT DE MÚSICS.
+- APP / AFINADOR: eliminada la caixa CONCERT / DO; la configuració de REFERÈNCIA queda centrada.
+- Versions i caches APP/EDITOR actualitzades a v0.100.

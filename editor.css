@@ -1173,3 +1173,11 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .demo-editor-thumb img{width:100%;height:100%;display:block;object-fit:cover}
 .demo-editor-item .list-main p{word-break:break-all}
 @media(max-width:640px){.demo-editor-item{grid-template-columns:84px minmax(0,1fr)!important}.demo-editor-thumb{width:84px}.demo-editor-item .list-actions{grid-column:1/-1;justify-content:flex-end}}
+
+
+/* ============================================================
+   v0.100 · DEMOS · visibilitat + títol opcional
+   ============================================================ */
+.demo-visibility-control{display:flex!important;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid rgba(57,58,134,.16);border-radius:13px;background:var(--blue-soft);color:var(--blue-deep)!important}
+.demo-visibility-control input{width:20px!important;height:20px!important;min-width:20px;accent-color:var(--blue)}
+.demo-untitled{color:var(--muted)!important;font-style:italic;font-weight:750!important}

@@ -34,6 +34,7 @@
       games:{title:homeString(homeCards.games?.title,'MINIJOCS'),authenticatedText:homeString(homeCards.games?.authenticatedText,'Jocs i reptes musicals de la banda.'),guestText:homeString(homeCards.games?.guestText,'Jocs musicals oberts a tothom. Inicia sessió per guardar punts.'),inactiveText:homeString(homeCards.games?.inactiveText,'Minijocs temporalment inactius.')},
       user:{guestTitle:homeString(homeCards.user?.guestTitle,'USUARI'),authenticatedText:homeString(homeCards.user?.authenticatedText,'Perfil i dades del teu compte.'),guestText:homeString(homeCards.user?.guestText,'Accés privat per als músics de la banda.')}
     };
+    base.settings.demosVisible = base.settings.demosVisible !== false;
     base.settings.minigames = base.settings.minigames && typeof base.settings.minigames === 'object' ? base.settings.minigames : {};
     const qne = base.settings.minigames.quinaNota && typeof base.settings.minigames.quinaNota === 'object' ? base.settings.minigames.quinaNota : {};
     base.settings.minigames.quinaNota = {
@@ -62,7 +63,7 @@
     })) : [];
     base.demos = Array.isArray(base.demos) ? base.demos.map((demo,index)=>({
       id: demo.id || uid(`demo${index}`),
-      title: demo.title || 'Demo sense títol',
+      title: typeof demo.title === 'string' ? demo.title.trim() : '',
       url: typeof demo.url === 'string' ? demo.url.trim() : '',
       videoId: typeof demo.videoId === 'string' ? demo.videoId.trim() : ''
     })).filter(demo=>demo.url) : [];

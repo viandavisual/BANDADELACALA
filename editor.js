@@ -1068,7 +1068,7 @@ function editDemo(id){
 }
 function deleteDemo(id){
   const item=(content.demos||[]).find(d=>d.id===id); if(!item) return;
-  if(!confirm(`Vols eliminar “${item.title}”?`)) return;
+  if(!confirm(`Vols eliminar aquesta demo${item.title?` (“${item.title}”)`:''}?`)) return;
   content.demos=(content.demos||[]).filter(d=>d.id!==id); save(content,'Demo eliminada'); resetDemoForm();
 }
 function moveDemo(id,delta){
@@ -1078,10 +1078,12 @@ function moveDemo(id,delta){
 }
 function renderDemos(){
   const list=content.demos||[]; const count=$('#demoCountEditor'); if(count) count.textContent=list.length;
+  const visible=$('#demoSectionVisible'); if(visible) visible.checked=content.settings?.demosVisible!==false;
   const host=$('#demoEditorList'); if(!host) return;
   host.innerHTML=list.length?list.map((item,index)=>{
     const id=item.videoId||youtubeVideoId(item.url); const thumb=demoThumbnail(id);
-    return `<article class="list-item demo-editor-item"><span class="demo-editor-thumb">${thumb?`<img loading="lazy" src="${esc(thumb)}" alt="" />`:'<span>▶</span>'}</span><div class="list-main"><div class="list-kicker"><span>#${String(index+1).padStart(2,'0')}</span><span>YOUTUBE</span></div><h3>${esc(item.title)}</h3><p>${esc(item.url)}</p></div><div class="list-actions"><button class="tiny-btn" data-up-demo="${esc(item.id)}" title="Pujar">↑</button><button class="tiny-btn" data-down-demo="${esc(item.id)}" title="Baixar">↓</button><button class="tiny-btn" data-edit-demo="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-demo="${esc(item.id)}" title="Eliminar">×</button></div></article>`;
+    const title=String(item.title||'').trim();
+    return `<article class="list-item demo-editor-item"><span class="demo-editor-thumb">${thumb?`<img loading="lazy" src="${esc(thumb)}" alt="" />`:'<span>▶</span>'}</span><div class="list-main"><div class="list-kicker"><span>#${String(index+1).padStart(2,'0')}</span><span>YOUTUBE</span></div>${title?`<h3>${esc(title)}</h3>`:'<h3 class="demo-untitled">SENSE TÍTOL</h3>'}<p>${esc(item.url)}</p></div><div class="list-actions"><button class="tiny-btn" data-up-demo="${esc(item.id)}" title="Pujar">↑</button><button class="tiny-btn" data-down-demo="${esc(item.id)}" title="Baixar">↓</button><button class="tiny-btn" data-edit-demo="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-demo="${esc(item.id)}" title="Eliminar">×</button></div></article>`;
   }).join(''):'<div class="empty-state">Encara no hi ha cap demo configurada.</div>';
   $$('[data-up-demo]').forEach(btn=>btn.onclick=()=>moveDemo(btn.dataset.upDemo,-1));
   $$('[data-down-demo]').forEach(btn=>btn.onclick=()=>moveDemo(btn.dataset.downDemo,1));
@@ -1092,7 +1094,6 @@ function bindDemos(){
   $('#demoForm')?.addEventListener('submit',event=>{
     event.preventDefault();
     const title=$('#demoTitle').value.trim(), url=$('#demoUrl').value.trim(), videoId=youtubeVideoId(url);
-    if(!title){showToast('Cal indicar un títol');return;}
     if(!videoId){showToast('Cal indicar un enllaç de YouTube vàlid');$('#demoUrl').focus();return;}
     const id=$('#demoId').value||BandaStore.uid('demo'); const item={id,title,url,videoId};
     const index=(content.demos||[]).findIndex(d=>d.id===id); if(!Array.isArray(content.demos)) content.demos=[];
@@ -1102,6 +1103,11 @@ function bindDemos(){
   $('#newDemoBtn')?.addEventListener('click',resetDemoForm);
   $('#cancelDemoEdit')?.addEventListener('click',resetDemoForm);
   $('#demoUrl')?.addEventListener('input',renderDemoPreview);
+  $('#demoSectionVisible')?.addEventListener('change',event=>{
+    content.settings=content.settings||{};
+    content.settings.demosVisible=Boolean(event.currentTarget.checked);
+    save(content,content.settings.demosVisible?'DEMOS visibles a l’APP':'DEMOS ocultes a l’APP');
+  });
 }
 
 function renderAudioLibrary(files=audioLibrary){

@@ -1945,12 +1945,18 @@ function youtubeVideoId(url){
   return '';
 }
 function renderUserDemos(){
-  const host=$('#userDemosList'); if(!host) return;
-  const demos=(state.content?.demos||[]).filter(item=>item?.title&&item?.url);
-  host.innerHTML=demos.length?demos.map(item=>{
+  const host=$('#userDemosList'), box=$('#userDemosBox'); if(!host||!box) return;
+  const visible=state.content?.settings?.demosVisible !== false;
+  box.hidden=!visible;
+  if(!visible){ box.open=false; host.innerHTML=''; return; }
+  const demos=(state.content?.demos||[]).filter(item=>item?.url);
+  host.innerHTML=demos.length?demos.map((item,index)=>{
     const videoId=item.videoId||youtubeVideoId(item.url);
-    const thumb=videoId?`https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`:'';
-    return `<a class="user-demo-item" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer"><span class="user-demo-thumb">${thumb?`<img loading="lazy" decoding="async" src="${esc(thumb)}" alt="" />`:'<span class="user-demo-thumb-fallback">▶</span>'}<span class="user-demo-play" aria-hidden="true">▶</span></span><strong>${esc(item.title)}</strong></a>`;
+    if(!videoId) return '';
+    const title=String(item.title||'').trim();
+    const label=title||`Demo ${index+1}`;
+    const embed=`https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?rel=0&playsinline=1`;
+    return `<article class="user-demo-item">${title?`<strong class="user-demo-title">${esc(title)}</strong>`:''}<div class="user-demo-video"><iframe loading="lazy" src="${esc(embed)}" title="${esc(label)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></article>`;
   }).join(''):'<p class="user-demos-empty">Encara no hi ha demos preparades per al proper concert.</p>';
 }
 

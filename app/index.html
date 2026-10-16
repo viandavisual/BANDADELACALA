@@ -14,9 +14,9 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.99" />
-  <link rel="stylesheet" href="tuner.css?v=0.99" />
-  <link rel="stylesheet" href="metronome.css?v=0.99" />
+  <link rel="stylesheet" href="style.css?v=0.100" />
+  <link rel="stylesheet" href="tuner.css?v=0.100" />
+  <link rel="stylesheet" href="metronome.css?v=0.100" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -296,7 +296,7 @@
 
             <details id="userDemosBox" class="user-settings-box user-demos-box">
               <summary>
-                <span class="user-demos-summary-copy"><span class="eyebrow">PREPARACIÓ</span><strong>DEMOS PROPER CONCERT</strong></span>
+                <span class="user-demos-summary-copy"><strong><span class="user-demos-headphones" aria-hidden="true">🎧</span> DEMOS PROPER CONCERT</strong></span>
                 <span class="details-chevron" aria-hidden="true">⌄</span>
               </summary>
               <div id="userDemosList" class="user-demos-list"></div>
@@ -440,7 +440,7 @@
     <div id="metronomeBackdrop" class="metronome-backdrop"></div>
     <section class="metronome-dialog" role="dialog" aria-modal="true" aria-labelledby="metronomeTitle">
       <div class="metronome-head">
-        <div><span class="eyebrow">UTILITAT DE MÚSICS</span><h2 id="metronomeTitle">METRÒNOM</h2></div>
+        <div><h2 id="metronomeTitle">METRÒNOM</h2></div>
         <button id="closeMetronomeBtn" class="metronome-close" type="button" aria-label="Tancar metrònom">×</button>
       </div>
       <div class="metronome-display">
@@ -473,11 +473,10 @@
     <div id="tunerBackdrop" class="tuner-backdrop"></div>
     <section class="tuner-dialog" role="dialog" aria-modal="true" aria-labelledby="tunerTitle">
       <div class="tuner-head">
-        <div><span class="eyebrow">UTILITAT DE MÚSICS</span><h2 id="tunerTitle">AFINADOR</h2></div>
+        <div><h2 id="tunerTitle">AFINADOR</h2></div>
         <button id="closeTunerBtn" class="tuner-close" type="button" aria-label="Tancar afinador">×</button>
       </div>
       <div class="tuner-reference" aria-label="Configuració de l'afinador">
-        <span class="tuner-chip">CONCERT / DO</span>
         <label class="tuner-reference-select">
           <span>REFERÈNCIA</span>
           <select id="tunerA4Reference" aria-label="Freqüència de referència A4">
@@ -527,14 +526,14 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.99"></script>
-  <script src="config.js?v=0.99"></script>
-  <script src="data/content-published.js?v=0.99"></script>
-  <script src="content-store.js?v=0.99"></script>
+  <script src="version.js?v=0.100"></script>
+  <script src="config.js?v=0.100"></script>
+  <script src="data/content-published.js?v=0.100"></script>
+  <script src="content-store.js?v=0.100"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.99"></script>
-  <script src="metronome.js?v=0.99"></script>
-  <script src="tuner.js?v=0.99"></script>
-  <script src="app.js?v=0.99"></script>
+  <script src="supabase-client.js?v=0.100"></script>
+  <script src="metronome.js?v=0.100"></script>
+  <script src="tuner.js?v=0.100"></script>
+  <script src="app.js?v=0.100"></script>
 </body>
 </html>

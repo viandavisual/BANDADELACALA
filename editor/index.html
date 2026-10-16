@@ -14,7 +14,7 @@
   <link rel="manifest" href="editor/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="editor/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="editor/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="editor.css?v=0.99" />
+  <link rel="stylesheet" href="editor.css?v=0.100" />
 </head>
 <body>
   <section id="editorLoginGate" class="editor-login-gate" aria-label="Accés a l'Editor">
@@ -213,7 +213,8 @@
             <div class="card-head"><div><span class="eyebrow">DEMOS PROPER CONCERT</span><h2 id="demoFormTitle">Nou vídeo</h2></div><button type="button" id="newDemoBtn" class="ghost-btn">NOU</button></div>
             <input type="hidden" id="demoId" />
             <p class="helper-copy">Afegeix les mostres de YouTube que els músics poden escoltar mentre preparen el proper concert. Es mostraran exclusivament als USERS registrats.</p>
-            <label>Títol *<input id="demoTitle" required maxlength="160" placeholder="Ex.: Pasdoble · versió de referència" /></label>
+            <label class="demo-visibility-control"><span>CAIXA VISIBLE A L'APP</span><input id="demoSectionVisible" type="checkbox" checked /></label>
+            <label>Títol<input id="demoTitle" maxlength="160" placeholder="Opcional · Ex.: Pasdoble · versió de referència" /></label>
             <label>Enllaç de YouTube *<input id="demoUrl" type="url" required maxlength="700" placeholder="https://www.youtube.com/watch?v=..." /></label>
             <div id="demoPreview" class="demo-editor-preview" hidden></div>
             <div class="form-actions"><button type="submit" class="primary-btn">DESAR DEMO</button><button type="button" id="cancelDemoEdit" class="secondary-btn">NETEJAR</button></div>
@@ -423,12 +424,12 @@
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="version.js?v=0.99"></script>
-  <script src="config.js?v=0.99"></script>
-  <script src="data/content-published.js?v=0.99"></script>
-  <script src="content-store.js?v=0.99"></script>
+  <script src="version.js?v=0.100"></script>
+  <script src="config.js?v=0.100"></script>
+  <script src="data/content-published.js?v=0.100"></script>
+  <script src="content-store.js?v=0.100"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.99"></script>
-  <script src="editor.js?v=0.99"></script>
+  <script src="supabase-client.js?v=0.100"></script>
+  <script src="editor.js?v=0.100"></script>
 </body>
 </html>
