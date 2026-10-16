@@ -1,4 +1,4 @@
-// PWA INSTALL v0.26 — patró estable de Disturbing Stories App.
+// PWA INSTALL v0.109 — auditoria robusta EDITOR.
 let editorInstallPrompt = null;
 function captureEditorInstallPrompt(event){
   event.preventDefault();
@@ -2931,16 +2931,46 @@ function editorIsStandalone(){
     return window.matchMedia('(display-mode: standalone)').matches ||
       window.matchMedia('(display-mode: fullscreen)').matches ||
       window.matchMedia('(display-mode: minimal-ui)').matches ||
+      window.matchMedia('(display-mode: window-controls-overlay)').matches ||
       window.navigator.standalone === true ||
       String(document.referrer || '').startsWith('android-app://');
-  }catch(_error){
-    return window.navigator.standalone === true;
-  }
+  }catch(_error){ return window.navigator.standalone === true; }
 }
-function editorIsIOS(){
-  return /iphone|ipad|ipod/i.test(navigator.userAgent || '') ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function editorDeviceInfo(){
+  const ua=String(navigator.userAgent||'');
+  const ios=/iphone|ipad|ipod/i.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  const android=/android/i.test(ua);
+  const windows=/windows nt/i.test(ua);
+  const mac=!ios && /macintosh|mac os x/i.test(ua);
+  const samsung=/samsungbrowser/i.test(ua);
+  const edge=/edg\//i.test(ua);
+  const firefox=/firefox\//i.test(ua) || /fxios/i.test(ua);
+  const chrome=!edge && !samsung && (/chrome\//i.test(ua) || /crios/i.test(ua));
+  const safari=!chrome && !edge && !firefox && /safari\//i.test(ua);
+  return {ios,android,windows,mac,samsung,edge,firefox,chrome,safari,os:android?'Android':ios?'iOS / iPadOS':windows?'Windows':mac?'macOS':'Dispositiu',browser:samsung?'Samsung Internet':edge?'Microsoft Edge':chrome?'Chrome':firefox?'Firefox':safari?'Safari':'Navegador'};
 }
+function editorInstallHelpMarkup(){
+  const d=editorDeviceInfo(), standalone=editorIsStandalone(), nativeReady=!!editorInstallPrompt;
+  let html='';
+  if(standalone) html='<p>Estàs executant <strong>BANDA DE LA CALA · EDITOR</strong> com a aplicació instal·lada.</p>';
+  else if(d.ios){
+    html=d.safari?'<p>Per instal·lar l’EDITOR:</p><ol><li>Prem <strong>Compartir</strong> a Safari.</li><li>Tria <strong>Afegir a la pantalla d’inici</strong>.</li><li>Activa <strong>Obrir com a app web</strong>, si apareix.</li><li>Prem <strong>Afegir</strong>.</li></ol>':'<p>Obre l’EDITOR amb <strong>Safari</strong> i utilitza <strong>Compartir → Afegir a la pantalla d’inici</strong>.</p>';
+  }else if(d.android){
+    html=d.samsung?'<p>Obre el menú de <strong>Samsung Internet</strong> i tria l’opció d’afegir o instal·lar a la pantalla d’inici.</p>':'<p>El navegador no està oferint ara mateix el diàleg automàtic.</p><ol><li>Obre el menú <strong>⋮</strong>.</li><li>Busca <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.</li><li>Si Android afirma que ja està instal·lat però no el trobes, revisa <strong>Configuració → Aplicacions</strong>, elimina la instal·lació residual de l’EDITOR i torna-ho a provar.</li></ol>';
+  }else if(d.windows||d.mac){
+    html=(d.chrome||d.edge)?'<p>Busca la icona d’instal·lació a la barra d’adreces o obre el menú del navegador i tria <strong>Instal·lar BANDA DE LA CALA · EDITOR</strong>.</p>':(d.safari&&d.mac?'<p>A Safari, utilitza <strong>Fitxer → Afegir al Dock</strong> si està disponible.</p>':'<p>Utilitza l’opció d’instal·lació del navegador.</p>');
+  }else html='<p>Utilitza l’opció <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong> del navegador.</p>';
+  return {html,device:`Dispositiu detectat: ${d.os} · ${d.browser} · ${standalone?'executant com a EDITOR':nativeReady?'instal·lació nativa disponible':'mode navegador'}`};
+}
+function showEditorInstallHelp(){
+  const modal=$('#editorInstallHelp'); if(!modal) return;
+  const info=editorInstallHelpMarkup();
+  const device=$('#editorInstallHelpDevice'), text=$('#editorInstallHelpText');
+  if(device) device.textContent=info.device;
+  if(text) text.innerHTML=info.html;
+  modal.hidden=false;
+}
+function closeEditorInstallHelp(){ const modal=$('#editorInstallHelp'); if(modal) modal.hidden=true; }
 function syncEditorInstallButton(){
   const btn=$('#editorInstallBtn'), cardBtn=$('#editorInstallCardBtn'), card=$('#editorInstallCard'), status=$('#editorInstallCardStatus');
   const installed=editorIsStandalone();
@@ -2951,58 +2981,33 @@ function syncEditorInstallButton(){
     target.disabled=false;
     target.classList.toggle('install-ready',!!editorInstallPrompt);
     target.textContent='INSTAL·LAR EDITOR';
-    target.title='Instal·lar BANDA DE LA CALA · EDITOR';
+    target.title=editorInstallPrompt?'Instal·lació disponible':'Veure opcions d’instal·lació';
   });
   if(status) status.textContent=editorInstallPrompt ? 'Preparat · prem INSTAL·LAR EDITOR.' : 'Prem INSTAL·LAR EDITOR.';
 }
-async function waitForNativeEditorInstallPrompt(timeout=1800){
+async function waitForNativeEditorInstallPrompt(timeout=1200){
   if(editorInstallPrompt) return editorInstallPrompt;
   return await new Promise(resolve=>{
     let done=false,timer=0;
-    const finish=value=>{
-      if(done)return;
-      done=true;
-      clearTimeout(timer);
-      window.removeEventListener('beforeinstallprompt',onPrompt);
-      resolve(value || editorInstallPrompt || null);
-    };
-    const onPrompt=event=>{
-      event.preventDefault();
-      editorInstallPrompt=event;
-      syncEditorInstallButton();
-      finish(event);
-    };
+    const finish=value=>{ if(done)return; done=true; clearTimeout(timer); window.removeEventListener('beforeinstallprompt',onPrompt); resolve(value || editorInstallPrompt || null); };
+    const onPrompt=event=>{ event.preventDefault(); editorInstallPrompt=event; syncEditorInstallButton(); finish(event); };
     window.addEventListener('beforeinstallprompt',onPrompt,{once:true});
     timer=setTimeout(()=>finish(editorInstallPrompt),timeout);
   });
 }
 async function launchEditorInstall(){
-  if(editorIsStandalone()){
-    syncEditorInstallButton();
-    return;
-  }
-  if(editorIsIOS()){
-    alert('A Safari: prem Compartir i després “Afegir a la pantalla d’inici”.');
-    return;
-  }
+  if(editorIsStandalone()){ showEditorInstallHelp(); return; }
+  const d=editorDeviceInfo();
+  if(d.ios){ showEditorInstallHelp(); return; }
   const prompt=editorInstallPrompt || await waitForNativeEditorInstallPrompt();
-  if(!prompt){
-    const status=$('#editorInstallCardStatus');
-    if(status) status.textContent='Chrome encara no ha ofert el diàleg d’instal·lació.';
-    return;
-  }
+  if(!prompt){ showEditorInstallHelp(); return; }
   try{
     prompt.prompt();
     const choice=await prompt.userChoice;
     if(editorInstallPrompt===prompt) editorInstallPrompt=null;
     if(choice?.outcome==='accepted') showToast('EDITOR instal·lat');
-  }catch(error){
-    console.warn('EDITOR install',error);
-    const status=$('#editorInstallCardStatus');
-    if(status) status.textContent='No s’ha pogut obrir el diàleg d’instal·lació.';
-  }finally{
-    syncEditorInstallButton();
-  }
+  }catch(error){ console.warn('EDITOR install',error); showEditorInstallHelp(); }
+  finally{ syncEditorInstallButton(); }
 }
 function bindEditorPwaInstall(){
   const btn=$('#editorInstallBtn'), cardBtn=$('#editorInstallCardBtn');
@@ -3010,16 +3015,18 @@ function bindEditorPwaInstall(){
   syncEditorInstallButton();
   btn?.addEventListener('click',launchEditorInstall);
   cardBtn?.addEventListener('click',launchEditorInstall);
-  window.addEventListener('appinstalled',()=>{
-    showToast('EDITOR instal·lat');
-  });
-  window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change',syncEditorInstallButton);
+  $('#closeEditorInstallHelp')?.addEventListener('click',closeEditorInstallHelp);
+  $('#editorInstallHelp')?.addEventListener('click',event=>{ if(event.target===$('#editorInstallHelp')) closeEditorInstallHelp(); });
+  window.addEventListener('appinstalled',()=>{ editorInstallPrompt=null; showToast('EDITOR instal·lat'); syncEditorInstallButton(); });
+  ['standalone','fullscreen','minimal-ui','window-controls-overlay'].forEach(mode=>window.matchMedia?.(`(display-mode: ${mode})`)?.addEventListener?.('change',syncEditorInstallButton));
+  window.addEventListener('pageshow',syncEditorInstallButton);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden) syncEditorInstallButton();});
 }
 async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.95',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.109',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

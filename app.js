@@ -1,14 +1,12 @@
-// PWA INSTALL v0.26 — patró estable de Disturbing Stories App.
+// PWA INSTALL v0.109 — auditoria robusta APP.
 let appInstallPrompt = null;
 function captureAppInstallPrompt(event){
   event.preventDefault();
   appInstallPrompt = event;
-  try{ localStorage.removeItem('banda-de-la-cala-app-installed-hint'); }catch(_error){}
   try{ syncAppInstallUI(); }catch(_error){}
 }
 function clearAppInstallPrompt(){
   appInstallPrompt = null;
-  try{ localStorage.setItem('banda-de-la-cala-app-installed-hint','1'); }catch(_error){}
   try{ syncAppInstallUI(); }catch(_error){}
 }
 window.addEventListener('beforeinstallprompt', captureAppInstallPrompt);
@@ -2460,86 +2458,107 @@ async function initAppAuth(){
 }
 
 
-function appHasInstalledHint(){
-  try{ return localStorage.getItem('banda-de-la-cala-app-installed-hint') === '1'; }catch(_error){ return false; }
-}
-
-function appLaunchMarkerIsInstalled(){
-  try{ return new URLSearchParams(location.search).get('pwa') === '1'; }catch(_error){ return false; }
-}
-
 function appIsStandalone(){
   try{
-    const installedDisplayMode =
-      window.matchMedia('(display-mode: standalone)').matches ||
+    return window.matchMedia('(display-mode: standalone)').matches ||
       window.matchMedia('(display-mode: fullscreen)').matches ||
       window.matchMedia('(display-mode: minimal-ui)').matches ||
-      window.matchMedia('(display-mode: window-controls-overlay)').matches;
-    return installedDisplayMode ||
+      window.matchMedia('(display-mode: window-controls-overlay)').matches ||
       window.navigator.standalone === true ||
-      String(document.referrer || '').startsWith('android-app://') ||
-      appLaunchMarkerIsInstalled();
+      String(document.referrer || '').startsWith('android-app://');
   }catch(_error){
-    return window.navigator.standalone === true || appLaunchMarkerIsInstalled();
+    return window.navigator.standalone === true;
   }
 }
 
-function rememberInstalledAppContext(){
-  if(!appIsStandalone()) return;
-  try{ localStorage.setItem('banda-de-la-cala-app-installed-hint','1'); }catch(_error){}
+function appDeviceInfo(){
+  const ua=String(navigator.userAgent||'');
+  const ios=/iphone|ipad|ipod/i.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  const android=/android/i.test(ua);
+  const windows=/windows nt/i.test(ua);
+  const mac=!ios && /macintosh|mac os x/i.test(ua);
+  const samsung=/samsungbrowser/i.test(ua);
+  const edge=/edg\//i.test(ua);
+  const firefox=/firefox\//i.test(ua) || /fxios/i.test(ua);
+  const chrome=!edge && !samsung && (/chrome\//i.test(ua) || /crios/i.test(ua));
+  const safari=!chrome && !edge && !firefox && /safari\//i.test(ua);
+  let os=android?'Android':ios?'iOS / iPadOS':windows?'Windows':mac?'macOS':'Dispositiu';
+  let browser=samsung?'Samsung Internet':edge?'Microsoft Edge':chrome?'Chrome':firefox?'Firefox':safari?'Safari':'Navegador';
+  return {ua,ios,android,windows,mac,samsung,edge,firefox,chrome,safari,os,browser};
 }
 
-function appInstallUiMustBeHidden(){
-  // v0.93 · El botó només s'oculta quan ESTEM executant realment la PWA.
-  // No fem servir cap hint persistent per decidir visibilitat: podia provocar
-  // falsos positius i amagar INSTAL·LAR APP al navegador d'alguns gestors.
-  return appIsStandalone();
+function appInstallHelpMarkup(reason='manual'){
+  const d=appDeviceInfo();
+  const standalone=appIsStandalone();
+  const nativeReady=!!appInstallPrompt;
+  let title='Instal·lació al dispositiu';
+  let html='';
+  if(standalone){
+    title='APP instal·lada';
+    html='<p>Estàs executant <strong>BANDA DE LA CALA</strong> com a aplicació instal·lada.</p>';
+  }else if(d.ios){
+    if(d.safari){
+      html='<p>Per instal·lar-la en aquest dispositiu:</p><ol><li>Prem el botó <strong>Compartir</strong> de Safari.</li><li>Tria <strong>Afegir a la pantalla d’inici</strong>.</li><li>Activa <strong>Obrir com a app web</strong>, si apareix.</li><li>Prem <strong>Afegir</strong>.</li></ol>';
+    }else{
+      html='<p>A iPhone/iPad, obre aquesta pàgina amb <strong>Safari</strong> i després:</p><ol><li>Prem <strong>Compartir</strong>.</li><li>Tria <strong>Afegir a la pantalla d’inici</strong>.</li><li>Prem <strong>Afegir</strong>.</li></ol>';
+    }
+  }else if(d.android){
+    if(nativeReady){
+      html='<p>Chrome/Android té preparada la instal·lació nativa. Tanca aquesta ajuda i torna a prémer <strong>INSTAL·LAR APP</strong>.</p>';
+    }else if(d.samsung){
+      html='<p>Obre el menú de <strong>Samsung Internet</strong> i tria <strong>Afegir pàgina a → Pantalla d’inici</strong> o l’opció equivalent d’instal·lació.</p>';
+    }else{
+      html='<p>El navegador no està oferint ara mateix el diàleg automàtic.</p><ol><li>Obre el menú <strong>⋮</strong> del navegador.</li><li>Busca <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.</li><li>Si Android diu que ja està instal·lada però no la trobes, revisa <strong>Configuració → Aplicacions</strong>, busca <strong>Banda de la Cala</strong>, desinstal·la aquella instal·lació residual i torna-ho a provar.</li></ol>';
+    }
+  }else if(d.windows || d.mac){
+    if(d.chrome || d.edge){
+      html='<p>Busca la icona d’instal·lació a la barra d’adreces o obre el menú del navegador i tria <strong>Instal·lar BANDA DE LA CALA</strong>.</p>';
+    }else if(d.safari && d.mac){
+      html='<p>A Safari, utilitza <strong>Fitxer → Afegir al Dock</strong> si aquesta opció està disponible.</p>';
+    }else{
+      html='<p>Utilitza l’opció <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong> del teu navegador.</p>';
+    }
+  }else{
+    html='<p>Utilitza l’opció <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong> del teu navegador.</p>';
+  }
+  return {title,html,device:`Dispositiu detectat: ${d.os} · ${d.browser} · ${standalone?'executant com a APP':nativeReady?'instal·lació nativa disponible':'mode navegador'}`};
 }
 
-function appIsIOS(){
-  return /iphone|ipad|ipod/i.test(navigator.userAgent || '') ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function showAppInstallHelp(reason='manual'){
+  const modal=$('#appInstallHelp'); if(!modal) return;
+  const info=appInstallHelpMarkup(reason);
+  const title=$('#appInstallHelpTitle'), device=$('#appInstallHelpDevice'), text=$('#appInstallHelpText');
+  if(title) title.textContent=info.title;
+  if(device) device.textContent=info.device;
+  if(text) text.innerHTML=info.html;
+  modal.hidden=false;
 }
+function closeAppInstallHelp(){ const modal=$('#appInstallHelp'); if(modal) modal.hidden=true; }
 
 function syncAppInstallUI(){
   const buttons=[$('#homeFooterInstallBtn')].filter(Boolean);
-  const statuses=[];
   const installed=appIsStandalone();
-  if(installed) rememberInstalledAppContext();
   document.documentElement.classList.toggle('app-is-installed', installed);
   buttons.forEach(btn=>{
     btn.hidden=false;
     btn.disabled=false;
     btn.classList.toggle('install-ready',!!appInstallPrompt && !installed);
     btn.textContent='INSTAL·LAR APP';
+    btn.title=installed?'APP instal·lada':(appInstallPrompt?'Instal·lació disponible':'Veure opcions d’instal·lació');
   });
-  const label=installed
-    ? 'APP instal·lada.'
-    : (appInstallPrompt ? 'Preparada · prem INSTAL·LAR APP.' : (appIsIOS() ? 'Prem INSTAL·LAR APP i segueix les instruccions.' : 'Prem INSTAL·LAR APP.'));
-  statuses.forEach(status=>{ status.textContent=label; });
 }
 
-function showAppInstallMessage(message){
-  const btn=$('#homeFooterInstallBtn'); if(btn) btn.title=message;
-}
-
-async function waitForNativeAppInstallPrompt(timeout=1800){
+async function waitForNativeAppInstallPrompt(timeout=1200){
   if(appInstallPrompt) return appInstallPrompt;
   return await new Promise(resolve=>{
     let done=false,timer=0;
     const finish=value=>{
       if(done) return;
-      done=true;
-      clearTimeout(timer);
+      done=true; clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt',onPrompt);
       resolve(value || appInstallPrompt || null);
     };
-    const onPrompt=event=>{
-      event.preventDefault();
-      appInstallPrompt=event;
-      syncAppInstallUI();
-      finish(event);
-    };
+    const onPrompt=event=>{ event.preventDefault(); appInstallPrompt=event; syncAppInstallUI(); finish(event); };
     window.addEventListener('beforeinstallprompt',onPrompt,{once:true});
     timer=setTimeout(()=>finish(appInstallPrompt),timeout);
   });
@@ -2547,40 +2566,41 @@ async function waitForNativeAppInstallPrompt(timeout=1800){
 
 async function requestNativeAppInstall(){
   const prompt=appInstallPrompt || await waitForNativeAppInstallPrompt();
-  if(!prompt){
-    showAppInstallMessage('Chrome encara no ha ofert el diàleg d’instal·lació.');
-    return false;
-  }
+  if(!prompt) return false;
   try{
     prompt.prompt();
     const choice=await prompt.userChoice;
     if(appInstallPrompt===prompt) appInstallPrompt=null;
     syncAppInstallUI();
-    return choice?.outcome==='accepted';
-  }catch(error){
-    console.warn('APP install',error);
-    showAppInstallMessage('No s’ha pogut obrir el diàleg d’instal·lació.');
+    if(choice?.outcome==='accepted') return true;
     return false;
-  }
+  }catch(error){ console.warn('APP install',error); return false; }
 }
 
 async function promptAppInstall(){
   if(appIsStandalone()){
-    alert('L’APP ja està instal·lada en aquest dispositiu.');
-    syncAppInstallUI();
+    showAppInstallHelp('installed');
     return;
   }
-  if(appIsIOS()){
-    alert('A Safari: prem Compartir i després “Afegir a la pantalla d’inici”.');
+  const d=appDeviceInfo();
+  if(d.ios){ showAppInstallHelp('ios'); return; }
+  if(appInstallPrompt){
+    const accepted=await requestNativeAppInstall();
+    if(!accepted && !appInstallPrompt) syncAppInstallUI();
     return;
   }
-  await requestNativeAppInstall();
+  const accepted=await requestNativeAppInstall();
+  if(!accepted) showAppInstallHelp('fallback');
 }
 
 function bindPwaInstall(){
   syncAppInstallUI();
   $('#homeFooterInstallBtn')?.addEventListener('click',promptAppInstall);
+  $('#closeAppInstallHelp')?.addEventListener('click',closeAppInstallHelp);
+  $('#appInstallHelpBackdrop')?.addEventListener('click',closeAppInstallHelp);
   window.addEventListener('appinstalled',()=>{
+    appInstallPrompt=null;
+    syncAppInstallUI();
     if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada';
   });
   ['standalone','fullscreen','minimal-ui','window-controls-overlay'].forEach(mode=>{
@@ -2601,7 +2621,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.95',root).href;
+    const swUrl=new URL('app/sw.js?v=0.109',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

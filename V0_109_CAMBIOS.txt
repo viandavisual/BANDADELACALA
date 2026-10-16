@@ -1,0 +1,11 @@
+BANDA DE LA CALA · v0.109
+
+- Auditoria i sanejament complet del sistema d'instal·lació PWA d'APP i EDITOR.
+- APP: s'elimina el paràmetre ?pwa=1 com a prova d'instal·lació. Ara només es considera instal·lada quan el navegador/sistema ho acredita mitjançant display-mode, navigator.standalone o context android-app.
+- APP i EDITOR: s'elimina la dependència de hints persistents per decidir si la PWA està instal·lada.
+- APP i EDITOR: els Service Workers es registren amb la versió actual v0.109 en lloc de l'antic marcador v0.95.
+- APP i EDITOR: quan no existeix beforeinstallprompt, ja no s'interpreta com 'ja instal·lada'; s'obre ajuda específica segons dispositiu i navegador.
+- S'afegeixen instruccions contextuals diferenciades per Android, Samsung Internet, iPhone/iPad, Windows, macOS i navegadors compatibles.
+- Els modals d'ajuda mostren el dispositiu/navegador detectat i l'estat: mode navegador, instal·lació nativa disponible o execució com a PWA instal·lada.
+- Android inclou una ruta clara de recuperació per a possibles instal·lacions WebAPK residuals: Configuració → Aplicacions → desinstal·lar i reinstal·lar.
+- Es conserven els IDs, scopes i Service Workers independents de l'APP i l'EDITOR.

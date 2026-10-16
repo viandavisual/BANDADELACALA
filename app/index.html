@@ -14,9 +14,9 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.108" />
-  <link rel="stylesheet" href="tuner.css?v=0.108" />
-  <link rel="stylesheet" href="metronome.css?v=0.108" />
+  <link rel="stylesheet" href="style.css?v=0.109" />
+  <link rel="stylesheet" href="tuner.css?v=0.109" />
+  <link rel="stylesheet" href="metronome.css?v=0.109" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -436,6 +436,18 @@
   </div>
 
 
+  <div id="appInstallHelp" class="app-install-help" hidden>
+    <div id="appInstallHelpBackdrop" class="app-install-help-backdrop"></div>
+    <section class="app-install-help-card" role="dialog" aria-modal="true" aria-labelledby="appInstallHelpTitle">
+      <button id="closeAppInstallHelp" class="app-install-help-close" type="button" aria-label="Tancar">×</button>
+      <img src="../assets/brand/app-icon.png" alt="" />
+      <span class="eyebrow">INSTAL·LAR APP</span>
+      <h2 id="appInstallHelpTitle">Instal·lació al dispositiu</h2>
+      <p id="appInstallHelpDevice" class="app-install-help-device"></p>
+      <div id="appInstallHelpText" class="app-install-help-text"></div>
+    </section>
+  </div>
+
   <div id="demoPlayerModal" class="demo-player-modal" hidden>
     <div id="demoPlayerBackdrop" class="demo-player-backdrop"></div>
     <section class="demo-player-dialog" role="dialog" aria-modal="true" aria-labelledby="demoPlayerTitle">
@@ -553,14 +565,14 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.108"></script>
-  <script src="config.js?v=0.108"></script>
-  <script src="data/content-published.js?v=0.108"></script>
-  <script src="content-store.js?v=0.108"></script>
+  <script src="version.js?v=0.109"></script>
+  <script src="config.js?v=0.109"></script>
+  <script src="data/content-published.js?v=0.109"></script>
+  <script src="content-store.js?v=0.109"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.108"></script>
-  <script src="metronome.js?v=0.108"></script>
-  <script src="tuner.js?v=0.108"></script>
-  <script src="app.js?v=0.108"></script>
+  <script src="supabase-client.js?v=0.109"></script>
+  <script src="metronome.js?v=0.109"></script>
+  <script src="tuner.js?v=0.109"></script>
+  <script src="app.js?v=0.109"></script>
 </body>
 </html>

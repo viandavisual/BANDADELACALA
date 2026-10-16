@@ -1181,3 +1181,10 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .demo-visibility-control{display:flex!important;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid rgba(57,58,134,.16);border-radius:13px;background:var(--blue-soft);color:var(--blue-deep)!important}
 .demo-visibility-control input{width:20px!important;height:20px!important;min-width:20px;accent-color:var(--blue)}
 .demo-untitled{color:var(--muted)!important;font-style:italic;font-weight:750!important}
+
+
+/* v0.109 · ajuda d'instal·lació contextual */
+.editor-install-help-device{display:inline-block;margin:0 0 14px;padding:7px 10px;border-radius:999px;background:#f2eadc;color:var(--editor-page-gold-dark);font-size:13px!important;font-weight:800!important;line-height:1.3!important}
+.editor-install-help-text{text-align:left;color:var(--muted);line-height:1.55;font-size:17px}
+.editor-install-help-text p{margin:0 0 10px}.editor-install-help-text ol{margin:8px 0 0;padding-left:22px}.editor-install-help-text li+li{margin-top:7px}
+@media(max-width:620px){.editor-install-help-text{font-size:15px}.editor-install-help-device{font-size:11px!important}}
