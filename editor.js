@@ -1588,7 +1588,8 @@ function mergeSelectedHistoricEntries(){
 function renderHistoric(){
   const list=[...(content.historicItems||[])].sort((a,b)=>{
     const pa=historicPeriods().findIndex(p=>p.id===a.periodId), pb=historicPeriods().findIndex(p=>p.id===b.periodId);
-    if(pa!==pb) return pa-pb;
+    // v0.106 · períodes més actuals primer al llistat de CRONOLOGIA FOTOGRAFIES.
+    if(pa!==pb) return pb-pa;
     const ya=Number(a.year)||0,yb=Number(b.year)||0;
     if(ya!==yb) return ya-yb;
     return String(a.title||'').localeCompare(String(b.title||''),'ca');

@@ -1,0 +1,5 @@
+BANDA DE LA CALA · v0.106
+
+- APP / PLAYER: els textos REPETIR 1, REPETIR TOT i RANDOM redueixen aproximadament a la meitat la seva escala visual, tant en DESKTOP com en MOBILE.
+- EDITOR / HISTÒRIC / CRONOLOGIA FOTOGRAFIES: s'inverteix l'ordre dels blocs de períodes perquè el període més actual aparegui a la part superior.
+- L'ordre intern de les entrades dins de cada període es manté sense canvis.

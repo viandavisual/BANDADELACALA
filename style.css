@@ -2847,3 +2847,17 @@ body.demo-video-open{overflow:hidden}
   letter-spacing:.055em!important;
   line-height:1.1!important;
 }
+
+/* v0.106 · PLAYER · textos de modes al 50% aproximat */
+.player-card .playback-modes .mode-btn{
+  font-size:.55rem!important;
+}
+.player-card.is-player-fullscreen>.playback-modes .mode-btn{
+  font-size:.55rem!important;
+}
+@media(max-width:780px){
+  .player-card .playback-modes .mode-btn,
+  .player-card.is-player-fullscreen>.playback-modes .mode-btn{
+    font-size:.42rem!important;
+  }
+}
