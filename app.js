@@ -2332,6 +2332,11 @@ function bindUserAuth(){
     });
   }
 
+  function anchorUserRow3(){
+    const row=document.querySelector('.user-tools-grid-secondary');
+    if(row) requestAnimationFrame(()=>scrollElementBelowTopbar(row,14));
+  }
+
   $('#openSuggestionBoxBtn')?.addEventListener('click',()=>{
     const box=$('#suggestionBox'), btn=$('#openSuggestionBoxBtn'); if(!box) return;
     closeUserRow3Panels('#suggestionBox');
@@ -2339,7 +2344,7 @@ function bindUserAuth(){
     if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
     const status=$('#suggestionStatus'); if(status) status.textContent='';
     const user=$('#suggestionUserName'); if(user) user.value=currentUserDisplayName();
-    if(willOpen) requestAnimationFrame(()=>scrollElementBelowTopbar(box,14));
+    if(willOpen) anchorUserRow3();
   });
   $('#closeSuggestionBoxBtn')?.addEventListener('click',()=>{
     const box=$('#suggestionBox'), btn=$('#openSuggestionBoxBtn'); if(box) box.hidden=true;
@@ -2371,7 +2376,7 @@ function bindUserAuth(){
     const willOpen=box.hidden; box.hidden=!willOpen;
     if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
     $('#archiveUploadStatus').textContent='';
-    if(willOpen) requestAnimationFrame(()=>scrollElementBelowTopbar(box,14));
+    if(willOpen) anchorUserRow3();
   });
   $('#closeArchiveUploadBtn')?.addEventListener('click',()=>{
     const box=$('#archiveUploadBox'), btn=$('#openArchiveUploadBtn'); if(box) box.hidden=true;
@@ -2384,7 +2389,7 @@ function bindUserAuth(){
     closeUserRow3Panels('#userOptionsBox');
     const willOpen=box.hidden; box.hidden=!willOpen;
     if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
-    if(willOpen) requestAnimationFrame(()=>scrollElementBelowTopbar(box,14));
+    if(willOpen) anchorUserRow3();
   });
   $('#closeUserOptionsBtn')?.addEventListener('click',()=>{
     const box=$('#userOptionsBox'), btn=$('#openUserOptionsBtn'); if(box) box.hidden=true;

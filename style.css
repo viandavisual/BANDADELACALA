@@ -2861,3 +2861,10 @@ body.demo-video-open{overflow:hidden}
     font-size:.42rem!important;
   }
 }
+
+
+/* v0.107 · USER · icones x2 + fila 3 estable */
+.user-tool-icon{width:76px!important;height:76px!important;min-width:76px!important;min-height:76px!important;font-size:40px!important}
+.user-tool-icon svg{width:44px!important;height:44px!important}
+.user-demos-headphones{font-size:2.3rem!important}
+@media(max-width:620px){.user-tool-icon{width:64px!important;height:64px!important;min-width:64px!important;min-height:64px!important;font-size:34px!important}.user-tool-icon svg{width:36px!important;height:36px!important}.user-demos-headphones{font-size:2.3rem!important}}

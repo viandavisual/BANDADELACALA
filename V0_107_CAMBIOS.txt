@@ -1,0 +1,6 @@
+BANDA DE LA CALA · v0.107
+
+- APP / USER: tots els icones de les caixes principals passen aproximadament al doble de mida, mantenint els títols amb la mateixa escala.
+- APP / USER / OPCIONS D'USUARI: el símbol anterior se substitueix per un engranatge convencional, més clar i recognoscible.
+- APP / USER / fila 3: PUJAR FATO MULTIMEDIA, OPCIONS D'USUARI i BÚSTIA DE SUGGERIMENTS comparteixen ara exactament el mateix punt d'ancoratge en obrir-se.
+- En obrir qualsevol de les tres, la fila de botons queda fixada visualment a la mateixa altura; el contingut desplegable apareix sempre per sota sense provocar salts diferents segons l'opció.
