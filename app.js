@@ -1949,6 +1949,9 @@ function renderUserDemos(){
   const visible=state.content?.settings?.demosVisible !== false;
   box.hidden=!visible;
   if(!visible){ box.open=false; host.innerHTML=''; return; }
+  const concertName=String(state.content?.settings?.demosConcertName||'').trim().toLocaleUpperCase('ca-ES');
+  const heading=$('#userDemosHeading');
+  if(heading) heading.textContent=`DEMOS PROPER CONCERT${concertName?`: ${concertName}`:''}`;
   const demos=(state.content?.demos||[]).filter(item=>item?.url);
   host.innerHTML=demos.length?demos.map((item,index)=>{
     const videoId=item.videoId||youtubeVideoId(item.url);

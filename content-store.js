@@ -35,6 +35,7 @@
       user:{guestTitle:homeString(homeCards.user?.guestTitle,'USUARI'),authenticatedText:homeString(homeCards.user?.authenticatedText,'Perfil i dades del teu compte.'),guestText:homeString(homeCards.user?.guestText,'Accés privat per als músics de la banda.')}
     };
     base.settings.demosVisible = base.settings.demosVisible !== false;
+    base.settings.demosConcertName = typeof base.settings.demosConcertName === 'string' ? base.settings.demosConcertName.trim() : '';
     base.settings.minigames = base.settings.minigames && typeof base.settings.minigames === 'object' ? base.settings.minigames : {};
     const qne = base.settings.minigames.quinaNota && typeof base.settings.minigames.quinaNota === 'object' ? base.settings.minigames.quinaNota : {};
     base.settings.minigames.quinaNota = {

@@ -1079,6 +1079,7 @@ function moveDemo(id,delta){
 function renderDemos(){
   const list=content.demos||[]; const count=$('#demoCountEditor'); if(count) count.textContent=list.length;
   const visible=$('#demoSectionVisible'); if(visible) visible.checked=content.settings?.demosVisible!==false;
+  const concertName=$('#demoConcertName'); if(concertName) concertName.value=content.settings?.demosConcertName||'';
   const host=$('#demoEditorList'); if(!host) return;
   host.innerHTML=list.length?list.map((item,index)=>{
     const id=item.videoId||youtubeVideoId(item.url); const thumb=demoThumbnail(id);
@@ -1093,6 +1094,8 @@ function renderDemos(){
 function bindDemos(){
   $('#demoForm')?.addEventListener('submit',event=>{
     event.preventDefault();
+    content.settings=content.settings||{};
+    content.settings.demosConcertName=String($('#demoConcertName')?.value||'').trim();
     const title=$('#demoTitle').value.trim(), url=$('#demoUrl').value.trim(), videoId=youtubeVideoId(url);
     if(!videoId){showToast('Cal indicar un enllaç de YouTube vàlid');$('#demoUrl').focus();return;}
     const id=$('#demoId').value||BandaStore.uid('demo'); const item={id,title,url,videoId};
@@ -1107,6 +1110,11 @@ function bindDemos(){
     content.settings=content.settings||{};
     content.settings.demosVisible=Boolean(event.currentTarget.checked);
     save(content,content.settings.demosVisible?'DEMOS visibles a l’APP':'DEMOS ocultes a l’APP');
+  });
+  $('#demoConcertName')?.addEventListener('change',event=>{
+    content.settings=content.settings||{};
+    content.settings.demosConcertName=String(event.currentTarget.value||'').trim();
+    save(content,'Nom del concert de DEMOS actualitzat');
   });
 }
 

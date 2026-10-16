@@ -1,0 +1,7 @@
+BANDA DE LA CALA · v0.101
+
+- APP / USER / DEMOS PROPER CONCERT: els vídeos passen a una graella de 3 columnes en pantalles àmplies, amb adaptació responsive en pantalles estretes.
+- APP / USER / DEMOS PROPER CONCERT: el títol incorpora el nom del concert configurat a EDITOR i el mostra sempre en majúscules: DEMOS PROPER CONCERT: XXX.
+- EDITOR / DEMOS: s'afegeix el camp NOM DEL CONCERT per definir el nom mostrat a la capçalera de la caixa de demos.
+- EDITOR / DEMOS: el control de visibilitat passa a titular-se ACTIVAR / DESACTIVAR DEMOS A L'APP.
+- APP i EDITOR: versions i cachés actualitzades a v0.101.
