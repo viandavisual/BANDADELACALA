@@ -56,6 +56,7 @@ body.tuner-open{overflow:hidden}
 @media(max-width:780px){
   .tuner-overlay{padding:0;place-items:stretch}
   .tuner-dialog{width:100%;max-height:100dvh;min-height:100dvh;border-radius:0;border:0;padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom))}
+  .tuner-dialog::before{background-size:auto 100%;background-position:center center}
   .tuner-head h2{font-size:1.7rem}
   .tuner-note{font-size:5.3rem}
   .tuner-note-line{min-height:94px}

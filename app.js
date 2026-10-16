@@ -1951,7 +1951,9 @@ function renderUserDemos(){
   if(!visible){ box.open=false; host.innerHTML=''; return; }
   const concertName=String(state.content?.settings?.demosConcertName||'').trim().toLocaleUpperCase('ca-ES');
   const heading=$('#userDemosHeading');
-  if(heading) heading.textContent=`DEMOS PROPER CONCERT${concertName?`: ${concertName}`:''}`;
+  if(heading){
+    heading.innerHTML=`<span class="user-demos-heading-label">DEMOS PROPER CONCERT:</span>${concertName?`<span class="user-demos-heading-concert">${esc(concertName)}</span>`:''}`;
+  }
   const demos=(state.content?.demos||[]).filter(item=>item?.url);
   host.innerHTML=demos.length?demos.map((item,index)=>{
     const videoId=item.videoId||youtubeVideoId(item.url);
@@ -2156,8 +2158,22 @@ function bindUserAuth(){
     window.scrollTo({top:target, behavior:'smooth'});
   }
 
+  function closeUserRow3Panels(exceptId=''){
+    [
+      {box:'#archiveUploadBox',btn:'#openArchiveUploadBtn'},
+      {box:'#userOptionsBox',btn:'#openUserOptionsBtn'},
+      {box:'#suggestionBox',btn:'#openSuggestionBoxBtn'}
+    ].forEach(item=>{
+      if(item.box===exceptId) return;
+      const box=$(item.box), btn=$(item.btn);
+      if(box) box.hidden=true;
+      if(btn) btn.setAttribute('aria-expanded','false');
+    });
+  }
+
   $('#openSuggestionBoxBtn')?.addEventListener('click',()=>{
     const box=$('#suggestionBox'), btn=$('#openSuggestionBoxBtn'); if(!box) return;
+    closeUserRow3Panels('#suggestionBox');
     const willOpen=box.hidden; box.hidden=!willOpen;
     if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
     const status=$('#suggestionStatus'); if(status) status.textContent='';
@@ -2190,6 +2206,7 @@ function bindUserAuth(){
 
   $('#openArchiveUploadBtn')?.addEventListener('click',()=>{
     const box=$('#archiveUploadBox'), btn=$('#openArchiveUploadBtn'); if(!box) return;
+    closeUserRow3Panels('#archiveUploadBox');
     const willOpen=box.hidden; box.hidden=!willOpen;
     if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
     $('#archiveUploadStatus').textContent='';
@@ -2203,6 +2220,7 @@ function bindUserAuth(){
 
   $('#openUserOptionsBtn')?.addEventListener('click',()=>{
     const box=$('#userOptionsBox'), btn=$('#openUserOptionsBtn'); if(!box) return;
+    closeUserRow3Panels('#userOptionsBox');
     const willOpen=box.hidden; box.hidden=!willOpen;
     if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
     if(willOpen) requestAnimationFrame(()=>scrollElementBelowTopbar(box,14));

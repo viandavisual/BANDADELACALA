@@ -1,0 +1,8 @@
+BANDA DE LA CALA · v0.103
+
+- APP / USER / DEMOS (MOBILE): els vídeos es mostren en files de 2.
+- APP / USER / DEMOS (MOBILE): el títol es divideix en dues línies: “DEMOS PROPER CONCERT:” i, a sota, el nom del concert configurat.
+- APP / AFINADOR (MOBILE): l'imagotip de fons passa a ocupar tota l'alçada de la pantalla, amb retall lateral quan cal.
+- APP / METRÒNOM (MOBILE): mateix tractament vertical de l'imagotip de fons.
+- APP / USER / fila 3: PUJAR FATO MULTIMEDIA, OPCIONS D'USUARI i BÚSTIA DE SUGGERIMENTS passen a ser mútuament exclusives; en obrir-ne una es tanquen les altres.
+- DESKTOP conserva la distribució i aparença de v0.102.
