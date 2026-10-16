@@ -14,9 +14,9 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.107" />
-  <link rel="stylesheet" href="tuner.css?v=0.107" />
-  <link rel="stylesheet" href="metronome.css?v=0.107" />
+  <link rel="stylesheet" href="style.css?v=0.108" />
+  <link rel="stylesheet" href="tuner.css?v=0.108" />
+  <link rel="stylesheet" href="metronome.css?v=0.108" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -286,26 +286,24 @@
 
             <div class="user-tools-grid user-tools-grid-primary" aria-label="Eines musicals i partitures">
               <a id="userDriveBox" class="user-tool-tile user-tool-link user-tool-partitures" href="https://drive.google.com/drive/folders/1KMBoe27wYKPcb-BmHFdJxxXQwAL9FbXq" target="_blank" rel="noopener noreferrer">
-                <span class="user-tool-icon" aria-hidden="true">
-                  <svg viewBox="0 0 32 32"><path d="M7 6h14v20H7zM11 3h14v20"/><path d="M14 10v9.2a3 3 0 1 1-2-2.8V9l9-2v8.2a3 3 0 1 1-2-2.8V8.2Z"/></svg>
-                </span>
+                <span class="user-tool-icon user-tool-icon-image" aria-hidden="true"><img src="../assets/user-icons/user-partitures.png" alt="" loading="lazy" decoding="async"></span>
                 <span class="user-tool-title">PARTITURES</span>
               </a>
 
               <button id="openTunerBtn" class="user-tool-tile tuner-launcher" type="button">
-                <span class="user-tool-icon" aria-hidden="true">♪</span>
+                <span class="user-tool-icon user-tool-icon-image" aria-hidden="true"><img src="../assets/user-icons/user-afinador.png" alt="" loading="lazy" decoding="async"></span>
                 <span class="user-tool-title">AFINADOR</span>
               </button>
 
               <button id="openMetronomeBtn" class="user-tool-tile metronome-launcher" type="button">
-                <span class="user-tool-icon" aria-hidden="true">♩</span>
+                <span class="user-tool-icon user-tool-icon-image" aria-hidden="true"><img src="../assets/user-icons/user-metronom.png" alt="" loading="lazy" decoding="async"></span>
                 <span class="user-tool-title">METRÒNOM</span>
               </button>
             </div>
 
             <details id="userDemosBox" class="user-settings-box user-demos-box">
               <summary>
-                <span class="user-demos-summary-copy"><strong><span class="user-demos-headphones" aria-hidden="true">🎧</span><span id="userDemosHeading">DEMOS PROPER CONCERT</span></strong></span>
+                <span class="user-demos-summary-copy"><strong><span class="user-demos-headphones user-demos-headphones-image" aria-hidden="true"><img src="../assets/user-icons/user-demos.png" alt="" loading="lazy" decoding="async"></span><span id="userDemosHeading">DEMOS PROPER CONCERT</span></strong></span>
                 <span class="details-chevron" aria-hidden="true">⌄</span>
               </summary>
               <div id="userDemosList" class="user-demos-list"></div>
@@ -313,23 +311,17 @@
 
             <div class="user-tools-grid user-tools-grid-secondary" aria-label="Accions del perfil">
               <button id="openArchiveUploadBtn" class="user-tool-tile archive-upload-launcher" type="button" aria-expanded="false" aria-controls="archiveUploadBox">
-                <span class="user-tool-icon" aria-hidden="true">
-                  <svg viewBox="0 0 32 32"><path d="M6 7h20v18H6z"/><path d="m8.5 21 5.2-6 4 4 2.8-3 3 5"/><circle cx="21" cy="11" r="2"/></svg>
-                </span>
+                <span class="user-tool-icon user-tool-icon-image" aria-hidden="true"><img src="../assets/user-icons/user-pujar-fato.png" alt="" loading="lazy" decoding="async"></span>
                 <span class="user-tool-title">PUJAR FATO MULTIMEDIA</span>
               </button>
 
               <button id="openUserOptionsBtn" class="user-tool-tile user-options-launcher" type="button" aria-expanded="false" aria-controls="userOptionsBox">
-                <span class="user-tool-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 8.97 19.36a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.52-1H3v-4h.08A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 8.97 4.64 1.7 1.7 0 0 0 10 3.08V3h4v.08a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9 1.7 1.7 0 0 0 20.92 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>
-                </span>
+                <span class="user-tool-icon user-tool-icon-image" aria-hidden="true"><img src="../assets/user-icons/user-opcions.png" alt="" loading="lazy" decoding="async"></span>
                 <span class="user-tool-title">OPCIONS D'USUARI</span>
               </button>
 
               <button id="openSuggestionBoxBtn" class="user-tool-tile suggestion-launcher" type="button" aria-expanded="false" aria-controls="suggestionBox">
-                <span class="user-tool-icon" aria-hidden="true">
-                  <svg viewBox="0 0 32 32"><rect x="4" y="7" width="24" height="18" rx="2"/><path d="m5.5 9 10.5 8 10.5-8"/></svg>
-                </span>
+                <span class="user-tool-icon user-tool-icon-image" aria-hidden="true"><img src="../assets/user-icons/user-bustia.png" alt="" loading="lazy" decoding="async"></span>
                 <span class="user-tool-title">BÚSTIA DE SUGGERIMENTS</span>
               </button>
             </div>
@@ -561,14 +553,14 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.107"></script>
-  <script src="config.js?v=0.107"></script>
-  <script src="data/content-published.js?v=0.107"></script>
-  <script src="content-store.js?v=0.107"></script>
+  <script src="version.js?v=0.108"></script>
+  <script src="config.js?v=0.108"></script>
+  <script src="data/content-published.js?v=0.108"></script>
+  <script src="content-store.js?v=0.108"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.107"></script>
-  <script src="metronome.js?v=0.107"></script>
-  <script src="tuner.js?v=0.107"></script>
-  <script src="app.js?v=0.107"></script>
+  <script src="supabase-client.js?v=0.108"></script>
+  <script src="metronome.js?v=0.108"></script>
+  <script src="tuner.js?v=0.108"></script>
+  <script src="app.js?v=0.108"></script>
 </body>
 </html>

@@ -2868,3 +2868,46 @@ body.demo-video-open{overflow:hidden}
 .user-tool-icon svg{width:44px!important;height:44px!important}
 .user-demos-headphones{font-size:2.3rem!important}
 @media(max-width:620px){.user-tool-icon{width:64px!important;height:64px!important;min-width:64px!important;min-height:64px!important;font-size:34px!important}.user-tool-icon svg{width:36px!important;height:36px!important}.user-demos-headphones{font-size:2.3rem!important}}
+
+
+/* v0.108 · USER · icones personalitzats */
+.user-tool-icon.user-tool-icon-image{
+  background:transparent!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+  padding:0!important;
+  color:inherit!important;
+}
+.user-tool-icon.user-tool-icon-image img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+.user-tool-partitures .user-tool-icon.user-tool-icon-image,
+.user-tools-grid .archive-upload-launcher .user-tool-icon.user-tool-icon-image,
+.user-tools-grid .suggestion-launcher .user-tool-icon.user-tool-icon-image,
+.user-options-launcher .user-tool-icon.user-tool-icon-image{
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.user-demos-headphones-image{
+  display:inline-flex!important;
+  align-items:center;
+  justify-content:center;
+  width:56px;
+  height:56px;
+  line-height:1;
+}
+.user-demos-headphones-image img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+@media(max-width:620px){
+  .user-demos-headphones-image{
+    width:46px;
+    height:46px;
+  }
+}

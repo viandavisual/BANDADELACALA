@@ -1,0 +1,5 @@
+BANDA DE LA CALA · v0.108
+
+- APP / USER: es substitueixen els icones actuals de PARTITURES, AFINADOR, METRÒNOM, DEMOS PROPER CONCERT, PUJAR FATO MULTIMEDIA, OPCIONS D'USUARI i BÚSTIA DE SUGGERIMENTS pels nous icones corporatius aportats.
+- Es manté l'estructura i mida general de les caixes de la secció USER, canviant únicament la identitat visual dels icones.
+- Els nous icones s'integren com a assets propis de l'app i queden inclosos també a la cache de la PWA.
