@@ -14,9 +14,9 @@
   <link rel="manifest" href="app/manifest.webmanifest?v=0.26" />
   <link rel="icon" href="app/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="app/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="style.css?v=0.103" />
-  <link rel="stylesheet" href="tuner.css?v=0.103" />
-  <link rel="stylesheet" href="metronome.css?v=0.103" />
+  <link rel="stylesheet" href="style.css?v=0.104" />
+  <link rel="stylesheet" href="tuner.css?v=0.104" />
+  <link rel="stylesheet" href="metronome.css?v=0.104" />
 </head>
 <body>
   <!-- v0.40 · FLAG de tela per al logo de la banda.
@@ -444,6 +444,18 @@
   </div>
 
 
+  <div id="demoPlayerModal" class="demo-player-modal" hidden>
+    <div id="demoPlayerBackdrop" class="demo-player-backdrop"></div>
+    <section class="demo-player-dialog" role="dialog" aria-modal="true" aria-labelledby="demoPlayerTitle">
+      <div class="demo-player-head">
+        <h2 id="demoPlayerTitle">DEMO</h2>
+        <button id="closeDemoPlayerBtn" class="demo-player-close" type="button" aria-label="Tancar reproductor">×</button>
+      </div>
+      <div id="demoPlayerHost" class="demo-player-host"></div>
+      <p class="demo-player-note">La pantalla es mantindrà activa mentre el vídeo estigui reproduint-se, sempre que el dispositiu ho permeti.</p>
+    </section>
+  </div>
+
   <div id="dresscodeModal" class="dresscode-modal" hidden>
     <div class="dresscode-backdrop" data-close-dresscode></div>
     <section class="dresscode-sheet" role="dialog" aria-modal="true" aria-labelledby="dresscodeModalTitle">
@@ -549,14 +561,14 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.103"></script>
-  <script src="config.js?v=0.103"></script>
-  <script src="data/content-published.js?v=0.103"></script>
-  <script src="content-store.js?v=0.103"></script>
+  <script src="version.js?v=0.104"></script>
+  <script src="config.js?v=0.104"></script>
+  <script src="data/content-published.js?v=0.104"></script>
+  <script src="content-store.js?v=0.104"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=0.103"></script>
-  <script src="metronome.js?v=0.103"></script>
-  <script src="tuner.js?v=0.103"></script>
-  <script src="app.js?v=0.103"></script>
+  <script src="supabase-client.js?v=0.104"></script>
+  <script src="metronome.js?v=0.104"></script>
+  <script src="tuner.js?v=0.104"></script>
+  <script src="app.js?v=0.104"></script>
 </body>
 </html>

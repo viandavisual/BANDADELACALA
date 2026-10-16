@@ -1,0 +1,8 @@
+BANDA DE LA CALA · v0.104
+
+- APP / USER / DEMOS: la parrilla deja de cargar reproductores de YouTube dentro de cada tarjeta.
+- Cada demo muestra ahora una miniatura 16:9 limpia, título opcional y botón de reproducción.
+- Al pulsar una demo se abre un reproductor interno de YouTube dentro de la APP, sin navegar fuera.
+- Solo existe un reproductor activo a la vez, mejorando rendimiento y comportamiento táctil en MOBILE.
+- Se añade Screen Wake Lock durante la reproducción cuando el dispositivo/navegador lo permite.
+- El Wake Lock se libera al pausar, terminar o cerrar el vídeo y se vuelve a solicitar al regresar a primer plano si el vídeo seguía reproduciéndose.

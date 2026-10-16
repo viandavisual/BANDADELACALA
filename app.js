@@ -1944,6 +1944,109 @@ function youtubeVideoId(url){
   }catch(_error){}
   return '';
 }
+
+let demoYoutubeApiPromise=null;
+let demoYoutubePlayer=null;
+let demoWakeLock=null;
+let demoVideoIsPlaying=false;
+
+function demoThumbnail(videoId){
+  return videoId?`https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg`:'';
+}
+function loadYoutubeIframeApi(){
+  if(window.YT?.Player) return Promise.resolve(window.YT);
+  if(demoYoutubeApiPromise) return demoYoutubeApiPromise;
+  demoYoutubeApiPromise=new Promise((resolve,reject)=>{
+    const previous=window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady=()=>{
+      try{ if(typeof previous==='function') previous(); }catch(_error){}
+      resolve(window.YT);
+    };
+    const existing=document.querySelector('script[data-band-youtube-api]');
+    if(existing){
+      const started=Date.now();
+      const timer=setInterval(()=>{
+        if(window.YT?.Player){ clearInterval(timer); resolve(window.YT); }
+        else if(Date.now()-started>12000){ clearInterval(timer); reject(new Error('YOUTUBE_API_TIMEOUT')); }
+      },100);
+      return;
+    }
+    const script=document.createElement('script');
+    script.src='https://www.youtube.com/iframe_api';
+    script.async=true;
+    script.dataset.bandYoutubeApi='1';
+    script.onerror=()=>reject(new Error('YOUTUBE_API_LOAD'));
+    document.head.appendChild(script);
+  });
+  return demoYoutubeApiPromise;
+}
+async function requestDemoWakeLock(){
+  if(!demoVideoIsPlaying || document.visibilityState!=='visible' || !('wakeLock' in navigator)) return;
+  try{
+    if(demoWakeLock && !demoWakeLock.released) return;
+    demoWakeLock=await navigator.wakeLock.request('screen');
+    demoWakeLock.addEventListener('release',()=>{demoWakeLock=null;},{once:true});
+  }catch(error){
+    console.info('DEMOS: wake lock no disponible',error);
+  }
+}
+async function releaseDemoWakeLock(){
+  const lock=demoWakeLock;
+  demoWakeLock=null;
+  if(lock && !lock.released){
+    try{ await lock.release(); }catch(_error){}
+  }
+}
+function handleDemoPlayerState(event){
+  const stateValue=event?.data;
+  const YT=window.YT;
+  if(!YT?.PlayerState) return;
+  if(stateValue===YT.PlayerState.PLAYING){
+    demoVideoIsPlaying=true;
+    requestDemoWakeLock();
+  }else if(stateValue===YT.PlayerState.PAUSED || stateValue===YT.PlayerState.ENDED || stateValue===YT.PlayerState.CUED || stateValue===YT.PlayerState.UNSTARTED){
+    demoVideoIsPlaying=false;
+    releaseDemoWakeLock();
+  }
+}
+async function openDemoPlayer(videoId,title=''){
+  const modal=$('#demoPlayerModal'), host=$('#demoPlayerHost'), titleEl=$('#demoPlayerTitle');
+  if(!modal||!host||!videoId) return;
+  modal.hidden=false;
+  document.body.classList.add('demo-video-open');
+  if(titleEl) titleEl.textContent=String(title||'').trim()||'DEMO';
+  host.innerHTML='<div class="demo-player-loading">CARREGANT VÍDEO…</div>';
+  demoVideoIsPlaying=false;
+  await releaseDemoWakeLock();
+  try{
+    const YT=await loadYoutubeIframeApi();
+    if(demoYoutubePlayer?.destroy){ try{demoYoutubePlayer.destroy();}catch(_error){} }
+    host.innerHTML='<div id="demoYoutubePlayer"></div>';
+    demoYoutubePlayer=new YT.Player('demoYoutubePlayer',{
+      videoId,
+      width:'100%',
+      height:'100%',
+      playerVars:{playsinline:1,rel:0,modestbranding:1},
+      events:{
+        onStateChange:handleDemoPlayerState,
+        onError:()=>{ const loading=$('#demoPlayerHost'); if(loading) loading.innerHTML='<div class="demo-player-error">No s’ha pogut reproduir aquest vídeo.</div>'; }
+      }
+    });
+  }catch(error){
+    console.warn('DEMOS: no s’ha pogut carregar el reproductor',error);
+    host.innerHTML='<div class="demo-player-error">No s’ha pogut carregar el reproductor de YouTube.</div>';
+  }
+}
+async function closeDemoPlayer(){
+  demoVideoIsPlaying=false;
+  await releaseDemoWakeLock();
+  if(demoYoutubePlayer?.destroy){ try{demoYoutubePlayer.destroy();}catch(_error){} }
+  demoYoutubePlayer=null;
+  const host=$('#demoPlayerHost'); if(host) host.innerHTML='';
+  const modal=$('#demoPlayerModal'); if(modal) modal.hidden=true;
+  document.body.classList.remove('demo-video-open');
+}
+
 function renderUserDemos(){
   const host=$('#userDemosList'), box=$('#userDemosBox'); if(!host||!box) return;
   const visible=state.content?.settings?.demosVisible !== false;
@@ -1960,9 +2063,22 @@ function renderUserDemos(){
     if(!videoId) return '';
     const title=String(item.title||'').trim();
     const label=title||`Demo ${index+1}`;
-    const embed=`https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?rel=0&playsinline=1`;
-    return `<article class="user-demo-item">${title?`<strong class="user-demo-title">${esc(title)}</strong>`:''}<div class="user-demo-video"><iframe loading="lazy" src="${esc(embed)}" title="${esc(label)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></article>`;
+    const thumb=demoThumbnail(videoId);
+    return `<button class="user-demo-item" type="button" data-demo-play="${esc(videoId)}" data-demo-title="${esc(label)}" aria-label="Reproduir ${esc(label)}">${title?`<strong class="user-demo-title">${esc(title)}</strong>`:''}<span class="user-demo-thumb">${thumb?`<img loading="lazy" src="${esc(thumb)}" alt="" />`:''}<span class="user-demo-play" aria-hidden="true">▶</span></span></button>`;
   }).join(''):'<p class="user-demos-empty">Encara no hi ha demos preparades per al proper concert.</p>';
+  $$('[data-demo-play]').forEach(btn=>btn.addEventListener('click',()=>openDemoPlayer(btn.dataset.demoPlay||'',btn.dataset.demoTitle||'')));
+}
+
+
+function bindDemoPlayer(){
+  $('#closeDemoPlayerBtn')?.addEventListener('click',closeDemoPlayer);
+  $('#demoPlayerBackdrop')?.addEventListener('click',closeDemoPlayer);
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape' && !$('#demoPlayerModal')?.hidden) closeDemoPlayer();
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible' && demoVideoIsPlaying) requestDemoWakeLock();
+  });
 }
 
 function renderUserSection(){
@@ -2465,6 +2581,7 @@ async function init(){
   bindHemeroteca();
   bindCalendar();
   bindDresscodeModal();
+  bindDemoPlayer();
   bindHistoryImageModal();
   renderTracks();
   bindPlayer();
