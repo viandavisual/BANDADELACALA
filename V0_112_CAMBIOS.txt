@@ -1,0 +1,11 @@
+BANDA DE LA CALA — v0.112
+
+- Nova pàgina /install/ per a descàrrega alternativa d'Android, amb disseny responsiu i en català.
+- Enllaç directe a Android APP v0.1 (GitHub Releases).
+- /install/downloads.json: configuració central de URL i versió del fitxer APK.
+- Instruccions senzilles de la instal·lació externa i nota de seguretat.
+- Preparada per incorporar EDITOR en properes versions.
+- APP i EDITOR sense canvis funcionals; es preserven els manifests, IDs, scopes i Service Workers.
+- Fitxer version.js actualitzat a v0.112.
+
+IMPORTANT: la pàgina /install/ no apareix encara automàticament dins l'assistent de PWA. S'integrarà després de les proves amb Android real.
