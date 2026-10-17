@@ -26,7 +26,6 @@ jobs:
           gradle-version: '8.7'
 
       - name: Decode signing keystore
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
         working-directory: ${{ github.workspace }}
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/banda-cala.keystore"
 
