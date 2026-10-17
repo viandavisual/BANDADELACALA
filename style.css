@@ -3087,3 +3087,67 @@ body.demo-video-open{overflow:hidden}
   .archive-upload-file-card{display:grid!important}
   .archive-upload-file-cta{width:100%!important}
 }
+
+
+/* v0.120 · USER · afinat final caixa ENVIA EL TEU MATERIAL */
+.archive-upload-box .archive-upload-intro-note{
+  margin:6px 0 16px!important;
+  color:#f2f0ff!important;
+  font:700 .95rem/1.58 Arial,sans-serif!important;
+  max-width:760px;
+}
+.archive-upload-box .archive-upload-year-note,
+.archive-upload-box .archive-upload-video-note{display:none!important}
+.archive-upload-box .archive-upload-head h3{font-size:1.72rem!important}
+.archive-upload-block-head h4{
+  font-size:1.26rem!important;
+  letter-spacing:.03em!important;
+  line-height:1.1!important;
+}
+.archive-upload-box .archive-upload-form label{
+  font-size:.96rem!important;
+  font-weight:900!important;
+  letter-spacing:.015em!important;
+}
+.archive-upload-box .archive-upload-form input:not([type=file]),
+.archive-upload-box .archive-upload-form select,
+.archive-upload-box .archive-upload-form textarea{
+  margin-top:6px;
+}
+.archive-upload-file-name{
+  font-size:.9rem!important;
+  font-weight:700!important;
+}
+.archive-upload-submit{
+  position:relative;
+  overflow:hidden;
+  min-height:50px!important;
+  border-radius:999px!important;
+  border:0!important;
+  background:linear-gradient(135deg,#d4ac5f 0%, #e6c779 50%, #c89c3c 100%)!important;
+  color:#27285f!important;
+  font:900 .94rem/1 Arial,sans-serif!important;
+  letter-spacing:.05em!important;
+  box-shadow:0 10px 24px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.35)!important;
+}
+.archive-upload-submit::before{
+  content:"";
+  position:absolute;
+  top:-10%; bottom:-10%; left:-35%;
+  width:22%;
+  background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.18) 30%, rgba(255,255,255,.72) 50%, rgba(255,255,255,.18) 70%, rgba(255,255,255,0) 100%);
+  transform:skewX(-22deg);
+  animation:archiveSubmitSweep 2.8s linear infinite;
+  pointer-events:none;
+}
+.archive-upload-submit:hover{filter:brightness(1.03)!important;transform:translateY(-1px)}
+.archive-upload-submit:active{transform:translateY(0) scale(.99)}
+@keyframes archiveSubmitSweep{
+  0%{left:-35%}
+  100%{left:115%}
+}
+@media(max-width:620px){
+  .archive-upload-box .archive-upload-intro-note{font-size:.88rem!important;line-height:1.55!important}
+  .archive-upload-block-head h4{font-size:1.12rem!important}
+  .archive-upload-box .archive-upload-form label{font-size:.9rem!important}
+}

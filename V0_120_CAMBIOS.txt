@@ -1,0 +1,11 @@
+BANDA DE LA CALA — v0.120
+
+APP / USER / PUJAR FATO MULTIMEDIA
+- Els tres textos introductoris es fusionen en un únic missatge més net i directe.
+- Es manté la informació clau: fotos/cartells, any obligatori i vídeos encara no disponibles.
+- Els títols de secció (com «AFEGEIX LA IMATGE») augmenten de mida.
+- Els subtítols/etiquetes dels camps (com «Descripció») també augmenten de mida.
+- El botó «ENVIAR MATERIAL» canvia de color cap a un acabat daurat corporatiu.
+- Nou efecte visual de barrido de llum d'esquerra a dreta en loop dins del botó.
+
+SENSE CANVIS: lògica de pujada, Supabase, EDITOR, APK Android, INSTALL, rols i identitats PWA.
