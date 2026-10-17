@@ -1,75 +1,61 @@
 <!doctype html>
 <html lang="ca">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#11171c">
-  <meta name="description" content="Instal·lació alternativa de Banda de la Cala per a Android.">
-  <title>Instal·lació · Banda de la Cala</title>
-  <link rel="icon" href="../assets/brand/app-icon.png">
-  <style>
-    :root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0e141a;color:#f5f7f8}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 5%,#233a4a 0%,#141e27 36%,#0e141a 82%)}
-    .wrap{max-width:600px;margin:auto;padding:clamp(26px,6vw,60px) 20px 48px;text-align:center}
-    .logo{display:block;width:min(86%,340px);height:auto;object-fit:contain;margin:0 auto 25px;filter:drop-shadow(0 8px 18px #0005)}
-    .overline{color:#b4c4cd;font-size:11px;letter-spacing:.25em;font-weight:800;margin:0 0 12px;text-transform:uppercase}
-    h1{font-size:clamp(30px,6vw,45px);letter-spacing:-.055em;line-height:1.08;margin:0 0 14px}
-    .lead{max-width:440px;margin:0 auto 25px;color:#c6d1d9;font-size:15px;line-height:1.55}
-    .panel{border:1px solid #415362;background:linear-gradient(145deg,#1a2a36,#16202a);border-radius:22px;padding:25px 22px;box-shadow:0 22px 58px #0005}
-    .app-icon{width:78px;height:78px;object-fit:contain;border-radius:19px;margin-bottom:10px}
-    .app-name{font-size:22px;font-weight:800;margin:0 0 5px}.hint{font-size:13px;color:#bdcbd4;margin:0 0 23px}
-    .download{display:flex;gap:10px;justify-content:center;align-items:center;text-decoration:none;border-radius:13px;padding:17px 16px;background:#ead093;color:#11181b;font-size:15px;font-weight:900;letter-spacing:.04em;transition:background .18s,transform .18s}
-    .download:hover{background:#ffe2a2;transform:translateY(-1px)}.download:focus-visible,a:focus-visible{outline:3px solid #fff;outline-offset:4px}
-    .download svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-    .version{color:#99acb9;font-size:12px;margin:14px 0 0}.steps{text-align:left;padding:26px 10px 6px}.steps h2{font-size:18px;letter-spacing:-.02em;margin:0 0 16px}
-    .steps ol{list-style:none;counter-reset:step;margin:0;padding:0;display:grid;gap:15px}.steps li{counter-increment:step;position:relative;padding-left:43px;color:#d8e0e6;font-size:14px;line-height:1.5}
-    .steps li:before{content:counter(step);position:absolute;left:0;top:0;display:grid;place-items:center;width:29px;height:29px;border-radius:50%;background:#2d4050;color:#f2d99f;font-weight:800}
-    .safe{margin:24px 0 0;padding:14px;border-radius:12px;background:#18252e;border:1px solid #30434f;color:#bfcbd3;font-size:12px;line-height:1.55;text-align:left}
-    footer{padding-top:27px;font-size:12px;color:#9aadb9}footer a{color:#ddc58b;text-underline-offset:4px}
-    .desktop-note{display:none;margin:20px 0 0;padding:12px;color:#cbd7de;border:1px solid #475b68;border-radius:12px;font-size:13px}
-    .editor-note{margin:15px 0 0;color:#a6b6c1;font-size:12px}
-    @media(max-width:400px){.panel{padding:21px 16px}.wrap{padding-left:15px;padding-right:15px}}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#faf8f4"><meta name="description" content="Instal·lació alternativa de l'aplicació Banda de la Cala per a Android.">
+<title>Instal·la l'APP · Banda de la Cala</title><link rel="icon" href="../assets/brand/app-icon.png">
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color:#142046;background:#eeece7}*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#eeece7;padding:18px 16px 34px}
+.paper{max-width:600px;margin:0 auto;background:#fff;border-top:7px solid #383783;border-bottom:4px solid #dab258;box-shadow:0 10px 36px #25223813}
+.masthead{text-align:center;background:#fbfaf7;padding:32px 20px 25px}
+.brand-disc{width:118px;height:118px;border:1px solid #e8e5df;border-radius:50%;background:#fff;display:grid;place-items:center;margin:0 auto 16px;overflow:hidden}
+.brand-disc img{width:97%;height:97%;object-fit:contain}
+.location{font-size:10px;color:#a66b28;font-weight:700;letter-spacing:.35em;line-height:1.55;margin:0}
+.content{text-align:center;padding:23px 36px 29px}
+h1{font-size:23px;line-height:1.15;color:#18266b;font-weight:800;margin:0;text-transform:uppercase}
+.rule{width:37px;height:2px;margin:15px auto 20px;background:#dab258}
+.lead{font-size:14px;line-height:1.7;color:#17203b;margin:0 auto 20px;max-width:445px}
+.download{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:46px;max-width:100%;padding:13px 22px;border-radius:9px;background:#383783;color:#fff;font-size:13px;line-height:1.35;font-weight:800;text-decoration:none;text-transform:uppercase;transition:background .18s}
+.download:hover{background:#242568}.download:focus-visible,a:focus-visible{outline:3px solid #d6a441;outline-offset:3px}
+.download svg{height:17px;width:17px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.version{font-size:11px;color:#7e7b84;margin:12px 0 24px}
+.instructions{background:#f0eff9;text-align:left;padding:20px 20px 17px;margin:0 auto 20px;max-width:500px}
+.instructions h2{color:#252a72;margin:0 0 12px;font-size:14px;text-align:center;text-transform:uppercase;letter-spacing:.04em}
+.instructions ol{margin:0;padding-left:22px}.instructions li{padding:0 0 9px 3px;font-size:12.5px;line-height:1.55;color:#23253b}.instructions li:last-child{padding-bottom:0}
+.footnote{margin:0 auto 11px;max-width:470px;font-size:11px;line-height:1.6;color:#77727a}
+.desktop-note{display:none;background:#f0eff9;padding:11px 14px;margin:0 auto 20px;max-width:500px;color:#363575;font-size:12px;line-height:1.5}
+.editor-note{font-size:11px;color:#89868c;margin:13px auto 0;line-height:1.5}
+.footer{text-align:center;background:#fbfaf7;border-top:1px solid #f0ece6;padding:19px 20px;color:#77727a;font-size:10px;line-height:1.6}
+.footer strong{color:#303078}.footer a{color:#303078;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:500px){body{padding:0;background:#fff}.paper{border-top-width:6px;box-shadow:none}.masthead{padding-top:25px}.content{padding:23px 20px 29px}h1{font-size:21px}.instructions{padding:18px 17px}.download{width:100%}}
+</style>
 </head>
 <body>
-<main class="wrap">
-  <img class="logo" src="../assets/brand/logo-banda-de-la-cala.png" alt="Banda de la Cala">
-  <p class="overline">Instal·lació alternativa</p>
-  <h1>La Banda, al teu mòbil.</h1>
-  <p class="lead">Si no has pogut instal·lar l'aplicació des del navegador, pots descarregar-la directament per a Android.</p>
-  <section class="panel" aria-labelledby="app-heading">
-    <img class="app-icon" src="../assets/brand/app-icon.png" alt="">
-    <h2 id="app-heading" class="app-name">BANDA DE LA CALA</h2>
-    <p class="hint">Aplicació per a Android</p>
-    <a class="download" id="download" href="https://github.com/viandavisual/BANDADELACALA/releases/download/android-app-v0.1/app-release.apk" download="app-release.apk" rel="noopener noreferrer">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg>
-      DESCARREGAR APP
-    </a>
-    <p id="version" class="version">Android v0.1</p>
-  </section>
-  <div class="desktop-note" id="desktop-note">Aquesta descàrrega és per a dispositius Android. Obre aquesta pàgina des del mòbil on vulguis instal·lar l'aplicació.</div>
-  <section class="steps" aria-labelledby="steps-heading">
-    <h2 id="steps-heading">Com s'instal·la?</h2>
-    <ol>
-      <li>Prem <strong>DESCARREGAR APP</strong> i espera que acabi la descàrrega.</li>
-      <li>Obre el fitxer <strong>.apk</strong> descarregat.</li>
-      <li>Si Android t'ho demana, autoritza la instal·lació des d'aquesta font i confirma <strong>Instal·la</strong>.</li>
-      <li>Obre <strong>Banda de la Cala</strong> i inicia sessió com sempre.</li>
-    </ol>
-  </section>
-  <p class="safe">Descarrega l'aplicació únicament des d'aquesta pàgina oficial. Si Android mostra un avís sobre instal·lar aplicacions externes, comprova que el fitxer prové d'aquest enllaç abans de continuar. Pots retirar el permís d'instal·lació després.</p>
-  <p class="editor-note">La instal·lació alternativa de l'EDITOR estarà disponible més endavant.</p>
-  <footer><a href="../app/">Tornar a l'APP</a></footer>
+<main class="paper">
+<header class="masthead">
+<div class="brand-disc"><img src="../assets/brand/logo-banda-de-la-cala.png" alt="Logotip de Banda de la Cala"></div>
+<p class="location">L’AMETLLA DE<br>MAR</p>
+</header>
+<section class="content" aria-labelledby="heading">
+<h1 id="heading">INSTAL·LA L’APLICACIÓ</h1><div class="rule" aria-hidden="true"></div>
+<p class="lead">Si no has pogut instal·lar l’APP des del navegador, descarrega aquí la versió alternativa per a Android.</p>
+<a class="download" id="download" href="https://github.com/viandavisual/BANDADELACALA/releases/download/android-app-v0.1/BANDA-DE-LA-CALA-APP-v0.1.apk" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg>DESCARREGAR APP</a>
+<p class="version" id="version">Android v0.1</p>
+<p id="desktop-note" class="desktop-note">Aquesta aplicació és per a Android. Obre la pàgina al mòbil on la vulguis instal·lar.</p>
+<div class="instructions"><h2>COM S’INSTAL·LA?</h2><ol><li>Prem <strong>DESCARREGAR APP</strong>.</li><li>Obre el fitxer <strong>.apk</strong> que has descarregat.</li><li>Si Android ho demana, permet instal·lar l’aplicació des d’aquesta font i confirma la instal·lació.</li><li>Obre <strong>Banda de la Cala</strong> i inicia sessió.</li></ol></div>
+<p class="footnote">Descarrega l’APP únicament des d’aquesta pàgina oficial. Si has autoritzat temporalment la instal·lació d’aplicacions externes, pots retirar aquest permís en acabar.</p>
+<p class="editor-note">La instal·lació alternativa de l’EDITOR estarà disponible més endavant.</p>
+</section>
+<footer class="footer"><strong>BANDA DE LA CALA</strong> · © 2026 · App development: <strong>Vianda Visual</strong><br><a href="../app/">TORNAR A L’APP</a></footer>
 </main>
 <script>
-  if (!/Android/i.test(navigator.userAgent)) document.getElementById('desktop-note').style.display='block';
-  // Configuració de descàrregues independent de les versions ordinàries de l'APP.
-  fetch('./downloads.json', {cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Config');return r.json()}).then(d=>{
-    if(d && d.app && /^https:\/\/github\.com\/viandavisual\/BANDADELACALA\/releases\/download\//.test(d.app.url)){
-      document.getElementById('download').href=d.app.url;
-      if(d.app.version) document.getElementById('version').textContent=d.app.version;
-    }
-  }).catch(()=>{}); // En cas d'error, l'enllaç directe verificat continua funcionant.
+if (!/Android/i.test(navigator.userAgent)) document.getElementById('desktop-note').style.display='block';
+fetch('./downloads.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Config');return r.json()}).then(d=>{
+if(d&&d.app&&/^https:\/\/github\.com\/viandavisual\/BANDADELACALA\/releases\/download\//.test(d.app.url)){
+document.getElementById('download').href=d.app.url;
+if(d.app.version)document.getElementById('version').textContent=d.app.version;
+}}).catch(()=>{});
 </script>
 </body>
 </html>

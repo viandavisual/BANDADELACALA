@@ -1,0 +1,6 @@
+BANDA DE LA CALA — v0.113
+
+- INSTALL redissenyada seguint la referència dels correus corporatius de Supabase: blanc, marfil, blau corporatiu, accent daurat i logotip centrat.
+- Interfície responsive, amb botó clar DESCARREGAR APP i instruccions en català.
+- Enllaç d’APK actualitzat a BANDA-DE-LA-CALA-APP-v0.1.apk, també com a fallback HTML.
+- APP i EDITOR sense modificacions funcionals; IDs, scopes i service workers preservats.
