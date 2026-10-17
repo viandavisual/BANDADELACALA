@@ -1,0 +1,6 @@
+BANDA DE LA CALA — v0.115
+
+- CALENDARI: en el detall de les activitats caducades, la franja esquerra conserva el color original segons el tipus (ASSAIG blau, EVENT/CONCERT/ACTUACIÓ daurat, ALTRES verd).
+- Es manté sense canvis el degradat gris dels esdeveniments caducats.
+- No es modifica la visualització de les activitats vigents ni la resta del calendari.
+- Actualització de versió, cache de l’APP i paràmetre de l’estil per distribuir el canvi.

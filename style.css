@@ -2559,7 +2559,10 @@ html.app-is-installed #mobileAppInstallCard,html.app-is-installed #mobileHomeIns
    ============================================================ */
 .hero-background{transition:opacity .5s ease!important}
 .hero-background.is-fading{opacity:0!important}
-.event-card.is-past{border-left-color:#9da2a8!important}
+/* v0.115: les activitats caducades conserven el color original a la barra esquerra. */
+.event-card.is-past.event-kind-rehearsal{border-left-color:var(--blue)!important}
+.event-card.is-past.event-kind-featured{border-left-color:var(--gold)!important}
+.event-card.is-past.event-kind-other{border-left-color:#4f9b62!important}
 .event-card.is-past::after{background:linear-gradient(to right,rgba(157,162,168,0) 0%,rgba(157,162,168,.14) 30%,rgba(157,162,168,.48) 68%,rgba(157,162,168,.88) 100%)!important}
 .event-card.is-past .event-type{color:#737980!important}
 
