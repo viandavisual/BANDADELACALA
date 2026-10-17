@@ -1,4 +1,3 @@
-PATCH v0.115 -> v0.116
-
-Copiar els arxius sobre l’arrel del repositori, mantenint les rutes. No eliminar cap arxiu existent.
-Modificats: app/index.html, app.js, supabase-client.js, style.css, version.js, app/sw.js, PATCH_README.txt; afegit V0_116_CAMBIOS.txt.
+BANDA DE LA CALA v0.117 — PATCH des de v0.116
+Copiar el contingut del ZIP a l’arrel del repositori respectant les rutes.
+No eliminar altres fitxers.

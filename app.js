@@ -454,7 +454,7 @@ function publicConcertCardMarkup(){
 }
 function renderHome(){
   const welcome=$('#homeWelcomeEyebrow');
-  if(welcome) welcome.textContent=state.authenticated ? (currentUserGender()==='other' ? 'Hola!' : `${currentWelcomeLabel()} ${currentUserDisplayName()}`) : 'BENVINGUT/DA';
+  if(welcome) welcome.textContent=state.authenticated ? (currentUserGender()==='other' ? `Hola! ${currentUserDisplayName()}` : `${currentWelcomeLabel()} ${currentUserDisplayName()}`) : 'BENVINGUT/DA';
   const copy=getHomeCardCopy();
   const gamesActive=getQuinaNotaSettings().active;
   const cards = state.authenticated ? [
@@ -2538,36 +2538,27 @@ function appInstallTechMarkup(signals){
 
 function appInstallHelpMarkup(reason='manual',signals={}){
   const d=appDeviceInfo();
-  let title='Instal·lació al dispositiu',html='',action='',label='';
+  let title='Instal·lar BANDA DE LA CALA',html='',action='',label='';
   if(signals.standalone){
-    title='APP instal·lada';
-    html='<p>Perfecte. Estàs executant <strong>BANDA DE LA CALA</strong> com a aplicació instal·lada.</p>';
+    title='APP ja instal·lada';
+    html='<p>Ja estàs fent servir <strong>BANDA DE LA CALA</strong> com a aplicació.</p>';
+  }else if(signals.relatedInstalled){
+    title='APP ja instal·lada';
+    html='<p>Hem detectat que ja tens l’APP instal·lada. Obre <strong>BANDA DE LA CALA</strong> des de la pantalla d’inici o des de les aplicacions del teu dispositiu.</p>';
   }else if(d.ios){
-    title='Instal·lar BANDA DE LA CALA';
-    html=d.safari?'<p>Només has de fer això:</p><ol><li>Prem <strong>Compartir</strong> a Safari.</li><li>Tria <strong>Afegir a la pantalla d’inici</strong>.</li><li>Activa <strong>Obrir com a app web</strong>, si apareix.</li><li>Prem <strong>Afegir</strong>.</li></ol>':'<p>Per instal·lar-la a iPhone/iPad, obre aquesta pàgina amb <strong>Safari</strong> i tria <strong>Compartir → Afegir a la pantalla d’inici</strong>.</p>';
+    html=d.safari?'<p>A Safari, prem <strong>Compartir</strong> i després <strong>Afegir a la pantalla d’inici</strong>.</p>':'<p>Obre aquesta pàgina amb <strong>Safari</strong> i selecciona <strong>Compartir → Afegir a la pantalla d’inici</strong>.</p>';
   }else if(signals.nativeReady){
-    title='Tot preparat';
-    html='<p>El dispositiu ja està preparat per instal·lar <strong>BANDA DE LA CALA</strong>.</p>';
-    action='native'; label='INSTAL·LAR ARA';
-  }else if(d.android && signals.relatedInstalled){
-    title='Hem trobat una instal·lació antiga';
-    html='<p>Android encara conserva una instal·lació de <strong>BANDA DE LA CALA</strong>, però aquesta pàgina no s’està executant com a APP.</p><p><strong>Solució:</strong></p><ol><li>Obre <strong>Configuració → Aplicacions</strong>.</li><li>Busca <strong>Banda de la Cala</strong> i prem <strong>Desinstal·lar</strong>.</li><li>Torna aquí i prem el botó de sota.</li></ol>';
-    action='recheck'; label='JA ESTÀ · CONTINUAR';
-  }else if(d.android && reason==='after-repair'){
-    title='Últim pas';
-    html='<p>Chrome encara no ofereix el botó automàtic. No passa res:</p><ol><li>Obre el menú <strong>⋮</strong> de Chrome.</li><li>Prem <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.</li></ol><p>Si Chrome diu que ja està instal·lada però no la trobes, ves a <strong>Configuració → Aplicacions</strong>, elimina <strong>Banda de la Cala</strong> i torna aquí.</p>';
-    action='recheck'; label='TORNAR A COMPROVAR';
+    html='<p>Ja pots instal·lar l’APP en aquest dispositiu.</p>';
+    action='native';label='INSTAL·LAR ARA';
   }else if(d.android){
-    title='Prepararem la instal·lació';
-    html='<p>No cal que facis res tècnic. Revisarem l’APP i tornarem a carregar-la una vegada perquè Chrome pugui oferir la instal·lació correctament.</p>';
-    action='repair'; label='PREPARAR I TORNAR A PROVAR';
+    html='<p>Si ja la tens instal·lada, obre-la des de la pantalla d’inici.</p><p>Si encara no la tens, pots provar la instal·lació alternativa.</p>';
+    action='alternative';label='INSTAL·LACIÓ ALTERNATIVA';
   }else if(d.windows||d.mac){
-    title='Instal·lar BANDA DE LA CALA';
-    html=(d.chrome||d.edge)?'<p>Obre el menú del navegador o la icona d’instal·lació de la barra d’adreces i tria <strong>Instal·lar BANDA DE LA CALA</strong>.</p>':(d.safari&&d.mac?'<p>A Safari, utilitza <strong>Fitxer → Afegir al Dock</strong>.</p>':'<p>Utilitza l’opció <strong>Instal·lar aplicació</strong> del navegador.</p>');
+    html='<p>Si ja tens l’APP instal·lada, obre-la des del menú d’aplicacions del teu ordinador.</p><p>Si encara no la tens, utilitza la icona d’instal·lació de la barra d’adreces o l’opció <strong>Instal·lar aplicació</strong> del navegador.</p>';
   }else{
-    html='<p>Utilitza l’opció <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong> del navegador.</p>';
+    html='<p>Si ja tens l’APP instal·lada, obre-la des del teu dispositiu. Si no, busca l’opció <strong>Instal·lar aplicació</strong> al navegador.</p>';
   }
-  return {title,html,action,label,device:`Dispositiu detectat: ${d.os} · ${d.browser} · ${signals.standalone?'executant com a APP':signals.nativeReady?'instal·lació preparada':'mode navegador'}`};
+  return {title,html,action,label,device:''};
 }
 
 async function showAppInstallHelp(reason='manual'){
@@ -2659,6 +2650,8 @@ async function handleAppInstallPrimary(){
   if(action==='native'){
     const accepted=await requestNativeAppInstall();
     if(!accepted) await showAppInstallHelp('manual');
+  }else if(action==='alternative'){
+    window.location.href=new URL('../install/',location.href).href;
   }else if(action==='repair'){
     await repairAppInstallEnvironment();
   }else if(action==='recheck'){
@@ -2669,6 +2662,8 @@ async function handleAppInstallPrimary(){
 
 async function promptAppInstall(){
   if(appIsStandalone()){ await showAppInstallHelp('installed'); return; }
+  const related=await appInstalledRelatedApps();
+  if(related.apps.some(item=>item?.platform==='webapp' || String(item?.id||'')==='/banda-de-la-cala-app')){ await showAppInstallHelp('installed'); return; }
   const d=appDeviceInfo();
   if(d.ios){ await showAppInstallHelp('ios'); return; }
   if(appInstallPrompt){

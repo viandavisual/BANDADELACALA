@@ -1,0 +1,13 @@
+BANDA DE LA CALA — v0.117
+
+APP / HOME
+- El gènere ALTRES mostra ara «Hola! NOM», mantenint el nom de l’usuari.
+
+APP / INSTAL·LACIÓ
+- Assistent simplificat: fora el bloc de diagnòstic tècnic i la fila del dispositiu.
+- Si es detecta instal·lació activa o relacionada, s’indica que ja està instal·lada.
+- En ordinadors amb PWA no detectable, instruccions breus per obrir-la des del menú d'aplicacions, sense assegurar que està instal·lada.
+- A Android, quan no hi ha instal·lació nativa disponible, botó cap a /install/.
+- L'estat de la instal·lació no es pressuposa quan el navegador no el comunica.
+
+SENSE CANVIS: EDITOR, permisos, rols, calendari, manifests i identitats PWA.
