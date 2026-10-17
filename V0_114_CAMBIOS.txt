@@ -1,0 +1,7 @@
+BANDA DE LA CALA — v0.114
+
+- INSTALL: textos més breus i instruccions simplificades per a persones sense coneixements tècnics.
+- INSTALL: avís sobre l’ús des del navegador si la instal·lació de l’APK tampoc funciona, amb enllaç directe a APP.
+- APP START: eliminat el text alternatiu visible durant el retard de càrrega de la imatge (alt buit, mantenint accessible el botó ENTRAR).
+- Conservats els enllaços APK i la configuració downloads.json.
+- Sense canvis funcionals a EDITOR, Supabase o els identificadors PWA.
