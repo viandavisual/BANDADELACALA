@@ -120,7 +120,7 @@ function currentUserDisplayName(){
 
 window.BandaAppAuth={ isAuthenticated:()=>!!state.authenticated };
 function currentAvatarKey(){ return String(state.profile?.avatar_key || '').trim(); }
-function currentUserGender(){ const value=String(state.session?.user?.user_metadata?.gender || '').trim().toLowerCase(); return ['male','female'].includes(value)?value:''; }
+function currentUserGender(){ const value=String(state.session?.user?.user_metadata?.gender || '').trim().toLowerCase(); return ['male','female','other'].includes(value)?value:''; }
 function currentWelcomeLabel(){ const gender=currentUserGender(); return gender==='male'?'BENVINGUT':gender==='female'?'BENVINGUDA':'BENVINGUT/DA'; }
 function getHistoricImages(item){
   const images=Array.isArray(item?.images) ? item.images.filter(Boolean) : [];
@@ -454,7 +454,7 @@ function publicConcertCardMarkup(){
 }
 function renderHome(){
   const welcome=$('#homeWelcomeEyebrow');
-  if(welcome) welcome.textContent=state.authenticated ? `${currentWelcomeLabel()} ${currentUserDisplayName()}` : 'BENVINGUT/DA';
+  if(welcome) welcome.textContent=state.authenticated ? (currentUserGender()==='other' ? 'Hola!' : `${currentWelcomeLabel()} ${currentUserDisplayName()}`) : 'BENVINGUT/DA';
   const copy=getHomeCardCopy();
   const gamesActive=getQuinaNotaSettings().active;
   const cards = state.authenticated ? [
@@ -2284,7 +2284,7 @@ function bindUserAuth(){
   $$('[data-profile-gender]').forEach(btn=>btn.addEventListener('click',async()=>{
     const status=$('#genderProfileStatus');
     const gender=btn.dataset.profileGender;
-    if(!state.authenticated || !['male','female'].includes(gender)) return;
+    if(!state.authenticated || !['male','female','other'].includes(gender)) return;
     if(status) status.textContent='Desant…';
     try{
       await BandaSupabase.updateOwnGender(gender);

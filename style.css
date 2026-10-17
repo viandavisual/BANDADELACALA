@@ -2959,3 +2959,8 @@ body.demo-video-open{overflow:hidden}
   .garment-crossfade{width:28px;height:28px}.garment-crossfade .garment-icon-svg{width:28px!important;height:28px!important}
 }
 @media(prefers-reduced-motion:reduce){.garment-crossfade>span{animation:none!important}.garment-crossfade>span+span{display:none!important}}
+
+/* v0.116: GÈNERE sense pictogrames; DEMOS per damunt de les eines musicals. */
+.gender-choice-btn>strong{font-size:.76rem}
+.user-profile-card .user-demos-box{margin-top:0!important;margin-bottom:16px!important}
+@media(max-width:780px){.user-profile-card .user-demos-box{margin-bottom:12px!important}}

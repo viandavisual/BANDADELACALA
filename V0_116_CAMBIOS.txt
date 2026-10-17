@@ -1,0 +1,8 @@
+BANDA DE LA CALA — v0.116
+
+- USER > OPCIONS D’USUARI > GÈNERE: botons MASCULÍ, FEMENÍ, ALTRES, sense icones.
+- ALTRES es desa a les metadades de l’usuari (gender=other), sense alterar els rols.
+- HOME: l’opció ALTRES mostra exactament «Hola!» com a salutació.
+- DEMOS PROPER CONCERT traslladat per damunt de PARTITURES, AFINADOR i METRÒNOM.
+- Service Worker de l’APP actualitzat a v0.116.
+- Sense canvis al funcionament de l’EDITOR, identitats PWA ni backend.

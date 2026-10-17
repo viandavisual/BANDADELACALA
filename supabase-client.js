@@ -142,7 +142,7 @@
   async function updateOwnGender(gender){
     const c=getClient(); if(!c) throw new Error('SUPABASE_NOT_READY');
     const clean=String(gender||'').trim().toLowerCase();
-    if(!['male','female'].includes(clean)) throw new Error('INVALID_GENDER');
+    if(!['male','female','other'].includes(clean)) throw new Error('INVALID_GENDER');
     const currentSession=await session();
     if(!currentSession) throw new Error('AUTH_REQUIRED');
     const {data,error}=await c.auth.updateUser({data:{gender:clean}});

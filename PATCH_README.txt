@@ -1,6 +1,4 @@
-PATCH v0.114 -> v0.115
+PATCH v0.115 -> v0.116
 
-Copia el contingut del PATCH a l’arrel del repositori GitHub, respectant les carpetes.
-Fitxers modificats: style.css, app/index.html, app/sw.js, version.js.
-Fitxers afegits: V0_115_CAMBIOS.txt.
-La resta de funcions d’APP, EDITOR i INSTALL no s’han modificat.
+Copiar els arxius sobre l’arrel del repositori, mantenint les rutes. No eliminar cap arxiu existent.
+Modificats: app/index.html, app.js, supabase-client.js, style.css, version.js, app/sw.js, PATCH_README.txt; afegit V0_116_CAMBIOS.txt.
