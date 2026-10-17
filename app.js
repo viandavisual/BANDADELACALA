@@ -2405,12 +2405,33 @@ function bindUserAuth(){
     const box=$('#userOptionsBox'), btn=$('#openUserOptionsBtn'); if(box) box.hidden=true;
     if(btn) btn.setAttribute('aria-expanded','false');
   });
+  const syncArchiveTypeButtons=()=>{
+    const current=$('#archiveUploadType')?.value||'photo';
+    document.querySelectorAll('[data-archive-type]').forEach(btn=>{
+      const active=btn.getAttribute('data-archive-type')===current;
+      btn.classList.toggle('is-active',active);
+      btn.setAttribute('aria-pressed',active?'true':'false');
+    });
+  };
+  document.querySelectorAll('[data-archive-type]').forEach(btn=>btn.addEventListener('click',()=>{
+    const select=$('#archiveUploadType');
+    if(select) select.value=btn.getAttribute('data-archive-type')||'photo';
+    syncArchiveTypeButtons();
+  }));
+  $('#archiveUploadType')?.addEventListener('change',syncArchiveTypeButtons);
+  syncArchiveTypeButtons();
+
   $('#archiveUploadFile')?.addEventListener('change',event=>{
     const preview=$('#archiveUploadPreview');
     const file=event.target.files?.[0];
+    const fileName=$('#archiveUploadFileName');
     if(!preview) return;
     if(preview.dataset.objectUrl){ try{URL.revokeObjectURL(preview.dataset.objectUrl);}catch(_error){} preview.dataset.objectUrl=''; }
-    if(!file){ preview.hidden=true; preview.innerHTML=''; return; }
+    if(!file){
+      if(fileName) fileName.textContent='Encara no has seleccionat cap arxiu.';
+      preview.hidden=true; preview.innerHTML=''; return;
+    }
+    if(fileName) fileName.textContent=`${file.name} · ${Math.max(.1,file.size/1024/1024).toFixed(1)} MB`;
     const url=URL.createObjectURL(file); preview.dataset.objectUrl=url;
     preview.innerHTML=`<img src="${esc(url)}" alt="Previsualització del material" /><small>${esc(file.name)} · ${Math.max(.1,file.size/1024/1024).toFixed(1)} MB</small>`;
     preview.hidden=false;
@@ -2448,6 +2469,8 @@ function bindUserAuth(){
       if(preview?.dataset.objectUrl){ try{URL.revokeObjectURL(preview.dataset.objectUrl);}catch(_error){} }
       form?.reset();
       if(preview){preview.hidden=true;preview.innerHTML='';preview.dataset.objectUrl='';}
+      const fileName=$('#archiveUploadFileName'); if(fileName) fileName.textContent='Encara no has seleccionat cap arxiu.';
+      syncArchiveTypeButtons();
       status.textContent='Material enviat correctament. Queda pendent de revisió per un GESTOR o ADMIN.';
     }catch(error){
       console.error(error);

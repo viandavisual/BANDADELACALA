@@ -1,0 +1,13 @@
+BANDA DE LA CALA — v0.118
+
+APP / USER / PUJAR FATO MULTIMEDIA
+- Redisseny visual complet de la caixa «ENVIA EL TEU MATERIAL».
+- Nova estructura més clara i visual: tipus de material, imatge, data i informació addicional.
+- Selecció del tipus mitjançant dos botons grans: FOTOGRAFIA i CARTELL.
+- Zona de selecció d'imatge més visual, amb nom d'arxiu destacat i previsualització.
+- Títols de secció més grans i fàcils d'identificar.
+- Missatge destacat indicant clarament que, de la informació del material, l'única dada obligatòria és l'ANY.
+- Dins la secció de data, el camp ANY queda remarcat explícitament com a OBLIGATORI.
+- La resta de dades addicionals es presenten com a opcionals, mantenint la mateixa lògica de pujada i revisió.
+
+SENSE CANVIS: EDITOR, Supabase, rols, APK Android, INSTALL, calendari i identitats PWA.

@@ -2964,3 +2964,95 @@ body.demo-video-open{overflow:hidden}
 .gender-choice-btn>strong{font-size:.76rem}
 .user-profile-card .user-demos-box{margin-top:0!important;margin-bottom:16px!important}
 @media(max-width:780px){.user-profile-card .user-demos-box{margin-bottom:12px!important}}
+
+
+/* v0.118 · USER · caixa ENVIA EL TEU MATERIAL redissenyada */
+.archive-upload-box{
+  background:#393A86!important;
+  border-color:#393A86!important;
+  color:#fff!important;
+  box-shadow:0 18px 34px rgba(34,35,86,.18)!important;
+}
+.archive-upload-box .archive-upload-head{margin-bottom:10px}
+.archive-upload-box .archive-upload-head h3{font-size:2rem!important;line-height:1.05!important}
+.archive-upload-intro{font-size:1rem!important;line-height:1.55!important;max-width:760px}
+.archive-upload-year-note{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:40px;padding:10px 14px;margin:0 0 16px;
+  border-radius:999px;background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.2);color:#fff;
+  font:900 .76rem/1.25 Arial,sans-serif;letter-spacing:.045em;text-transform:uppercase;
+}
+.archive-upload-form{gap:16px!important}
+.archive-upload-block{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:18px;
+  padding:16px;
+}
+.archive-upload-block-head{display:grid;gap:6px;margin-bottom:12px}
+.archive-upload-block-head h4{
+  margin:0;color:#fff;font:900 1.1rem/1.1 Arial,sans-serif;letter-spacing:.035em;
+}
+.archive-upload-block-head p{margin:0;color:rgba(255,255,255,.86);font-size:.92rem;line-height:1.45}
+.archive-upload-type-pills{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.archive-upload-type-btn{
+  border:1px solid rgba(255,255,255,.26);border-radius:14px;background:rgba(255,255,255,.1);
+  color:#fff;min-height:56px;padding:12px 14px;cursor:pointer;
+  font:900 .92rem/1.15 Arial,sans-serif;letter-spacing:.045em;text-align:center;
+  transition:transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.archive-upload-type-btn:hover{transform:translateY(-1px)}
+.archive-upload-type-btn.is-active{
+  background:#fff;color:#393A86;border-color:#fff;box-shadow:0 10px 22px rgba(0,0,0,.15);
+}
+.archive-upload-file-card{
+  position:relative;display:grid!important;gap:10px;padding:16px;border-radius:16px;
+  background:#fff;border:1px dashed rgba(57,58,134,.28);cursor:pointer;
+}
+.archive-upload-file-card input[type="file"]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;
+}
+.archive-upload-file-cta{
+  display:inline-flex;align-items:center;justify-content:center;width:max-content;max-width:100%;
+  min-height:42px;padding:10px 16px;border-radius:999px;background:#393A86;color:#fff;
+  font:900 .78rem/1 Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase;
+}
+.archive-upload-file-name{color:#393A86;font-size:.92rem;line-height:1.4;font-weight:700}
+.archive-upload-box .archive-upload-form label{font-size:.82rem!important;letter-spacing:.025em}
+.archive-upload-box .archive-upload-form input,
+.archive-upload-box .archive-upload-form select,
+.archive-upload-box .archive-upload-form textarea{
+  border-radius:14px!important;border-color:#d9d7e8!important;
+  font-size:.96rem!important;font-weight:700!important;color:#24211f!important;
+}
+.archive-upload-date-row,.archive-upload-meta-grid{display:grid;gap:12px}
+.archive-upload-date-row{grid-template-columns:1.1fr 1fr .9fr}
+.archive-upload-meta-grid{grid-template-columns:1fr 1fr}
+.archive-upload-meta-full{grid-column:1 / -1}
+.archive-upload-label-strong{position:relative}
+.archive-required-chip{
+  display:inline-flex;align-items:center;justify-content:center;margin-left:8px;vertical-align:middle;
+  min-height:22px;padding:2px 8px;border-radius:999px;background:#D4AC5F;color:#27285f;
+  font:900 .62rem/1 Arial,sans-serif;letter-spacing:.05em;
+}
+.archive-upload-preview{margin-top:2px;background:#ececf7!important;border-radius:16px!important}
+.archive-upload-preview img{background:#fff!important}
+.archive-upload-submit{
+  min-height:54px;border-radius:999px!important;background:#fff!important;color:#393A86!important;
+  font:900 1rem/1 Arial,sans-serif!important;letter-spacing:.045em!important;
+}
+.archive-upload-submit:hover{filter:brightness(.98)}
+.archive-upload-box .user-auth-status{display:block;min-height:18px;font-size:.82rem;line-height:1.45}
+@media(max-width:780px){
+  .archive-upload-box .archive-upload-head h3{font-size:1.7rem!important}
+  .archive-upload-year-note{display:flex;border-radius:16px;font-size:.72rem;line-height:1.35}
+  .archive-upload-type-pills,.archive-upload-meta-grid,.archive-upload-date-row{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .archive-upload-box{padding:14px!important}
+  .archive-upload-block{padding:14px}
+  .archive-upload-intro{font-size:.95rem!important}
+  .archive-upload-box .archive-upload-head h3{font-size:1.5rem!important}
+  .archive-upload-file-cta{width:100%}
+}
