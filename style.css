@@ -3151,3 +3151,11 @@ body.demo-video-open{overflow:hidden}
   .archive-upload-block-head h4{font-size:1.12rem!important}
   .archive-upload-box .archive-upload-form label{font-size:.9rem!important}
 }
+
+
+/* v0.121 · INSTALL assistant · contingut centrat */
+.app-install-help-card{display:flex;flex-direction:column;align-items:center;text-align:center!important}
+.app-install-help-card>img{display:block;margin:0 auto 8px!important}
+.app-install-help-text{width:100%;text-align:center!important;margin:0 auto}
+.app-install-help-text p{max-width:420px;margin:0 auto 10px!important}
+.app-install-help-device:empty{display:none!important}

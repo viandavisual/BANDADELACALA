@@ -1,0 +1,9 @@
+BANDA DE LA CALA — v0.121
+
+APP / INSTAL·LACIÓ
+- Ajust visual de la finestra d'ajuda d'instal·lació quan l'APP ja està instal·lada.
+- El contingut interior de la caixa queda centrat horitzontalment.
+- La icona, el títol i el text informatiu es presenten ara de manera coherent i centrada.
+- S'oculta la pastilla de dispositiu si està buida.
+
+SENSE CANVIS: lògica d'instal·lació, APK Android, USER, SUPABASE, EDITOR i identitats PWA.
