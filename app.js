@@ -2696,7 +2696,7 @@ async function promptAppInstall(){
     if(!accepted) await showAppInstallHelp('manual');
     return;
   }
-  const prompt=await waitForNativeAppInstallPrompt(900);
+  const prompt=await waitForNativeAppInstallPrompt(1600);
   if(prompt){
     const accepted=await requestNativeAppInstall();
     if(!accepted) await showAppInstallHelp('manual');

@@ -1216,3 +1216,44 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 @keyframes garmentCrossfadeA{0%,25%{opacity:1}50%,75%{opacity:0}100%{opacity:1}}
 @keyframes garmentCrossfadeB{0%,25%{opacity:0}50%,75%{opacity:1}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.dress-item-icon .garment-crossfade>span{animation:none!important}.dress-item-icon .garment-crossfade>span+span{display:none!important}}
+
+
+/* v0.123 · DRESSCODE editor · fitxes compactes i llegibles */
+[data-editor-view="dresscode"] .dresscode-editor-stack{gap:14px}
+[data-editor-view="dresscode"] .dresscode-form-card{padding:18px!important}
+[data-editor-view="dresscode"] .dresscode-top-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+[data-editor-view="dresscode"] .dresscode-unified-wrap{margin-top:12px}
+[data-editor-view="dresscode"] .dress-unified-card{padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
+[data-editor-view="dresscode"] .dress-unified-card .dress-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important}
+[data-editor-view="dresscode"] .dress-item-row{
+  display:grid!important;grid-template-columns:38px minmax(0,1fr)!important;
+  gap:10px!important;align-items:start!important;padding:12px!important;
+  background:#fff!important;border:1px solid #e6dbc7!important;border-radius:13px!important;
+  box-shadow:0 2px 8px rgba(88,60,26,.035);
+}
+[data-editor-view="dresscode"] .dress-item-icon{width:36px!important;height:36px!important;border-radius:10px!important}
+[data-editor-view="dresscode"] .dress-item-icon .garment-icon-svg{width:27px!important;height:27px!important}
+[data-editor-view="dresscode"] .dress-item-icon .garment-crossfade{width:28px!important;height:28px!important}
+[data-editor-view="dresscode"] .dress-item-name-row{min-height:24px;margin:0 0 7px!important;flex-wrap:wrap}
+[data-editor-view="dresscode"] .dress-item-name{font-size:12px!important;line-height:1.2!important;margin:0!important;letter-spacing:.045em!important}
+[data-editor-view="dresscode"] .dress-item-fields{display:grid!important;grid-template-columns:1fr!important;gap:7px!important}
+[data-editor-view="dresscode"] .dress-item-fields label{font-size:10px!important;line-height:1.2!important;letter-spacing:.045em!important;gap:4px!important}
+[data-editor-view="dresscode"] .dress-item-fields select,
+[data-editor-view="dresscode"] .dress-item-fields input{
+  font-size:12px!important;min-height:36px!important;height:36px!important;
+  padding:6px 10px!important;width:100%!important;border-radius:9px!important;
+}
+[data-editor-view="dresscode"] .dress-item-fields select option{font-size:12px!important}
+[data-editor-view="dresscode"] .dress-visible-toggle{font-size:9px!important;gap:6px!important}
+[data-editor-view="dresscode"] .dress-visible-toggle input{width:16px!important;height:16px!important}
+[data-editor-view="dresscode"] .dresscode-other-field{margin-top:12px!important}
+[data-editor-view="dresscode"] .dresscode-other-field textarea{min-height:68px!important}
+[data-editor-view="dresscode"] .form-actions{margin-top:12px!important}
+@media(max-width:850px){
+  [data-editor-view="dresscode"] .dress-unified-card .dress-items{grid-template-columns:1fr!important}
+}
+@media(max-width:560px){
+  [data-editor-view="dresscode"] .dresscode-top-fields{grid-template-columns:1fr!important}
+  [data-editor-view="dresscode"] .dresscode-form-card{padding:13px!important}
+  [data-editor-view="dresscode"] .dress-item-row{padding:10px!important}
+}

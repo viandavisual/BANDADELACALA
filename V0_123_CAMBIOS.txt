@@ -1,0 +1,13 @@
+BANDA DE LA CALA — v0.123
+
+EDITOR / DRESSCODE
+- Disposició més compacta: dues fitxes de peces de roba per fila en ordinador, una en mòbil.
+- Icones, noms i camps amb millor mida de lectura i menys espai buit.
+- Manté OPCIÓ, TEXT FINAL i la visibilitat de l’ABRIC, així com la compatibilitat dels registres existents.
+- Formulari general més compacte, sense alterar els camps de nom, subtítol o indicacions.
+
+APP / INSTALL
+- Prioritza la instal·lació nativa quan Chrome la té disponible i amplia lleugerament el marge d'espera de l'oferta nativa abans de mostrar ajuda.
+- La detecció d'una instal·lació existent continua subjecta al que permet el navegador.
+
+Sense canvis a Supabase, rols, dades, permisos ni identitats PWA.
