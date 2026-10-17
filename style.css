@@ -3166,3 +3166,11 @@ body.demo-video-open{overflow:hidden}
 .install-assistant-copy:hover{background:var(--blue-soft)}
 .install-assistant-copy[hidden]{display:none!important}
 .install-browser-tip{font-size:.78rem;color:var(--muted)}
+
+
+/* v0.125 · confirmació real d'instal·lació PWA */
+.app-install-success[hidden]{display:none!important}
+.app-install-success{position:fixed;z-index:7500;left:50%;top:max(20px,env(safe-area-inset-top));transform:translateX(-50%);width:min(460px,calc(100vw - 32px));display:flex;align-items:center;gap:14px;padding:18px 20px;border-radius:18px;border:1px solid rgba(212,172,95,.55);background:#fbfaf7;color:#29295e;box-shadow:0 14px 45px rgba(0,0,0,.28);text-align:left;box-sizing:border-box}
+.app-install-success-icon{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:50%;background:#e7f4eb;color:#207849;font:900 25px/1 Arial,sans-serif}
+.app-install-success strong{display:block;font:900 .92rem/1.25 Arial,sans-serif}
+.app-install-success p{margin:5px 0 0;font:.82rem/1.4 Arial,sans-serif}

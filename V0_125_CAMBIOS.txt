@@ -1,0 +1,10 @@
+BANDA DE LA CALA — v0.125
+
+APP / INSTAL·LACIÓ
+- En acceptar el diàleg natiu d'instal·lació es tanca l'assistent anterior, sense mostrar l'alternativa APK.
+- Només quan Chrome comunica l'esdeveniment appinstalled es mostra una confirmació breu: «APP INSTAL·LADA CORRECTAMENT!».
+- La confirmació desapareix automàticament al cap de 3 segons.
+- S'evita que una comprovació asíncrona anterior reobri l'assistent després de la confirmació.
+- Si Chrome no confirma la instal·lació, no es mostra un èxit fals.
+
+SENSE CANVIS: EDITOR, Supabase, rols, URL d'APK, manifests i identitats PWA.

@@ -11,6 +11,8 @@ function clearAppInstallPrompt(){
 }
 window.addEventListener('beforeinstallprompt', captureAppInstallPrompt);
 window.addEventListener('appinstalled', clearAppInstallPrompt);
+let appInstallCompleted = false;
+let appInstallSuccessTimer = null;
 
 const CFG = window.BANDA_CONFIG || {};
 const initialGlobalMuted = (() => { try { return localStorage.getItem('banda-de-la-cala-muted') === '1'; } catch(error) { return false; } })();
@@ -2589,6 +2591,7 @@ function appInstallHelpMarkup(reason='manual',signals={}){
 }
 
 async function showAppInstallHelp(reason='manual'){
+  if(appInstallCompleted) return;
   const modal=$('#appInstallHelp'); if(!modal) return;
   const title=$('#appInstallHelpTitle'),device=$('#appInstallHelpDevice'),text=$('#appInstallHelpText'),primary=$('#appInstallPrimaryAction'),tech=$('#appInstallTech');
   if(title) title.textContent='Comprovant instal·lació…';
@@ -2599,6 +2602,7 @@ async function showAppInstallHelp(reason='manual'){
   if(copyLink) copyLink.hidden=true;
   modal.hidden=false;
   const signals=await appInstallSignals();
+  if(appInstallCompleted) return;
   const info=appInstallHelpMarkup(reason,signals);
   if(title) title.textContent=info.title;
   if(device) device.textContent=info.device;
@@ -2613,6 +2617,15 @@ async function showAppInstallHelp(reason='manual'){
   }
 }
 function closeAppInstallHelp(){ const modal=$('#appInstallHelp'); if(modal) modal.hidden=true; }
+function showAppInstallSuccess(){
+  appInstallCompleted=true;
+  closeAppInstallHelp();
+  const toast=$('#appInstallSuccess');
+  if(!toast) return;
+  toast.hidden=false;
+  if(appInstallSuccessTimer) clearTimeout(appInstallSuccessTimer);
+  appInstallSuccessTimer=setTimeout(()=>{toast.hidden=true;appInstallSuccessTimer=null;},3000);
+}
 
 function syncAppInstallUI(){
   const buttons=[$('#homeFooterInstallBtn')].filter(Boolean);
@@ -2651,6 +2664,7 @@ async function requestNativeAppInstall(){
     const choice=await prompt.userChoice;
     if(appInstallPrompt===prompt) appInstallPrompt=null;
     syncAppInstallUI();
+    if(choice?.outcome==='accepted') closeAppInstallHelp();
     return choice?.outcome==='accepted';
   }catch(error){ console.warn('APP install',error); return false; }
 }
@@ -2679,7 +2693,7 @@ async function handleAppInstallPrimary(){
   const action=$('#appInstallPrimaryAction')?.dataset.action||'';
   if(action==='native'){
     const accepted=await requestNativeAppInstall();
-    if(!accepted) await showAppInstallHelp('manual');
+    if(!accepted && !appInstallCompleted) await showAppInstallHelp('manual');
   }else if(action==='continue'){
     closeAppInstallHelp();
   }else if(action==='alternative'){
@@ -2700,13 +2714,13 @@ async function promptAppInstall(){
   if(d.ios){ await showAppInstallHelp('ios'); return; }
   if(appInstallPrompt){
     const accepted=await requestNativeAppInstall();
-    if(!accepted) await showAppInstallHelp('manual');
+    if(!accepted && !appInstallCompleted) await showAppInstallHelp('manual');
     return;
   }
   const prompt=await waitForNativeAppInstallPrompt(1600);
   if(prompt){
     const accepted=await requestNativeAppInstall();
-    if(!accepted) await showAppInstallHelp('manual');
+    if(!accepted && !appInstallCompleted) await showAppInstallHelp('manual');
     return;
   }
   await showAppInstallHelp('manual');
@@ -2732,7 +2746,7 @@ function bindPwaInstall(){
     appInstallPrompt=null;
     syncAppInstallUI();
     if($('#pwaStatus')) $('#pwaStatus').textContent='PWA instal·lada';
-    showAppInstallHelp('installed');
+    showAppInstallSuccess();
   });
   ['standalone','fullscreen','minimal-ui','window-controls-overlay'].forEach(mode=>{
     window.matchMedia?.(`(display-mode: ${mode})`)?.addEventListener?.('change',syncAppInstallUI);
