@@ -331,13 +331,12 @@
                 <div><span class="eyebrow">ARXIU DE LA BANDA</span><h3>ENVIA EL TEU MATERIAL</h3></div>
                 <button id="closeArchiveUploadBtn" class="archive-upload-close" type="button" aria-label="Tancar">×</button>
               </div>
-              <p class="archive-upload-intro">Comparteix fotografies i cartells per ampliar l'HISTÒRIC de la banda.</p>
-              <div class="archive-upload-year-note">DE LA INFORMACIÓ DEL MATERIAL, L'ÚNICA DADA OBLIGATÒRIA ÉS L'ANY.</div>
+              <p class="archive-upload-intro">Comparteix fotografies i cartells amb la banda.</p>
+              <p class="archive-upload-year-note">Només cal indicar l'any. La resta de dades són opcionals.</p>
               <form id="archiveUploadForm" class="archive-upload-form">
                 <div class="archive-upload-block archive-upload-type-block">
                   <div class="archive-upload-block-head">
                     <h4>QUÈ VOLS ENVIAR?</h4>
-                    <p>Tria el tipus de material.</p>
                   </div>
                   <div class="archive-upload-type-pills" role="radiogroup" aria-label="Tipus de material">
                     <button class="archive-upload-type-btn is-active" type="button" data-archive-type="photo" aria-pressed="true">FOTOGRAFIA</button>
@@ -352,7 +351,6 @@
                 <div class="archive-upload-block">
                   <div class="archive-upload-block-head">
                     <h4>AFEGEIX LA IMATGE</h4>
-                    <p>Selecciona una imatge en format JPG, PNG o WEBP.</p>
                   </div>
                   <label class="archive-upload-file-card"> 
                     <input id="archiveUploadFile" type="file" accept="image/jpeg,image/png,image/webp" required />
@@ -365,7 +363,6 @@
                 <div class="archive-upload-block">
                   <div class="archive-upload-block-head">
                     <h4>QUAN ES VA FER?</h4>
-                    <p><strong>L'ANY és obligatori.</strong> El mes i el dia són opcionals.</p>
                   </div>
                   <div class="archive-upload-date-row">
                     <label class="archive-upload-label-strong">Any <span class="archive-required-chip">OBLIGATORI</span><input id="archiveUploadYear" type="number" min="1900" max="2100" step="1" required placeholder="Ex.: 1998" /></label>
@@ -377,7 +374,6 @@
                 <div class="archive-upload-block">
                   <div class="archive-upload-block-head">
                     <h4>INFORMACIÓ ADDICIONAL</h4>
-                    <p>Tota aquesta informació és opcional, però ens pot ajudar a ordenar millor l'històric.</p>
                   </div>
                   <div class="archive-upload-meta-grid">
                     <label>Títol<input id="archiveUploadTitle" type="text" maxlength="180" placeholder="Opcional" /></label>
@@ -386,6 +382,7 @@
                   </div>
                 </div>
 
+                <p class="archive-upload-video-note">De moment, el sistema NO admet VÍDEOS. En una propera actualització ho farem possible.</p>
                 <button class="user-password-btn archive-upload-submit" type="submit">ENVIAR MATERIAL</button>
                 <small id="archiveUploadStatus" class="user-auth-status" aria-live="polite"></small>
               </form>
@@ -605,7 +602,7 @@
     </section>
   </div>
 
-  <script src="version.js?v=0.118"></script>
+  <script src="version.js?v=0.119"></script>
   <script src="config.js?v=0.111"></script>
   <script src="data/content-published.js?v=0.111"></script>
   <script src="content-store.js?v=0.111"></script>
@@ -613,6 +610,6 @@
   <script src="supabase-client.js?v=0.117"></script>
   <script src="metronome.js?v=0.111"></script>
   <script src="tuner.js?v=0.111"></script>
-  <script src="app.js?v=0.118"></script>
+  <script src="app.js?v=0.119"></script>
 </body>
 </html>

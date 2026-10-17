@@ -1,0 +1,10 @@
+BANDA DE LA CALA — v0.119
+
+APP / USER / ENVIA EL TEU MATERIAL
+- Formulari simplificat amb menys caixes, menys text i més aire visual.
+- Els blocs passen a separar-se amb línies fines, sense panells interiors.
+- L'única dada de descripció obligatòria continua sent l'any (cal seleccionar la imatge a enviar).
+- Avís nou: «De moment, el sistema NO admet VÍDEOS. En una propera actualització ho farem possible.»
+- Es manté la selecció de fotografia/cartell, la previsualització, la validació i l'enviament a Supabase.
+
+Sense canvis en l'EDITOR, rols, instal·lació, manifests o identificadors PWA.

@@ -3056,3 +3056,34 @@ body.demo-video-open{overflow:hidden}
   .archive-upload-box .archive-upload-head h3{font-size:1.5rem!important}
   .archive-upload-file-cta{width:100%}
 }
+
+/* v0.119 · ENVIA EL TEU MATERIAL · simplificació visual */
+.archive-upload-box{padding:22px!important}
+.archive-upload-box .archive-upload-head{margin-bottom:4px!important}
+.archive-upload-box .archive-upload-head h3{font-size:1.6rem!important}
+.archive-upload-box .archive-upload-intro{margin:4px 0 10px!important;font-size:.9rem!important}
+.archive-upload-box .archive-upload-year-note{display:block!important;margin:0 0 18px!important;padding:0!important;min-height:0!important;background:transparent!important;border:0!important;border-radius:0!important;color:#eeeaff!important;font:700 .81rem/1.4 Arial,sans-serif!important;text-transform:none!important;letter-spacing:0!important}
+.archive-upload-form{gap:0!important}
+.archive-upload-block{background:transparent!important;border:0!important;border-radius:0!important;padding:0 0 16px!important;margin:0 0 16px!important;border-bottom:1px solid rgba(255,255,255,.24)!important}
+.archive-upload-block-head{margin-bottom:9px!important}
+.archive-upload-block-head h4{font-size:1rem!important;letter-spacing:.025em!important}
+.archive-upload-type-btn{min-height:46px!important;border-radius:12px!important;font-size:.82rem!important}
+.archive-upload-file-card{padding:12px!important;border-radius:12px!important;display:flex!important;align-items:center;flex-wrap:wrap;gap:10px!important}
+.archive-upload-file-cta{min-height:38px!important;padding:9px 14px!important;font-size:.72rem!important}
+.archive-upload-file-name{font-size:.78rem!important;font-weight:600!important}
+.archive-upload-date-row{grid-template-columns:1.1fr 1fr .9fr!important;gap:10px!important}
+.archive-upload-meta-grid{gap:10px!important}
+.archive-upload-box .archive-upload-form label{font-size:.8rem!important}
+.archive-upload-box .archive-upload-form input:not([type=file]),.archive-upload-box .archive-upload-form select,.archive-upload-box .archive-upload-form textarea{padding:10px 12px!important;font-size:.88rem!important;border-radius:10px!important}
+.archive-required-chip{background:transparent!important;color:#ffda80!important;padding:0!important;margin-left:4px!important;font-size:.62rem!important}
+.archive-upload-video-note{margin:0 0 16px!important;color:#f1e8cc!important;font-size:.82rem!important;line-height:1.5!important}
+.archive-upload-submit{min-height:46px!important;font-size:.86rem!important}
+@media(max-width:620px){
+  .archive-upload-box{padding:16px!important}
+  .archive-upload-date-row{grid-template-columns:1.1fr 1fr .9fr!important;gap:7px!important}
+  .archive-upload-date-row label{min-width:0;font-size:.72rem!important}
+  .archive-upload-date-row input,.archive-upload-date-row select{min-width:0;padding:9px 6px!important;font-size:.8rem!important}
+  .archive-upload-meta-grid{grid-template-columns:1fr!important}
+  .archive-upload-file-card{display:grid!important}
+  .archive-upload-file-cta{width:100%!important}
+}
