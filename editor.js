@@ -66,20 +66,13 @@ const DRESS_DEFS = [
     {id:'black_short',label:'MÀNIGA CURTA · NEGRA',text:'Camisa negra de màniga curta'},
     {id:'other',label:'ALTRES',text:''}
   ]},
-  {key:'bottom', label:'PANTALÓ/FALDILLA', optionsBySex:{
-    boys:[
-      {id:'suit_trousers',label:'PANTALONS DEL TRATGE (NEGRE)',text:'Pantalons del tratge (negre)'},
-      {id:'jeans',label:'TEXANS (NORMALS)',text:'Texans (normals)'},
-      {id:'other',label:'ALTRES',text:''}
-    ],
-    girls:[
-      {id:'skirt',label:'FALDILLA DEL TRATGE',text:'Faldilla del tratge'},
-      {id:'denim_bottom',label:'FALDILLA O PANTALÓ TEXÀ (NORMAL)',text:'Faldilla o pantaló texà (normal)'},
-      {id:'other',label:'ALTRES',text:''}
-    ]
-  }},
-  {key:'socks', label:'MITJA/MITJÓ', options:[
-    {id:'black',label:'NEGRES',textBySex:{boys:'Mitjons negres',girls:'Mitges negres'}},
+  {key:'bottom', label:'PANTALONS/FALDILLA', options:[
+    {id:'suit',label:'PANTALONS/FALDILLA DEL TRATGE',text:'Pantalons/Faldilla del tratge'},
+    {id:'denim',label:'TEXANS / FALDILLA O PANTALÓ TEXÀ (NORMAL)',text:'Texans / Faldilla o pantaló texà (normal)'},
+    {id:'other',label:'ALTRES',text:''}
+  ]},
+  {key:'socks', label:'MITGES/MITJONS', options:[
+    {id:'black',label:'NEGRES',text:'Mitges/Mitjons negres'},
     {id:'other',label:'ALTRES',text:''}
   ]},
   {key:'jacket', label:'AMERICANA', options:[
@@ -95,24 +88,32 @@ const DRESS_DEFS = [
     {id:'yes',label:'SÍ',text:'Corbata + pinza: sí'},
     {id:'no',label:'NO',text:'Corbata + pinza: no'},
     {id:'other',label:'ALTRES',text:''}
+  ]},
+  {key:'coat', label:'ABRIC', options:[
+    {id:'yes',label:'SÍ',text:'Abric: sí'},
+    {id:'no',label:'NO',text:'Abric: no'},
+    {id:'other',label:'ALTRES',text:''}
   ]}
 ];
-const DEFAULT_DRESS_PRESETS = {
-  boys:{shirt:'white_short',bottom:'suit_trousers',socks:'black',jacket:'no',footwear:'black',tie:'yes'},
-  girls:{shirt:'white_short',bottom:'skirt',socks:'black',jacket:'no',footwear:'black',tie:'yes'}
-};
+const DEFAULT_DRESS_PRESETS={shirt:'white_short',bottom:'suit',socks:'black',jacket:'no',footwear:'black',tie:'yes',coat:'no'};
 
-function garmentIconSvg(key,sex='boys'){
+function garmentBaseSvg(key,variant='default'){
   const common='viewBox="0 0 48 48" class="garment-icon-svg" aria-hidden="true"';
   const stroke='fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
   if(key==='shirt') return `<svg ${common}><path ${stroke} d="M15 10 20 7h8l5 3 8 6-5 7-5-3v18H17V20l-5 3-5-7 8-6Z"/><path class="garment-gold" ${stroke} d="M20 7c.7 4 2 6 4 6s3.3-2 4-6"/></svg>`;
-  if(key==='bottom' && sex==='girls') return `<svg ${common}><path ${stroke} d="M18 8h12l2 7 6 24H10l6-24 2-7Z"/><path class="garment-gold" ${stroke} d="M16 15h16"/></svg>`;
+  if(key==='bottom' && variant==='skirt') return `<svg ${common}><path ${stroke} d="M18 8h12l2 7 6 24H10l6-24 2-7Z"/><path class="garment-gold" ${stroke} d="M16 15h16"/></svg>`;
   if(key==='bottom') return `<svg ${common}><path ${stroke} d="M14 8h20l-2 31h-8l-1-18-1 18h-8L14 8Z"/><path class="garment-gold" ${stroke} d="M23 9v12"/></svg>`;
-  if(key==='socks' && sex==='girls') return `<svg ${common}><path ${stroke} d="M12 7h24l-2 9-4 25h-8l2-21-3-4-3 4 2 21h-8L8 16l4-9Z"/><path class="garment-gold" ${stroke} d="M10 15h24M21 16v7"/></svg>`;
+  if(key==='socks' && variant==='tights') return `<svg ${common}><path ${stroke} d="M12 7h24l-2 9-4 25h-8l2-21-3-4-3 4 2 21h-8L8 16l4-9Z"/><path class="garment-gold" ${stroke} d="M10 15h24M21 16v7"/></svg>`;
   if(key==='socks') return `<svg ${common}><path ${stroke} d="M12 8h9v20l-4 10H8l4-12V8ZM27 8h9v20l4 10h-9l-4-12V8Z"/><path class="garment-gold" ${stroke} d="M12 13h9M27 13h9"/></svg>`;
   if(key==='jacket') return `<svg ${common}><path ${stroke} d="M15 9 21 6h6l6 3 6 8-5 5-3-4v21H17V18l-3 4-5-5 6-8Z"/><path class="garment-gold" ${stroke} d="m21 7 3 8 3-8M24 15v24"/></svg>`;
+  if(key==='coat') return `<svg ${common}><path ${stroke} d="M16 8 21 5h6l5 3 6 8-5 5-3-4v24H18V17l-3 4-5-5 6-8Z"/><path class="garment-gold" ${stroke} d="m21 6 3 9 3-9M24 15v26M19 27h10"/></svg>`;
   if(key==='footwear') return `<svg ${common}><path ${stroke} d="M8 29c7 0 10-2 13-7l5 4c4 4 8 6 14 7v6H8V29Z"/><path class="garment-gold" ${stroke} d="M22 28h7M12 39v2"/></svg>`;
   return `<svg ${common}><path ${stroke} d="M20 7h8l-2 8 4 20-6 7-6-7 4-20-2-8Z"/><path class="garment-gold" ${stroke} d="M20 7l4 8 4-8"/></svg>`;
+}
+function garmentIconSvg(key){
+  if(key==='bottom') return `<span class="garment-crossfade garment-crossfade-bottom"><span>${garmentBaseSvg('bottom')}</span><span>${garmentBaseSvg('bottom','skirt')}</span></span>`;
+  if(key==='socks') return `<span class="garment-crossfade garment-crossfade-socks"><span>${garmentBaseSvg('socks')}</span><span>${garmentBaseSvg('socks','tights')}</span></span>`;
+  return garmentBaseSvg(key);
 }
 
 const views = {
@@ -794,58 +795,73 @@ function bindEventForm(){
 }
 
 function dressDef(key){ return DRESS_DEFS.find(def=>def.key===key); }
-function dressOptions(def,sex){ return def?.optionsBySex?.[sex] || def?.options || []; }
-function dressOption(def,preset,sex){ const options=dressOptions(def,sex); return options.find(opt=>opt.id===preset) || options[0]; }
-function optionText(def,preset,sex){
-  const option=dressOption(def,preset,sex); if(!option) return '';
+function dressOptions(def){ return def?.options || []; }
+function dressOption(def,preset){ const options=dressOptions(def); return options.find(opt=>opt.id===preset) || options[0]; }
+function optionText(def,preset){
+  const option=dressOption(def,preset); if(!option) return '';
   if(preset==='other') return '';
-  return option.textBySex?.[sex] ?? option.text ?? '';
+  return option.text ?? '';
 }
-function normalizeDressItems(items,sex,legacyText=''){
+function legacyDressItem(d,key){
+  const boys=Array.isArray(d?.boysItems)?d.boysItems:[];
+  const girls=Array.isArray(d?.girlsItems)?d.girlsItems:[];
+  return boys.find(x=>x.key===key)||girls.find(x=>x.key===key)||null;
+}
+function inferLegacyUnifiedPreset(d,key){
+  const boys=Array.isArray(d?.boysItems)?d.boysItems:[];
+  const girls=Array.isArray(d?.girlsItems)?d.girlsItems:[];
+  const b=boys.find(x=>x.key===key)?.preset||'';
+  const g=girls.find(x=>x.key===key)?.preset||'';
+  if(key==='bottom'){
+    if(['jeans','denim_bottom'].includes(b)||['jeans','denim_bottom'].includes(g)) return 'denim';
+    return 'suit';
+  }
+  if(key==='socks') return 'black';
+  const raw=b||g||DEFAULT_DRESS_PRESETS[key]||'';
+  const map={tie:'yes',none:'no',suit_trousers:'suit',skirt:'suit',jeans:'denim',denim_bottom:'denim'};
+  return map[raw]||raw;
+}
+function legacyUnifiedText(d,key,preset){
+  if(key==='bottom') return preset==='denim'?'Texans / Faldilla o pantaló texà (normal)':'Pantalons/Faldilla del tratge';
+  if(key==='socks') return 'Mitges/Mitjons negres';
+  const item=legacyDressItem(d,key);
+  const def=dressDef(key);
+  return String(item?.text||'').trim() || optionText(def,preset);
+}
+function normalizeUnifiedDressItems(items,dresscode=null){
   const incoming=Array.isArray(items)?items:[];
-  const legacyLines=String(legacyText||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
   return DRESS_DEFS.map(def=>{
     const found=incoming.find(item=>item.key===def.key);
-    const options=dressOptions(def,sex);
-    let preset=found?.preset || DEFAULT_DRESS_PRESETS[sex][def.key] || options[0]?.id || '';
-    const legacyPresetMap={white_short:'white_short',white_long:'white_long',black:'black_long',tie:'yes',none:'no'};
-    if(def.key==='bottom' && sex==='girls' && preset==='jeans') preset='denim_bottom';
-    if(!options.some(opt=>opt.id===preset) && legacyPresetMap[preset] && options.some(opt=>opt.id===legacyPresetMap[preset])) preset=legacyPresetMap[preset];
-    if(!options.some(opt=>opt.id===preset)) preset=options[0]?.id||'';
-    const legacyDetail=typeof found?.detail==='string'?found.detail.trim():'';
-    let text=typeof found?.text==='string'&&found.text.trim()?found.text.trim():optionText(def,preset,sex);
-    if(preset==='other' && !text && legacyDetail) text=legacyDetail;
-    if(!incoming.length && legacyLines.length){
-      const legacyMap=sex==='girls'&&legacyLines.length===4?{shirt:0,bottom:1,footwear:2,tie:3}:{shirt:0,bottom:1,footwear:2,socks:3,tie:4};
-      const legacyIndex=legacyMap[def.key]; if(Number.isInteger(legacyIndex)&&legacyLines[legacyIndex]) text=legacyLines[legacyIndex];
-    }
-    return {key:def.key,preset,text,detail:''};
+    let preset=found?.preset || (dresscode?inferLegacyUnifiedPreset(dresscode,def.key):DEFAULT_DRESS_PRESETS[def.key]) || dressOptions(def)[0]?.id || '';
+    if(!dressOptions(def).some(opt=>opt.id===preset)) preset=DEFAULT_DRESS_PRESETS[def.key]||dressOptions(def)[0]?.id||'';
+    let text=String(found?.text||'').trim();
+    if(!text) text=dresscode?legacyUnifiedText(dresscode,def.key,preset):optionText(def,preset);
+    const visible=def.key==='coat' ? (found?found.visible!==false:Boolean(dresscode?.coatVisible)) : true;
+    return {key:def.key,preset,text,detail:'',visible};
   });
 }
-function syncDressRow(row,sex,{forceText=false}={}){
+function syncDressRow(row,{forceText=false}={}){
   if(!row) return;
   const def=dressDef(row.dataset.key);
   const select=row.querySelector('.dress-preset');
   const finalInput=row.querySelector('.dress-final-text');
   if(!select||!finalInput) return;
   if(forceText){
-    const generated=optionText(def,select.value,sex);
+    const generated=optionText(def,select.value);
     finalInput.value=select.value==='other'?'':generated;
     if(select.value==='other') finalInput.focus();
-  }else if(!finalInput.value.trim() && select.value!=='other'){
-    finalInput.value=optionText(def,select.value,sex);
-  }
+  }else if(!finalInput.value.trim() && select.value!=='other') finalInput.value=optionText(def,select.value);
 }
-function renderDressItems(sex,items){
-  const target=$(`#${sex}DressItems`); if(!target) return;
-  target.innerHTML=normalizeDressItems(items,sex).map(item=>{
+function renderDressItems(items,dresscode=null){
+  const target=$('#unifiedDressItems'); if(!target) return;
+  target.innerHTML=normalizeUnifiedDressItems(items,dresscode).map(item=>{
     const def=dressDef(item.key);
-    const options=dressOptions(def,sex);
-    const opts=options.map(opt=>`<option value="${esc(opt.id)}" ${opt.id===item.preset?'selected':''}>${esc(opt.label)}</option>`).join('');
-    return `<div class="dress-item-row" data-dress-row="${sex}" data-key="${esc(item.key)}">
-      <span class="dress-item-icon" aria-hidden="true">${garmentIconSvg(item.key,sex)}</span>
+    const opts=dressOptions(def).map(opt=>`<option value="${esc(opt.id)}" ${opt.id===item.preset?'selected':''}>${esc(opt.label)}</option>`).join('');
+    const visibility=def.key==='coat'?`<label class="dress-visible-toggle"><input class="dress-visible" type="checkbox" ${item.visible?'checked':''}/><span>VISIBLE A L’APP</span></label>`:'';
+    return `<div class="dress-item-row" data-dress-row="unified" data-key="${esc(item.key)}">
+      <span class="dress-item-icon" aria-hidden="true">${garmentIconSvg(item.key)}</span>
       <div class="dress-item-content">
-        <strong class="dress-item-name">${esc(def.label)}</strong>
+        <div class="dress-item-name-row"><strong class="dress-item-name">${esc(def.label)}</strong>${visibility}</div>
         <div class="dress-item-fields">
           <label>OPCIÓ<select class="dress-preset">${opts}</select></label>
           <label>TEXT FINAL<input class="dress-final-text" maxlength="180" value="${esc(item.text)}" placeholder="${item.preset==='other'?'Escriu aquí quin és l’altre vestuari':'Text que veuran els músics'}" /></label>
@@ -854,20 +870,20 @@ function renderDressItems(sex,items){
     </div>`;
   }).join('');
   target.querySelectorAll('[data-dress-row]').forEach(row=>{
-    const select=row.querySelector('.dress-preset');
-    select?.addEventListener('change',()=>syncDressRow(row,sex,{forceText:true}));
-    syncDressRow(row,sex);
+    row.querySelector('.dress-preset')?.addEventListener('change',()=>syncDressRow(row,{forceText:true}));
+    syncDressRow(row);
   });
 }
-function collectDressItems(sex){
-  return [...document.querySelectorAll(`[data-dress-row="${sex}"]`)].map(row=>({
+function collectDressItems(){
+  return [...document.querySelectorAll('[data-dress-row="unified"]')].map(row=>({
     key:row.dataset.key,
     preset:row.querySelector('.dress-preset').value,
     text:row.querySelector('.dress-final-text').value.trim(),
-    detail:''
+    detail:'',
+    visible:row.dataset.key==='coat'?(row.querySelector('.dress-visible')?.checked===true):true
   }));
 }
-function itemsToText(items){ return (items||[]).map(item=>item.text?.trim()).filter(Boolean).join('\n'); }
+function itemsToText(items){ return (items||[]).filter(item=>item.visible!==false).map(item=>item.text?.trim()).filter(Boolean).join('\n'); }
 function resetDresscodeForm(){
   $('#dresscodeForm').reset();
   $('#dresscodeId').value='';
@@ -875,8 +891,7 @@ function resetDresscodeForm(){
   $('#dresscodeTitle').value='';
   $('#dresscodeSubtitle').value='Uniforme de banda';
   $('#dresscodeOther').value='';
-  renderDressItems('boys',normalizeDressItems([], 'boys'));
-  renderDressItems('girls',normalizeDressItems([], 'girls'));
+  renderDressItems(normalizeUnifiedDressItems([]));
 }
 function editDresscode(id){
   const d=(content.dresscodes||[]).find(x=>x.id===id); if(!d) return;
@@ -884,8 +899,7 @@ function editDresscode(id){
   $('#dresscodeTitle').value=d.title||'';
   $('#dresscodeSubtitle').value=d.subtitle||'';
   $('#dresscodeOther').value=d.other||'';
-  renderDressItems('boys',normalizeDressItems(d.boysItems,'boys',d.boys));
-  renderDressItems('girls',normalizeDressItems(d.girlsItems,'girls',d.girls));
+  renderDressItems(d.items,d);
   $('#dresscodeFormTitle').textContent='Editar dresscode';
   $('#dresscodeForm').scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -899,12 +913,10 @@ function deleteDresscode(id){
 }
 function dresscodeListDetail(d){
   const linked=(content.events||[]).filter(e=>e.dresscodeId===d.id);
-  const boys=normalizeDressItems(d.boysItems,'boys',d.boys).map(i=>i.text).filter(Boolean);
-  const girls=normalizeDressItems(d.girlsItems,'girls',d.girls).map(i=>i.text).filter(Boolean);
+  const items=normalizeUnifiedDressItems(d.items,d).filter(i=>i.key!=='coat'||i.visible!==false).map(i=>i.text).filter(Boolean);
   return `<div class="dresscode-strip-detail-grid">
     ${d.subtitle?`<div class="dresscode-strip-wide"><span>SUBTÍTOL</span><strong>${esc(d.subtitle)}</strong></div>`:''}
-    <div><span>NOIS</span><strong>${boys.length?boys.map(esc).join(' · '):'Sense indicacions'}</strong></div>
-    <div><span>NOIES</span><strong>${girls.length?girls.map(esc).join(' · '):'Sense indicacions'}</strong></div>
+    <div class="dresscode-strip-wide"><span>VESTUARI</span><strong>${items.length?items.map(esc).join(' · '):'Sense indicacions'}</strong></div>
     ${d.other?`<div class="dresscode-strip-wide"><span>ALTRES</span><strong>${esc(d.other)}</strong></div>`:''}
     <div class="dresscode-strip-wide"><span>VINCULAT A</span><strong>${linked.length?linked.map(e=>`${esc(e.title)} · ${esc(formatDateNumeric(e.date))}`).join('<br>'):'Cap esdeveniment encara'}</strong></div>
   </div>`;
@@ -930,10 +942,7 @@ function renderDresscodes(){
   }).join(''):'<div class="empty-state">Encara no hi ha cap dresscode.</div>';
   $$('[data-toggle-dress]').forEach(btn=>btn.onclick=()=>{
     const article=btn.closest('[data-dresscode-strip]'); const details=article?.querySelector('.dresscode-strip-details'); if(!details)return;
-    const open=details.hidden;
-    details.hidden=!open;
-    article.classList.toggle('is-open',open);
-    btn.setAttribute('aria-expanded',open?'true':'false');
+    const open=details.hidden; details.hidden=!open; article.classList.toggle('is-open',open); btn.setAttribute('aria-expanded',open?'true':'false');
   });
   $$('[data-edit-dress]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();editDresscode(btn.dataset.editDress);});
   $$('[data-delete-dress]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();deleteDresscode(btn.dataset.deleteDress);});
@@ -942,20 +951,19 @@ function bindDresscodes(){
   $('#dresscodeForm').addEventListener('submit',event=>{
     event.preventDefault();
     const id=$('#dresscodeId').value||BandaStore.uid('dress');
-    const boysItems=collectDressItems('boys'), girlsItems=collectDressItems('girls');
+    const items=collectDressItems();
     const previous=(content.dresscodes||[]).find(d=>d.id===id);
     const title=$('#dresscodeTitle').value.trim();
     if(!title){showToast('Cal indicar un títol per al dresscode');$('#dresscodeTitle').focus();return;}
+    const coat=items.find(i=>i.key==='coat');
     const item={
-      id,
-      eventId:'',
-      title,
+      id,eventId:'',title,
       subtitle:$('#dresscodeSubtitle').value.trim()||'Uniforme de banda',
-      boysItems,
-      girlsItems,
-      boys:itemsToText(boysItems),
-      girls:itemsToText(girlsItems),
+      items,
+      coatVisible:coat?.visible===true,
       other:$('#dresscodeOther').value.trim(),
+      // Camps legacy buits: a partir de v0.111 la font canònica és items[].
+      boys:'',girls:'',boysItems:[],girlsItems:[],
       createdAt:previous?.createdAt||new Date().toISOString()
     };
     const index=content.dresscodes.findIndex(d=>d.id===id);

@@ -182,18 +182,25 @@ function dresscodeClothesIcon(){
   return `<span class="dresscode-clothes-icon" aria-hidden="true"><svg viewBox="0 0 32 32" role="presentation"><g class="dress-shirt"><path class="dress-blue" d="M11.1 7.5 14 6h4l2.9 1.5 5.1 4.2-3.2 4.1-2.4-1.8v11H11.6V14l-2.4 1.8L6 11.7Z"/><path class="dress-gold" d="M13.8 6.4c.4 1.6 1.1 2.5 2.2 2.5s1.8-.9 2.2-2.5"/></g><path class="dress-hanger" d="M13.8 4.1c0-1.1.8-1.8 2-1.8 1 0 1.8.6 1.8 1.5 0 1.7-2.1 1.7-2.1 3.3M15.5 7.1 8.3 11h15.4Z"/></svg></span>`;
 }
 
-function garmentIconSvg(key,sex='boys'){
+function garmentBaseSvg(key,variant='default'){
   const common='viewBox="0 0 48 48" class="garment-icon-svg" aria-hidden="true"';
   const stroke='fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
   if(key==='shirt') return `<svg ${common}><path ${stroke} d="M15 10 20 7h8l5 3 8 6-5 7-5-3v18H17V20l-5 3-5-7 8-6Z"/><path class="garment-gold" ${stroke} d="M20 7c.7 4 2 6 4 6s3.3-2 4-6"/></svg>`;
-  if(key==='bottom' && sex==='girls') return `<svg ${common}><path ${stroke} d="M18 8h12l2 7 6 24H10l6-24 2-7Z"/><path class="garment-gold" ${stroke} d="M16 15h16"/></svg>`;
+  if(key==='bottom' && variant==='skirt') return `<svg ${common}><path ${stroke} d="M18 8h12l2 7 6 24H10l6-24 2-7Z"/><path class="garment-gold" ${stroke} d="M16 15h16"/></svg>`;
   if(key==='bottom') return `<svg ${common}><path ${stroke} d="M14 8h20l-2 31h-8l-1-18-1 18h-8L14 8Z"/><path class="garment-gold" ${stroke} d="M23 9v12"/></svg>`;
-  if(key==='socks' && sex==='girls') return `<svg ${common}><path ${stroke} d="M12 7h24l-2 9-4 25h-8l2-21-3-4-3 4 2 21h-8L8 16l4-9Z"/><path class="garment-gold" ${stroke} d="M10 15h24M21 16v7"/></svg>`;
+  if(key==='socks' && variant==='tights') return `<svg ${common}><path ${stroke} d="M12 7h24l-2 9-4 25h-8l2-21-3-4-3 4 2 21h-8L8 16l4-9Z"/><path class="garment-gold" ${stroke} d="M10 15h24M21 16v7"/></svg>`;
   if(key==='socks') return `<svg ${common}><path ${stroke} d="M12 8h9v20l-4 10H8l4-12V8ZM27 8h9v20l4 10h-9l-4-12V8Z"/><path class="garment-gold" ${stroke} d="M12 13h9M27 13h9"/></svg>`;
   if(key==='jacket') return `<svg ${common}><path ${stroke} d="M15 9 21 6h6l6 3 6 8-5 5-3-4v21H17V18l-3 4-5-5 6-8Z"/><path class="garment-gold" ${stroke} d="m21 7 3 8 3-8M24 15v24"/></svg>`;
+  if(key==='coat') return `<svg ${common}><path ${stroke} d="M16 8 21 5h6l5 3 6 8-5 5-3-4v24H18V17l-3 4-5-5 6-8Z"/><path class="garment-gold" ${stroke} d="m21 6 3 9 3-9M24 15v26M19 27h10"/></svg>`;
   if(key==='footwear') return `<svg ${common}><path ${stroke} d="M8 29c7 0 10-2 13-7l5 4c4 4 8 6 14 7v6H8V29Z"/><path class="garment-gold" ${stroke} d="M22 28h7M12 39v2"/></svg>`;
   return `<svg ${common}><path ${stroke} d="M20 7h8l-2 8 4 20-6 7-6-7 4-20-2-8Z"/><path class="garment-gold" ${stroke} d="M20 7l4 8 4-8"/></svg>`;
 }
+function garmentIconSvg(key){
+  if(key==='bottom') return `<span class="garment-crossfade garment-crossfade-bottom"><span>${garmentBaseSvg('bottom')}</span><span>${garmentBaseSvg('bottom','skirt')}</span></span>`;
+  if(key==='socks') return `<span class="garment-crossfade garment-crossfade-socks"><span>${garmentBaseSvg('socks')}</span><span>${garmentBaseSvg('socks','tights')}</span></span>`;
+  return garmentBaseSvg(key);
+}
+
 function eventMetaIcon(type){
   if(type==='place') return `<svg class="event-meta-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.6 6-12a6 6 0 1 0-12 0c0 6.4 6 12 6 12Z"/><circle cx="12" cy="9" r="2.2"/></svg>`;
   return `<svg class="event-meta-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.3v5.1l3.4 2"/></svg>`;
@@ -1236,29 +1243,35 @@ function applyHomeHero(){
   }
 }
 
-const DRESSCODE_VIEW_ORDER=['shirt','bottom','socks','jacket','footwear','tie'];
-function normalizeDresscodeDisplayText(key,value,sex='boys'){
-  let text=String(value||'').trim();
-  if(sex==='girls' && key==='socks') text=text.replace(/\bmitjons\b/gi,'Mitges');
-  return text;
+const DRESSCODE_VIEW_ORDER=['shirt','bottom','socks','jacket','footwear','tie','coat'];
+function appLegacyUnifiedDressItems(item){
+  const current=Array.isArray(item?.items)?item.items:[];
+  if(current.length) return current.map(x=>({...x,visible:x.visible!==false}));
+  const boys=Array.isArray(item?.boysItems)?item.boysItems:[];
+  const girls=Array.isArray(item?.girlsItems)?item.girlsItems:[];
+  const find=(key)=>boys.find(x=>x.key===key)||girls.find(x=>x.key===key)||{};
+  const bp=key=>boys.find(x=>x.key===key)?.preset||'';
+  const gp=key=>girls.find(x=>x.key===key)?.preset||'';
+  const denim=['jeans','denim_bottom'].includes(bp('bottom'))||['jeans','denim_bottom'].includes(gp('bottom'));
+  const defaults={
+    shirt:String(find('shirt').text||'Camisa blanca de màniga curta').trim(),
+    bottom:denim?'Texans / Faldilla o pantaló texà (normal)':'Pantalons/Faldilla del tratge',
+    socks:'Mitges/Mitjons negres',
+    jacket:String(find('jacket').text||'Americana: no').trim(),
+    footwear:String(find('footwear').text||'Calçat negre (no es permet esportiu ni Converse)').trim(),
+    tie:String(find('tie').text||'Corbata + pinza: sí').trim(),
+    coat:'Abric: no'
+  };
+  return DRESSCODE_VIEW_ORDER.map(key=>({key,text:defaults[key]||'',visible:key==='coat'?Boolean(item?.coatVisible):true}));
 }
-function renderDresscodeParameters(host,items,legacyText='',sex='boys'){
+function renderDresscodeParameters(host,item){
   if(!host) return;
-  const list=Array.isArray(items)?items:[];
-  if(list.length){
-    const byKey=new Map(list.map(item=>[item.key,item]));
-    host.innerHTML=DRESSCODE_VIEW_ORDER.map(key=>{
-      const item=byKey.get(key); if(!item) return '';
-      const value=normalizeDresscodeDisplayText(key,item.text||item.detail||'',sex); if(!value) return '';
-      return `<div class="dresscode-param-row"><span class="dresscode-garment-icon">${garmentIconSvg(key,sex)}</span><strong>${esc(value)}</strong></div>`;
-    }).join('');
-    if(host.innerHTML.trim()) return;
-  }
-  const lines=String(legacyText||'').split(/\n+/).map(line=>line.trim()).filter(Boolean);
-  host.innerHTML=lines.map((line,index)=>{
-    const key=DRESSCODE_VIEW_ORDER[index]||'shirt';
-    const value=sex==='girls'?String(line).replace(/\bmitjons\b/gi,'Mitges'):line;
-    return `<div class="dresscode-param-row legacy"><span class="dresscode-garment-icon">${garmentIconSvg(key,sex)}</span><strong>${esc(value)}</strong></div>`;
+  const items=appLegacyUnifiedDressItems(item);
+  const byKey=new Map(items.map(entry=>[entry.key,entry]));
+  host.innerHTML=DRESSCODE_VIEW_ORDER.map(key=>{
+    const entry=byKey.get(key); if(!entry||entry.visible===false) return '';
+    const value=String(entry.text||entry.detail||'').trim(); if(!value) return '';
+    return `<div class="dresscode-param-row"><span class="dresscode-garment-icon">${garmentIconSvg(key)}</span><strong>${esc(value)}</strong></div>`;
   }).join('') || '<div class="dresscode-param-row legacy"><strong>Sense informació.</strong></div>';
 }
 function openDresscode(id){
@@ -1266,8 +1279,7 @@ function openDresscode(id){
   if(!item) return;
   $('#dresscodeModalTitle').textContent=item.title||'Dress code';
   $('#dresscodeModalSubtitle').textContent=item.subtitle||'';
-  renderDresscodeParameters($('#dresscodeBoysView'),item.boysItems,item.boys,'boys');
-  renderDresscodeParameters($('#dresscodeGirlsView'),item.girlsItems,item.girls,'girls');
+  renderDresscodeParameters($('#dresscodeUnifiedView'),item);
   const other=String(item.other||'').trim();
   const otherBlock=$('#dresscodeOtherViewBlock');
   if(otherBlock){ otherBlock.hidden=!other; $('#dresscodeOtherView').textContent=other; }

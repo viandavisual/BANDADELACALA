@@ -73,9 +73,12 @@
       eventId: item.eventId || '',
       title: item.title || 'Dress code',
       subtitle: item.subtitle || 'Uniforme de banda',
+      items: Array.isArray(item.items) ? item.items.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||'',detail:x.detail||'',visible:x.visible!==false})) : [],
+      coatVisible: item.coatVisible === true,
+      other: item.other || '',
+      // Camps legacy conservats per compatibilitat amb contingut anterior.
       boys: item.boys || '',
       girls: item.girls || '',
-      other: item.other || '',
       boysItems: Array.isArray(item.boysItems) ? item.boysItems.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||'',detail:x.detail||''})) : [],
       girlsItems: Array.isArray(item.girlsItems) ? item.girlsItems.map(x=>({key:x.key||'',preset:x.preset||'',text:x.text||'',detail:x.detail||''})) : []
     })) : [];

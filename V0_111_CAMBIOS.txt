@@ -1,0 +1,10 @@
+BANDA DE LA CALA · v0.111
+
+- DRESSCODE: s'elimina la separació NOIS / NOIES i es passa a un únic vestuari comú.
+- Ordre APP: CAMISA · PANTALONS/FALDILLA DEL TRATGE · MITGES/MITJONS NEGRES · AMERICANA · CALÇAT · CORBATA + PINZA · ABRIC (quan sigui visible).
+- EDITOR: un únic configurador de DRESSCODE amb les mateixes possibilitats de selecció, adaptades al format unificat.
+- Nova peça ABRIC amb opcions SÍ / NO / ALTRES i interruptor independent VISIBLE A L'APP.
+- Icona PANTALONS/FALDILLA: transició contínua 1 s pantalons + 1 s fundido + 1 s faldilla + 1 s fundido de retorn.
+- Icona MITGES/MITJONS: mateix sistema de transició contínua.
+- S'afegeix una icona específica d'ABRIC.
+- Compatibilitat: els dresscodes antics NOIS/NOIES es transformen automàticament a la vista unificada en carregar-los o editar-los; no cal migració SQL.

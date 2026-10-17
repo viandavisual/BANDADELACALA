@@ -2935,3 +2935,24 @@ body.demo-video-open{overflow:hidden}
 .install-assistant-tech-body{margin-top:10px;font-size:.68rem;color:var(--muted)}
 .install-assistant-tech-body dl{margin:0;display:grid;gap:6px}.install-assistant-tech-body dl>div{display:flex;justify-content:space-between;gap:12px;padding:6px 8px;border-radius:9px;background:rgba(57,58,134,.05)}
 .install-assistant-tech-body dt{font-weight:800}.install-assistant-tech-body dd{margin:0;text-align:right;font-weight:800;color:var(--blue-deep)}
+
+
+/* ============================================================
+   v0.111 · DRESSCODE unificat i inclusiu
+   ============================================================ */
+.dresscode-grid-unified{grid-template-columns:1fr!important;max-width:720px;margin-inline:auto}
+.dresscode-grid-unified>div{width:100%}
+.dresscode-param-row{grid-template-columns:56px minmax(0,1fr)!important;align-items:center!important}
+.dresscode-garment-icon{position:relative;overflow:hidden}
+.garment-crossfade{position:relative;display:block;width:32px;height:32px}
+.garment-crossfade>span{position:absolute;inset:0;display:grid;place-items:center;animation:garmentCrossfadeA 4s linear infinite}
+.garment-crossfade>span+span{animation-name:garmentCrossfadeB}
+.garment-crossfade .garment-icon-svg{width:32px!important;height:32px!important}
+@keyframes garmentCrossfadeA{0%,25%{opacity:1}50%,75%{opacity:0}100%{opacity:1}}
+@keyframes garmentCrossfadeB{0%,25%{opacity:0}50%,75%{opacity:1}100%{opacity:0}}
+@media(max-width:620px){
+  .dresscode-grid-unified{display:block!important}
+  .dresscode-param-row{grid-template-columns:48px minmax(0,1fr)!important}
+  .garment-crossfade{width:28px;height:28px}.garment-crossfade .garment-icon-svg{width:28px!important;height:28px!important}
+}
+@media(prefers-reduced-motion:reduce){.garment-crossfade>span{animation:none!important}.garment-crossfade>span+span{display:none!important}}

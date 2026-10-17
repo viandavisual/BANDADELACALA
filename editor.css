@@ -1198,3 +1198,21 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .editor-install-assistant-tech-body{margin-top:10px;font-size:12px;color:var(--muted)}
 .editor-install-assistant-tech-body dl{margin:0;display:grid;gap:6px}.editor-install-assistant-tech-body dl>div{display:flex;justify-content:space-between;gap:12px;padding:6px 8px;border-radius:9px;background:#f7f1e8}
 .editor-install-assistant-tech-body dt{font-weight:800}.editor-install-assistant-tech-body dd{margin:0;text-align:right;font-weight:800;color:var(--editor-page-gold-dark)}
+
+
+/* ============================================================
+   v0.111 · EDITOR DRESSCODE unificat
+   ============================================================ */
+.dresscode-unified-wrap{margin-top:18px}
+.dress-unified-card{max-width:none}
+.dress-unified-card .dress-items{display:grid;gap:10px}
+.dress-item-name-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.dress-visible-toggle{display:inline-flex!important;align-items:center;gap:7px;margin:0!important;font-size:.62rem!important;font-weight:950!important;color:var(--blue)!important;letter-spacing:.04em}
+.dress-visible-toggle input{width:18px!important;height:18px!important;min-height:auto!important;margin:0!important}
+.dress-item-icon{position:relative;overflow:hidden}
+.dress-item-icon .garment-crossfade{position:relative;display:block;width:36px;height:36px}
+.dress-item-icon .garment-crossfade>span{position:absolute;inset:0;display:grid;place-items:center;animation:garmentCrossfadeA 4s linear infinite}
+.dress-item-icon .garment-crossfade>span+span{animation-name:garmentCrossfadeB}
+@keyframes garmentCrossfadeA{0%,25%{opacity:1}50%,75%{opacity:0}100%{opacity:1}}
+@keyframes garmentCrossfadeB{0%,25%{opacity:0}50%,75%{opacity:1}100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.dress-item-icon .garment-crossfade>span{animation:none!important}.dress-item-icon .garment-crossfade>span+span{display:none!important}}
