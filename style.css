@@ -3159,3 +3159,10 @@ body.demo-video-open{overflow:hidden}
 .app-install-help-text{width:100%;text-align:center!important;margin:0 auto}
 .app-install-help-text p{max-width:420px;margin:0 auto 10px!important}
 .app-install-help-device:empty{display:none!important}
+
+/* v0.124 · INSTALL · sortida clara quan el navegador no ofereix instal·lació */
+.install-assistant-actions{display:flex;flex-direction:column;align-items:stretch;gap:10px;width:100%;max-width:420px;margin:14px auto 0}
+.install-assistant-copy{background:transparent;border:1px solid rgba(57,58,134,.32);border-radius:999px;padding:12px 16px;color:var(--blue-deep);font:800 .78rem/1.2 Arial,sans-serif;cursor:pointer}
+.install-assistant-copy:hover{background:var(--blue-soft)}
+.install-assistant-copy[hidden]{display:none!important}
+.install-browser-tip{font-size:.78rem;color:var(--muted)}

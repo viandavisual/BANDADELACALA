@@ -2577,11 +2577,13 @@ function appInstallHelpMarkup(reason='manual',signals={}){
     html='<p>Si ja la tens instal·lada, obre-la des de la pantalla d’inici.</p><p>Si encara no la tens, pots provar la instal·lació alternativa.</p>';
     action='alternative';label='INSTAL·LACIÓ ALTERNATIVA';
   }else if(d.windows||d.mac){
-    title='JA TENS L’APP INSTAL·LADA?';
-    html='<p>Si ja la tens, obre-la des de les aplicacions del teu dispositiu.</p><p>Si encara no la tens, instal·la-la des del menú del navegador.</p>';
+    title='CONTINUA DES DEL NAVEGADOR';
+    html='<p>No podem instal·lar l’APP des d’aquest navegador ara mateix, però pots continuar utilitzant-la amb totes les seves funcions.</p><p class="install-browser-tip">Consell: desa aquesta pàgina als preferits per accedir-hi fàcilment.</p>';
+    action='continue';label='CONTINUAR A L’APP';
   }else{
-    title='JA TENS L’APP INSTAL·LADA?';
-    html='<p>Si ja la tens, obre-la des de les aplicacions del teu dispositiu.</p><p>Si encara no la tens, instal·la-la des del menú del navegador.</p>';
+    title='CONTINUA DES DEL NAVEGADOR';
+    html='<p>No hi ha una instal·lació disponible en aquest navegador ara mateix. Pots continuar utilitzant l’APP des d’aquí.</p>';
+    action='continue';label='CONTINUAR A L’APP';
   }
   return {title,html,action,label,device:''};
 }
@@ -2593,12 +2595,15 @@ async function showAppInstallHelp(reason='manual'){
   if(device) device.textContent='Un moment…';
   if(text) text.innerHTML='<p>Estem revisant automàticament aquest dispositiu.</p>';
   if(primary) primary.hidden=true;
+  const copyLink=$('#appInstallCopyLink');
+  if(copyLink) copyLink.hidden=true;
   modal.hidden=false;
   const signals=await appInstallSignals();
   const info=appInstallHelpMarkup(reason,signals);
   if(title) title.textContent=info.title;
   if(device) device.textContent=info.device;
   if(text) text.innerHTML=info.html;
+  if(copyLink){copyLink.hidden=info.action!=='continue' || !(appDeviceInfo().windows||appDeviceInfo().mac);copyLink.textContent='COPIAR ENLLAÇ DE L’APP';}
   if(tech) tech.innerHTML=appInstallTechMarkup(signals);
   if(primary){
     primary.hidden=!info.action;
@@ -2675,6 +2680,8 @@ async function handleAppInstallPrimary(){
   if(action==='native'){
     const accepted=await requestNativeAppInstall();
     if(!accepted) await showAppInstallHelp('manual');
+  }else if(action==='continue'){
+    closeAppInstallHelp();
   }else if(action==='alternative'){
     window.location.href=new URL('../install/',location.href).href;
   }else if(action==='repair'){
@@ -2709,6 +2716,16 @@ function bindPwaInstall(){
   syncAppInstallUI();
   $('#homeFooterInstallBtn')?.addEventListener('click',promptAppInstall);
   $('#appInstallPrimaryAction')?.addEventListener('click',handleAppInstallPrimary);
+  $('#appInstallCopyLink')?.addEventListener('click',async()=>{
+    const btn=$('#appInstallCopyLink');
+    const link=new URL('./',location.href).href;
+    try{
+      await navigator.clipboard.writeText(link);
+      if(btn) btn.textContent='ENLLAÇ COPIAT';
+    }catch(_error){
+      if(btn) btn.textContent='NO S’HA POGUT COPIAR';
+    }
+  });
   $('#closeAppInstallHelp')?.addEventListener('click',closeAppInstallHelp);
   $('#appInstallHelpBackdrop')?.addEventListener('click',closeAppInstallHelp);
   window.addEventListener('appinstalled',()=>{

@@ -1,3 +1,3 @@
-BANDA DE LA CALA v0.123 — PATCH des de v0.122
-Copia el contingut a l’arrel del repositori i respecta les carpetes.
-No eliminis altres arxius.
+BANDA DE LA CALA v0.124 — PATCH des de v0.123
+Copia els fitxers del ZIP a l'arrel del repositori mantenint les rutes.
+No eliminis altres fitxers.

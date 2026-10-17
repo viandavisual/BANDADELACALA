@@ -1,0 +1,12 @@
+BANDA DE LA CALA — v0.124
+
+APP / INSTALL
+- Quan existeix beforeinstallprompt, es continua obrint el diàleg natiu directament.
+- Si el navegador no permet instal·lar, missatge clar sense instruccions impossibles.
+- Windows/Mac: CONTINUA DES DEL NAVEGADOR, botó CONTINUAR A L’APP (tanca el diàleg) i COPIAR ENLLAÇ DE L’APP.
+- Android: es conserva la sortida a INSTAL·LACIÓ ALTERNATIVA (APK).
+- iOS/iPadOS: es mantenen les instruccions breus d'afegir a la pantalla d'inici.
+- Si es detecta instal·lació real, continua el missatge APP ja instal·lada.
+- La detecció no pot confirmar sempre una PWA instal·lada des d'una pestanya normal.
+
+SENSE CANVIS: EDITOR, dades, permisos, Supabase, DRESSCODE, manifests i IDs.
