@@ -1,0 +1,38 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.viandavisual.bandadelacala'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.viandavisual.bandadelacala'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '1.0-pilot'
+    }
+
+    signingConfigs {
+        release {
+            def ks = System.getenv('ANDROID_KEYSTORE_PATH')
+            if (ks) {
+                storeFile file(ks)
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            shrinkResources false
+            if (System.getenv('ANDROID_KEYSTORE_PATH')) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}

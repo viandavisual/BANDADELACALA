@@ -1,0 +1,9 @@
+COM INTEGRAR A BANDADELACALA
+
+Descomprimeix el contingut d'aquest ZIP a l'arrel del repositori principal.
+
+Afegirà:
+- /ANDROID/  -> projecte Android
+- /.github/workflows/build-banda-android-apk.yml -> compilació automàtica de l'APK
+
+No substitueix ni mou /app, /editor ni cap altre fitxer actual del projecte.
