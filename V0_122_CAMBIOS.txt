@@ -1,0 +1,9 @@
+BANDA DE LA CALA — v0.122
+
+APP / INSTALL
+- Quan Chrome en ordinador no pot confirmar la instal·lació, mostra un missatge breu: «JA TENS L’APP INSTAL·LADA?».
+- Explica com obrir l’APP instal·lada o instal·lar-la des del navegador, sense assegurar que està instal·lada.
+- Es manté la detecció d’instal·lacions confirmades i la instal·lació alternativa d’Android.
+- Caché APP actualitzada a v0.122.
+
+SENSE CANVIS: EDITOR, Supabase, APK, calendari, rols i identitats PWA.

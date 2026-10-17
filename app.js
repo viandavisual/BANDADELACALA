@@ -2577,9 +2577,11 @@ function appInstallHelpMarkup(reason='manual',signals={}){
     html='<p>Si ja la tens instal·lada, obre-la des de la pantalla d’inici.</p><p>Si encara no la tens, pots provar la instal·lació alternativa.</p>';
     action='alternative';label='INSTAL·LACIÓ ALTERNATIVA';
   }else if(d.windows||d.mac){
-    html='<p>Si ja tens l’APP instal·lada, obre-la des del menú d’aplicacions del teu ordinador.</p><p>Si encara no la tens, utilitza la icona d’instal·lació de la barra d’adreces o l’opció <strong>Instal·lar aplicació</strong> del navegador.</p>';
+    title='JA TENS L’APP INSTAL·LADA?';
+    html='<p>Si ja la tens, obre-la des de les aplicacions del teu dispositiu.</p><p>Si encara no la tens, instal·la-la des del menú del navegador.</p>';
   }else{
-    html='<p>Si ja tens l’APP instal·lada, obre-la des del teu dispositiu. Si no, busca l’opció <strong>Instal·lar aplicació</strong> al navegador.</p>';
+    title='JA TENS L’APP INSTAL·LADA?';
+    html='<p>Si ja la tens, obre-la des de les aplicacions del teu dispositiu.</p><p>Si encara no la tens, instal·la-la des del menú del navegador.</p>';
   }
   return {title,html,action,label,device:''};
 }
