@@ -2577,7 +2577,7 @@ function appInstallHelpMarkup(reason='manual',signals={}){
     action='native';label='INSTAL·LAR ARA';
   }else if(d.android){
     title='CONTINUA DES DEL NAVEGADOR';
-    html='<p>Aquest dispositiu no ofereix ara la instal·lació directa. <strong>No cal descarregar cap APK ni canviar permisos.</strong></p><p>Pots fer servir l’APP aquí mateix. Per tornar-hi fàcilment, desa aquesta pàgina als <strong>Marcadors</strong> del navegador (menú ⋮ → estrella).</p>';
+    html='<p>Aquest mòbil no ofereix ara la instal·lació automàtica. <strong>Pots provar d’instal·lar-la com una app Android</strong> amb el botó de sota, o continuar aquí sense instal·lar res.</p><p>Si tries la descàrrega, Android pot demanar permís per instal·lar l’arxiu. És opcional: <strong>no cal canviar cap permís per fer servir l’APP</strong>.</p><p>També pots desar aquesta pàgina als <strong>Marcadors</strong> de Chrome (menú ⋮ → estrella).</p>';
     action='continue';label='CONTINUAR A L’APP';
   }else if(d.windows||d.mac){
     title='CONTINUA DES DEL NAVEGADOR';
@@ -2601,6 +2601,8 @@ async function showAppInstallHelp(reason='manual'){
   if(primary) primary.hidden=true;
   const copyLink=$('#appInstallCopyLink');
   if(copyLink) copyLink.hidden=true;
+  const androidApk=$('#appInstallAndroidApk');
+  if(androidApk) androidApk.hidden=true;
   modal.hidden=false;
   const signals=await appInstallSignals();
   if(appInstallCompleted) return;
@@ -2609,6 +2611,7 @@ async function showAppInstallHelp(reason='manual'){
   if(device) device.textContent=info.device;
   if(text) text.innerHTML=info.html;
   if(copyLink){copyLink.hidden=info.action!=='continue';copyLink.textContent='COPIAR ENLLAÇ DE L’APP';}
+  if(androidApk){androidApk.hidden=!(appDeviceInfo().android && !signals.standalone && !signals.nativeReady && !signals.relatedInstalled);}
   if(tech) tech.innerHTML=appInstallTechMarkup(signals);
   if(primary){
     primary.hidden=!info.action;

@@ -1,6 +1,6 @@
-BANDA DE LA CALA v0.127 — PATCH des de v0.126
+BANDA DE LA CALA v0.128 — PATCH des de v0.127
 
-Puja TOT el contingut d’aquest ZIP a l’arrel del repositori BANDADELACALA mantenint les carpetes i substituint els fitxers existents.
-Inclou install/Banda-de-la-Cala-v0.127-Android.apk (APK firmada), install/index.html i install/downloads.json.
-No esborris .nojekyll ni .well-known/assetlinks.json ja publicats.
-L’APK és una alternativa opcional; l’ús al navegador continua funcionant.
+Puja el contingut del ZIP a l’arrel del repositori BANDADELACALA, mantenint les carpetes.
+Pots eliminar el fitxer install/Banda-de-la-Cala-v0.127-Android.apk antic un cop confirmada la nova descàrrega (si no s’utilitza en enllaços antics).
+No eliminis .well-known/assetlinks.json ni .nojekyll.
+La signatura de l’APK és la mateixa; no hi ha cap fitxer keystore en aquesta entrega.

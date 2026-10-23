@@ -1,0 +1,9 @@
+BANDA DE LA CALA — v0.128
+
+- APP: quan Android no ofereix instal·lació PWA nativa, apareix un botó opcional per provar la instal·lació mitjançant APK.
+- Primer continua sent CONTINUAR A L’APP; sempre es pot navegar sense instal·lar res.
+- Pàgina /install/: instruccions senzilles per descarregar, autoritzar puntualment (si l’usuari ho decideix), instal·lar i revocar el permís.
+- La mateixa APK Android verificada a v0.127 es distribueix amb el nom v0.128; el contingut binari i la versió interna de l’APK NO s’han alterat.
+- Service Workers i versió web actualitzats a v0.128.
+- EDITOR: sense canvis funcionals.
+- Preservada la identitat PWA d’APP i EDITOR.
