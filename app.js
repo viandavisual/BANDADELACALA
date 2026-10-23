@@ -2576,8 +2576,9 @@ function appInstallHelpMarkup(reason='manual',signals={}){
     html='<p>Ja pots instal·lar l’APP en aquest dispositiu.</p>';
     action='native';label='INSTAL·LAR ARA';
   }else if(d.android){
-    html='<p>Si ja la tens instal·lada, obre-la des de la pantalla d’inici.</p><p>Si encara no la tens, pots provar la instal·lació alternativa.</p>';
-    action='alternative';label='INSTAL·LACIÓ ALTERNATIVA';
+    title='CONTINUA DES DEL NAVEGADOR';
+    html='<p>Aquest dispositiu no ofereix ara la instal·lació directa. <strong>No cal descarregar cap APK ni canviar permisos.</strong></p><p>Pots fer servir l’APP aquí mateix. Per tornar-hi fàcilment, desa aquesta pàgina als <strong>Marcadors</strong> del navegador (menú ⋮ → estrella).</p>';
+    action='continue';label='CONTINUAR A L’APP';
   }else if(d.windows||d.mac){
     title='CONTINUA DES DEL NAVEGADOR';
     html='<p>No podem instal·lar l’APP des d’aquest navegador ara mateix, però pots continuar utilitzant-la amb totes les seves funcions.</p><p class="install-browser-tip">Consell: desa aquesta pàgina als preferits per accedir-hi fàcilment.</p>';
@@ -2607,7 +2608,7 @@ async function showAppInstallHelp(reason='manual'){
   if(title) title.textContent=info.title;
   if(device) device.textContent=info.device;
   if(text) text.innerHTML=info.html;
-  if(copyLink){copyLink.hidden=info.action!=='continue' || !(appDeviceInfo().windows||appDeviceInfo().mac);copyLink.textContent='COPIAR ENLLAÇ DE L’APP';}
+  if(copyLink){copyLink.hidden=info.action!=='continue';copyLink.textContent='COPIAR ENLLAÇ DE L’APP';}
   if(tech) tech.innerHTML=appInstallTechMarkup(signals);
   if(primary){
     primary.hidden=!info.action;
@@ -2697,7 +2698,7 @@ async function handleAppInstallPrimary(){
   }else if(action==='continue'){
     closeAppInstallHelp();
   }else if(action==='alternative'){
-    window.location.href=new URL('../install/',location.href).href;
+    closeAppInstallHelp();
   }else if(action==='repair'){
     await repairAppInstallEnvironment();
   }else if(action==='recheck'){

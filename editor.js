@@ -2992,18 +2992,10 @@ function editorInstallHelpMarkup(reason='manual',signals={}){
     html=d.safari?'<p>Només has de fer això:</p><ol><li>Prem <strong>Compartir</strong> a Safari.</li><li>Tria <strong>Afegir a la pantalla d’inici</strong>.</li><li>Activa <strong>Obrir com a app web</strong>, si apareix.</li><li>Prem <strong>Afegir</strong>.</li></ol>':'<p>Obre l’EDITOR amb <strong>Safari</strong> i tria <strong>Compartir → Afegir a la pantalla d’inici</strong>.</p>';
   }else if(signals.nativeReady){
     title='Tot preparat'; html='<p>El dispositiu ja està preparat per instal·lar <strong>BANDA DE LA CALA · EDITOR</strong>.</p>'; action='native'; label='INSTAL·LAR ARA';
-  }else if(d.android && signals.relatedInstalled){
-    title='Hem trobat una instal·lació antiga';
-    html='<p>Android encara conserva una instal·lació de l’<strong>EDITOR</strong>, però aquesta pàgina no s’està executant com a APP.</p><ol><li>Obre <strong>Configuració → Aplicacions</strong>.</li><li>Busca <strong>EDITOR</strong> o <strong>Banda de la Cala</strong> i prem <strong>Desinstal·lar</strong>.</li><li>Torna aquí i prem el botó de sota.</li></ol>';
-    action='recheck'; label='JA ESTÀ · CONTINUAR';
-  }else if(d.android && reason==='after-repair'){
-    title='Últim pas';
-    html='<p>Chrome encara no ofereix el botó automàtic. Obre el menú <strong>⋮</strong> i prem <strong>Instal·lar aplicació</strong> o <strong>Afegir a la pantalla d’inici</strong>.</p><p>Si Chrome diu que ja està instal·lat però no el trobes, ves a <strong>Configuració → Aplicacions</strong>, elimina l’EDITOR i torna aquí.</p>';
-    action='recheck'; label='TORNAR A COMPROVAR';
   }else if(d.android){
-    title='Prepararem la instal·lació';
-    html='<p>No cal que facis res tècnic. Revisarem l’EDITOR i tornarem a carregar-lo una vegada perquè Chrome pugui oferir la instal·lació correctament.</p>';
-    action='repair'; label='PREPARAR I TORNAR A PROVAR';
+    title='CONTINUA DES DEL NAVEGADOR';
+    html='<p>Aquest dispositiu no ofereix ara la instal·lació directa de l’EDITOR. <strong>No cal descarregar cap APK ni canviar permisos.</strong></p><p>Pots utilitzar l’EDITOR des del navegador i desar aquesta pàgina als <strong>Marcadors</strong> (menú ⋮ → estrella) per tornar-hi fàcilment.</p>';
+    action='continue'; label='CONTINUAR A L’EDITOR';
   }else if(d.windows||d.mac){
     title='Instal·lar EDITOR';
     html=(d.chrome||d.edge)?'<p>Obre el menú del navegador o la icona d’instal·lació de la barra d’adreces i tria <strong>Instal·lar EDITOR</strong>.</p>':(d.safari&&d.mac?'<p>A Safari, utilitza <strong>Fitxer → Afegir al Dock</strong>.</p>':'<p>Utilitza l’opció d’instal·lació del navegador.</p>');
@@ -3069,7 +3061,8 @@ async function handleEditorInstallPrimary(){
   if(action==='native'){
     const accepted=await requestNativeEditorInstall();
     if(!accepted) await showEditorInstallHelp('manual');
-  }else if(action==='repair') await repairEditorInstallEnvironment();
+  }else if(action==='continue') closeEditorInstallHelp();
+  else if(action==='repair') await repairEditorInstallEnvironment();
   else if(action==='recheck'){
     const prompt=await waitForNativeEditorInstallPrompt(1200);
     await showEditorInstallHelp(prompt?'native-ready':'after-repair');

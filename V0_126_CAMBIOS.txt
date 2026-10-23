@@ -1,0 +1,12 @@
+BANDA DE LA CALA — v0.126
+
+INSTAL·LACIÓ APP I EDITOR
+- Si el navegador ofereix un diàleg natiu real, es manté el procés normal d’instal·lació.
+- Si Android no ofereix instal·lació, la sortida principal és CONTINUAR AL NAVEGADOR, sense reenviar a APK ni sol·licitar permisos per a fonts desconegudes.
+- Indicació breu per guardar la pàgina als Marcadors del navegador, fins i tot en dispositius sense afegir a HOME.
+- El botó de copiar l’enllaç està disponible també per a Android quan s’ofereix continuar al navegador.
+- S’eliminen de la ruta habitual de l’EDITOR els reintents de reparació i les instruccions de desinstal·lació no confirmades.
+- Es preserven els manifest IDs i scopes independents /app/ i /editor/, els usuaris, la base de dades i la resta de funcions.
+- Versions d’arxius i memòria cau actualitzades a v0.126.
+
+NOTA: No és possible forçar l’aparició d’Instal·lar/Afegir a inici en navegadors o launchers que no ho ofereixen. La pàgina /install/ (APK avançada) no s’ha eliminat, però ja no s’ofereix com a via principal.
