@@ -39,20 +39,20 @@ h1{font-size:23px;line-height:1.15;color:#18266b;font-weight:800;margin:0;text-t
 </header>
 <section class="content" aria-labelledby="heading">
 <h1 id="heading">INSTAL·LA L’APLICACIÓ</h1><div class="rule" aria-hidden="true"></div>
-<p class="lead">Si no pots instal·lar l’APP habitualment, descarrega aquesta versió per a Android.</p>
-<a class="download" id="download" href="https://github.com/viandavisual/BANDADELACALA/releases/download/android-app-v0.1/BANDA-DE-LA-CALA-APP-v0.1.apk" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg>DESCARREGAR APP</a>
-<p class="version" id="version">Android v0.1</p>
+<p class="lead">Si el navegador no et permet instal·lar l’APP, pots continuar fent-la servir sense instal·lar res. Opcionalment, pots descarregar la versió Android.</p>
+<a class="download" id="download" href="./Banda-de-la-Cala-v0.127-Android.apk" rel="noopener noreferrer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg>DESCARREGAR APP</a>
+<p class="version" id="version">Android · TWA · paquet v0.127</p>
 <p id="desktop-note" class="desktop-note">Aquesta aplicació és per a Android. Obre la pàgina al mòbil on la vulguis instal·lar.</p>
-<div class="instructions"><h2>COM S’INSTAL·LA?</h2><ol><li>Prem <strong>DESCARREGAR APP</strong> i obre el fitxer descarregat.</li><li>Si el mòbil et demana permís, accepta la instal·lació.</li><li>Obre l’APP i inicia sessió.</li></ol></div>
-<p class="footnote">Baixa l’APP només des d’aquesta pàgina oficial.</p>
-<div class="fallback-warning" role="note"><strong>NO POTS INSTAL·LAR L’APP?</strong><p>Si aquesta opció tampoc funciona, no passa res: pots fer servir <a href="../app/">Banda de la Cala des del navegador</a>, com una pàgina web, sense instal·lar res.</p></div>
+<div class="instructions"><h2>INSTAL·LACIÓ OPCIONAL (ANDROID)</h2><ol><li>Descarrega el fitxer APK des d’aquesta pàgina oficial.</li><li>Android pot bloquejar la instal·lació i demanar que autoritzis aquesta font. <strong>És normal: és una protecció de seguretat.</strong> No cal desactivar cap protecció si no et sents còmode.</li><li>Si decideixes autoritzar-la, segueix les indicacions d’Android i, en acabar, pots tornar a desactivar el permís.</li></ol></div>
+<p class="footnote">Aquesta APK és opcional i només és per a Android. No és necessària per accedir a l’APP.</p>
+<div class="fallback-warning" role="note"><strong>NO POTS INSTAL·LAR L’APP?</strong><p>No passa res: pots <a href="../app/">obrir Banda de la Cala al navegador</a> ara mateix i guardar-la als marcadors (estrella de Chrome) per accedir-hi fàcilment. No cal instal·lar res.</p></div>
 </section>
 <footer class="footer"><strong>BANDA DE LA CALA</strong> · © 2026 · App development: <strong>Vianda Visual</strong><br><a href="../app/">TORNAR A L’APP</a></footer>
 </main>
 <script>
 if (!/Android/i.test(navigator.userAgent)) document.getElementById('desktop-note').style.display='block';
 fetch('./downloads.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Config');return r.json()}).then(d=>{
-if(d&&d.app&&/^https:\/\/github\.com\/viandavisual\/BANDADELACALA\/releases\/download\//.test(d.app.url)){
+if(d&&d.app&&typeof d.app.url==='string'&&/^\.\/Banda-de-la-Cala-v0\.127-Android\.apk$/.test(d.app.url)){
 document.getElementById('download').href=d.app.url;
 if(d.app.version)document.getElementById('version').textContent=d.app.version;
 }}).catch(()=>{});

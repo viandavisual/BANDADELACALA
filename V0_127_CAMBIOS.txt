@@ -1,0 +1,13 @@
+BANDA DE LA CALA — v0.127
+
+- S’incorpora la nova APK/TWA per a Android, verificada en un Redmi A5, amb domini bandadelacala.viandavisual.com i certificat SHA-256 confirmat a les proves.
+- La pàgina /install/ ja no apunta a la release APK v0.1 antiga: ofereix un fitxer APK inclòs dins del repositori.
+- Es manté la instal·lació PWA nativa com a primera opció des de l’APP; l’APK continua sent voluntària i fora del flux principal.
+- Advertiments clars sobre la instal·lació des de fonts externes, sense obligar a canviar ajustos de seguretat.
+- Sortida sempre disponible per obrir l’APP en el navegador i guardar-la als marcadors.
+- Identitats PWA /app/ i /editor/, lògica, permisos, dades i interfícies principals sense canvis.
+- version.js i caches APP/EDITOR actualitzades a v0.127.
+
+NOTA: La nova APK utilitza el mateix certificat que la prova anterior i el package id com.viandavisual.bandadelacala. El nombre del paquet web v0.127 no canvia la versió interna Android generada amb PWABuilder. No compartir cap fitxer keystore ni contrasenyes.
+
+IMPORTANT: Publicar també la carpeta install/ amb el fitxer APK. Conservar .nojekyll i .well-known/assetlinks.json publicats a GitHub; no s’inclouen aquí canvis del certificat.

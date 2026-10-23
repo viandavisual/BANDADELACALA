@@ -1,14 +1,6 @@
-BANDA DE LA CALA — PATCH v0.125 -> v0.126
+BANDA DE LA CALA v0.127 — PATCH des de v0.126
 
-Sube los archivos de este ZIP a la RAÍZ del repositorio BANDADELACALA en GitHub, manteniendo exactamente la estructura de carpetas. Sobrescribe cuando se solicite.
-
-Archivos de aplicación modificados:
-- app.js
-- version.js
-- editor.js
-- editor/sw.js
-- app/sw.js
-
-Documentación incluida: V0_126_CAMBIOS.txt
-
-No es necesario subir el paquete FULL ni eliminar otros archivos.
+Puja TOT el contingut d’aquest ZIP a l’arrel del repositori BANDADELACALA mantenint les carpetes i substituint els fitxers existents.
+Inclou install/Banda-de-la-Cala-v0.127-Android.apk (APK firmada), install/index.html i install/downloads.json.
+No esborris .nojekyll ni .well-known/assetlinks.json ja publicats.
+L’APK és una alternativa opcional; l’ús al navegador continua funcionant.
