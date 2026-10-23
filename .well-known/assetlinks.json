@@ -1,8 +1,27 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "com.viandavisual.bandadelacala",
-        "sha256_cert_fingerprints": ["FE:1D:FC:B2:1E:91:ED:25:DB:D3:37:82:33:46:1B:C2:5E:2D:3A:3C:4B:9E:97:0D:FC:7A:73:9E:5E:C7:C4:18"]
-      }
-    }]
+
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.viandavisual.bandadelacala",
+      "sha256_cert_fingerprints": [
+        "FE:1D:FC:B2:1E:91:ED:25:DB:D3:37:82:33:46:1B:C2:5E:2D:3A:3C:4B:9E:97:0D:FC:7A:73:9E:5E:C7:C4:18"
+      ]
+    }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.viandavisual.bandadelacala.editor",
+      "sha256_cert_fingerprints": [
+        "37:D0:06:CE:DC:F6:C9:BC:47:BB:C1:6D:65:88:84:4B:98:F1:68:12:D5:8C:E6:8C:A6:71:D0:CB:AF:A2:C8:47"
+      ]
+    }
+  }
+]
