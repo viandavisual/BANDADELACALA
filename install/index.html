@@ -45,14 +45,29 @@ h1{font-size:23px;line-height:1.15;color:#18266b;font-weight:800;margin:0;text-t
 <p id="desktop-note" class="desktop-note">Aquesta aplicació és per a Android. Obre la pàgina al mòbil on la vulguis instal·lar.</p>
 <div class="instructions"><h2>COM INSTAL·LAR-LA AL MÒBIL</h2><ol><li>Prem <strong>DESCARREGAR APP</strong>. Quan acabi, obre el fitxer descarregat des de Chrome o des de <strong>Descàrregues</strong>.</li><li>Si Android mostra un avís de seguretat, és normal: l’app no ve de Google Play. Si vols continuar, prem <strong>Configuració / Ajustos</strong> i autoritza temporalment les instal·lacions des de Chrome (el nom del permís pot variar segons el mòbil).</li><li>Torna a la descàrrega i prem <strong>Instal·lar</strong>. Quan acabi, obre <strong>Banda de la Cala</strong> des de les apps del mòbil.</li><li>Per més seguretat, pots tornar als ajustos i desactivar el permís d’instal·lar aplicacions des de Chrome.</li></ol></div>
 <p class="footnote"><strong>Prefereixes no donar permisos?</strong> Cap problema: no instal·lis res. Pots fer servir l’APP des del navegador igualment.</p>
+<div id="editor-notice" class="fallback-warning" role="note" hidden><strong>EDITOR PER A ANDROID</strong><p>Estem preparant la descàrrega de l’EDITOR. De moment, pots <a href="../editor/">utilitzar-lo des del navegador</a>, sense instal·lar res.</p></div>
 <div class="fallback-warning" role="note"><strong>NO POTS INSTAL·LAR L’APP?</strong><p>No passa res: pots <a href="../app/">obrir Banda de la Cala al navegador</a> ara mateix i guardar-la als marcadors (estrella de Chrome) per accedir-hi fàcilment. No cal instal·lar res.</p></div>
 </section>
 <footer class="footer"><strong>BANDA DE LA CALA</strong> · © 2026 · App development: <strong>Vianda Visual</strong><br><a href="../app/">TORNAR A L’APP</a></footer>
 </main>
 <script>
+const wantsEditor = new URLSearchParams(location.search).get('target')==='editor';
+if(wantsEditor){
+ document.title='Instal·la l’EDITOR · Banda de la Cala';
+ document.querySelector('h1').textContent='INSTAL·LA L’EDITOR';
+ document.querySelector('.lead').textContent='Si no pots instal·lar l’EDITOR des del navegador, pots continuar utilitzant-lo com a web. La descàrrega alternativa per a Android s’activarà quan estigui verificada.';
+ document.querySelector('.instructions').hidden=true;
+ document.querySelector('.footnote').hidden=true;
+ document.querySelector('.fallback-warning:not(#editor-notice)').hidden=true;
+ document.getElementById('editor-notice').hidden=false;
+ document.getElementById('download').hidden=true;
+ document.getElementById('version').hidden=true;
+ document.querySelector('.footer a').href='../editor/';
+ document.querySelector('.footer a').textContent='TORNAR A L’EDITOR';
+}
 if (!/Android/i.test(navigator.userAgent)) document.getElementById('desktop-note').style.display='block';
 fetch('./downloads.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Config');return r.json()}).then(d=>{
-if(d&&d.app&&typeof d.app.url==='string'&&/^\.\/Banda-de-la-Cala-v0\.127-Android\.apk$/.test(d.app.url)){
+if(!wantsEditor&&d&&d.app&&typeof d.app.url==='string'&&/^\.\/Banda-de-la-Cala-v0\.128-Android\.apk$/.test(d.app.url)){
 document.getElementById('download').href=d.app.url;
 if(d.app.version)document.getElementById('version').textContent=d.app.version;
 }}).catch(()=>{});

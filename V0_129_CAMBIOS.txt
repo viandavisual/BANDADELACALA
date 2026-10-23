@@ -1,0 +1,18 @@
+BANDA DE LA CALA — v0.129
+
+EDITOR / ANDROID (preparació)
+- Nova via des de l’assistent d’instal·lació de l’EDITOR cap a INSTALL en Android.
+- INSTALL reconeix ?target=editor i mostra una pàgina pròpia, amb accés al navegador.
+- Es manté la instal·lació nativa PWA com a via preferent.
+- No es publica cap APK de l’EDITOR sense generar-la, signar-la i verificar-la.
+- La descàrrega de l’APP Android v0.128 es conserva.
+
+PENDENT ABANS DE DISTRIBUIR L’EDITOR ANDROID:
+1. Generar TWA de l’EDITOR a https://bandadelacala.viandavisual.com/editor/ amb PWABuilder.
+2. Usar package ID nou, per exemple com.viandavisual.bandadelacala.editor (sense canviar el de l’APP).
+3. Signar-la amb una clau de firma privada i guardar-la per a futures actualitzacions.
+4. Afegir el fingerprint SHA256 al Digital Asset Links del domini i comprovar la verificació.
+5. Provar al Xiaomi: instal·lació simultània APP/EDITOR, obrir sense barra de Chrome, login i permisos.
+6. Publicar llavors la descàrrega real de l’EDITOR; no oferir-la abans.
+
+Sense canvis en funcions de la resta de l’APP i l’EDITOR.

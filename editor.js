@@ -2994,7 +2994,7 @@ function editorInstallHelpMarkup(reason='manual',signals={}){
     title='Tot preparat'; html='<p>El dispositiu ja està preparat per instal·lar <strong>BANDA DE LA CALA · EDITOR</strong>.</p>'; action='native'; label='INSTAL·LAR ARA';
   }else if(d.android){
     title='CONTINUA DES DEL NAVEGADOR';
-    html='<p>Aquest dispositiu no ofereix ara la instal·lació directa de l’EDITOR. <strong>No cal descarregar cap APK ni canviar permisos.</strong></p><p>Pots utilitzar l’EDITOR des del navegador i desar aquesta pàgina als <strong>Marcadors</strong> (menú ⋮ → estrella) per tornar-hi fàcilment.</p>';
+    html='<p>Pots continuar utilitzant l’EDITOR des del navegador.</p><p>Si vols provar la instal·lació alternativa d’Android, consulta la pàgina d’instal·lació.</p>';
     action='continue'; label='CONTINUAR A L’EDITOR';
   }else if(d.windows||d.mac){
     title='Instal·lar EDITOR';
@@ -3017,6 +3017,7 @@ async function showEditorInstallHelp(reason='manual'){
   if(text) text.innerHTML=info.html;
   if(tech) tech.innerHTML=editorInstallTechMarkup(signals);
   if(primary){ primary.hidden=!info.action; primary.disabled=false; primary.textContent=info.label||'CONTINUAR'; primary.dataset.action=info.action||''; }
+  const alt=$('#editorInstallAndroidAlternative'); if(alt) alt.hidden=!(editorDeviceInfo().android&&!signals.standalone&&!signals.nativeReady);
 }
 function closeEditorInstallHelp(){ const modal=$('#editorInstallHelp'); if(modal) modal.hidden=true; }
 function syncEditorInstallButton(){
@@ -3061,7 +3062,7 @@ async function handleEditorInstallPrimary(){
   if(action==='native'){
     const accepted=await requestNativeEditorInstall();
     if(!accepted) await showEditorInstallHelp('manual');
-  }else if(action==='continue') closeEditorInstallHelp();
+  }else if(action==='alternative'){ window.location.href=new URL('../install/?target=editor',location.href).href; }else if(action==='continue') closeEditorInstallHelp();
   else if(action==='repair') await repairEditorInstallEnvironment();
   else if(action==='recheck'){
     const prompt=await waitForNativeEditorInstallPrompt(1200);
@@ -3084,6 +3085,7 @@ function bindEditorPwaInstall(){
   btn?.addEventListener('click',launchEditorInstall);
   cardBtn?.addEventListener('click',launchEditorInstall);
   $('#editorInstallPrimaryAction')?.addEventListener('click',handleEditorInstallPrimary);
+  $('#editorInstallAndroidAlternative')?.addEventListener('click',()=>{window.location.href=new URL('../install/?target=editor',location.href).href;});
   $('#closeEditorInstallHelp')?.addEventListener('click',closeEditorInstallHelp);
   $('#editorInstallHelp')?.addEventListener('click',event=>{if(event.target===$('#editorInstallHelp'))closeEditorInstallHelp();});
   window.addEventListener('appinstalled',()=>{editorInstallPrompt=null;showToast('EDITOR instal·lat');syncEditorInstallButton();showEditorInstallHelp('installed');});
