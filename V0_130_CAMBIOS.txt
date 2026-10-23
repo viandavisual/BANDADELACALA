@@ -1,0 +1,9 @@
+BANDA DE LA CALA — v0.130
+
+- APK Android TWA de l’EDITOR provada en dispositiu: install/Banda-de-la-Cala-Editor-v0.130-Android.apk
+- /install/?target=editor ara permet descarregar-la amb instruccions adaptades.
+- Descàrrega de l’APP Android v0.128 intacta.
+- install/downloads.json conté les dues descàrregues independents.
+- Versió de web i caches d’APP/EDITOR actualitzats a v0.130.
+- Preservar .nojekyll i .well-known/assetlinks.json publicats a GitHub, amb les dues firmes.
+- Sense canvis de backend, login o permisos.

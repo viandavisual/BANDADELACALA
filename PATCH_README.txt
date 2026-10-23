@@ -1,3 +1,3 @@
-BANDA DE LA CALA v0.129 — PATCH des de v0.128
-Puja els arxius a l’arrel del repositori mantenint rutes. No eliminis .nojekyll ni .well-known/assetlinks.json.
-El fitxer APK d’EDITOR encara NO està disponible.
+BANDA DE LA CALA v0.130 — PATCH des de v0.129
+Copiar el contingut del ZIP a l’arrel del repositori respectant les rutes.
+No eliminar fitxers, especialment .nojekyll i .well-known/assetlinks.json.

@@ -55,22 +55,27 @@ const wantsEditor = new URLSearchParams(location.search).get('target')==='editor
 if(wantsEditor){
  document.title='Instal·la l’EDITOR · Banda de la Cala';
  document.querySelector('h1').textContent='INSTAL·LA L’EDITOR';
- document.querySelector('.lead').textContent='Si no pots instal·lar l’EDITOR des del navegador, pots continuar utilitzant-lo com a web. La descàrrega alternativa per a Android s’activarà quan estigui verificada.';
- document.querySelector('.instructions').hidden=true;
- document.querySelector('.footnote').hidden=true;
- document.querySelector('.fallback-warning:not(#editor-notice)').hidden=true;
- document.getElementById('editor-notice').hidden=false;
- document.getElementById('download').hidden=true;
- document.getElementById('version').hidden=true;
+ document.querySelector('.lead').textContent='Si el navegador no et permet instal·lar l’EDITOR, pots continuar utilitzant-lo sense instal·lar res. Opcionalment, pots descarregar la versió Android.';
+ document.querySelector('.instructions li:first-child').innerHTML='Prem <strong>DESCARREGAR EDITOR</strong>. Quan acabi, obre el fitxer descarregat des de Chrome o des de <strong>Descàrregues</strong>.';
+ document.querySelector('.instructions li:nth-child(3)').innerHTML='Torna a la descàrrega i prem <strong>Instal·lar</strong>. Quan acabi, obre <strong>Banda de la Cala Editor</strong> des de les apps del mòbil.';
+ document.querySelector('.footnote').textContent='Prefereixes no donar permisos? Cap problema: pots utilitzar l’EDITOR des del navegador sense instal·lar res.';
+ document.querySelector('.fallback-warning:not(#editor-notice) strong').textContent='NO POTS INSTAL·LAR L’EDITOR?';
+ document.querySelector('.fallback-warning:not(#editor-notice) p').innerHTML='No passa res: pots <a href="../editor/">obrir l’EDITOR al navegador</a> i guardar-lo als marcadors.';
+ document.getElementById('download').textContent='DESCARREGAR EDITOR';
+ document.getElementById('download').href='./Banda-de-la-Cala-Editor-v0.130-Android.apk';
+ document.getElementById('version').textContent='Android · TWA · paquet v0.130';
  document.querySelector('.footer a').href='../editor/';
  document.querySelector('.footer a').textContent='TORNAR A L’EDITOR';
 }
 if (!/Android/i.test(navigator.userAgent)) document.getElementById('desktop-note').style.display='block';
 fetch('./downloads.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Config');return r.json()}).then(d=>{
-if(!wantsEditor&&d&&d.app&&typeof d.app.url==='string'&&/^\.\/Banda-de-la-Cala-v0\.128-Android\.apk$/.test(d.app.url)){
-document.getElementById('download').href=d.app.url;
-if(d.app.version)document.getElementById('version').textContent=d.app.version;
-}}).catch(()=>{});
+ const entry=wantsEditor?d?.editor:d?.app;
+ const allowed=wantsEditor?/^\.\/Banda-de-la-Cala-Editor-v0\.130-Android\.apk$/:/^\.\/Banda-de-la-Cala-v0\.128-Android\.apk$/;
+ if(entry && typeof entry.url==='string' && allowed.test(entry.url)){
+  document.getElementById('download').href=entry.url;
+  if(entry.version) document.getElementById('version').textContent=entry.version;
+ }
+}).catch(()=>{});
 </script>
 </body>
 </html>
