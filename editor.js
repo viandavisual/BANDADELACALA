@@ -1187,6 +1187,18 @@ async function fetchGitHubAudioFiles(){
   return [...names].map(name=>({name,url:`../assets/AUDIO/${encodeURIComponent(name)}`,source:'GITHUB'}));
 }
 
+// Índice estático generado por GitHub Actions, servido desde el mismo dominio.
+// No depende de cuotas, permisos ni CORS de la API pública de GitHub.
+async function fetchPublishedAudioCatalog(){
+  const response=await fetch(`../assets/AUDIO/catalog.json?ts=${Date.now()}`,{cache:'no-store'});
+  if(!response.ok) throw new Error(`Catàleg HTTP ${response.status}`);
+  const payload=await response.json();
+  if(!Array.isArray(payload.files)) throw new Error('Format incorrecte de catalog.json');
+  return payload.files
+    .filter(name=>typeof name==='string' && !name.includes('/') && !name.includes('\\') && /\.(mp3|wav|m4a|ogg)$/i.test(name))
+    .map(name=>({name,url:`../assets/AUDIO/${encodeURIComponent(name)}`,source:'WEB'}));
+}
+
 async function refreshAudioDirectory(){
   const status=$('#audioFolderStatus');
   status.textContent='Actualitzant…';
@@ -1194,21 +1206,27 @@ async function refreshAudioDirectory(){
   try{
     const results=await Promise.allSettled([
       window.BandaSupabase?.enabled ? BandaSupabase.listPublicFiles('player-audio') : Promise.resolve([]),
-      fetchGitHubAudioFiles()
+      fetchPublishedAudioCatalog()
     ]);
     const remote=results[0].status==='fulfilled'?results[0].value:[];
-    const github=results[1].status==='fulfilled'?results[1].value:[];
-    const remoteItems=remote.map(item=>({name:item.name,url:item.url,source:'NÚVOL'}));
-    renderAudioLibrary([...remoteItems,...github]);
+    let folder=results[1].status==='fulfilled'?results[1].value:[];
+    let apiError=null;
+    // Compatible con repositorios que aún no hayan generado el catálogo.
     if(results[1].status==='rejected'){
-      console.warn('Biblioteca GitHub AUDIO:',results[1].reason);
-      status.textContent=`${audioLibrary.length} àudios disponibles · No s’ha pogut consultar assets/AUDIO a GitHub`;
-      showToast('GitHub no respon. Comprova la carpeta assets/AUDIO i torna-ho a provar.');
+      try { folder=await fetchGitHubAudioFiles(); }
+      catch(error){apiError=error;}
+    }
+    const remoteItems=remote.map(item=>({name:item.name,url:item.url,source:'NÚVOL'}));
+    renderAudioLibrary([...remoteItems,...folder]);
+    if(results[1].status==='rejected' && apiError){
+      console.warn('Catàleg AUDIO:',results[1].reason,'GitHub:',apiError);
+      status.textContent=`${audioLibrary.length} àudios disponibles · Falta el catàleg assets/AUDIO/catalog.json`;
+      showToast('Falta el catàleg AUDIO. Executa «Actualitzar catàleg AUDIO» a GitHub Actions.');
     }else if(results[0].status==='rejected'){
       console.warn('Biblioteca Supabase:',results[0].reason);
-      showToast(`${github.length} àudios de GitHub · No s’ha pogut consultar el núvol`);
+      showToast(`${folder.length} àudios al web · No s’ha pogut consultar el núvol`);
     }else{
-      showToast(`${remoteItems.length} àudios al núvol · ${github.length} a assets/AUDIO`);
+      showToast(`${remoteItems.length} àudios al núvol · ${folder.length} a assets/AUDIO`);
     }
   }catch(error){
     console.error(error);

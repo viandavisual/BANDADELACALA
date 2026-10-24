@@ -1,0 +1,9 @@
+BANDA DE LA CALA — v0.132
+
+- EDITOR/PLAYER: catàleg publicat localment a assets/AUDIO/catalog.json; evita dependre de la consulta API de GitHub.
+- Nou GitHub Actions «Actualitzar cataleg AUDIO»: escaneja els MP3/WAV/M4A/OGG de la carpeta en cada push i sota demanda; publica el catalog.json.
+- Manté el fallback GitHub API si el catàleg encara no existeix.
+- No es toquen les APK, els reproductors, els rols, ni l'estructura INSTALL.
+
+IMPORTANT: Després de pujar el PATCH, obrir Actions > Actualitzar cataleg AUDIO > Run workflow (main). Comprovar que apareix assets/AUDIO/catalog.json amb els fitxers reals i després prémer ACTUALITZAR a l'EDITOR.
+Si GitHub Actions no pot fer push, revisar Settings > Actions > General > Workflow permissions: Read and write permissions.
