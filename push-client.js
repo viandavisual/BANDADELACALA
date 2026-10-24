@@ -1,4 +1,4 @@
-/* BANDA DE LA CALA v0.133 · APP Web Push. No inicia permisos sense un gest. */
+/* BANDA DE LA CALA v0.134 · APP Web Push. No inicia permisos sense un gest. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -6,6 +6,13 @@
   const say = message => {if (status()) status().textContent = message;};
   const button = () => $('pushEnableButton');
   const trial = () => $('pushTestButton');
+  const closeBtn = () => $('pushCloseButton');
+  const reopenBtn = () => $('pushReopenButton');
+  const activatedUI = isActive => {
+    button().hidden = !!isActive;
+    if (closeBtn()) closeBtn().hidden = !isActive;
+    if (trial()) trial().hidden = !isActive;
+  };
   const supported = () => ('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && window.isSecureContext);
   const key = String(window.BANDA_CONFIG?.push?.vapidPublicKey || '').trim();
   function decodeKey(k) {
@@ -42,13 +49,13 @@
     button().hidden=false;
     const permission=Notification.permission;
     if(permission==='denied'){say('Notificacions bloquejades. Activa-les des dels ajustos del navegador o dispositiu.');button().hidden=true;return;}
-    if(permission!=='granted'){say('Pendent d’autoritzar al dispositiu.');button().textContent='ACTIVAR NOTIFICACIONS';trial().hidden=true;return;}
-    trial().hidden=false;
+    if(permission!=='granted'){say('Pendent d’autoritzar al dispositiu.');button().textContent='ACTIVAR NOTIFICACIONS';activatedUI(false);return;}
+    activatedUI(false);
     button().textContent='REGISTRAR DISPOSITIU';
     if(!key){say('Permís concedit. Falta configurar la clau pública VAPID per activar els avisos remots.');return;}
     try {
       const reg=await registration(); const sub=await reg.pushManager.getSubscription();
-      if(sub){await syncSubscription(sub,user);say('Notificacions PUSH activades en aquest dispositiu.');button().textContent='ACTUALITZAR REGISTRE';}
+      if(sub){await syncSubscription(sub,user);say('Notificacions PUSH activades en aquest dispositiu.');activatedUI(true);}
       else say('Permís concedit. Prem REGISTRAR DISPOSITIU per activar PUSH.');
     } catch(err){say('No s’ha pogut sincronitzar el dispositiu: '+err.message);}
   }
@@ -82,6 +89,17 @@
   document.addEventListener('DOMContentLoaded',()=>{
     button()?.addEventListener('click',activate);
     trial()?.addEventListener('click',test);
+    closeBtn()?.addEventListener('click',()=>{
+      const box=$('pushSetupBox'), reopen=reopenBtn();
+      if(box) box.style.display='none';
+      if(reopen){reopen.hidden=false;reopen.style.display='block';}
+    });
+    reopenBtn()?.addEventListener('click',()=>{
+      const box=$('pushSetupBox'), reopen=reopenBtn();
+      if(box) box.style.display='grid';
+      if(reopen){reopen.hidden=true;reopen.style.display='none';}
+      refresh();
+    });
     const box=$('pushSetupBox');
     if(box && 'MutationObserver' in window){new MutationObserver(()=>{if(!box.closest('[hidden]'))refresh();}).observe($('userProfileCard'),{attributes:true,attributeFilter:['hidden']});}
     refresh();

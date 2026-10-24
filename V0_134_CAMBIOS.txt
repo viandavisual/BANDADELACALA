@@ -1,0 +1,6 @@
+BANDA DE LA CALA v0.134 — NOTIFICACIONS USER
+
+- Quan PUSH esta activa, amagar ACTUALITZAR REGISTRE i mostrar PROVAR NOTIFICACIO + TANCAR.
+- TANCAR plega la caixa i deixa un acces NOTIFICACIONS per tornar-la a obrir.
+- Sincronitzacio de la subscripcio conservada de forma automatica en comprovar-ne l'estat.
+- Sense canvis a Supabase, INSTALL, APK ni al servidor d'enviament (pendent).
