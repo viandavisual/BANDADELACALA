@@ -127,6 +127,7 @@ const views = {
   archive:{eyebrow:'GESTIÓ',title:'APORTACIONS'},
   games:{eyebrow:'CONTINGUT',title:'MINIJOCS'},
   users:{eyebrow:'GESTIÓ',title:'USUARIS'},
+  notifications:{eyebrow:'GESTIÓ',title:'NOTIFICACIONS'},
   system:{eyebrow:'CONFIGURACIÓ',title:'SISTEMA'}
 };
 

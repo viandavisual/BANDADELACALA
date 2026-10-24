@@ -47,6 +47,7 @@
         <button class="editor-nav-btn" data-editor-nav="history"><span>◷</span>HISTÒRIC</button>
         <button class="editor-nav-btn archive-nav-btn" data-editor-nav="archive"><span class="archive-nav-icon">▤<b id="archiveNavBadge" class="archive-nav-badge" hidden>0</b></span>APORTACIONS</button>
         <button class="editor-nav-btn" data-editor-nav="games"><span>◆</span>MINIJOCS</button>
+        <button class="editor-nav-btn" data-editor-nav="notifications"><span>♧</span>NOTIFICACIONS</button>
         <button class="editor-nav-btn" data-editor-nav="users"><span>♙</span>USUARIS</button>
         <button class="editor-nav-btn" data-editor-nav="system"><span>⚙</span>SISTEMA</button>
       </nav>
@@ -106,6 +107,19 @@
         </div>
       </section>
 
+      <section class="editor-view" data-editor-view="notifications">
+        <div class="editor-card form-card" style="max-width:720px">
+          <div class="card-head"><div><span class="eyebrow">PROVA PUSH REMOTA</span><h2>NOTIFICACIONS</h2></div></div>
+          <p class="helper-copy">Primera prova: envia una notificació PUSH només als dispositius registrats del teu usuari. No s'enviarà a la resta de músics.</p>
+          <form id="manualPushForm">
+            <label>TÍTOL<input id="manualPushTitle" maxlength="120" required value="🎼 BANDA DE LA CALA · PROVA" /></label>
+            <label>MISSATGE<textarea id="manualPushBody" maxlength="300" rows="3" required>Aquesta és una prova de notificació enviada des de l'EDITOR.</textarea></label>
+            <p class="helper-copy">DESTINATARIS: ELS MEUS DISPOSITIUS · En tocar l'avís, s'obrirà l'APP (+INFO).</p>
+            <div class="form-actions"><button class="primary-btn" id="manualPushSend" type="submit">ENVIAR PROVA PUSH</button></div>
+            <small id="manualPushStatus" role="status" aria-live="polite"></small>
+          </form>
+        </div>
+      </section>
       <section class="editor-view" data-editor-view="calendar">
         <div class="editor-two-col">
           <form id="eventForm" class="editor-card form-card event-form-card">
@@ -435,6 +449,7 @@
   <script src="content-store.js?v=0.111"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-client.js?v=0.111"></script>
-  <script src="editor.js?v=0.132"></script>
+  <script src="editor.js?v=0.135"></script>
+  <script src="editor-push.js?v=0.135"></script>
 </body>
 </html>

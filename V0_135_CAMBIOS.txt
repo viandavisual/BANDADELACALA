@@ -1,0 +1,7 @@
+BANDA DE LA CALA v0.135 · PUSH
+
+APP: després de TANCAR la caixa desapareix completament per usuari/dispositiu; si perd permisos o subscripció reapareix. Sense botó de reobrir.
+EDITOR: nova secció NOTIFICACIONS; de moment només enviaments de prova als dispositius del propi ADMIN/GESTOR.
+EDGE FUNCTION: supabase/functions/send-push-notification/index.ts. No està desplegada automàticament: cal fer-ho a Supabase (Verify JWT activat), configurar VAPID_SUBJECT (ex.: mailto:correu-del-projecte@domini.tld) com a secret, i verificar que VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY ja coincideixen amb la APP.
+IMPORTANT: no ampliar a tots els usuaris sense prova real i confirmació. Els avisos automàtics d'esdeveniments queden per a una versió posterior.
+La prova local de la APP i les subscripcions existents segueixen funcionant.

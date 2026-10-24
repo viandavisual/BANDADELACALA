@@ -1,4 +1,4 @@
-/* BANDA DE LA CALA v0.134 · APP Web Push. No inicia permisos sense un gest. */
+/* BANDA DE LA CALA v0.135 · APP Web Push. No inicia permisos sense un gest. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -7,11 +7,14 @@
   const button = () => $('pushEnableButton');
   const trial = () => $('pushTestButton');
   const closeBtn = () => $('pushCloseButton');
-  const reopenBtn = () => $('pushReopenButton');
+  const visibilityKey = userId => 'banda-push-closed-v0135:'+userId;
+  let activeUserId = null;
   const activatedUI = isActive => {
     button().hidden = !!isActive;
     if (closeBtn()) closeBtn().hidden = !isActive;
     if (trial()) trial().hidden = !isActive;
+    const box=$('pushSetupBox');
+    if(box) box.style.display=(isActive && activeUserId && localStorage.getItem(visibilityKey(activeUserId))==='yes')?'none':'grid';
   };
   const supported = () => ('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && window.isSecureContext);
   const key = String(window.BANDA_CONFIG?.push?.vapidPublicKey || '').trim();
@@ -45,7 +48,8 @@
   async function refresh() {
     const box=$('pushSetupBox'); if(!box || box.closest('[hidden]')) return;
     if(!supported()){say('Aquest navegador no admet notificacions PUSH. Pots seguir utilitzant l’APP.');button().hidden=true;return;}
-    const user=await sessionUser(); if(!user){say('Inicia sessió per activar els avisos.');button().hidden=true;trial().hidden=true;return;}
+    const user=await sessionUser(); if(!user){activeUserId=null;say('Inicia sessió per activar els avisos.');button().hidden=true;trial().hidden=true;return;}
+    activeUserId=user.id;
     button().hidden=false;
     const permission=Notification.permission;
     if(permission==='denied'){say('Notificacions bloquejades. Activa-les des dels ajustos del navegador o dispositiu.');button().hidden=true;return;}
@@ -90,15 +94,10 @@
     button()?.addEventListener('click',activate);
     trial()?.addEventListener('click',test);
     closeBtn()?.addEventListener('click',()=>{
-      const box=$('pushSetupBox'), reopen=reopenBtn();
-      if(box) box.style.display='none';
-      if(reopen){reopen.hidden=false;reopen.style.display='block';}
-    });
-    reopenBtn()?.addEventListener('click',()=>{
-      const box=$('pushSetupBox'), reopen=reopenBtn();
-      if(box) box.style.display='grid';
-      if(reopen){reopen.hidden=true;reopen.style.display='none';}
-      refresh();
+      if(activeUserId && button()?.hidden){
+        localStorage.setItem(visibilityKey(activeUserId),'yes');
+        $('pushSetupBox').style.display='none';
+      }
     });
     const box=$('pushSetupBox');
     if(box && 'MutationObserver' in window){new MutationObserver(()=>{if(!box.closest('[hidden]'))refresh();}).observe($('userProfileCard'),{attributes:true,attributeFilter:['hidden']});}

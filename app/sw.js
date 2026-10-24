@@ -1,5 +1,5 @@
-// BANDA DE LA CALA · APP v0.134 · scope /app/
-const CACHE='banda-de-la-cala-app-v0.134';
+// BANDA DE LA CALA · APP v0.135 · scope /app/
+const CACHE='banda-de-la-cala-app-v0.135';
 const PREFIX='banda-de-la-cala-app-';
 const CORE=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','../version.js','../style.css','../tuner.css','../tuner.js','../metronome.css','../metronome.js','../app.js','../config.js','../content-store.js','../supabase-client.js','../data/content-published.js','../assets/brand/logo-banda-de-la-cala.png','../assets/brand/imago-banda-de-la-cala.png','../assets/brand/app-icon.png','../assets/bandalogo.jpg','../assets/user-icons/user-partitures.png','../assets/user-icons/user-afinador.png','../assets/user-icons/user-metronom.png','../assets/user-icons/user-demos.png','../assets/user-icons/user-pujar-fato.png','../assets/user-icons/user-opcions.png','../assets/user-icons/user-bustia.png','./minigames/quina-nota-es/app.html'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>Promise.allSettled(CORE.map(url=>cache.add(url)))).then(()=>self.skipWaiting()))});
@@ -12,7 +12,7 @@ self.addEventListener('fetch',event=>{
   event.respondWith(networkFirst(event.request));
 });
 
-// v0.134 · Web Push recepció, oberta només quan l'usuari concedeix permisos.
+// v0.135 · Web Push recepció, oberta només quan l'usuari concedeix permisos.
 self.addEventListener('push', event => {
   event.waitUntil((async () => {
     let data = {};
