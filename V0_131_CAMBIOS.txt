@@ -1,0 +1,10 @@
+BANDA DE LA CALA — v0.131
+
+EDITOR / PLAYER
+- Corrige las rutas de los ficheros de assets/AUDIO desde /editor/: ../assets/AUDIO/ (URL escapada por nombre).
+- La lectura de la biblioteca de GitHub usa API Contents y, si falla o no encuentra audios, consulta Git Trees.
+- Un fallo de la API ya no se presenta silenciosamente como biblioteca vacía: se muestra advertencia y se mantienen los audios accesibles del núvol.
+- Conserva el selector y el flujo de asignación de MP3 al PLAYER.
+
+Nota: los nuevos MP3 deben estar publicados en assets/AUDIO en la rama main del repositorio público.
+SENSE CANVIS: Supabase, permisos, EDITOR en otras secciones, APP, APKs y DOWNLOADS.

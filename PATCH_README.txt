@@ -1,3 +1,2 @@
-BANDA DE LA CALA v0.130 — PATCH des de v0.129
-Copiar el contingut del ZIP a l’arrel del repositori respectant les rutes.
-No eliminar fitxers, especialment .nojekyll i .well-known/assetlinks.json.
+BANDA DE LA CALA v0.131 — PATCH desde v0.130.
+Copiar el contenido del ZIP a la raíz del repositorio, respetando las rutas. No borrar otros archivos.

@@ -1127,7 +1127,7 @@ function bindDemos(){
 }
 
 function renderAudioLibrary(files=audioLibrary){
-  audioLibrary=(files||[]).map(item=>typeof item==='string'?{name:item,url:`assets/AUDIO/${item}`,source:'GITHUB'}:item)
+  audioLibrary=(files||[]).map(item=>typeof item==='string'?{name:item,url:`../assets/AUDIO/${encodeURIComponent(item)}`,source:'GITHUB'}:item)
     .filter(item=>item?.name && /\.(mp3|wav|m4a|ogg)$/i.test(item.name))
     .sort((a,b)=>a.name.localeCompare(b.name,'ca',{numeric:true}));
   const select=$('#audioLibrarySelect');
@@ -1150,15 +1150,41 @@ function resolveGitHubRepository(){
 
 async function fetchGitHubAudioFiles(){
   const gh=resolveGitHubRepository();
-  if(!gh) return [];
-  const branch=gh.branch?`?ref=${encodeURIComponent(gh.branch)}`:'';
-  const url=`https://api.github.com/repos/${encodeURIComponent(gh.owner)}/${encodeURIComponent(gh.repo)}/contents/assets/AUDIO${branch}`;
-  const response=await fetch(url,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
-  if(!response.ok) return [];
-  const entries=await response.json();
-  if(!Array.isArray(entries)) return [];
-  return entries.filter(item=>item&&item.type==='file'&&/\.(mp3|wav|m4a|ogg)$/i.test(item.name||''))
-    .map(item=>({name:item.name,url:`assets/AUDIO/${item.name}`,source:'GITHUB'}));
+  if(!gh) throw new Error('No s’ha pogut identificar el repositori de GitHub');
+  const repoBase=`https://api.github.com/repos/${encodeURIComponent(gh.owner)}/${encodeURIComponent(gh.repo)}`;
+  const branch=gh.branch||'main';
+  const headers={Accept:'application/vnd.github+json'};
+  const names=new Set();
+  const errors=[];
+  const collect=entries=>{
+    for(const item of entries||[]){
+      if(item?.type==='file' && /\.(mp3|wav|m4a|ogg)$/i.test(item.name||'')) names.add(item.name);
+    }
+  };
+  // Primera opció: API Contents, carpeta exacta al repositori públic.
+  try{
+    const url=`${repoBase}/contents/assets/AUDIO?ref=${encodeURIComponent(branch)}`;
+    const response=await fetch(url,{cache:'no-store',headers});
+    if(!response.ok) throw new Error(`GitHub Contents HTTP ${response.status}`);
+    const entries=await response.json();
+    if(!Array.isArray(entries)) throw new Error('Resposta inesperada de GitHub Contents');
+    collect(entries);
+  }catch(error){errors.push(String(error.message||error));}
+  // Fallback: arbre Git recursiu, útil si Contents falla o retorna buit.
+  if(!names.size){
+    try{
+      const url=`${repoBase}/git/trees/${encodeURIComponent(branch)}?recursive=1`;
+      const response=await fetch(url,{cache:'no-store',headers});
+      if(!response.ok) throw new Error(`GitHub Tree HTTP ${response.status}`);
+      const payload=await response.json();
+      const entries=(payload.tree||[])
+        .filter(item=>item?.type==='blob' && /^assets\/AUDIO\/[^/]+\.(mp3|wav|m4a|ogg)$/i.test(item.path||''))
+        .map(item=>({type:'file',name:item.path.split('/').pop()}));
+      collect(entries);
+    }catch(error){errors.push(String(error.message||error));}
+  }
+  if(!names.size && errors.length===2) throw new Error(errors.join(' · '));
+  return [...names].map(name=>({name,url:`../assets/AUDIO/${encodeURIComponent(name)}`,source:'GITHUB'}));
 }
 
 async function refreshAudioDirectory(){
@@ -1166,16 +1192,26 @@ async function refreshAudioDirectory(){
   status.textContent='Actualitzant…';
   $('#refreshAudioFolder').disabled=true;
   try{
-    const [remote,github]=await Promise.all([
-      window.BandaSupabase?.enabled ? BandaSupabase.listPublicFiles('player-audio').catch(()=>[]) : Promise.resolve([]),
-      fetchGitHubAudioFiles().catch(()=>[])
+    const results=await Promise.allSettled([
+      window.BandaSupabase?.enabled ? BandaSupabase.listPublicFiles('player-audio') : Promise.resolve([]),
+      fetchGitHubAudioFiles()
     ]);
+    const remote=results[0].status==='fulfilled'?results[0].value:[];
+    const github=results[1].status==='fulfilled'?results[1].value:[];
     const remoteItems=remote.map(item=>({name:item.name,url:item.url,source:'NÚVOL'}));
     renderAudioLibrary([...remoteItems,...github]);
-    showToast(`${remoteItems.length} àudios al núvol · ${github.length} a la biblioteca antiga`);
+    if(results[1].status==='rejected'){
+      console.warn('Biblioteca GitHub AUDIO:',results[1].reason);
+      status.textContent=`${audioLibrary.length} àudios disponibles · No s’ha pogut consultar assets/AUDIO a GitHub`;
+      showToast('GitHub no respon. Comprova la carpeta assets/AUDIO i torna-ho a provar.');
+    }else if(results[0].status==='rejected'){
+      console.warn('Biblioteca Supabase:',results[0].reason);
+      showToast(`${github.length} àudios de GitHub · No s’ha pogut consultar el núvol`);
+    }else{
+      showToast(`${remoteItems.length} àudios al núvol · ${github.length} a assets/AUDIO`);
+    }
   }catch(error){
     console.error(error);
-    renderAudioLibrary([]);
     status.textContent='No s’ha pogut actualitzar';
     showToast('No s’ha pogut actualitzar la biblioteca d’àudio');
   }finally{
