@@ -1,0 +1,19 @@
+BANDA DE LA CALA v0.133 — Base de notificaciones PUSH (fase 1)
+
+Incluye:
+- APP > USER: caja NOTIFICACIONS solo con sesión iniciada; botón de permiso explícito.
+- Botón de prueba local, mediante Service Worker, visible si se ha concedido permiso.
+- Recepción real de eventos Web Push en app/sw.js; +INFO abre URL de APP, validada al mismo dominio.
+- Preparación para suscripción remota con clave VAPID pública configurable en config.js.
+- SQL para tabla push_subscriptions con RLS por usuario; nunca exponer claves privadas.
+- Cache v0.133 y version.js v0.133; preserva manifest IDs y scopes, APKs e INSTALL.
+
+NO ES AÚN ENVÍO REMOTO FUNCIONAL:
+1. Ejecutar SUPABASE_UPDATE_v0.133_PUSH.sql en Supabase.
+2. Generar un par VAPID de forma segura. En config.js, colocar SOLO la clave pública en push.vapidPublicKey; mantener la privada como secreto de backend.
+3. Implementar/configurar Edge Function de envío Web Push + acceso restringido de ADMIN/GESTOR + cola/reintentos/recordatorios.
+4. Validar suscripción real en APP y una notificación de servidor con APP cerrada.
+5. En iOS, instalar PWA en pantalla de inicio para Web Push; APK Android TWA requiere verificar permisos/delegación en móvil real.
+
+El botón PROVAR NOTIFICACIÓ lanza únicamente una notificación local: NO acredita conectividad PUSH con Supabase.
+La autorización de OS siempre es voluntaria. No hay opciones por categorías.

@@ -5,6 +5,7 @@ window.BANDA_CONFIG = {
   subtitle: "L’Ametlla de Mar",
   logo: 'assets/brand/logo-banda-de-la-cala.png',
   appIcon: 'assets/brand/app-icon.png',
+  push: { vapidPublicKey: '' }, // v0.133: introduir només la clau VAPID PÚBLICA; mai la privada
   introVideo: 'assets/intro.webm',
   introAudio: 'assets/AUDIO/introhimne.mp3',
   introFallbackMs: 6000,

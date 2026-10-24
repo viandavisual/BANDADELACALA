@@ -282,6 +282,14 @@
               <div class="user-avatar-mark"><img id="userProfileAvatar" alt="Avatar del perfil" hidden /><span id="userProfileAvatarFallback" aria-hidden="true">●</span></div>
               <div class="user-profile-copy"><span class="eyebrow" id="userProfileRole">USER</span><h3 id="userProfileName">Músic</h3><p id="userProfileEmail"></p></div>
             </div>
+            <section id="pushSetupBox" class="user-settings-box" style="padding:16px;margin:14px 0;display:grid;gap:10px" aria-label="Notificacions">
+              <strong>🔔 NOTIFICACIONS</strong>
+              <p style="margin:0;font-size:13px">Rebràs avisos d'assaigs, concerts, canvis i recordatoris quan autoritzis les notificacions del dispositiu.</p>
+              <small id="pushSetupStatus" aria-live="polite">Comprovant disponibilitat…</small>
+              <button id="pushEnableButton" type="button" class="user-password-btn">ACTIVAR NOTIFICACIONS</button>
+              <button id="pushTestButton" type="button" class="user-password-btn" style="background:transparent;border:1px solid currentColor;color:inherit" hidden>PROVAR NOTIFICACIÓ EN AQUEST DISPOSITIU</button>
+            </section>
+
             <div id="passwordSetupNotice" class="password-setup-notice" hidden><strong>COMPTE NOU</strong><span>Per completar l’alta, tria ara la contrasenya privada que vulguis utilitzar. Aquesta contrasenya només la coneixeràs tu.</span></div>
 
             <details id="userDemosBox" class="user-settings-box user-demos-box">
@@ -616,5 +624,6 @@
   <script src="metronome.js?v=0.111"></script>
   <script src="tuner.js?v=0.111"></script>
   <script src="app.js?v=0.128"></script>
+  <script src="push-client.js?v=0.133"></script>
 </body>
 </html>
