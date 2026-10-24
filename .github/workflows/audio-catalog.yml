@@ -1,0 +1,39 @@
+name: Actualitzar cataleg AUDIO
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'assets/AUDIO/**'
+      - '.github/workflows/audio-catalog.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Generar catalog.json amb tots els audios reals
+        run: |
+          python3 - <<'PYTHON'
+          import json
+          from pathlib import Path
+          p=Path('assets/AUDIO')
+          files=sorted((f.name for f in p.iterdir() if f.is_file() and f.suffix.lower() in {'.mp3','.wav','.m4a','.ogg'}), key=str.casefold)
+          (p/'catalog.json').write_text(json.dumps({'files':files},indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
+          print('Àudios trobats:',len(files))
+          PYTHON
+      - name: Publicar cataleg si ha canviat
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/AUDIO/catalog.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Actualitzar cataleg AUDIO'
+            git push
+          fi
