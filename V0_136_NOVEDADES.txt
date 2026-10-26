@@ -1,0 +1,6 @@
+BANDA DE LA CALA v0.136
+- NOTIFICACIONS: el cierre persiste por usuario y dispositivo mientras existe permiso y suscripción PUSH.
+- Evita reaparición de caja durante las consultas a Supabase o errores temporales de sincronización.
+- Si se revoca el permiso o realmente falta la suscripción, reaparece la caja.
+- No sobrescribir config.js en la web: la clave VAPID pública se mantiene en el archivo publicado.
+- Sin cambios en el sistema de envío PUSH remoto (el problema Failed to fetch se diagnostica aparte).

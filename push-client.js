@@ -1,4 +1,4 @@
-/* BANDA DE LA CALA v0.135 · APP Web Push. No inicia permisos sense un gest. */
+/* BANDA DE LA CALA v0.136 · APP Web Push. No inicia permisos sense un gest. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -45,23 +45,62 @@
     },{onConflict:'endpoint'});
     if(error) throw error;
   }
+  // El tancament és una preferència local per usuari i dispositiu.
+  // La sincronització remota mai no ha de reobrir la caixa per un error temporal.
   async function refresh() {
     const box=$('pushSetupBox'); if(!box || box.closest('[hidden]')) return;
-    if(!supported()){say('Aquest navegador no admet notificacions PUSH. Pots seguir utilitzant l’APP.');button().hidden=true;return;}
-    const user=await sessionUser(); if(!user){activeUserId=null;say('Inicia sessió per activar els avisos.');button().hidden=true;trial().hidden=true;return;}
+    if(!supported()){
+      box.style.display='grid';
+      say('Aquest navegador no admet notificacions PUSH. Pots seguir utilitzant l’APP.');
+      button().hidden=true; return;
+    }
+    const user=await sessionUser();
+    if(!user){
+      activeUserId=null; box.style.display='grid';
+      say('Inicia sessió per activar els avisos.');
+      button().hidden=true; trial().hidden=true; closeBtn().hidden=true; return;
+    }
     activeUserId=user.id;
-    button().hidden=false;
+    const dismissed=localStorage.getItem(visibilityKey(user.id))==='yes';
     const permission=Notification.permission;
-    if(permission==='denied'){say('Notificacions bloquejades. Activa-les des dels ajustos del navegador o dispositiu.');button().hidden=true;return;}
-    if(permission!=='granted'){say('Pendent d’autoritzar al dispositiu.');button().textContent='ACTIVAR NOTIFICACIONS';activatedUI(false);return;}
-    activatedUI(false);
+    if(permission==='denied'){
+      localStorage.removeItem(visibilityKey(user.id));
+      box.style.display='grid';
+      say('Notificacions bloquejades. Activa-les des dels ajustos del navegador o dispositiu.');
+      button().hidden=true;trial().hidden=true;closeBtn().hidden=true;return;
+    }
+    if(permission!=='granted'){
+      localStorage.removeItem(visibilityKey(user.id));
+      say('Pendent d’autoritzar al dispositiu.');
+      button().textContent='ACTIVAR NOTIFICACIONS'; activatedUI(false); return;
+    }
+    // Amagar immediatament una caixa ja tancada sense esperar la xarxa.
+    if(dismissed) box.style.display='none';
     button().textContent='REGISTRAR DISPOSITIU';
-    if(!key){say('Permís concedit. Falta configurar la clau pública VAPID per activar els avisos remots.');return;}
+    if(!key){
+      // Un canvi de configuració no anul·la el permís concedit ni el tancament.
+      if(!dismissed){activatedUI(false);say('Permís concedit. Falta configurar la clau pública VAPID per activar els avisos remots.');}
+      return;
+    }
     try {
-      const reg=await registration(); const sub=await reg.pushManager.getSubscription();
-      if(sub){await syncSubscription(sub,user);say('Notificacions PUSH activades en aquest dispositiu.');activatedUI(true);}
-      else say('Permís concedit. Prem REGISTRAR DISPOSITIU per activar PUSH.');
-    } catch(err){say('No s’ha pogut sincronitzar el dispositiu: '+err.message);}
+      const reg=await registration();
+      const sub=await reg.pushManager.getSubscription();
+      if(!sub){
+        // Només la pèrdua real de subscripció obliga a tornar a mostrar l'activació.
+        localStorage.removeItem(visibilityKey(user.id));
+        say('Permís concedit. Prem REGISTRAR DISPOSITIU per activar PUSH.');
+        activatedUI(false);
+        return;
+      }
+      // La subscripció del navegador segueix vigent. Sincronització best-effort.
+      say('Notificacions PUSH activades en aquest dispositiu.');
+      activatedUI(true);
+      try { await syncSubscription(sub,user); }
+      catch(err){ console.warn('PUSH_SYNC_RETRY_LATER',err?.message||err); }
+    } catch(err) {
+      if(!dismissed){activatedUI(false);say('No s’ha pogut comprovar el dispositiu: '+err.message);}
+      else console.warn('PUSH_CHECK_RETRY_LATER',err?.message||err);
+    }
   }
   async function activate() {
     if(!supported())return;

@@ -1,1 +1,1 @@
-BANDA DE LA CALA v0.132 — PATCH desde v0.131. Copiar los archivos conservando carpetas. Después ejecutar el workflow en Actions para crear catalog.json con los MP3 reales.
+BANDA DE LA CALA v0.136 — PATCH desde v0.135. Corrige la persistencia del cierre de NOTIFICACIONS tras reabrir APP. No incluye ni sobrescribe config.js (conservar la clave VAPID publicada). No modifica las Edge Functions ni INSTALL.
