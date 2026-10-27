@@ -1257,3 +1257,20 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
   [data-editor-view="dresscode"] .dresscode-form-card{padding:13px!important}
   [data-editor-view="dresscode"] .dress-item-row{padding:10px!important}
 }
+
+/* v0.140 · NOTIFICACIONS: mateix llenguatge visual que les tires del CALENDARI. */
+#pushUpcoming{display:grid;gap:9px;margin-top:14px}
+#pushUpcoming .push-event-strip{grid-template-columns:minmax(0,1fr)}
+#pushUpcoming .push-event-summary{width:100%;cursor:pointer}
+#pushUpcoming .push-event-summary:focus-visible{outline:2px solid var(--blue);outline-offset:-3px}
+#pushUpcoming .push-event-details[hidden]{display:none}
+#pushUpcoming .push-reminder-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+#pushUpcoming .push-reminder-grid>div:first-child{grid-column:1/-1}
+@media(max-width:550px){
+ #pushUpcoming .push-event-summary{grid-template-columns:minmax(0,1fr) 22px;gap:6px}
+ #pushUpcoming .push-event-date{grid-column:1/-1}
+ #pushUpcoming .push-event-summary .event-strip-date{grid-column:1;grid-row:2;white-space:normal}
+ #pushUpcoming .push-event-summary .event-strip-chevron{grid-column:2;grid-row:1/3;align-self:center}
+ #pushUpcoming .push-reminder-grid{grid-template-columns:1fr}
+ #pushUpcoming .push-reminder-grid>div:first-child{grid-column:auto}
+}
