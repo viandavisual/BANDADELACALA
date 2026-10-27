@@ -1,0 +1,8 @@
+BANDA DE LA CALA v0.142
+- USER: botó NOTIFICACIONS reduït aproximadament un 20%, text reduït al 75%.
+- Nova subsecció NOTIFICACIONS amb bústia local de PUSH rebudes, ordenades de més recent a més antiga.
+- En tocar un avís: s’elimina de pendents i s’obre la URL de destí rebuda; si no n’hi ha, /app/.
+- Swipe horitzontal per eliminar.
+- L’historial es conserva en IndexedDB del dispositiu. NO és sincronització entre dispositius: cada instal·lació té el seu historial.
+- COMPTE NOU: es mostra només si must_change_password és cert i el rol no és admin; el flux recovery manté un avís específic. Un registre local després de canviar correctament la contrasenya impedeix que reaparegui l’avís si el perfil remot va desfasat.
+- No es modifica Supabase ni l’Edge Function. La funció actual envia url /app/; els destins específics s’han d’afegir posteriorment al sistema d’emissió.

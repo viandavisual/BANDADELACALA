@@ -2154,9 +2154,11 @@ function renderUserSection(){
   renderAvatarChoices();
   renderUserAvatar();
   renderUserDemos();
-  const needsPassword=!!state.profile?.must_change_password;
+  const passwordCompletedKey='banda-password-completed:'+String(state.session?.user?.id||'');
+  let passwordCompleted=false;try{passwordCompleted=localStorage.getItem(passwordCompletedKey)==='yes'}catch(_){}
+  const needsPassword=!!state.profile?.must_change_password && !passwordCompleted && String(state.profile?.role||'').toLowerCase()!=='admin';
   const temp=$('#passwordSetupNotice');
-  if(temp) temp.hidden=!needsPassword;
+  if(temp) { const recovery=passwordRecoveryRequested(); temp.hidden=!(needsPassword||recovery); if(recovery) temp.innerHTML='<strong>RECUPERACIÓ DE CONTRASENYA</strong><span>Escriu una contrasenya nova per recuperar el compte.</span>'; }
   const passwordDetails=$('#passwordDetails');
   if(passwordDetails && needsPassword) passwordDetails.open=true;
   const driveBox=$('#userDriveBox');
@@ -2313,6 +2315,7 @@ function bindUserAuth(){
       // La RPC ja persisteix el canvi; aquest fallback evita que una resposta de perfil
       // momentàniament desfasada mantingui l'avís visible en la mateixa sessió.
       if(initialSetup && state.profile) state.profile.must_change_password=false;
+      try{localStorage.setItem('banda-password-completed:'+String(state.session?.user?.id||''),'yes')}catch(_){}
       renderUserSection();
       const details=$('#passwordDetails'); if(details) details.open=false;
       if(recovery) clearPasswordRecoveryUrl();
@@ -2394,15 +2397,6 @@ function bindUserAuth(){
     const box=$('#archiveUploadBox'), btn=$('#openArchiveUploadBtn'); if(box) box.hidden=true;
     if(btn) btn.setAttribute('aria-expanded','false');
     $('#archiveUploadStatus').textContent='';
-  });
-
-  $('#openNotificationsHubBtn')?.addEventListener('click',()=>{
-    const box=$('#pushSetupBox'), btn=$('#openNotificationsHubBtn'); if(!box) return;
-    const willOpen=box.hidden;
-    box.hidden=!willOpen;
-    box.style.display=willOpen?'grid':'none';
-    if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
-    if(willOpen) scrollElementBelowTopbar(box,14);
   });
 
   $('#openUserOptionsBtn')?.addEventListener('click',()=>{

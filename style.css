@@ -3208,3 +3208,20 @@ body.demo-video-open{overflow:hidden}
 .app-install-success-icon{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:50%;background:#e7f4eb;color:#207849;font:900 25px/1 Arial,sans-serif}
 .app-install-success strong{display:block;font:900 .92rem/1.25 Arial,sans-serif}
 .app-install-success p{margin:5px 0 0;font:.82rem/1.4 Arial,sans-serif}
+
+/* v0.142 · Bústia privada de notificacions al dispositiu */
+.user-profile-notifications-launcher{width:131px!important;min-width:131px!important;min-height:94px!important;padding:9px 5px!important;gap:6px!important}
+.user-profile-notifications-launcher .user-tool-icon{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important}
+.user-profile-notifications-launcher .user-tool-title-one-line{font-size:.54rem!important;letter-spacing:0!important;white-space:nowrap!important;overflow-wrap:normal!important}
+.user-notifications-panel{margin-top:14px;padding:17px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:var(--shadow-soft)}
+.user-notifications-panel[hidden]{display:none!important}
+.user-notifications-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.user-notifications-head h3{margin:4px 0;color:var(--blue-deep);font-size:1.23rem}
+.user-notifications-hint{font-size:.8rem;color:var(--muted);line-height:1.45;margin:10px 0 16px}
+.user-notifications-list{display:grid;gap:10px}
+.user-notification-item{border:1px solid rgba(57,58,134,.17);border-radius:15px;background:linear-gradient(135deg,#fff,#f3f6ff);padding:13px 14px;position:relative;touch-action:pan-y;transition:transform .15s ease,opacity .15s ease;cursor:pointer;display:grid;gap:5px}
+.user-notification-item strong{color:var(--blue-deep);font-size:.9rem}
+.user-notification-item span{color:var(--muted);font-size:.81rem;line-height:1.35}
+.user-notification-item time{color:#665e58;font-size:.7rem}
+.user-notifications-empty{padding:18px 8px;text-align:center;color:var(--muted);font-size:.86rem}
+@media(max-width:780px){.user-profile-notifications-launcher{width:96px!important;min-width:96px!important;flex:0 0 96px!important;min-height:70px!important}.user-profile-notifications-launcher .user-tool-icon{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important}.user-profile-notifications-launcher .user-tool-title-one-line{font-size:.45rem!important}}

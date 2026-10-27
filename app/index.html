@@ -281,11 +281,16 @@
             <div class="user-profile-head">
               <div class="user-avatar-mark"><img id="userProfileAvatar" alt="Avatar del perfil" hidden /><span id="userProfileAvatarFallback" aria-hidden="true">●</span></div>
               <div class="user-profile-copy"><span class="eyebrow" id="userProfileRole">USER</span><h3 id="userProfileName">Músic</h3><p id="userProfileEmail"></p></div>
-              <button id="openNotificationsHubBtn" class="user-tool-tile user-profile-notifications-launcher" type="button" aria-expanded="false" aria-controls="pushSetupBox">
+              <button id="openNotificationsHubBtn" class="user-tool-tile user-profile-notifications-launcher" type="button" aria-expanded="false" aria-controls="userNotificationsPanel">
                 <span class="user-tool-icon user-tool-icon-image" aria-hidden="true"><img src="../assets/user-icons/user-notificacions.png" alt="" loading="lazy" decoding="async"></span>
                 <span class="user-tool-title user-tool-title-one-line">NOTIFICACIONS</span>
               </button>
             </div>
+            <section id="userNotificationsPanel" class="user-notifications-panel" hidden aria-label="Centre de notificacions">
+              <div class="user-notifications-head"><div><span class="eyebrow">MISSATGES REBUTS</span><h3>NOTIFICACIONS</h3></div><button id="closeUserNotificationsBtn" type="button" class="user-options-close" aria-label="Tancar notificacions">×</button></div>
+              <p class="user-notifications-hint">Toca una notificació per obrir-ne el contingut i retirar-la de la llista. Llisca cap a un costat per eliminar-la.</p>
+              <div id="userNotificationsList" class="user-notifications-list" aria-live="polite"><p>Carregant notificacions…</p></div>
+            </section>
             <section id="pushSetupBox" class="user-settings-box" hidden style="padding:16px;margin:14px 0;display:none;gap:10px" aria-label="Notificacions">
               <strong>🔔 NOTIFICACIONS</strong>
               <p style="margin:0;font-size:13px">Rebràs avisos d'assaigs, concerts, canvis i recordatoris quan autoritzis les notificacions del dispositiu.</p>
@@ -628,7 +633,8 @@
   <script src="supabase-client.js?v=0.117"></script>
   <script src="metronome.js?v=0.111"></script>
   <script src="tuner.js?v=0.111"></script>
-  <script src="app.js?v=0.128"></script>
-  <script src="push-client.js?v=0.138"></script>
+  <script src="app.js?v=0.142"></script>
+  <script src="push-client.js?v=0.142"></script>
+<script src="../notifications-inbox.js?v=0.142"></script>
 </body>
 </html>
