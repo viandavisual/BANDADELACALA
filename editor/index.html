@@ -108,13 +108,27 @@
       </section>
 
       <section class="editor-view" data-editor-view="notifications">
-        <div class="editor-card form-card" style="max-width:720px">
-          <div class="card-head"><div><span class="eyebrow">PROVA PUSH REMOTA</span><h2>NOTIFICACIONS</h2></div></div>
-          <p class="helper-copy">Primera prova: envia una notificació PUSH només als dispositius registrats del teu usuari. No s'enviarà a la resta de músics.</p>
+        <div class="editor-card form-card" style="max-width:800px;margin-bottom:20px">
+          <div class="card-head"><div><span class="eyebrow">CALENDARI · 24 H / 9 H</span><h2>PROPERS AVISOS AUTOMÀTICS</h2></div><button type="button" class="ghost-btn" id="pushRefreshUpcoming">ACTUALITZAR</button></div>
+          <p class="helper-copy">Els cinc pròxims esdeveniments amb recordatoris pendents. La programació requereix activar el treball automàtic al servidor.</p>
+          <div id="pushUpcoming" aria-live="polite">Carregant...</div>
+        </div>
+        <div class="editor-card form-card" style="max-width:800px;margin-bottom:20px">
+          <div class="card-head"><div><span class="eyebrow">ENVIAMENT A TOTHOM</span><h2>NOTIFICACIÓ PERSONALITZADA</h2></div></div>
+          <p class="helper-copy">Envia ara un comunicat a tots els dispositius subscrits dels usuaris registrats. Requereix confirmació.</p>
+          <form id="broadcastPushForm">
+            <label>TÍTOL<input id="broadcastPushTitle" maxlength="120" required placeholder="Títol de l'avís"></label>
+            <label>MISSATGE<textarea id="broadcastPushBody" maxlength="300" rows="3" required placeholder="Escriu el missatge"></textarea></label>
+            <p class="helper-copy">DESTINATARIS: TOTS ELS USUARIS REGISTRATS AMB PUSH ACTIVAT · +INFO obre l'APP.</p>
+            <div class="form-actions"><button class="primary-btn" id="broadcastPushSend" type="submit">ENVIAR A TOTHOM</button></div>
+            <small id="broadcastPushStatus" role="status" aria-live="polite"></small>
+          </form>
+        </div>
+        <div class="editor-card form-card" style="max-width:800px">
+          <div class="card-head"><div><span class="eyebrow">NOMÉS ELS MEUS DISPOSITIUS</span><h2>PROVA DE NOTIFICACIONS</h2></div></div>
           <form id="manualPushForm">
-            <label>TÍTOL<input id="manualPushTitle" maxlength="120" required value="🎼 BANDA DE LA CALA · PROVA" /></label>
+            <label>TÍTOL<input id="manualPushTitle" maxlength="120" required value="🎼 BANDA DE LA CALA · PROVA"></label>
             <label>MISSATGE<textarea id="manualPushBody" maxlength="300" rows="3" required>Aquesta és una prova de notificació enviada des de l'EDITOR.</textarea></label>
-            <p class="helper-copy">DESTINATARIS: ELS MEUS DISPOSITIUS · En tocar l'avís, s'obrirà l'APP (+INFO).</p>
             <div class="form-actions"><button class="primary-btn" id="manualPushSend" type="submit">ENVIAR PROVA PUSH</button></div>
             <small id="manualPushStatus" role="status" aria-live="polite"></small>
           </form>
@@ -450,6 +464,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-client.js?v=0.111"></script>
   <script src="editor.js?v=0.135"></script>
-  <script src="editor-push.js?v=0.137"></script>
+  <script src="editor-push.js?v=0.139"></script>
 </body>
 </html>

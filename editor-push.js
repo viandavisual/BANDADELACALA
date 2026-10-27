@@ -1,28 +1,13 @@
-/* v0.137 · Prova PUSH remota exclusivament als dispositius de l'usuari emissor. */
+/* BANDA DE LA CALA v0.139 — 3 caixes de notificacions */
 (()=>{'use strict';
-const form=document.getElementById('manualPushForm');if(!form)return;
-form.addEventListener('submit',async event=>{
-  event.preventDefault();
-  const status=document.getElementById('manualPushStatus'),send=document.getElementById('manualPushSend');
-  const title=document.getElementById('manualPushTitle').value.trim(),body=document.getElementById('manualPushBody').value.trim();
-  if(!title||!body)return;
-  if(!window.confirm('Enviar una notificació PUSH real als dispositius del teu usuari?'))return;
-  send.disabled=true;status.textContent='Enviant…';
-  try{
-    const client=window.BandaSupabase?.getClient?.();if(!client)throw new Error('Supabase no disponible');
-    const {data:{session},error:authError}=await client.auth.getSession();
-    if(authError||!session)throw new Error('Cal iniciar sessió.');
-    const endpoint=String(window.BANDA_CONFIG?.supabase?.url||'').replace(/\/$/,'')+'/functions/v1/send-push-notification';
-    let res;
-    try {
-      res=await fetch(endpoint,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':window.BANDA_CONFIG.supabase.publishableKey},body:JSON.stringify({mode:'self',title,body,url:'/app/'})});
-    } catch (networkError) {
-      throw new Error('Connexió bloquejada (CORS o xarxa). Comprova que send-push-notification està desplegada i té Verify JWT desactivat; la funció valida l’usuari i el rol internament.');
-    }
-    const response=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(response.error||('HTTP '+res.status));
-    status.textContent=`Resultat: ${response.sent||0} enviades, ${response.failed||0} fallides, ${response.total||0} dispositius.`;
-  }catch(error){status.textContent='No s’ha pogut enviar: '+error.message;}
-  finally{send.disabled=false;}
-});
+const $=id=>document.getElementById(id);
+const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function session(){const c=window.BandaSupabase?.getClient?.();if(!c)throw Error('Supabase no disponible');const {data:{session},error}=await c.auth.getSession();if(error||!session)throw Error('Cal iniciar sessió');return session;}
+async function call(mode,title,body){const s=await session();const url=String(window.BANDA_CONFIG?.supabase?.url||'').replace(/\/$/,'')+'/functions/v1/send-push-notification';let r;try{r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':window.BANDA_CONFIG.supabase.publishableKey},body:JSON.stringify({mode,title,body})});}catch(e){throw Error('Error de connexió: '+e.message)}const output=await r.json().catch(()=>({}));if(!r.ok)throw Error(output.error||('HTTP '+r.status));return output;}
+function setup(formId,titleId,bodyId,buttonId,statusId,mode){const f=$(formId);if(!f)return;f.addEventListener('submit',async e=>{e.preventDefault();const title=$(titleId).value.trim(),body=$(bodyId).value.trim();if(!title||!body)return;const ask=mode==='broadcast'?'ATENCIÓ: enviar ara aquesta notificació a TOTS els dispositius subscrits? Aquesta acció no es pot desfer.':'Enviar la prova només als teus dispositius?';if(!confirm(ask))return;const btn=$(buttonId),stat=$(statusId);btn.disabled=true;stat.textContent='Enviant...';try{const r=await call(mode,title,body);stat.textContent=`Resultat: ${r.sent||0} enviades, ${r.failed||0} fallides, ${r.total||0} dispositius.`;}catch(err){stat.textContent='No s’ha pogut enviar: '+err.message}finally{btn.disabled=false}});}
+setup('manualPushForm','manualPushTitle','manualPushBody','manualPushSend','manualPushStatus','self');
+setup('broadcastPushForm','broadcastPushTitle','broadcastPushBody','broadcastPushSend','broadcastPushStatus','broadcast');
+function timeMadrid(date,time){const raw=String(date||'')+'T'+String(time||'00:00');if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(raw))return NaN;const guess=Date.parse(raw+':00Z');if(!Number.isFinite(guess))return NaN;let instant=guess;for(let i=0;i<3;i++){const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(instant));const m=Object.fromEntries(parts.map(p=>[p.type,p.value]));const observed=Date.UTC(+m.year,+m.month-1,+m.day,+m.hour,+m.minute);instant+=guess-observed;}return instant;}
+function renderUpcoming(){const host=$('pushUpcoming');if(!host)return;let events=[];try{const c=window.BandaStore?.loadRemoteCache?.()||window.BandaStore?.loadPublished?.();events=Array.isArray(c?.events)?c.events:[]}catch(e){}const now=Date.now();const listed=events.map(e=>({...e,at:timeMadrid(e.date,e.time)})).filter(e=>Number.isFinite(e.at)&&e.at>now&&e.at-9*3600000>now).sort((a,b)=>a.at-b.at).slice(0,5);host.innerHTML=listed.length?listed.map(e=>`<div style="padding:12px 0;border-bottom:1px solid rgba(150,150,150,.2)"><strong>${escape(e.title||'Esdeveniment')}</strong><div class="helper-copy">${escape(e.type||'')} · ${escape(e.date||'')} ${escape(e.time||'')}</div><small>Recordatori 24 h: ${new Date(e.at-86400000)>new Date()?new Date(e.at-86400000).toLocaleString('ca-ES',{timeZone:'Europe/Madrid'}):'Ja ha passat'} · Recordatori 9 h: ${new Date(e.at-32400000).toLocaleString('ca-ES',{timeZone:'Europe/Madrid'})}</small></div>`).join(''):'<p class="helper-copy">No hi ha esdeveniments amb avisos pendents.</p>';}
+$('pushRefreshUpcoming')?.addEventListener('click',renderUpcoming);document.querySelector('[data-editor-nav="notifications"]')?.addEventListener('click',()=>setTimeout(renderUpcoming,50));renderUpcoming();
 })();
