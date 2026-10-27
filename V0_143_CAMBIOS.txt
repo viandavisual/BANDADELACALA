@@ -1,0 +1,7 @@
+BANDA DE LA CALA v0.143
+- Botó NOTIFICACIONS separat de la capçalera, situat just damunt de DEMOS PROPER CONCERT.
+- Notificació del sistema obre USER/NOTIFICACIONS sense eliminar el missatge de la bústia.
+- Des de la bústia, tocar un missatge el marca com a llegit i obre el seu destí; swipe el descarta.
+- Recordatoris de calendaris inclouen eventId/eventDate al payload per obrir calendari a la data corresponent.
+- Navegació per query view=calendar&date=YYYY-MM-DD&event=ID; se salta la introducció en navegació interna si la APP la gestionava.
+- Requereix desplegar de nou send-push-notification/index.ts a Supabase.

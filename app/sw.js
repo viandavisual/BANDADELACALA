@@ -1,5 +1,5 @@
 // BANDA DE LA CALA · APP v0.138 · scope /app/
-const CACHE='banda-de-la-cala-app-v0.142';
+const CACHE='banda-de-la-cala-app-v0.143';
 const PREFIX='banda-de-la-cala-app-';
 const CORE=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/icon-180.png','../version.js','../style.css','../tuner.css','../tuner.js','../metronome.css','../metronome.js','../app.js','../notifications-inbox.js','../config.js','../content-store.js','../supabase-client.js','../data/content-published.js','../assets/brand/logo-banda-de-la-cala.png','../assets/brand/imago-banda-de-la-cala.png','../assets/brand/app-icon.png','../assets/bandalogo.jpg','../assets/user-icons/user-partitures.png','../assets/user-icons/user-afinador.png','../assets/user-icons/user-metronom.png','../assets/user-icons/user-demos.png','../assets/user-icons/user-pujar-fato.png','../assets/user-icons/user-opcions.png','../assets/user-icons/user-bustia.png','../assets/user-icons/user-notificacions.png','./minigames/quina-nota-es/app.html'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>Promise.allSettled(CORE.map(url=>cache.add(url)))).then(()=>self.skipWaiting()))});
@@ -27,7 +27,7 @@ self.addEventListener('push', event => {
     const target = new URL(data.url || '/app/', self.location.origin);
     if (target.origin !== self.location.origin || !target.pathname.startsWith('/app/')) target.href = self.location.origin + '/app/';
     const messageId=String(data.tag||'banda-push')+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
-    try {await inboxPut({id:messageId,title,body:String(data.body||'').slice(0,350),url:target.href,timestamp:Date.now()});} catch(e) {console.warn('INBOX_WRITE_ERROR',e);}
+    try {await inboxPut({id:messageId,title,body:String(data.body||'').slice(0,350),url:target.href,eventId:String(data.eventId||''),eventDate:String(data.eventDate||''),timestamp:Date.now()});} catch(e) {console.warn('INBOX_WRITE_ERROR',e);}
     const active=await self.clients.matchAll({type:'window',includeUncontrolled:true});active.forEach(client=>client.postMessage({type:'BANDA_PUSH_RECEIVED'}));
     await self.registration.showNotification(title, {
       body: String(data.body || '').slice(0,350),
@@ -41,11 +41,15 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil((async () => {
-    await inboxDelete(event.notification.data?.inboxId).catch(()=>{});
-    const target = event.notification.data?.url || self.location.origin + '/app/';
-    const clientsList = await self.clients.matchAll({type:'window', includeUncontrolled:true});
-    for (const client of clientsList) {
-      if (client.url === target && 'focus' in client) return client.focus();
+    // Només obre la bústia. No marca com a llegit ni esborra el missatge.
+    const target=self.location.origin+'/app/?view=user&inbox=1';
+    const clientsList=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    for(const client of clientsList){
+      if(new URL(client.url).origin===self.location.origin && new URL(client.url).pathname.startsWith('/app/') && 'focus' in client){
+        await client.focus();
+        client.postMessage({type:'BANDA_OPEN_INBOX'});
+        return;
+      }
     }
     return self.clients.openWindow(target);
   })());

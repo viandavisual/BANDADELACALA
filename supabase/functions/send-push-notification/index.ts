@@ -18,8 +18,8 @@ function parseMadrid(date:string,time:string){
  }
  return result;
 }
-async function deliver(client:ReturnType<typeof admin>,subs:Array<{id:string;user_id:string;endpoint:string;p256dh:string;auth:string}>,title:string,body:string,tag:string){
- const payload=JSON.stringify({title,body,url:'/app/',tag});let sent=0,failed=0;
+async function deliver(client:ReturnType<typeof admin>,subs:Array<{id:string;user_id:string;endpoint:string;p256dh:string;auth:string}>,title:string,body:string,tag:string,extra:Record<string,string>={}){
+ const payload=JSON.stringify({title,body,url:'/app/',tag,...extra});let sent=0,failed=0;
  // Sequential delivery avoids excessive simultaneous outgoing connections.
  for(const sub of subs){try{
   await webpush.sendNotification({endpoint:sub.endpoint,keys:{p256dh:sub.p256dh,auth:sub.auth}},payload,{TTL:3600});sent++;
@@ -74,7 +74,7 @@ Deno.serve(async req=>{
      due++;
      const title=hours===24?'🎼 Recordatori: demà':'🎼 Recordatori: avui';
      const body=`${String(e.title||'Esdeveniment').slice(0,120)} · ${e.time} h · ${String(e.place||'').slice(0,90)}`;
-     const outcome=await deliver(a,allSubs,title,body,'banda-'+jobKey);sent+=outcome.sent;failed+=outcome.failed;
+     const outcome=await deliver(a,allSubs,title,body,'banda-'+jobKey,{eventId,eventDate:String(e.date)});sent+=outcome.sent;failed+=outcome.failed;
      await a.from('push_reminder_deliveries').update({status:outcome.failed?'partial':'sent',sent_count:outcome.sent,failed_count:outcome.failed,finished_at:new Date().toISOString()}).eq('job_key',jobKey);
     }
    }

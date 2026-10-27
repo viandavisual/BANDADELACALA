@@ -281,10 +281,6 @@
             <div class="user-profile-head">
               <div class="user-avatar-mark"><img id="userProfileAvatar" alt="Avatar del perfil" hidden /><span id="userProfileAvatarFallback" aria-hidden="true">●</span></div>
               <div class="user-profile-copy"><span class="eyebrow" id="userProfileRole">USER</span><h3 id="userProfileName">Músic</h3><p id="userProfileEmail"></p></div>
-              <button id="openNotificationsHubBtn" class="user-tool-tile user-profile-notifications-launcher" type="button" aria-expanded="false" aria-controls="userNotificationsPanel">
-                <span class="user-tool-icon user-tool-icon-image" aria-hidden="true"><img src="../assets/user-icons/user-notificacions.png" alt="" loading="lazy" decoding="async"></span>
-                <span class="user-tool-title user-tool-title-one-line">NOTIFICACIONS</span>
-              </button>
             </div>
             <section id="userNotificationsPanel" class="user-notifications-panel" hidden aria-label="Centre de notificacions">
               <div class="user-notifications-head"><div><span class="eyebrow">MISSATGES REBUTS</span><h3>NOTIFICACIONS</h3></div><button id="closeUserNotificationsBtn" type="button" class="user-options-close" aria-label="Tancar notificacions">×</button></div>
@@ -301,6 +297,13 @@
             </section>
 
             <div id="passwordSetupNotice" class="password-setup-notice" hidden><strong>COMPTE NOU</strong><span>Per completar l’alta, tria ara la contrasenya privada que vulguis utilitzar. Aquesta contrasenya només la coneixeràs tu.</span></div>
+
+            <div class="user-notifications-launch-row">
+              <button id="openNotificationsHubBtn" class="user-tool-tile user-profile-notifications-launcher" type="button" aria-expanded="false" aria-controls="userNotificationsPanel">
+                <span class="user-tool-icon user-tool-icon-image" aria-hidden="true"><img src="../assets/user-icons/user-notificacions.png" alt="" loading="lazy" decoding="async"></span>
+                <span class="user-tool-title user-tool-title-one-line">NOTIFICACIONS</span>
+              </button>
+            </div>
 
             <details id="userDemosBox" class="user-settings-box user-demos-box">
               <summary>
@@ -633,8 +636,8 @@
   <script src="supabase-client.js?v=0.117"></script>
   <script src="metronome.js?v=0.111"></script>
   <script src="tuner.js?v=0.111"></script>
-  <script src="app.js?v=0.142"></script>
-  <script src="push-client.js?v=0.142"></script>
-<script src="../notifications-inbox.js?v=0.142"></script>
+  <script src="app.js?v=0.143"></script>
+  <script src="push-client.js?v=0.143"></script>
+<script src="../notifications-inbox.js?v=0.143"></script>
 </body>
 </html>

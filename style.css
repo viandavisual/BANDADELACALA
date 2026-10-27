@@ -3225,3 +3225,12 @@ body.demo-video-open{overflow:hidden}
 .user-notification-item time{color:#665e58;font-size:.7rem}
 .user-notifications-empty{padding:18px 8px;text-align:center;color:var(--muted);font-size:.86rem}
 @media(max-width:780px){.user-profile-notifications-launcher{width:96px!important;min-width:96px!important;flex:0 0 96px!important;min-height:70px!important}.user-profile-notifications-launcher .user-tool-icon{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important}.user-profile-notifications-launcher .user-tool-title-one-line{font-size:.45rem!important}}
+
+/* v0.143 · NOTIFICACIONS com a targeta pròpia, abans de DEMOS. */
+.user-notifications-launch-row{display:flex;justify-content:flex-start;margin-top:14px}
+.user-notifications-launch-row .user-profile-notifications-launcher{margin:0!important;align-self:auto!important;width:105px!important;min-width:105px!important;min-height:75px!important;padding:8px 5px!important;gap:5px!important}
+.user-notifications-launch-row .user-profile-notifications-launcher .user-tool-icon{width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important}
+.user-notifications-launch-row .user-profile-notifications-launcher .user-tool-title-one-line{font-size:.405rem!important;letter-spacing:0!important;white-space:nowrap!important;overflow-wrap:normal!important}
+@media(max-width:780px){.user-notifications-launch-row .user-profile-notifications-launcher{width:84px!important;min-width:84px!important;min-height:62px!important}.user-notifications-launch-row .user-profile-notifications-launcher .user-tool-icon{width:27px!important;height:27px!important;min-width:27px!important;min-height:27px!important}.user-notifications-launch-row .user-profile-notifications-launcher .user-tool-title-one-line{font-size:.36rem!important}}
+
+.event-card.notification-destination{outline:3px solid #d8aa47;outline-offset:3px;scroll-margin-top:125px}

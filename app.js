@@ -693,7 +693,7 @@ function selectDate(date){
     const type=String(event.type||'').toUpperCase();
     const eventKind=['CONCERT','ACTUACIÓ'].includes(type)?'featured':(type==='ALTRES'?'other':'rehearsal');
     const isPast=calendarEventHasPassed(event,new Date());
-    return `<article class="event-card event-kind-${eventKind}${isPast?' is-past':''}"><span class="event-type">${esc(event.type)}</span><h4>${esc(String(event.title||'').toUpperCase())}</h4>${event.time?`<p class="event-meta-line">${eventMetaIcon('time')}<span>${esc(event.time)}</span></p>`:''}${event.place?`<p class="event-meta-line">${eventMetaIcon('place')}<span>${esc(event.place)}</span></p>`:''}${event.notes?`<p class="preserve-lines">${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
+    return `<article data-event-id="${esc(String(event.id||''))}" class="event-card event-kind-${eventKind}${isPast?' is-past':''}"><span class="event-type">${esc(event.type)}</span><h4>${esc(String(event.title||'').toUpperCase())}</h4>${event.time?`<p class="event-meta-line">${eventMetaIcon('time')}<span>${esc(event.time)}</span></p>`:''}${event.place?`<p class="event-meta-line">${eventMetaIcon('place')}<span>${esc(event.place)}</span></p>`:''}${event.notes?`<p class="preserve-lines">${esc(event.notes)}</p>`:''}${dresscode?`<button class="dresscode-btn" data-dresscode="${esc(dresscode.id)}">${dresscodeClothesIcon()}<span>VEURE DRESSCODE</span></button>`:''}</article>`;
   }).join('') : '<p class="empty-copy">No hi ha cap activitat prevista per aquest dia.</p>';
   $$('[data-dresscode]').forEach(btn=>btn.addEventListener('click',()=>openDresscode(btn.dataset.dresscode)));
 }
@@ -2779,7 +2779,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.110',root).href;
+    const swUrl=new URL('app/sw.js?v=0.143',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
@@ -2826,8 +2826,27 @@ async function init(){
   registerSW();
   await initAppAuth();
   const requestedView=new URLSearchParams(location.search).get('view');
+  if(requestedView==='user'||requestedView==='calendar')showApp();
   renderNavigation(); renderHome(); renderUserSection();
-  if(requestedView==='user'){ state.currentView='home'; switchView('user',false); }
+  if(requestedView==='user'){
+    state.currentView='home';switchView('user',false);
+    if(new URLSearchParams(location.search).get('inbox')==='1'){
+      const inbox=$('#userNotificationsPanel');if(inbox){$('#openNotificationsHubBtn')?.click();}
+    }
+  }
+  if(requestedView==='calendar'){
+    state.currentView='home';switchView('calendar',false);
+    const params=new URLSearchParams(location.search);const date=params.get('date');
+    if(date && /^\d{4}-\d{2}-\d{2}$/.test(date)){
+      const d=new Date(date+'T12:00:00');if(!Number.isNaN(d.getTime())){
+        state.calendarDate=new Date(d.getFullYear(),d.getMonth(),1);
+        selectDate(date);
+        const id=params.get('event');
+        if(id){const card=$$('#eventList .event-card').find(el=>el.dataset.eventId===id);if(card){card.classList.add('notification-destination');setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'center'}),250)}}
+        else setTimeout(()=>$('#eventList')?.scrollIntoView({behavior:'smooth',block:'center'}),250);
+      }
+    }
+  }
   if(passwordRecoveryRequested() && state.authenticated){
     const details=$('#passwordDetails');
     if(details) details.open=true;
@@ -2840,6 +2859,7 @@ async function init(){
     if(status) status.textContent='Has accedit des de l’enllaç de recuperació.';
     setTimeout(()=>$('#newUserPassword')?.focus(),100);
   }
+  navigator.serviceWorker?.addEventListener('message',event=>{if(event.data?.type==='BANDA_OPEN_INBOX'){showApp();switchView('user',false);}});
   const backBtn = $('#backBtn');
   if(backBtn) backBtn.onclick = goBack;
 }
