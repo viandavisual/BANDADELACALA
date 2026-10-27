@@ -1,0 +1,10 @@
+BANDA DE LA CALA v0.138 — Persistència de la caixa NOTIFICACIONS
+
+- La caixa comença oculta al propi HTML per evitar que aparegui breument en obrir USER.
+- Es respecta la preferència persistent de tancament per usuari/dispositiu; no es borra per problemes de xarxa, sessió temporal o renovació PUSH.
+- Si l’usuari ja disposa de subscripció Web Push, es considera completada la configuració sense obligar-lo a tancar una altra vegada.
+- La renovació i sincronització s'executen en segon pla i no manipulen la visibilitat.
+- La caixa pot reaparèixer si el permís és explícitament denegat.
+- No s'han modificat el PLAYER, INSTALL, les APK ni les Edge Functions.
+
+PROVA: Entrar a USER, activar i tancar si s'escau, sortir completament de la PWA i tornar a USER. La caixa no ha d'aparèixer ni un instant.

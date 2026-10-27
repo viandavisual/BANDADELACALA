@@ -1,4 +1,4 @@
-/* BANDA DE LA CALA v0.137 · APP Web Push. No inicia permisos sense un gest. */
+/* BANDA DE LA CALA v0.138 · APP Web Push. No inicia permisos sense un gest. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -7,14 +7,25 @@
   const button = () => $('pushEnableButton');
   const trial = () => $('pushTestButton');
   const closeBtn = () => $('pushCloseButton');
-  const visibilityKey = userId => 'banda-push-closed-v0135:'+userId;
+  // La decisió de tancar la caixa és independent de la sincronització PUSH.
+  const visibilityKey = userId => 'banda-push-closed-v0135:'+userId; // Compatible amb les versions anteriors.
   let activeUserId = null;
+  const box = () => $('pushSetupBox');
+  const closed = userId => {
+    try { return localStorage.getItem(visibilityKey(userId)) === 'yes'; }
+    catch (_) { return false; }
+  };
+  const rememberClosed = userId => {
+    try { localStorage.setItem(visibilityKey(userId), 'yes'); } catch (_) {}
+  };
+  const showBox = () => { if(box()) { box().hidden=false; box().style.display='grid'; } };
+  const hideBox = () => { if(box()) { box().hidden=true; box().style.display='none'; } };
   const activatedUI = isActive => {
-    button().hidden = !!isActive;
-    if (closeBtn()) closeBtn().hidden = !isActive;
-    if (trial()) trial().hidden = !isActive;
-    const box=$('pushSetupBox');
-    if(box) box.style.display=(isActive && activeUserId && localStorage.getItem(visibilityKey(activeUserId))==='yes')?'none':'grid';
+    if(button()) button().hidden = !!isActive;
+    if(closeBtn()) closeBtn().hidden = !isActive;
+    if(trial()) trial().hidden = !isActive;
+    if(activeUserId && closed(activeUserId)) hideBox();
+    else showBox();
   };
   const supported = () => ('serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && window.isSecureContext);
   const key = String(window.BANDA_CONFIG?.push?.vapidPublicKey || '').trim();
@@ -45,72 +56,60 @@
     },{onConflict:'endpoint'});
     if(error) throw error;
   }
-  // El tancament és una preferència local per usuari i dispositiu.
-  // La sincronització remota mai no ha de reobrir la caixa per un error temporal.
+  // Només la comprovació explícita dels permisos pot obrir una caixa ja tancada.
+  // Ni els errors de xarxa, ni el canvi de sessió, ni l'absència temporal de
+  // subscripció revoquen la preferència de l'usuari.
   async function refresh() {
-    const box=$('pushSetupBox'); if(!box || box.closest('[hidden]')) return;
-    if(!supported()){
-      box.style.display='grid';
-      say('Aquest navegador no admet notificacions PUSH. Pots seguir utilitzant l’APP.');
-      button().hidden=true; return;
-    }
+    if(!box() || box().closest('#userProfileCard[hidden]')) return;
+    hideBox(); // Evita qualsevol flaix visual mentre comprovem la sessió.
     const user=await sessionUser();
-    if(!user){
-      activeUserId=null; box.style.display='grid';
-      say('Inicia sessió per activar els avisos.');
-      button().hidden=true; trial().hidden=true; closeBtn().hidden=true; return;
-    }
+    if(!user) { activeUserId=null; return; }
     activeUserId=user.id;
-    const dismissed=localStorage.getItem(visibilityKey(user.id))==='yes';
+    const wasClosed=closed(user.id);
+    if(!supported()) {
+      if(!wasClosed) { showBox(); say('Aquest navegador no admet notificacions PUSH. Pots seguir utilitzant l’APP.');button().hidden=true;trial().hidden=true;closeBtn().hidden=true; }
+      return;
+    }
     const permission=Notification.permission;
-    if(permission==='denied'){
-      localStorage.removeItem(visibilityKey(user.id));
-      box.style.display='grid';
-      say('Notificacions bloquejades. Activa-les des dels ajustos del navegador o dispositiu.');
+    if(permission==='denied') {
+      // Denegació explícita: cal avisar perquè no podem lliurar PUSH.
+      showBox(); say('Notificacions bloquejades. Activa-les des dels ajustos del navegador o dispositiu.');
       button().hidden=true;trial().hidden=true;closeBtn().hidden=true;return;
     }
-    if(permission!=='granted'){
-      localStorage.removeItem(visibilityKey(user.id));
-      say('Pendent d’autoritzar al dispositiu.');
-      button().textContent='ACTIVAR NOTIFICACIONS'; activatedUI(false); return;
-    }
-    // Amagar immediatament una caixa ja tancada sense esperar la xarxa.
-    if(dismissed) box.style.display='none';
-    button().textContent='REGISTRAR DISPOSITIU';
-    if(!key){
-      // Un canvi de configuració no anul·la el permís concedit ni el tancament.
-      if(!dismissed){activatedUI(false);say('Permís concedit. Falta configurar la clau pública VAPID per activar els avisos remots.');}
+    if(wasClosed) {
+      hideBox();
+      if(permission==='granted' && key) {
+        // Renovació opcional sense alterar la interfície.
+        try {
+          const reg=await registration();
+          let sub=await reg.pushManager.getSubscription();
+          if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(key)});
+          await syncSubscription(sub,user);
+        } catch(err) { console.warn('PUSH_BACKGROUND_SYNC_RETRY',err?.message||err); }
+      }
       return;
+    }
+    if(permission!=='granted') {
+      button().textContent='ACTIVAR NOTIFICACIONS';
+      say('Pendent d’autoritzar al dispositiu.');activatedUI(false);return;
+    }
+    if(!key) {
+      button().textContent='REGISTRAR DISPOSITIU';
+      say('Permís concedit. Falta configurar la clau pública VAPID per activar els avisos remots.');activatedUI(false);return;
     }
     try {
       const reg=await registration();
-      const sub=await reg.pushManager.getSubscription();
-      if(!sub){
-        // La baixa d'una subscripció antiga no ha de reobrir el formulari.
-        // Amb permís concedit, intentem renovar-la silenciosament.
-        try {
-          const renewed=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(key)});
-          await syncSubscription(renewed,user);
-          localStorage.setItem(visibilityKey(user.id),'yes');
-          say('Notificacions PUSH activades en aquest dispositiu.');
-          activatedUI(true);
-        } catch (renewError) {
-          console.warn('PUSH_SILENT_RENEW_PENDING',renewError?.message||renewError);
-          if(!dismissed){
-            say('Prem REGISTRAR DISPOSITIU per completar les notificacions.');
-            activatedUI(false);
-          }
-        }
-        return;
-      }
-      // La subscripció del navegador segueix vigent. Sincronització best-effort.
-      say('Notificacions PUSH activades en aquest dispositiu.');
-      activatedUI(true);
+      let sub=await reg.pushManager.getSubscription();
+      if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(key)});
       try { await syncSubscription(sub,user); }
-      catch(err){ console.warn('PUSH_SYNC_RETRY_LATER',err?.message||err); }
+      catch(err) { console.warn('PUSH_SYNC_RETRY_LATER',err?.message||err); }
+      // Una subscripció funcional ja existia. No cal mostrar una caixa d'alta.
+      rememberClosed(user.id);
+      say('Notificacions PUSH activades en aquest dispositiu.');
+      hideBox();
     } catch(err) {
-      if(!dismissed){activatedUI(false);say('No s’ha pogut comprovar el dispositiu: '+err.message);}
-      else console.warn('PUSH_CHECK_RETRY_LATER',err?.message||err);
+      button().textContent='REGISTRAR DISPOSITIU';activatedUI(false);
+      say('No s’ha pogut comprovar el dispositiu: '+(err?.message||err));
     }
   }
   async function activate() {
@@ -125,7 +124,6 @@
       if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(key)});
       await syncSubscription(sub,user);
       activeUserId=user.id;
-      localStorage.setItem(visibilityKey(user.id),'yes');
       say('Notificacions PUSH activades en aquest dispositiu.');
       activatedUI(true);
     } catch(err){say('No s’ha pogut activar: '+err.message);}
@@ -148,12 +146,13 @@
     trial()?.addEventListener('click',test);
     closeBtn()?.addEventListener('click',()=>{
       if(activeUserId && button()?.hidden){
-        localStorage.setItem(visibilityKey(activeUserId),'yes');
-        $('pushSetupBox').style.display='none';
+        rememberClosed(activeUserId);
+        hideBox();
       }
     });
-    const box=$('pushSetupBox');
-    if(box && 'MutationObserver' in window){new MutationObserver(()=>{if(!box.closest('[hidden]'))refresh();}).observe($('userProfileCard'),{attributes:true,attributeFilter:['hidden']});}
+    hideBox();
+    const profile=$('userProfileCard');
+    if(profile && 'MutationObserver' in window){new MutationObserver(()=>{if(!profile.hidden)refresh();}).observe(profile,{attributes:true,attributeFilter:['hidden']});}
     refresh();
   });
 })();
