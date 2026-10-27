@@ -18,8 +18,9 @@
   const rememberClosed = userId => {
     try { localStorage.setItem(visibilityKey(userId), 'yes'); } catch (_) {}
   };
-  const showBox = () => { if(box()) { box().hidden=false; box().style.display='grid'; } };
-  const hideBox = () => { if(box()) { box().hidden=true; box().style.display='none'; } };
+  const launcher = () => $('openNotificationsHubBtn');
+  const showBox = () => { if(box()) { box().hidden=false; box().style.display='grid'; } if(launcher()) launcher().setAttribute('aria-expanded','true'); };
+  const hideBox = () => { if(box()) { box().hidden=true; box().style.display='none'; } if(launcher()) launcher().setAttribute('aria-expanded','false'); };
   const activatedUI = isActive => {
     if(button()) button().hidden = !!isActive;
     if(closeBtn()) closeBtn().hidden = !isActive;
@@ -147,8 +148,8 @@
     closeBtn()?.addEventListener('click',()=>{
       if(activeUserId && button()?.hidden){
         rememberClosed(activeUserId);
-        hideBox();
       }
+      hideBox();
     });
     hideBox();
     const profile=$('userProfileCard');

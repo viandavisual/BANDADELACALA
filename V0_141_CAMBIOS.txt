@@ -1,0 +1,12 @@
+BANDA DE LA CALA v0.141
+
+- USER: nou botó NOTIFICACIONS integrat dins la capçalera del perfil, a la dreta del nom/avatar.
+- El nou botó reutilitza l'estil visual dels botons inferiors (PARTITURES, AFINADOR, etc.).
+- S'afegeix el nou asset corporatiu user-notificacions.png.
+- El títol NOTIFICACIONS queda forçat en una sola línia amb una escala llegible en mobile.
+- El botó obre/tanca la caixa de gestió de notificacions PUSH (pushSetupBox).
+- push-client sincronitza l'estat aria-expanded del nou botó i permet tancar manualment la caixa.
+- Service Worker: s'inclou el nou icona dins el CORE cache.
+
+Nota funcional:
+- El retard al Xiaomi fins desbloquejar la pantalla acostuma a ser comportament del sistema (estalvi de bateria / restriccions en segon pla), no del flux de notificacions de la PWA.

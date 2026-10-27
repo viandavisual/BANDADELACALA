@@ -2396,6 +2396,15 @@ function bindUserAuth(){
     $('#archiveUploadStatus').textContent='';
   });
 
+  $('#openNotificationsHubBtn')?.addEventListener('click',()=>{
+    const box=$('#pushSetupBox'), btn=$('#openNotificationsHubBtn'); if(!box) return;
+    const willOpen=box.hidden;
+    box.hidden=!willOpen;
+    box.style.display=willOpen?'grid':'none';
+    if(btn) btn.setAttribute('aria-expanded',willOpen?'true':'false');
+    if(willOpen) scrollElementBelowTopbar(box,14);
+  });
+
   $('#openUserOptionsBtn')?.addEventListener('click',()=>{
     const box=$('#userOptionsBox'), btn=$('#openUserOptionsBtn'); if(!box) return;
     closeUserRow3Panels('#userOptionsBox');
