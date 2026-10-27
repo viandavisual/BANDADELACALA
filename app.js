@@ -2779,7 +2779,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.143',root).href;
+    const swUrl=new URL('app/sw.js?v=0.144',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
@@ -2831,7 +2831,7 @@ async function init(){
   if(requestedView==='user'){
     state.currentView='home';switchView('user',false);
     if(new URLSearchParams(location.search).get('inbox')==='1'){
-      const inbox=$('#userNotificationsPanel');if(inbox){$('#openNotificationsHubBtn')?.click();}
+      const inbox=$('#userNotificationsBox');if(inbox){inbox.open=true; inbox.setAttribute('aria-expanded','true'); window.BandaNotificationsInbox?.render?.();}
     }
   }
   if(requestedView==='calendar'){
@@ -2859,7 +2859,7 @@ async function init(){
     if(status) status.textContent='Has accedit des de l’enllaç de recuperació.';
     setTimeout(()=>$('#newUserPassword')?.focus(),100);
   }
-  navigator.serviceWorker?.addEventListener('message',event=>{if(event.data?.type==='BANDA_OPEN_INBOX'){showApp();switchView('user',false);}});
+  navigator.serviceWorker?.addEventListener('message',event=>{if(event.data?.type==='BANDA_OPEN_INBOX'){showApp();switchView('user',false);window.BandaNotificationsInbox?.openInbox?.('start');}});
   const backBtn = $('#backBtn');
   if(backBtn) backBtn.onclick = goBack;
 }

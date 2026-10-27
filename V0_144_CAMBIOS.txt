@@ -1,0 +1,6 @@
+BANDA DE LA CALA v0.144
+- Caixa NOTIFICACIONS redissenyada com una caixa ampla i desplegable, situada damunt de DEMOS PROPER CONCERT.
+- Icona i títol de NOTIFICACIONS alineats com la caixa de DEMOS, amb mida visual una mica més continguda.
+- En tocar NOTIFICACIONS, la llista es desplega just a sota de la mateixa caixa, no a la part superior del perfil.
+- La bústia privada continua ordenant les notificacions de més recent a més antiga i manté swipe per eliminar.
+- Millora extra: si l’APP s’obre amb ?view=user&inbox=1, la bústia intenta obrir-se automàticament.

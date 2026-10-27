@@ -1,4 +1,4 @@
-/* v0.143 · Local inbox, registered users only, device specific. */
+/* v0.144 · Local inbox, registered users only, device specific. */
 (() => {
  'use strict';
  const $=id=>document.getElementById(id);
@@ -20,8 +20,20 @@
   };card.addEventListener('click',open);card.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();open()}});
  let startX=null,startY=null;card.addEventListener('touchstart',ev=>{startX=ev.touches[0].clientX;startY=ev.touches[0].clientY},{passive:true});card.addEventListener('touchend',async ev=>{if(startX===null)return;const dx=ev.changedTouches[0].clientX-startX,dy=ev.changedTouches[0].clientY-startY;startX=null;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.35){ev.preventDefault();card.style.transform=`translateX(${dx>0?110:-110}%)`;card.style.opacity='0';await remove(msg.id);setTimeout(render,165)}},{passive:false});list.append(card)}
  }catch(err){list.textContent='No s’ha pogut carregar l’historial d’aquest dispositiu.';console.warn('INBOX_READ_ERROR',err)}}
- document.addEventListener('DOMContentLoaded',()=>{$('openNotificationsHubBtn')?.addEventListener('click',()=>{const panel=$('userNotificationsPanel');const btn=$('openNotificationsHubBtn');if(!panel)return;panel.hidden=!panel.hidden;btn?.setAttribute('aria-expanded',panel.hidden?'false':'true');if(!panel.hidden){render();panel.scrollIntoView({behavior:'smooth',block:'nearest'})}});$('closeUserNotificationsBtn')?.addEventListener('click',()=>{$('userNotificationsPanel').hidden=true;$('openNotificationsHubBtn')?.setAttribute('aria-expanded','false')});navigator.serviceWorker?.addEventListener('message',event=>{
- if(event.data?.type==='BANDA_PUSH_RECEIVED'&&!$('userNotificationsPanel')?.hidden)render();
- if(event.data?.type==='BANDA_OPEN_INBOX'){const p=$('userNotificationsPanel');if(p){p.hidden=false;$('openNotificationsHubBtn')?.setAttribute('aria-expanded','true');render();p.scrollIntoView({behavior:'smooth',block:'start'})}}
-})});
+ function openInbox(scrollBlock='nearest'){const box=$('userNotificationsBox');if(!box)return;box.open=true;box.setAttribute('aria-expanded','true');render();box.scrollIntoView({behavior:'smooth',block:scrollBlock})}
+ function closeInbox(){const box=$('userNotificationsBox');if(!box)return;box.open=false;box.setAttribute('aria-expanded','false')}
+ document.addEventListener('DOMContentLoaded',()=>{
+   const box=$('userNotificationsBox');
+   if(box){
+     box.addEventListener('toggle',()=>{box.setAttribute('aria-expanded',box.open?'true':'false'); if(box.open) render()});
+     box.setAttribute('aria-expanded',box.open?'true':'false');
+   }
+   navigator.serviceWorker?.addEventListener('message',event=>{
+     if(event.data?.type==='BANDA_PUSH_RECEIVED'&&$('userNotificationsBox')?.open)render();
+     if(event.data?.type==='BANDA_OPEN_INBOX')openInbox('start');
+   });
+   const params=new URLSearchParams(location.search);
+   if(params.get('view')==='user'&&params.get('inbox')==='1')setTimeout(()=>openInbox('start'),350);
+ });
+ window.BandaNotificationsInbox={render,openInbox,closeInbox};
 })();

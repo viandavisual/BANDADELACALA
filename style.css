@@ -3234,3 +3234,30 @@ body.demo-video-open{overflow:hidden}
 @media(max-width:780px){.user-notifications-launch-row .user-profile-notifications-launcher{width:84px!important;min-width:84px!important;min-height:62px!important}.user-notifications-launch-row .user-profile-notifications-launcher .user-tool-icon{width:27px!important;height:27px!important;min-width:27px!important;min-height:27px!important}.user-notifications-launch-row .user-profile-notifications-launcher .user-tool-title-one-line{font-size:.36rem!important}}
 
 .event-card.notification-destination{outline:3px solid #d8aa47;outline-offset:3px;scroll-margin-top:125px}
+
+
+/* v0.144 · NOTIFICACIONS com a caixa desplegable ampla damunt de DEMOS. */
+.user-notifications-box{padding:0!important;overflow:hidden;background:linear-gradient(145deg,#fff,#f7f4ec)!important;margin-top:14px!important;margin-bottom:16px!important}
+.user-notifications-box>summary{list-style:none;position:relative;display:grid;align-items:center;min-height:72px;padding:12px 52px 12px 16px;cursor:pointer;user-select:none;text-align:left}
+.user-notifications-box>summary::-webkit-details-marker{display:none}
+.user-notifications-summary-copy{display:flex;align-items:center;justify-content:flex-start;text-align:left}
+.user-notifications-summary-copy strong{display:flex;align-items:center;gap:10px;color:var(--blue-deep);font-size:.76rem;letter-spacing:.03em;line-height:1.12}
+.user-notifications-summary-copy #userNotificationsHeading{display:inline-flex;align-items:center;justify-content:flex-start;white-space:nowrap}
+.user-notifications-box>summary .details-chevron{position:absolute;right:16px;top:50%;transform:translateY(-50%)}
+.user-notifications-box[open]>summary .details-chevron{transform:translateY(-50%) rotate(180deg)}
+.user-notifications-panel-inline{padding:0 16px 16px;border-top:1px solid var(--line)}
+.user-notifications-panel-inline[hidden]{display:none!important}
+.user-notifications-hint{font-size:.8rem;color:var(--muted);line-height:1.45;margin:12px 0 14px}
+.user-notifications-list{display:grid;gap:10px}
+.user-notification-item{border:1px solid rgba(57,58,134,.17);border-radius:15px;background:linear-gradient(135deg,#fff,#f3f6ff);padding:13px 14px;position:relative;touch-action:pan-y;transition:transform .15s ease,opacity .15s ease;cursor:pointer;display:grid;gap:5px}
+.user-notification-item strong{color:var(--blue-deep);font-size:.9rem}
+.user-notification-item span{color:var(--muted);font-size:.81rem;line-height:1.35}
+.user-notification-item time{color:#665e58;font-size:.7rem}
+.user-notifications-empty{padding:18px 8px;text-align:center;color:var(--muted);font-size:.86rem}
+@media(max-width:780px){
+  .user-notifications-box{margin-top:12px!important;margin-bottom:12px!important}
+  .user-notifications-box>summary{min-height:66px;padding:10px 44px 10px 12px}
+  .user-notifications-summary-copy strong{font-size:.68rem;gap:8px}
+  .user-notifications-summary-copy .user-demos-headphones-image{width:42px;height:42px}
+  .user-notifications-panel-inline{padding:0 12px 12px}
+}
