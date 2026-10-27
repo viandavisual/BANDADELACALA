@@ -1,1 +1,1 @@
-BANDA DE LA CALA v0.136 — PATCH desde v0.135. Corrige la persistencia del cierre de NOTIFICACIONS tras reabrir APP. No incluye ni sobrescribe config.js (conservar la clave VAPID publicada). No modifica las Edge Functions ni INSTALL.
+PATCH v0.137 des de v0.136. Copia les carpetes al repositori i respecta els fitxers ocults. NO substitueix config.js. Actualitza manualment la funció a Supabase i desactiva Verify JWT només per send-push-notification.

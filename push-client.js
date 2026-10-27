@@ -1,4 +1,4 @@
-/* BANDA DE LA CALA v0.136 · APP Web Push. No inicia permisos sense un gest. */
+/* BANDA DE LA CALA v0.137 · APP Web Push. No inicia permisos sense un gest. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
@@ -86,10 +86,21 @@
       const reg=await registration();
       const sub=await reg.pushManager.getSubscription();
       if(!sub){
-        // Només la pèrdua real de subscripció obliga a tornar a mostrar l'activació.
-        localStorage.removeItem(visibilityKey(user.id));
-        say('Permís concedit. Prem REGISTRAR DISPOSITIU per activar PUSH.');
-        activatedUI(false);
+        // La baixa d'una subscripció antiga no ha de reobrir el formulari.
+        // Amb permís concedit, intentem renovar-la silenciosament.
+        try {
+          const renewed=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(key)});
+          await syncSubscription(renewed,user);
+          localStorage.setItem(visibilityKey(user.id),'yes');
+          say('Notificacions PUSH activades en aquest dispositiu.');
+          activatedUI(true);
+        } catch (renewError) {
+          console.warn('PUSH_SILENT_RENEW_PENDING',renewError?.message||renewError);
+          if(!dismissed){
+            say('Prem REGISTRAR DISPOSITIU per completar les notificacions.');
+            activatedUI(false);
+          }
+        }
         return;
       }
       // La subscripció del navegador segueix vigent. Sincronització best-effort.
@@ -113,7 +124,10 @@
       let sub=await reg.pushManager.getSubscription();
       if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(key)});
       await syncSubscription(sub,user);
-      say('Notificacions PUSH activades en aquest dispositiu.');await refresh();
+      activeUserId=user.id;
+      localStorage.setItem(visibilityKey(user.id),'yes');
+      say('Notificacions PUSH activades en aquest dispositiu.');
+      activatedUI(true);
     } catch(err){say('No s’ha pogut activar: '+err.message);}
   }
   async function test() {

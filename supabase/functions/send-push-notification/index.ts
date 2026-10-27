@@ -1,11 +1,11 @@
-// BANDA DE LA CALA v0.135 · Push de prova a dispositius propis.
-// IMPORTANT: desplegar com a Edge Function amb Verify JWT activat.
+// BANDA DE LA CALA v0.137 · Push de prova a dispositius propis.
+// IMPORTANT: Verify JWT de plataforma DESACTIVAT; autenticació JWT i rol verificats dins la funció.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3.6.7';
-const cors={'Access-Control-Allow-Origin':'https://bandadelacala.viandavisual.com','Access-Control-Allow-Headers':'authorization, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'};
+const cors={'Access-Control-Allow-Origin':'https://bandadelacala.viandavisual.com','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info, x-supabase-api-version','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,'Content-Type':'application/json'}});
 Deno.serve(async req=>{
- if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
+ if(req.method==='OPTIONS')return new Response('ok',{status:200,headers:cors});
  if(req.method!=='POST')return json({error:'METHOD_NOT_ALLOWED'},405);
  try{
   const auth=req.headers.get('Authorization')||'';

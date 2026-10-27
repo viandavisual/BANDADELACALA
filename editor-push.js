@@ -1,4 +1,4 @@
-/* v0.135 · Prova PUSH remota exclusivament als dispositius de l'usuari emissor. */
+/* v0.137 · Prova PUSH remota exclusivament als dispositius de l'usuari emissor. */
 (()=>{'use strict';
 const form=document.getElementById('manualPushForm');if(!form)return;
 form.addEventListener('submit',async event=>{
@@ -13,7 +13,12 @@ form.addEventListener('submit',async event=>{
     const {data:{session},error:authError}=await client.auth.getSession();
     if(authError||!session)throw new Error('Cal iniciar sessió.');
     const endpoint=String(window.BANDA_CONFIG?.supabase?.url||'').replace(/\/$/,'')+'/functions/v1/send-push-notification';
-    const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':window.BANDA_CONFIG.supabase.publishableKey},body:JSON.stringify({mode:'self',title,body,url:'/app/'})});
+    let res;
+    try {
+      res=await fetch(endpoint,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':window.BANDA_CONFIG.supabase.publishableKey},body:JSON.stringify({mode:'self',title,body,url:'/app/'})});
+    } catch (networkError) {
+      throw new Error('Connexió bloquejada (CORS o xarxa). Comprova que send-push-notification està desplegada i té Verify JWT desactivat; la funció valida l’usuari i el rol internament.');
+    }
     const response=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(response.error||('HTTP '+res.status));
     status.textContent=`Resultat: ${response.sent||0} enviades, ${response.failed||0} fallides, ${response.total||0} dispositius.`;

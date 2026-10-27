@@ -1,0 +1,8 @@
+BANDA DE LA CALA v0.137 — Reparació PUSH
+
+APP: Persisteix la confirmació de PUSH en activar correctament; si una subscripció desapareix, es prova de renovar silenciosament sense reobrir la caixa quan el permís continua concedit. Torna a mostrar l'activació si mai no es va completar o es denega el permís.
+EDITOR: Missatge de diagnòstic clar quan el navegador bloqueja la connexió amb la funció.
+EDGE FUNCTION: Gestió CORS OPTIONS i capçaleres ampliades; verificació de JWT dins la funció amb auth.getUser() i comprovació de rol admin/gestor.
+IMPORTANT: A Supabase Dashboard cal desactivar Verify JWT a send-push-notification; el control d'autenticació intern es manté actiu. El fitxer supabase/config.toml documenta aquest ajust si es desplega via CLI.
+No es modifica config.js (la clau VAPID pública publicada s'ha de conservar).
+No s'envien notificacions automàtiques en aquesta versió.
