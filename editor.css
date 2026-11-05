@@ -1274,3 +1274,6 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
  #pushUpcoming .push-reminder-grid{grid-template-columns:1fr}
  #pushUpcoming .push-reminder-grid>div:first-child{grid-column:auto}
 }
+
+/* v0.145 · Segon minijoc a l'EDITOR */
+.escacs-editor-grid{margin-top:22px}

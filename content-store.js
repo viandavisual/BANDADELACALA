@@ -45,6 +45,13 @@
       icon: typeof qne.icon === 'string' ? qne.icon : '',
       titleImage: typeof qne.titleImage === 'string' ? qne.titleImage : ''
     };
+    const eab = base.settings.minigames.escacsABanda && typeof base.settings.minigames.escacsABanda === 'object' ? base.settings.minigames.escacsABanda : {};
+    base.settings.minigames.escacsABanda = {
+      active: eab.active !== false,
+      visibleName: typeof eab.visibleName === 'string' && eab.visibleName.trim() ? eab.visibleName.trim() : 'ESCACS A BANDA',
+      description: typeof eab.description === 'string' && eab.description.trim() ? eab.description.trim() : 'Escacs musicals: juga contra la CPU o amb una altra persona.',
+      icon: typeof eab.icon === 'string' ? eab.icon : ''
+    };
     base.events = Array.isArray(base.events) ? base.events.map((event,index)=>({
       id: event.id || uid(`evt${index}`),
       date: event.date || '',

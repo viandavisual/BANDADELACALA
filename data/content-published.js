@@ -5,6 +5,12 @@ window.BANDA_PUBLISHED_CONTENT = {
     homeHeroImage: "",
     homeHeroMode: "random",
     minigames: {
+      escacsABanda: {
+        active: true,
+        visibleName: "ESCACS A BANDA",
+        description: "Escacs musicals: juga contra la CPU o amb una altra persona.",
+        icon: ""
+      },
       quinaNota: {
         active: true,
         visibleName: "QUINA NOTA ÉS?",

@@ -1,0 +1,11 @@
+BANDA DE LA CALA v0.145 — ESCACS A BANDA
+
+- APP: nova targeta ESCACS A BANDA a MINIJOCS, independent de QUINA NOTA ÉS?.
+- El joc v19 s'inclou íntegrament a app/minigames/escacs-a-banda/.
+- Obertura fullscreen amb iframe i retorn correcte mitjançant BANDA_MINIGAME_CLOSE.
+- Manté la pausa i represa del reproductor de Banda App.
+- EDITOR: configuració independent de visibilitat, títol, descripció i icona, amb previsualització.
+- S'ha ampliat el model de dades de minijocs sense perdre la configuració precedent.
+- Service Workers APP i EDITOR actualitzats; no cal cap migració SQL.
+
+Per publicar: pujar el contingut complet d'aquest ZIP a l'arrel del repositori BANDADELACALA, preservant app/ i editor/.

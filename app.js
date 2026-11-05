@@ -35,6 +35,7 @@ const state = {
   hemerotecaType: 'cartells',
   hemerotecaOpenYears: new Set(),
   minigameOpen: false,
+  minigameId: null,
   minigameWasPlaying: false,
   content: window.BandaStore ? (BandaStore.loadApp ? BandaStore.loadApp() : BandaStore.load()) : {events:[],tracks:[],dresscodes:[],historicItems:[],hemerotecaItems:[],settings:{}}
 };
@@ -245,6 +246,15 @@ function getQuinaNotaSettings(){
     titleImage: String(raw.titleImage||'').trim()
   };
 }
+function getEscacsSettings(){
+  const raw=state.content?.settings?.minigames?.escacsABanda || {};
+  return {
+    active: raw.active !== false,
+    visibleName: String(raw.visibleName||'ESCACS A BANDA').trim() || 'ESCACS A BANDA',
+    description: String(raw.description||'Escacs musicals: juga contra la CPU o amb una altra persona.').trim() || 'Escacs musicals: juga contra la CPU o amb una altra persona.',
+    icon: String(raw.icon||'').trim()
+  };
+}
 function quinaNotaIconSvg(){
   return `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M11 7.2v14.1" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linecap="round"/><path d="M20.8 5.1v13.1" fill="none" stroke="#8B6228" stroke-width="1.7" stroke-linecap="round"/><path d="M11 7.2l9.8-2.1v4.1L11 11.3V7.2Z" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linejoin="round"/><ellipse cx="8.6" cy="22.2" rx="3.9" ry="2.8" transform="rotate(-18 8.6 22.2)" fill="#D4AC5F"/><ellipse cx="18.4" cy="19.2" rx="3.9" ry="2.8" transform="rotate(-18 18.4 19.2)" fill="#393A86"/></svg>`;
 }
@@ -252,33 +262,33 @@ function renderGames(){
   const menu=$('#gamesMenu'), grid=$('#gamesGrid');
   if(!menu||!grid) return;
   const qne=getQuinaNotaSettings();
-  if(!qne.active){
-    grid.innerHTML='<div class="panel games-empty"><span class="eyebrow">MINIJOCS</span><p>Ara mateix no hi ha cap minijoc actiu.</p></div>';
-    return;
+  const eab=getEscacsSettings();
+  const cards=[];
+  if(qne.active){
+    const points=state.authenticated?Number(state.profile?.quina_nota_points_total||0):null;
+    const marker=state.authenticated?`<span class="game-points-bubble">${esc(`TENS ${points} ${points===1?'PUNT':'PUNTS'}`)}</span>`:'';
+    const icon=qne.icon
+      ? `<span class="game-launch-icon game-launch-image"><img src="${esc(qne.icon)}" alt="" /></span>`
+      : `<span class="game-launch-icon">${quinaNotaIconSvg()}</span>`;
+    const title=qne.titleImage
+      ? `<img class="game-launch-title-image" src="${esc(qne.titleImage)}" alt="${esc(qne.visibleName)}" />`
+      : `<strong>${esc(qne.visibleName)}</strong>`;
+    cards.push(`<button class="game-launch-card" type="button" data-open-minigame="QUINA_NOTA_ES">${icon}<span class="game-launch-copy">${title}<small class="preserve-lines">${esc(qne.description)}</small>${marker}</span></button>`);
   }
-  const points=state.authenticated?Number(state.profile?.quina_nota_points_total||0):null;
-  const pointsUnit=points===1?'PUNT':'PUNTS';
-  const marker=state.authenticated?`<span class="game-points-bubble">${esc(`TENS ${points} ${pointsUnit}`)}</span>`:'';
-  const icon=qne.icon
-    ? `<span class="game-launch-icon game-launch-image"><img src="${esc(qne.icon)}" alt="" /></span>`
-    : `<span class="game-launch-icon">${quinaNotaIconSvg()}</span>`;
-  const title=qne.titleImage
-    ? `<img class="game-launch-title-image" src="${esc(qne.titleImage)}" alt="${esc(qne.visibleName)}" />`
-    : `<strong>${esc(qne.visibleName)}</strong>`;
-  grid.innerHTML=`<button class="game-launch-card" type="button" data-open-minigame="QUINA_NOTA_ES">${icon}<span class="game-launch-copy">${title}<small class="preserve-lines">${esc(qne.description)}</small>${marker}</span></button>`;
+  if(eab.active){
+    // Imatge per defecte inclosa amb el propi joc, editable des de l'EDITOR.
+    const eabIcon=eab.icon||'app/minigames/escacs-a-banda/assets/ui/game_icon.png';
+    cards.push(`<button class="game-launch-card" type="button" data-open-minigame="ESCACS_A_BANDA"><span class="game-launch-icon game-launch-image"><img src="${esc(eabIcon)}" alt="" /></span><span class="game-launch-copy"><strong>${esc(eab.visibleName)}</strong><small class="preserve-lines">${esc(eab.description)}</small></span></button>`);
+  }
+  grid.innerHTML=cards.join('')||'<div class="panel games-empty"><span class="eyebrow">MINIJOCS</span><p>Ara mateix no hi ha cap minijoc actiu.</p></div>';
   const titleImage=grid.querySelector('.game-launch-title-image');
-  titleImage?.addEventListener('error',()=>{
-    const strong=document.createElement('strong');
-    strong.textContent=qne.visibleName;
-    titleImage.replaceWith(strong);
-  },{once:true});
-  const iconImage=grid.querySelector('.game-launch-icon.game-launch-image img');
-  iconImage?.addEventListener('error',()=>{
-    const host=iconImage.closest('.game-launch-icon');
-    if(host){host.classList.remove('game-launch-image');host.innerHTML=quinaNotaIconSvg();}
-  },{once:true});
-  grid.querySelector('[data-open-minigame]')?.addEventListener('click',openQuinaNotaGame);
+  titleImage?.addEventListener('error',()=>{const strong=document.createElement('strong');strong.textContent=qne.visibleName;titleImage.replaceWith(strong);},{once:true});
+  const iconImage=grid.querySelector('[data-open-minigame="QUINA_NOTA_ES"] .game-launch-icon.game-launch-image img');
+  iconImage?.addEventListener('error',()=>{const host=iconImage.closest('.game-launch-icon');if(host){host.classList.remove('game-launch-image');host.innerHTML=quinaNotaIconSvg();}},{once:true});
+  grid.querySelector('[data-open-minigame="QUINA_NOTA_ES"]')?.addEventListener('click',openQuinaNotaGame);
+  grid.querySelector('[data-open-minigame="ESCACS_A_BANDA"]')?.addEventListener('click',openEscacsGame);
 }
+
 function sendToOpenMinigame(payload){
   const frame=$('#gamePlayerFrame');
   if(!state.minigameOpen||!frame?.contentWindow) return;
@@ -332,6 +342,21 @@ function invalidateQuinaNotaPrefetch(){
   quinaNotaDailyPrefetch=null;
   quinaNotaDailyPrefetchAt=0;
 }
+function openEscacsGame(){
+  if(!getEscacsSettings().active || state.minigameOpen) return;
+  const menu=$('#gamesMenu'), panel=$('#gamePlayerPanel'), frame=$('#gamePlayerFrame');
+  if(!menu||!panel||!frame) return;
+  const player=audio();
+  state.minigameWasPlaying=!!(player && !player.paused && state.currentTrack>=0);
+  if(state.minigameWasPlaying){try{player.pause();}catch(_error){}}
+  state.minigameOpen=true;
+  state.minigameId='ESCACS_A_BANDA';
+  document.body.classList.add('minigame-fullscreen-open');
+  menu.hidden=true;panel.hidden=false;
+  frame.onload=()=>{sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_INIT',game:'ESCACS_A_BANDA',muted:state.globalMuted});};
+  frame.src=`app/minigames/escacs-a-banda/index.html?v=19&ts=${Date.now()}`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 async function openQuinaNotaGame(){
   if(!getQuinaNotaSettings().active) return;
   const menu=$('#gamesMenu'), panel=$('#gamePlayerPanel'), frame=$('#gamePlayerFrame');
@@ -340,6 +365,7 @@ async function openQuinaNotaGame(){
   state.minigameWasPlaying=!!(player && !player.paused && state.currentTrack>=0);
   if(state.minigameWasPlaying){ try{player.pause();}catch(_error){} }
   state.minigameOpen=true;
+  state.minigameId='QUINA_NOTA_ES';
   document.body.classList.add('minigame-fullscreen-open');
   menu.hidden=true; panel.hidden=false;
 
@@ -370,8 +396,9 @@ async function openQuinaNotaGame(){
 function closeOpenMinigame({resumePlayer=true}={}){
   if(!state.minigameOpen) return;
   const menu=$('#gamesMenu'), panel=$('#gamePlayerPanel'), frame=$('#gamePlayerFrame');
-  sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_STOP',game:'QUINA_NOTA_ES'});
+  sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_STOP',game:state.minigameId||'QUINA_NOTA_ES'});
   state.minigameOpen=false;
+  state.minigameId=null;
   document.body.classList.remove('minigame-fullscreen-open');
   if(menu) menu.hidden=false;
   if(panel) panel.hidden=true;
@@ -388,12 +415,18 @@ function bindMinigameBridge(){
     const frame=$('#gamePlayerFrame');
     if(!frame?.contentWindow || event.source!==frame.contentWindow) return;
     const data=event.data||{};
-    if(data.game!=='QUINA_NOTA_ES' || !state.minigameOpen) return;
+    if(!state.minigameOpen) return;
+    // ESCACS A BANDA v19 utilitza BANDA_MINIGAME_CLOSE.
+    if(state.minigameId==='ESCACS_A_BANDA' && data.type==='BANDA_MINIGAME_CLOSE' && data.game==='escacs-a-banda'){
+      closeOpenMinigame({resumePlayer:true});
+      return;
+    }
+    if(data.game!==state.minigameId) return;
     if(data.type==='BANDA_DE_LA_CALA_MINIGAME_EXIT'){
       closeOpenMinigame({resumePlayer:true});
       return;
     }
-    if(data.type==='BANDA_DE_LA_CALA_MINIGAME_RESULT'){
+    if(data.type==='BANDA_DE_LA_CALA_MINIGAME_RESULT' && state.minigameId==='QUINA_NOTA_ES'){
       if(!state.authenticated) return;
       try{
         const result=await BandaSupabase.submitQuinaNotaAnswer(data.answer);
@@ -458,7 +491,7 @@ function renderHome(){
   const welcome=$('#homeWelcomeEyebrow');
   if(welcome) welcome.textContent=state.authenticated ? (currentUserGender()==='other' ? `Hola! ${currentUserDisplayName()}` : `${currentWelcomeLabel()} ${currentUserDisplayName()}`) : 'BENVINGUT/DA';
   const copy=getHomeCardCopy();
-  const gamesActive=getQuinaNotaSettings().active;
+  const gamesActive=getQuinaNotaSettings().active || getEscacsSettings().active;
   const cards = state.authenticated ? [
     { id:'calendar', icon:'calendar', title:copy.calendar.title, text:copy.calendar.text, status:'ACTIU' },
     { id:'history', icon:'history', title:copy.history.title, text:copy.history.text, status:'ACTIU' },
@@ -1893,7 +1926,7 @@ function applyGlobalMute(){
 
   }
   syncPlayerEqualizers();
-  sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_MUTE',game:'QUINA_NOTA_ES',muted:state.globalMuted});
+  sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_MUTE',game:state.minigameId||'QUINA_NOTA_ES',muted:state.globalMuted});
 }
 function toggleGlobalMute(){
   state.globalMuted = !state.globalMuted;
@@ -2779,7 +2812,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.144',root).href;
+    const swUrl=new URL('app/sw.js?v=0.145',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
