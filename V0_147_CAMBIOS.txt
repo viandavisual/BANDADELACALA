@@ -1,0 +1,14 @@
+BANDA DE LA CALA — v0.147
+
+CORRECCIÓ CRÍTICA
+- content-store.js: conservar settings.minigames.escacsABanda.titleImage quan es normalitza la configuració.
+- La URL del logo d'ESCACS A BANDA ara persisteix en els canvis de l'EDITOR i el contingut sincronitzat.
+- La targeta d'ESCACS A BANDA fa servir exactament la mateixa estructura visual que QUINA NOTA ÉS?, sense etiqueta REPTE DIARI ni punts.
+- Versions, referències i memòries cau actualitzades a v0.147.
+
+IMPORTANT
+La URL carregada amb v0.146 es va perdre durant el desat per culpa del camp descartat;
+si el logo no apareix després de publicar v0.147, cal tornar-lo a seleccionar UNA VEGADA des de l'EDITOR.
+Després, l'APP mostrarà la imatge en lloc del títol en text.
+
+No hi ha canvis d'esquema Supabase ni SQL nou.

@@ -282,6 +282,7 @@ function renderGames(){
     const eabTitle=eab.titleImage
       ? `<img class="game-launch-title-image" src="${esc(eab.titleImage)}" alt="${esc(eab.visibleName)}" />`
       : `<strong>${esc(eab.visibleName)}</strong>`;
+    // Mateixa composició que QUINA NOTA ÉS?, sense REPTE DIARI ni cap indicador de punts.
     cards.push(`<button class="game-launch-card" type="button" data-open-minigame="ESCACS_A_BANDA"><span class="game-launch-icon game-launch-image"><img src="${esc(eabIcon)}" alt="" /></span><span class="game-launch-copy">${eabTitle}<small class="preserve-lines">${esc(eab.description)}</small></span></button>`);
   }
   grid.innerHTML=cards.join('')||'<div class="panel games-empty"><span class="eyebrow">MINIJOCS</span><p>Ara mateix no hi ha cap minijoc actiu.</p></div>';
@@ -2818,7 +2819,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.146',root).href;
+    const swUrl=new URL('app/sw.js?v=0.147',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

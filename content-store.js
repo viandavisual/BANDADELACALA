@@ -50,7 +50,9 @@
       active: eab.active !== false,
       visibleName: typeof eab.visibleName === 'string' && eab.visibleName.trim() ? eab.visibleName.trim() : 'ESCACS A BANDA',
       description: typeof eab.description === 'string' && eab.description.trim() ? eab.description.trim() : 'Escacs musicals: juga contra la CPU o amb una altra persona.',
-      icon: typeof eab.icon === 'string' ? eab.icon : ''
+      icon: typeof eab.icon === 'string' ? eab.icon : '',
+      // v0.147: no descartar la URL del logotip en normalitzar i desar a Supabase.
+      titleImage: typeof eab.titleImage === 'string' ? eab.titleImage.trim() : ''
     };
     base.events = Array.isArray(base.events) ? base.events.map((event,index)=>({
       id: event.id || uid(`evt${index}`),
