@@ -57,6 +57,7 @@ function fitStageWrap(){
   }
   stageWrap.style.width = `${Math.floor(width)}px`;
   stageWrap.style.height = `${Math.floor(height)}px`;
+  stageWrap.style.setProperty('--eab-scale', String(Math.floor(width)/W));
 }
 fitStageWrap();
 window.addEventListener('resize', fitStageWrap);

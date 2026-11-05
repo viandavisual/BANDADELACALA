@@ -46,10 +46,12 @@ h1,h2{font-family:var(--font-display);margin:.1em 0;color:#ffe08a;text-shadow:0 
 @media (min-aspect-ratio:9/16){#stageWrap{border-radius:8px}}
 
 #hudButtons{position:absolute;display:flex;align-items:center;gap:12px;pointer-events:auto}
-body.desktop #statusBar{left:8px;top:625px;width:690px;height:235px}
-body.desktop #hudButtons{left:66px;top:46px;bottom:auto;flex-direction:column;gap:12px}
-body.desktop #statusText{left:184px;right:18px;top:20px;bottom:32px;padding:8px 16px;font-size:clamp(24px,2vw,36px)}
-body.desktop .uiBtn.tiny{width:72px;height:72px;border-radius:10px;font-size:33px}
+/* v0.146: HUD ancorat a la mateixa geometria proporcional que el fons 1672×941.
+   Els valors dins del quadre també escalen amb el stage (variable --eab-scale). */
+body.desktop #statusBar{left:0.4785%;top:71.73%;width:41.2679%;height:22.848%;}
+body.desktop #hudButtons{left:calc(66px * var(--eab-scale,1));top:calc(25px * var(--eab-scale,1));bottom:auto;flex-direction:column;gap:calc(12px * var(--eab-scale,1))}
+body.desktop #statusText{left:26.67%;right:2.6%;top:16%;bottom:6%;padding:calc(8px * var(--eab-scale,1)) calc(12px * var(--eab-scale,1));font-size:calc(34px * var(--eab-scale,1));}
+body.desktop .uiBtn.tiny{width:calc(72px * var(--eab-scale,1));height:calc(72px * var(--eab-scale,1));border-radius:calc(10px * var(--eab-scale,1));font-size:calc(33px * var(--eab-scale,1));}
 
 
 

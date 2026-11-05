@@ -452,9 +452,18 @@ function escacsEditorSettings(){
     active:current.active!==false,
     visibleName:String(current.visibleName||'ESCACS A BANDA').trim()||'ESCACS A BANDA',
     description:String(current.description||'Escacs musicals: juga contra la CPU o amb una altra persona.').trim()||'Escacs musicals: juga contra la CPU o amb una altra persona.',
-    icon:String(current.icon||'').trim()
+    icon:String(current.icon||'').trim(),
+    titleImage:String(current.titleImage||'').trim()
   };
   return content.settings.minigames.escacsABanda;
+}
+function renderEscacsTitlePreview(settings=escacsEditorSettings()){
+  const img=$('#escacsPreviewTitleImage'),text=$('#escacsPreviewName');
+  if(!img||!text)return;
+  if(settings.titleImage){
+    img.hidden=false;img.src=settings.titleImage;text.hidden=true;
+    img.onerror=()=>{img.hidden=true;text.hidden=false;};
+  }else{img.hidden=true;img.removeAttribute('src');text.hidden=false;}
 }
 function renderEscacsEditor(){
   const settings=escacsEditorSettings();
@@ -465,6 +474,7 @@ function renderEscacsEditor(){
   const preview=$('#escacsPreviewIcon');
   if(preview)preview.src=settings.icon||'app/minigames/escacs-a-banda/assets/ui/game_icon.png';
   const previewName=$('#escacsPreviewName');if(previewName)previewName.textContent=settings.visibleName;
+  renderEscacsTitlePreview(settings);
   const previewDescription=$('#escacsPreviewDescription');if(previewDescription)previewDescription.textContent=settings.description;
   const status=$('#escacsPreviewStatus');if(status){status.textContent=settings.active?'ACTIU':'INACTIU';status.classList.toggle('is-inactive',!settings.active);}
 }
@@ -545,6 +555,24 @@ function bindEscacsEditor(){
   $('#clearEscacsIcon')?.addEventListener('click',()=>{
     const settings=escacsEditorSettings();settings.icon='';save(content,'Icona per defecte d’ESCACS A BANDA restaurada');
   });
+  $('#escacsTitleImageFile')?.addEventListener('change',async event=>{
+    const file=event.target.files?.[0];if(!file)return;
+    try{
+      const compressed=await compressImage(file,true);
+      const imageSrc=await uploadImageWithBackup({
+        file,compressed,activeFile:file,
+        activeBucket:'app-images',activeFolder:'minigames/escacs-a-banda',activeName:'escacs-a-banda-title',
+        backupRoot:'minijocs/escacs-a-banda/title',backupLabel:'la imatge del títol d’ESCACS A BANDA'
+      });
+      const settings=escacsEditorSettings();settings.titleImage=imageSrc;
+      save(content,'Imatge del títol d’ESCACS A BANDA actualitzada');
+    }catch(error){console.error(error);mediaUploadErrorToast(error,'No s’ha pogut pujar la imatge del títol d’ESCACS A BANDA');}
+    event.target.value='';
+  });
+  $('#clearEscacsTitleImage')?.addEventListener('click',()=>{
+    const settings=escacsEditorSettings();settings.titleImage='';
+    save(content,'Imatge del títol d’ESCACS A BANDA eliminada');
+  });
   form.addEventListener('submit',event=>{
     event.preventDefault();
     const current=escacsEditorSettings();
@@ -553,7 +581,8 @@ function bindEscacsEditor(){
       active:!!$('#escacsActive')?.checked,
       visibleName:$('#escacsVisibleName')?.value.trim()||'ESCACS A BANDA',
       description:$('#escacsDescription')?.value.trim()||'Escacs musicals: juga contra la CPU o amb una altra persona.',
-      icon:current.icon||''
+      icon:current.icon||'',
+      titleImage:current.titleImage||''
     };
     save(content,'Configuració d’ESCACS A BANDA desada');
   });
@@ -3219,7 +3248,7 @@ async function registerEditorSW(){
   if(location.protocol==='file:' || !('serviceWorker' in navigator)) return;
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('editor/sw.js?v=0.145',root).href;
+    const swUrl=new URL('editor/sw.js?v=0.146',root).href;
     const scopeUrl=new URL('editor/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}
