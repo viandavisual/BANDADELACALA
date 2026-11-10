@@ -280,12 +280,13 @@ function renderGames(){
   if(qne.active){
     const points=state.authenticated?Number(state.profile?.quina_nota_points_total||0):null;
     const marker=state.authenticated?`<span class="game-points-bubble">${esc(`TENS ${points} ${points===1?'PUNT':'PUNTS'}`)}</span>`:'';
-    const qneIcon=qne.icon||GAME_CARD_ART.QUINA_NOTA_ES.icon;
+    const qneDescription=qne.description.replace(/^(?:\s*\[\s*REPTE\s+DIARI\s*\]\s*)+/i,'').trim();
+    const qneIcon=GAME_CARD_ART.QUINA_NOTA_ES.icon; // Card fixa: evita la icona antiga i opaca guardada a Supabase.
     const icon=`<span class="game-launch-icon game-launch-image"><img src="${esc(qneIcon)}" alt="" /></span>`;
     const title=qne.titleImage
       ? `<img class="game-launch-title-image" src="${esc(qne.titleImage)}" alt="${esc(qne.visibleName)}" />`
       : `<strong>${esc(qne.visibleName)}</strong>`;
-    cards.push(`<button class="game-launch-card game-launch-card--bg" type="button" data-open-minigame="QUINA_NOTA_ES" style="--game-card-bg:url('${esc(GAME_CARD_ART.QUINA_NOTA_ES.bg)}')">${icon}<span class="game-launch-copy">${title}<span class="game-launch-textbox"><small class="game-launch-eyebrow">[ REPTE DIARI ]</small><small class="preserve-lines">${esc(qne.description)}</small></span>${marker}</span></button>`);
+    cards.push(`<button class="game-launch-card game-launch-card--bg" type="button" data-open-minigame="QUINA_NOTA_ES" style="--game-card-bg:url('${esc(GAME_CARD_ART.QUINA_NOTA_ES.bg)}')">${icon}<span class="game-launch-copy">${title}<span class="game-launch-textbox"><small class="game-launch-eyebrow">[ REPTE DIARI ]</small><small class="preserve-lines">${esc(qneDescription)}</small></span>${marker}</span></button>`);
   }
   if(eab.active){
     const eabIcon=eab.icon||GAME_CARD_ART.ESCACS_A_BANDA.icon;
@@ -2832,7 +2833,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.147',root).href;
+    const swUrl=new URL('app/sw.js?v=0.151',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

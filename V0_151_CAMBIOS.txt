@@ -1,0 +1,7 @@
+BANDA DE LA CALA v0.151 — PATCH des de v0.150
+
+- QUINA NOTA ÉS?: extret el símbol musical de la icona proporcionada, eliminant el requadre blanc/gris interior i deixant únicament la il·lustració sobre transparència RGBA real.
+- QUINA NOTA ÉS?: la card utilitza la icona local corregida, sense prioritzar la URL antiga d'icona del contingut Supabase. L'icona personalitzada de l'EDITOR es conserva en dades, però ja no substitueix aquesta icona fixa de la card.
+- QUINA NOTA ÉS?: eliminat el [REPTE DIARI] repetit a l'inici de la descripció. Es manté una única etiqueta en negreta.
+- Actualitzats app.js, HTML i Service Worker per refrescar l'asset i el codi.
+- ESCACS A BANDA i la resta de l'APP no es modifiquen.
