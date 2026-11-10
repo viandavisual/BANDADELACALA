@@ -765,6 +765,18 @@ function getHistoricItems(){
   });
 }
 
+// v0.152 · Fotografies fixes dels directors (independents de contingut editable).
+const HISTORY_DIRECTOR_PORTRAITS = {
+  '1980-1982-arques':'assets/historic/directors/01_arques.jpg',
+  '1982-1986-cloquell':'assets/historic/directors/02_cloquell.jpg',
+  '1986-1990-ramis':'assets/historic/directors/03_ramis.jpg',
+  '1990-1999-castells-1':'assets/historic/directors/04_alex1.jpg',
+  '2000-bono':'assets/historic/directors/05_pere.jpg',
+  '2001-2004-castells-2':'assets/historic/directors/06_alex2.jpg',
+  '2005-2011-chorda':'assets/historic/directors/07_chorda.jpg',
+  '2012-current-cabello':'assets/historic/directors/08_cabello.jpg',
+};
+
 function historyPeriodItems(periodId){
   return getHistoricItems().filter(item=>item.periodId===periodId);
 }
@@ -916,7 +928,7 @@ function renderHistory(){
     const nextPeriod=displayPeriods[displayIndex+1];
     const nextButton=nextPeriod?`<button class="history-next-period" type="button" data-next-period="${esc(nextPeriod.id)}"><span>SEGÜENT PERÍODE</span><strong>↓</strong></button>`:'';
     const photoCount=historyPeriodPhotoCount(period.id);
-    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-dot" aria-hidden="true"></span><div class="history-period-inline"><span class="history-period-year history-period-years history-period-years-desktop">${esc(yearsLabel)}</span><span class="history-period-year history-period-years history-period-years-mobile">${esc(mobileYearsLabel)}</span><span class="history-period-director">${esc(period.director)}</span>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-photo-total" aria-label="${photoCount} ${photoCount===1?'foto':'fotos'}">${photoCount}</span><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
+    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-portrait" aria-hidden="true"><img src="${esc(HISTORY_DIRECTOR_PORTRAITS[period.id]||'')}" alt="" loading="lazy" decoding="async"></span><div class="history-period-inline"><span class="history-period-year history-period-years history-period-years-desktop">${esc(yearsLabel)}</span><span class="history-period-year history-period-years history-period-years-mobile">${esc(mobileYearsLabel)}</span><span class="history-period-director">${esc(period.director)}</span>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-photo-total" aria-label="${photoCount} ${photoCount===1?'foto':'fotos'}">${photoCount}</span><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
   }).join('');
   host.onclick=event=>{
     const toggle=event.target.closest('[data-toggle-period]');
@@ -2833,7 +2845,7 @@ async function registerSW(){
   }
   try{
     const root=new URL('../',location.href);
-    const swUrl=new URL('app/sw.js?v=0.151',root).href;
+    const swUrl=new URL('app/sw.js?v=0.152',root).href;
     const scopeUrl=new URL('app/',root).href;
     const reg=await navigator.serviceWorker.register(swUrl,{scope:scopeUrl,updateViaCache:'none'});
     try{ await reg.update(); }catch(_error){}

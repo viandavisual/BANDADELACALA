@@ -1,0 +1,7 @@
+BANDA DE LA CALA — v0.152
+
+- HISTÒRIC: les 8 capçaleres dels períodes incorporen el retrat del director al costat esquerre, en lloc del punt blanc.
+- Imatges associades a l'ID permanent de cada període, independentment de l'ordre visual del timeline.
+- Retall quadrat amb object-fit: cover, mida adaptada a desktop i mobile.
+- Els colors, textos, comptadors, col·lapsables i altres sistemes no es modifiquen.
+- Versió APP i caché Service Worker v0.152.

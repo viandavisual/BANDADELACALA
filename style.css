@@ -3361,3 +3361,39 @@ body.demo-video-open{overflow:hidden}
   .game-launch-card--bg .game-launch-icon{width:96px!important;height:96px!important;max-width:96px;max-height:96px}
   .game-launch-card--bg .game-launch-title-image{max-height:58px}
 }
+
+
+/* v0.152 · Retrats dels directors a les capçaleres d'HISTÒRIC. */
+.history-period-head .history-period-portrait{
+  display:block!important;
+  flex:0 0 64px!important;
+  width:64px!important;
+  height:64px!important;
+  min-width:64px!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border:2px solid rgba(255,255,255,.5)!important;
+  border-radius:3px!important;
+  box-shadow:0 1px 3px rgba(0,0,0,.20)!important;
+  background:rgba(255,255,255,.16)!important;
+}
+.history-period-head .history-period-portrait img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  margin:0!important;
+  padding:0!important;
+}
+.history-period-head:has(.history-period-portrait){padding-top:4px!important;padding-bottom:4px!important;min-height:74px!important;}
+.history-period.is-collapsed .history-period-head:has(.history-period-portrait){padding-top:4px!important;padding-bottom:4px!important;min-height:74px!important;}
+@media(max-width:780px){
+ .history-period-head .history-period-portrait{flex-basis:48px!important;width:48px!important;height:48px!important;min-width:48px!important;}
+ .history-period-head:has(.history-period-portrait),
+ .history-period.is-collapsed .history-period-head:has(.history-period-portrait){min-height:60px!important;padding-top:5px!important;padding-bottom:5px!important;}
+}
+@media(max-width:440px){
+ .history-period-head .history-period-portrait{flex-basis:43px!important;width:43px!important;height:43px!important;min-width:43px!important;}
+}
