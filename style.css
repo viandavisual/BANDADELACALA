@@ -3264,7 +3264,7 @@ body.demo-video-open{overflow:hidden}
 
 
 /* ============================================================
-   v0.149 · MINIJOCS · fons il·lustrats + icones transparents
+   v0.150 · MINIJOCS · centrado final + icona QNE sense fons blanc
    ============================================================ */
 .game-launch-card--bg{
   position:relative;
@@ -3272,6 +3272,10 @@ body.demo-video-open{overflow:hidden}
   isolation:isolate;
   border-color:rgba(159,173,217,.34)!important;
   background:linear-gradient(145deg,#eaf0ff,#f5f7ff)!important;
+  justify-content:center!important;
+  align-items:center!important;
+  gap:14px;
+  padding:18px;
 }
 .game-launch-card--bg::before{
   content:'';
@@ -3292,10 +3296,10 @@ body.demo-video-open{overflow:hidden}
 }
 .game-launch-card--bg > *{position:relative;z-index:1}
 .game-launch-card--bg .game-launch-icon{
-  width:125px!important;
-  height:125px!important;
-  max-width:125px;
-  max-height:125px;
+  width:135px!important;
+  height:135px!important;
+  max-width:135px;
+  max-height:135px;
 }
 .game-launch-card--bg .game-launch-icon.game-launch-image,
 .game-launch-card--bg .game-launch-icon.game-launch-image img{
@@ -3306,16 +3310,23 @@ body.demo-video-open{overflow:hidden}
   object-position:center!important;
 }
 .game-launch-card--bg .game-launch-copy{
+  width:100%;
   gap:10px;
+  justify-items:center;
+  align-content:center;
+  text-align:center;
 }
 .game-launch-card--bg .game-launch-title-image{
+  display:block;
   max-height:88px;
+  margin-inline:auto;
 }
 .game-launch-card--bg .game-launch-textbox{
   display:grid;
   gap:7px;
   width:fit-content;
   max-width:min(100%, 360px);
+  margin-inline:auto;
   padding:10px 12px;
   border-radius:12px;
   background:rgba(0,0,0,.82);
@@ -3338,14 +3349,15 @@ body.demo-video-open{overflow:hidden}
 }
 .game-launch-card--bg .game-points-bubble{
   margin-top:2px;
+  align-self:center;
 }
 @media(max-width:780px){
-  .game-launch-card--bg .game-launch-icon{width:94px!important;height:94px!important;max-width:94px;max-height:94px}
+  .game-launch-card--bg .game-launch-icon{width:104px!important;height:104px!important;max-width:104px;max-height:104px}
   .game-launch-card--bg .game-launch-title-image{max-height:66px}
   .game-launch-card--bg .game-launch-textbox{padding:8px 10px;gap:5px;max-width:92%}
   .game-launch-card--bg .game-launch-eyebrow{font-size:.68rem}
 }
 @media(max-width:390px){
-  .game-launch-card--bg .game-launch-icon{width:88px!important;height:88px!important;max-width:88px;max-height:88px}
+  .game-launch-card--bg .game-launch-icon{width:96px!important;height:96px!important;max-width:96px;max-height:96px}
   .game-launch-card--bg .game-launch-title-image{max-height:58px}
 }

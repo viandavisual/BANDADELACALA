@@ -1,0 +1,7 @@
+BANDA DE LA CALA — v0.150
+
+- MINIJOCS: corregida la icona de QUINA NOTA ÉS? per eliminar el fons blanc visible i deixar-la integrada com a asset transparent.
+- MINIJOCS: ampliades les icones dels dos jocs fins a una mida aproximada del 135% en desktop.
+- MINIJOCS: ajustat el centrado horitzontal i vertical del bloc complet de contingut dins de cada card.
+- MINIJOCS: retocats també els tamanys responsive dels icons perquè la presentació es mantingui equilibrada en mobile.
+- APP/EDITOR: versions i Service Workers actualitzats a v0.150 per refrescar cache i assets nous.
