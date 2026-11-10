@@ -40,10 +40,20 @@
    return open.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
  }
 
+ const dismissing=new Set();
+ async function dismissNotification(id,card){
+   if(id===undefined||id===null||dismissing.has(id))return;
+   dismissing.add(id);
+   // The notification disappears immediately, exactly as after a swipe.
+   if(card){card.style.pointerEvents='none';card.remove();}
+   try{await remove(id);}
+   catch(err){console.warn('INBOX_DISMISS_ERROR',err);}
+   finally{dismissing.delete(id);await render();}
+ }
  async function render(){const list=$('userNotificationsList');if(!list)return;try{const messages=await pending();list.replaceChildren();if(!messages.length){const empty=document.createElement('p');empty.className='user-notifications-empty';empty.textContent='No tens notificacions pendents.';list.append(empty);return}
  for(const msg of messages){const card=document.createElement('div');card.className='user-notification-item';card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label','Obrir notificació: '+String(msg.title||''));const title=document.createElement('strong');title.textContent=String(msg.title||'BANDA DE LA CALA');const body=document.createElement('span');body.textContent=String(msg.body||'');const date=document.createElement('time');date.textContent=dateFmt.format(new Date(msg.timestamp||Date.now()));card.append(title,body,date);
  const dismiss=document.createElement('button');dismiss.type='button';dismiss.className='user-notification-dismiss';dismiss.textContent='×';dismiss.setAttribute('aria-label','Eliminar aquesta notificació');dismiss.title='Eliminar notificació';
- dismiss.addEventListener('click',async ev=>{ev.stopPropagation();ev.preventDefault();await remove(msg.id);card.remove();if(!list.querySelector('.user-notification-item'))render();});
+ dismiss.dataset.notificationId=String(msg.id);
  card.append(dismiss);
  const open=async()=>{
    const destination=new URL(safeUrl(msg.url),location.origin);
@@ -52,12 +62,28 @@
      if(msg.eventId)destination.searchParams.set('event',msg.eventId);
    }
    await remove(msg.id);location.assign(destination.href);
-  };card.addEventListener('click',open);card.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();open()}});
- let startX=null,startY=null;card.addEventListener('touchstart',ev=>{startX=ev.touches[0].clientX;startY=ev.touches[0].clientY},{passive:true});card.addEventListener('touchend',async ev=>{if(startX===null)return;const dx=ev.changedTouches[0].clientX-startX,dy=ev.changedTouches[0].clientY-startY;startX=null;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.35){ev.preventDefault();card.style.transform=`translateX(${dx>0?110:-110}%)`;card.style.opacity='0';await remove(msg.id);setTimeout(render,165)}},{passive:false});list.append(card)}
+  };card.addEventListener('click',ev=>{if(ev.target.closest('.user-notification-dismiss'))return;open()});card.addEventListener('keydown',ev=>{if(ev.target.closest('.user-notification-dismiss'))return;if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();open()}});
+ let startX=null,startY=null;card.addEventListener('touchstart',ev=>{startX=ev.touches[0].clientX;startY=ev.touches[0].clientY},{passive:true});card.addEventListener('touchend',async ev=>{if(startX===null)return;const dx=ev.changedTouches[0].clientX-startX,dy=ev.changedTouches[0].clientY-startY;startX=null;if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.35){ev.preventDefault();card.style.transform=`translateX(${dx>0?110:-110}%)`;card.style.opacity='0';await dismissNotification(msg.id,card)}},{passive:false});list.append(card)}
  }catch(err){list.textContent='No s’ha pogut carregar l’historial d’aquest dispositiu.';console.warn('INBOX_READ_ERROR',err)}}
  function openInbox(scrollBlock='nearest'){const box=$('userNotificationsBox');if(!box)return;box.open=true;box.setAttribute('aria-expanded','true');render();box.scrollIntoView({behavior:'smooth',block:scrollBlock})}
  function closeInbox(){const box=$('userNotificationsBox');if(!box)return;box.open=false;box.setAttribute('aria-expanded','false')}
  document.addEventListener('DOMContentLoaded',()=>{
+   const list=$('userNotificationsList');
+   if(list){
+     list.addEventListener('click',ev=>{
+       const button=ev.target.closest('button.user-notification-dismiss');
+       if(!button||!list.contains(button))return;
+       ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();
+       const card=button.closest('.user-notification-item');
+       dismissNotification(button.dataset.notificationId,card);
+     },true);
+     list.addEventListener('keydown',ev=>{
+       const button=ev.target.closest('button.user-notification-dismiss');
+       if(!button||!list.contains(button)||!(ev.key==='Enter'||ev.key===' '))return;
+       ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();
+       dismissNotification(button.dataset.notificationId,button.closest('.user-notification-item'));
+     },true);
+   }
    const box=$('userNotificationsBox');
    if(box){
      box.addEventListener('toggle',()=>{box.setAttribute('aria-expanded',box.open?'true':'false'); if(box.open) render()});

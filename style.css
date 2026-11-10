@@ -3605,3 +3605,25 @@ html,body{max-width:100%;overflow-x:clip}
   .user-profile-card .archive-upload-submit{font-size:1.04rem!important}
   .user-profile-card .user-options-box .user-settings-grid,.user-profile-card .suggestion-form{padding:12px!important}
 }
+
+/* v0.154 · Opcions d'usuari: llista vertical en mòbil i tres línies fixes d'introducció. */
+.user-profile-card .archive-upload-intro-note span{display:block}
+@media(max-width:780px){
+  .user-profile-card #userOptionsBox .user-settings-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:12px!important;
+    align-items:stretch!important;
+  }
+  .user-profile-card #userOptionsBox .user-settings-grid > .user-profile-tile{
+    grid-column:1 / -1!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+  }
+  .user-profile-card #nameProfileDetails{order:1!important}
+  .user-profile-card #passwordDetails{order:2!important}
+  .user-profile-card #genderProfileDetails{order:3!important}
+  .user-profile-card #avatarProfileDetails{order:4!important}
+  .user-profile-card .archive-upload-intro-note span{margin-bottom:3px}
+}

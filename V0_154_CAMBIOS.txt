@@ -1,0 +1,7 @@
+BANDA DE LA CALA v0.154
+
+- APP/USER/NOTIFICACIONS: botó X de desktop corregit. Captura prioritària del clic, desaparició immediata i eliminació persistent via IndexedDB, igual que amb swipe.
+- APP/USER/OPCIONS D’USUARI: en mòbil, les quatre caixes en una sola columna i en l’ordre NOM, CONTRASENYA, GÈNERE, AVATAR. En desktop es manté la disposició existent.
+- APP/USER: eliminat el símbol decoratiu ▱ de les capçaleres dels tres minimenús (PUJAR FATO, OPCIONS D’USUARI i BÚSTIA DE SUGGERIMENTS).
+- APP/USER/ENVIA EL TEU MATERIAL: textos introductoris substituïts exactament pels tres missatges sol·licitats, cadascun en línia pròpia.
+- Versions i memòria cau de les PWA actualitzades a v0.154. No hi ha canvis de Supabase.
