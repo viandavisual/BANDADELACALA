@@ -14,7 +14,7 @@
   <link rel="manifest" href="editor/manifest.webmanifest?v=0.111" />
   <link rel="icon" href="editor/icons/icon-192.png?v=0.26" type="image/png" />
   <link rel="apple-touch-icon" href="editor/icons/icon-180.png?v=0.26" />
-  <link rel="stylesheet" href="editor.css?v=0.153" />
+  <link rel="stylesheet" href="editor.css?v=0.155" />
 </head>
 <body>
   <section id="editorLoginGate" class="editor-login-gate" aria-label="Accés a l'Editor">
@@ -67,7 +67,7 @@
 
       <section class="editor-view active" data-editor-view="dashboard">
         <div class="dashboard-hero">
-          <div><span class="eyebrow">BANDA DE LA CALA</span><h2>Centre de gestió</h2><p>Gestiona el calendari, el dresscode, la HOME, el Player, l’Històric i els usuaris autoritzats de la banda.</p></div>
+          <div><span class="eyebrow">BANDA DE LA CALA</span><h2>Centre de gestió</h2><p>Gestiona el Calendari, Dresscode, HOME, Player, Històric i Users.</p></div>
           <img src="assets/brand/editor-icon.png" alt="" />
         </div>
         <div id="editorInstallCard" class="editor-pwa-card">
@@ -100,7 +100,7 @@
             <div class="app-home-preview-hero">
               <div class="app-home-preview-media" aria-hidden="true"><img id="homeHeroPreview" class="app-home-preview-image" alt="Previsualització de la imatge de HOME" /></div>
               <div class="app-home-preview-overlay" aria-hidden="true"></div>
-              <div class="app-home-preview-copy"><span class="eyebrow">BENVINGUT/DA</span><h3>BANDA DE LA CALA</h3><p>Calendari, música i continguts de la banda en un únic espai.</p></div>
+              <div class="app-home-preview-copy"><span class="eyebrow">BENVINGUT/DA</span><h3>BANDA DE LA CALA</h3><p>Calendari, Música i Continguts en un únic espai</p></div>
             </div>
             <small class="exact-preview-note">Aquesta caixa utilitza els mateixos punts de tall, proporcions, gradient i animació que la capçalera HOME de l’APP.</small>
           </div>
@@ -423,6 +423,12 @@
             </div>
           </div>
         </div>
+        <div class="editor-card banda-pending-card" id="pendingRegistrationsCard">
+          <div class="card-head banda-pending-header"><div><span class="eyebrow">INSCRIPCIONS REBUDES</span><h2>NOVES ALTES PENDENTS</h2></div><div class="banda-pending-tools"><span class="count-pill" id="pendingRegistrationsCount">0</span><button type="button" class="secondary-btn" id="refreshPendingRegistrations">ACTUALITZAR</button></div></div>
+          <p class="helper-copy">Dades enviades pels músics des de <a href="../altes/" target="_blank" rel="noopener">/altes/</a>. Prem «PASSAR A NOU USUARI» per omplir el formulari superior. La petició només desapareix després de crear correctament el compte.</p>
+          <div id="pendingRegistrationsList" class="editor-list banda-pending-list" aria-live="polite"><div class="empty-state">Carregant peticions…</div></div>
+          <p id="pendingRegistrationsStatus" class="helper-copy" role="status"></p>
+        </div>
       </section>
 
       <section class="editor-view" data-editor-view="system">
@@ -500,7 +506,7 @@
   <script src="content-store.js?v=0.111"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-client.js?v=0.111"></script>
-  <script src="editor.js?v=0.153"></script>
+  <script src="editor.js?v=0.155"></script>
   <script src="editor-push.js?v=0.153"></script>
 </body>
 </html>

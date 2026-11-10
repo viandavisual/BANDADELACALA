@@ -1294,3 +1294,17 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .push-prefix-editor #pushReminderSave{justify-self:start}
 .push-prefix-editor #pushReminderStatus{font-size:.78rem;color:#525c86}
 @media(max-width:560px){.push-prefix-fields{grid-template-columns:1fr}.push-prefix-editor #pushReminderSave{width:100%}}
+
+/* v0.155 · Altes pendents: llista de 9,5 franges. */
+.banda-pending-card{margin-top:20px;min-width:0}
+.banda-pending-header{flex-wrap:wrap}
+.banda-pending-tools{display:flex;align-items:center;gap:9px}
+.banda-pending-list{overflow:visible;overscroll-behavior:contain;scrollbar-gutter:stable}
+.banda-pending-list.banda-pending-scroll{overflow-y:auto;padding-right:5px}
+.banda-pending-strip{grid-template-columns:minmax(0,1fr) auto;min-height:74px;gap:12px}
+.banda-pending-info{display:grid;gap:3px;min-width:0}
+.banda-pending-info strong{color:var(--blue-deep);font-size:.89rem;overflow-wrap:anywhere}
+.banda-pending-info span{color:var(--muted);font-size:.79rem;overflow-wrap:anywhere}
+.banda-pending-info small{color:var(--editor-gold-deep);font-size:.68rem}
+.banda-transfer-btn{font-size:.66rem;white-space:nowrap}
+@media(max-width:690px){.banda-pending-strip{grid-template-columns:minmax(0,1fr)}.banda-transfer-btn{justify-self:start}}

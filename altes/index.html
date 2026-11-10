@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#202f70"><title>Altes · Banda de la Cala</title><meta name="description" content="Envia el teu nom i correu electrònic per sol·licitar l'alta a l'aplicació de la Banda de la Cala."><link rel="icon" href="../assets/brand/app-icon.png"><link rel="stylesheet" href="./style.css"></head>
+<body><main class="registration-shell"><section class="registration-card">
+<img class="brand" src="../assets/brand/logo-banda-de-la-cala.png" alt="Banda de la Cala">
+<div class="eyebrow">BANDA DE LA CALA · ACCÉS ALS MÚSICS</div><h1>Benvinguts a l'APP!</h1><p class="intro">Deixa'ns el teu nom i correu electrònic per preparar el teu compte personal.</p>
+<form id="registrationForm" autocomplete="on"><label for="registrationName">NOM</label><input id="registrationName" name="name" type="text" required minlength="2" maxlength="120" placeholder="Nom i cognoms" autocomplete="name">
+<label for="registrationEmail">EMAIL</label><input id="registrationEmail" name="email" type="email" required maxlength="254" placeholder="nom@exemple.com" autocomplete="email" inputmode="email">
+<div class="silent" aria-hidden="true"><label for="registrationWebsite">Web</label><input id="registrationWebsite" name="website" type="text" autocomplete="off" tabindex="-1"></div>
+<p class="privacy">En enviar aquestes dades, acceptes que la Banda de la Cala les utilitzi exclusivament per gestionar la teva alta a l'APP. Encara no s'està creant cap compte.</p>
+<button id="sendRegistration" type="submit">ENVIAR DADES <span aria-hidden="true">➜</span></button>
+<p id="registrationStatus" class="status" role="status" aria-live="polite"></p></form>
+<section id="sentSuccess" class="success" hidden><strong>Sol·licitud rebuda!</strong><p>Gràcies! Els gestors de la banda prepararan el teu accés.</p><button id="anotherRegistration" type="button">INTRODUIR UN ALTRE NOM + EMAIL</button></section>
+</section><footer>BANDA DE LA CALA · L'Ametlla de Mar</footer></main>
+<script src="../config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="./app.js"></script></body></html>

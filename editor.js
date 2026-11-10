@@ -199,7 +199,7 @@ function save(next=content,message='Canvis desats'){
 }
 function bootIdentity(){ $$('[data-app-name]').forEach(el=>el.textContent=CFG.appName||'BANDA DE LA CALA'); $$('[data-app-subtitle]').forEach(el=>el.textContent=CFG.subtitle||'L’Ametlla de Mar'); $$('[data-app-icon]').forEach(el=>el.src=CFG.appIcon||'assets/brand/app-icon.png'); $$('[data-app-version]').forEach(el=>el.textContent=CFG.version||window.BANDA_VERSION||'v0.26'); }
 function editorCanAccessView(id){ return !(currentProfile?.role==='gestor' && ['games','system'].includes(id)); }
-function switchEditorView(id){ if(!views[id] || !editorCanAccessView(id)) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const titleIcon=$('#editorTitleIcon'); if(titleIcon){titleIcon.innerHTML=editorPageTitleIcon(id);titleIcon.hidden=id!=='history';} const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); if(id==='archive') refreshArchiveReview(); else refreshArchivePendingBadge(); window.scrollTo({top:0,behavior:'smooth'}); }
+function switchEditorView(id){ if(!views[id] || !editorCanAccessView(id)) id='dashboard'; $$('.editor-view').forEach(view=>view.classList.toggle('active',view.dataset.editorView===id)); $$('[data-editor-nav]').forEach(btn=>btn.classList.toggle('active',btn.dataset.editorNav===id)); $('#editorEyebrow').textContent=views[id].eyebrow; $('#editorTitle').textContent=views[id].title; const titleIcon=$('#editorTitleIcon'); if(titleIcon){titleIcon.innerHTML=editorPageTitleIcon(id);titleIcon.hidden=id!=='history';} const installBtn=$('#editorInstallBtn'); if(installBtn) installBtn.classList.toggle('view-hidden',id!=='dashboard'); if(id==='dashboard') renderDashboard(); if(id==='users') loadPendingRegistrations(); if(id==='archive') refreshArchiveReview(); else refreshArchivePendingBadge(); window.scrollTo({top:0,behavior:'smooth'}); }
 function bindNavigation(){ $$('[data-editor-nav]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.editorNav))); $$('[data-jump]').forEach(btn=>btn.addEventListener('click',()=>switchEditorView(btn.dataset.jump))); }
 function formatDate(date){ if(!date) return 'Sense data'; const d=new Date(date+'T12:00:00'); return new Intl.DateTimeFormat('ca-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(d).replace(/^./,c=>c.toUpperCase()); }
 function formatDateNumeric(date){ if(!date) return '—'; const [y,m,d]=String(date).split('-'); return y&&m&&d?`${d}/${m}/${y}`:String(date); }
@@ -2917,6 +2917,67 @@ async function loadUsers(){
   }catch(error){ console.error(error); if($('#usersList')) $('#usersList').innerHTML='<div class="empty-state">No s’han pogut carregar els usuaris.</div>'; }
 }
 
+// v0.155: Peticions públiques d'alta; només ADMIN/GESTOR tenen permís RLS de lectura i supressió.
+let pendingRegistrationRows=[];
+let pendingRegistrationSelectedId=null;
+const pendingDateFormatter=new Intl.DateTimeFormat('ca-ES',{dateStyle:'short',timeStyle:'short',timeZone:'Europe/Madrid'});
+function fitPendingRegistrationsList(){
+  const host=$('#pendingRegistrationsList');if(!host)return;
+  const items=[...host.children].filter(el=>el.classList.contains('banda-pending-strip'));
+  host.style.height='';host.style.maxHeight='';
+  host.classList.toggle('banda-pending-scroll',items.length>=10);
+  if(items.length<10)return;
+  const gap=parseFloat(getComputedStyle(host).rowGap||getComputedStyle(host).gap)||0;
+  const height=items.slice(0,9).reduce((n,el)=>n+el.getBoundingClientRect().height,0)+gap*9+items[9].getBoundingClientRect().height*.5;
+  host.style.maxHeight=Math.ceil(height)+'px';
+}
+function renderPendingRegistrations(){
+  const list=$('#pendingRegistrationsList');if(!list)return;
+  $('#pendingRegistrationsCount').textContent=String(pendingRegistrationRows.length);
+  list.replaceChildren();
+  if(!pendingRegistrationRows.length){const empty=document.createElement('div');empty.className='empty-state';empty.textContent='Encara no hi ha noves altes pendents.';list.append(empty);return;}
+  for(const item of pendingRegistrationRows){
+    const row=document.createElement('article');row.className='list-item banda-pending-strip';
+    const main=document.createElement('div');main.className='banda-pending-info';
+    const name=document.createElement('strong');name.textContent=item.name;
+    const email=document.createElement('span');email.textContent=item.email;
+    const date=document.createElement('small');date.textContent='Rebut: '+pendingDateFormatter.format(new Date(item.created_at));
+    main.append(name,email,date);
+    const btn=document.createElement('button');btn.type='button';btn.className='secondary-btn banda-transfer-btn';btn.textContent='PASSAR A NOU USUARI';
+    btn.addEventListener('click',()=>{
+      $('#newUserName').value=item.name;
+      $('#newUserEmail').value=item.email;
+      $('#newUserRole').value='standard';
+      pendingRegistrationSelectedId=item.id;
+      $('#createUserStatus').textContent='Petició preparada. Selecciona STANDARD o GESTOR i prem CREAR USUARI.';
+      $('#createUserForm').scrollIntoView({behavior:'smooth',block:'start'});
+      $('#newUserRole').focus({preventScroll:true});
+    });
+    row.append(main,btn);list.append(row);
+  }
+  requestAnimationFrame(fitPendingRegistrationsList);
+}
+async function loadPendingRegistrations(){
+  if(!editorCanWrite)return;
+  const status=$('#pendingRegistrationsStatus');
+  const client=window.BandaSupabase?.getClient?.();if(!client)return;
+  const {data,error}=await client.from('banda_pending_registrations')
+     .select('id,name,email,created_at').order('created_at',{ascending:false}).limit(1000);
+  if(error){if(status)status.textContent='No s’han pogut carregar les altes. Comprova que s’ha executat la migració SQL v0.155.';console.warn('BANDA_PENDING_LOAD',error);return;}
+  pendingRegistrationRows=data||[];
+  if(status)status.textContent='';
+  renderPendingRegistrations();
+}
+async function finalizePendingRegistration(email){
+  const selected=pendingRegistrationRows.find(x=>x.id===pendingRegistrationSelectedId);
+  if(!selected||String(selected.email).toLowerCase()!==String(email).toLowerCase())return;
+  const client=window.BandaSupabase?.getClient?.();
+  const {error}=await client.from('banda_pending_registrations').delete().eq('id',selected.id);
+  if(error)throw error;
+  pendingRegistrationSelectedId=null;
+  await loadPendingRegistrations();
+}
+
 function bindUsers(){
   const accountsCard=$('#usersAccountsCard');
   const accountsToggle=$('#usersAccountsToggle');
@@ -2939,6 +3000,7 @@ function bindUsers(){
   mobileAccountsQuery?.addEventListener?.('change',syncAccountsDisclosure);
   syncAccountsDisclosure();
 
+  $('#refreshPendingRegistrations')?.addEventListener('click',()=>loadPendingRegistrations());
   $('#createUserForm')?.addEventListener('submit',async event=>{
     event.preventDefault();
     if(!editorCanWrite) return;
@@ -2953,6 +3015,7 @@ function bindUsers(){
       status.textContent=result.replacedPendingUser
         ? 'Compte pendent reiniciat. S’ha enviat una nova invitació perquè l’usuari triï la seva contrasenya.'
         : 'Usuari creat correctament. Invitació enviada: l’usuari triarà la seva pròpia contrasenya.';
+      try{await finalizePendingRegistration(email);}catch(pendingError){console.warn('PENDING_FINALIZE',pendingError);status.textContent+=' Compte creat, però no s’ha pogut retirar la petició de la llista; actualitza i revisa-la.';}
       $('#newUserName').value=''; $('#newUserEmail').value=''; $('#newUserRole').value='standard';
       await loadUsers();
     }catch(error){
@@ -3077,7 +3140,7 @@ async function activateSupabaseEditor(session){
       supabaseActive=true; migrationPending=false;
       markSaved('DESAT A SUPABASE');
     }
-    renderAll(); updatePermissionUi(); await refreshArchivePendingBadge(); await loadUsers();
+    renderAll(); updatePermissionUi(); await refreshArchivePendingBadge(); await loadUsers(); await loadPendingRegistrations();
     BandaSupabase.subscribeContent(next=>{
       if(!supabaseActive || !contentHasUsefulData(next)) return;
       content=BandaStore.normalize(next); BandaStore.cacheRemote?.(content); renderAll(); updatePermissionUi(); markSaved('ACTUALITZAT DES DE SUPABASE');
@@ -3287,5 +3350,5 @@ async function registerEditorSW(){
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();if(document.querySelector('.editor-view.active[data-editor-view=\"users\"]'))loadPendingRegistrations();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();

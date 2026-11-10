@@ -1,4 +1,4 @@
-/* v0.144 · Local inbox, registered users only, device specific. */
+/* v0.155 · Local inbox, registered users only, device specific. */
 (() => {
  'use strict';
  const $=id=>document.getElementById(id);
@@ -54,6 +54,8 @@
  for(const msg of messages){const card=document.createElement('div');card.className='user-notification-item';card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label','Obrir notificació: '+String(msg.title||''));const title=document.createElement('strong');title.textContent=String(msg.title||'BANDA DE LA CALA');const body=document.createElement('span');body.textContent=String(msg.body||'');const date=document.createElement('time');date.textContent=dateFmt.format(new Date(msg.timestamp||Date.now()));card.append(title,body,date);
  const dismiss=document.createElement('button');dismiss.type='button';dismiss.className='user-notification-dismiss';dismiss.textContent='×';dismiss.setAttribute('aria-label','Eliminar aquesta notificació');dismiss.title='Eliminar notificació';
  dismiss.dataset.notificationId=String(msg.id);
+ dismiss.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();dismissNotification(msg.id,card);});
+ dismiss.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();dismissNotification(msg.id,card);}});
  card.append(dismiss);
  const open=async()=>{
    const destination=new URL(safeUrl(msg.url),location.origin);
@@ -68,22 +70,6 @@
  function openInbox(scrollBlock='nearest'){const box=$('userNotificationsBox');if(!box)return;box.open=true;box.setAttribute('aria-expanded','true');render();box.scrollIntoView({behavior:'smooth',block:scrollBlock})}
  function closeInbox(){const box=$('userNotificationsBox');if(!box)return;box.open=false;box.setAttribute('aria-expanded','false')}
  document.addEventListener('DOMContentLoaded',()=>{
-   const list=$('userNotificationsList');
-   if(list){
-     list.addEventListener('click',ev=>{
-       const button=ev.target.closest('button.user-notification-dismiss');
-       if(!button||!list.contains(button))return;
-       ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();
-       const card=button.closest('.user-notification-item');
-       dismissNotification(button.dataset.notificationId,card);
-     },true);
-     list.addEventListener('keydown',ev=>{
-       const button=ev.target.closest('button.user-notification-dismiss');
-       if(!button||!list.contains(button)||!(ev.key==='Enter'||ev.key===' '))return;
-       ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation();
-       dismissNotification(button.dataset.notificationId,button.closest('.user-notification-item'));
-     },true);
-   }
    const box=$('userNotificationsBox');
    if(box){
      box.addEventListener('toggle',()=>{box.setAttribute('aria-expanded',box.open?'true':'false'); if(box.open) render()});

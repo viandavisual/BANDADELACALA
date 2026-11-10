@@ -1,0 +1,7 @@
+BANDA DE LA CALA v0.155
+- APP/USER: la X desktop elimina realment les notificacions; conserva el tipus original de l'ID d'IndexedDB (l'anterior delegació l'havia convertit a string).
+- Nova pàgina pública independent /altes/: nom, email, enviar, opció de repetir; disseny blau corporatiu, logotip i missatge de privacitat.
+- EDITOR/USUARIS: NOVES ALTES PENDENTS, data/hora Madrid, 9,5 registres visibles i scroll; transferència a NOU USUARI i retirada després de crear el compte.
+- HOME EDITOR i HOME APP: nous textos exactes.
+- Requereix migració SQL SUPABASE_UPDATE_v0.155_PENDING_REGISTRATIONS.sql abans de publicar l'enllaç de la miniapp.
+- La pàgina pública no exposa el registre; RLS limita lectura/esborrat a ADMIN/GESTOR.
