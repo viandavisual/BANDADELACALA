@@ -386,7 +386,7 @@ function openEscacsGame(){
   document.body.classList.add('minigame-fullscreen-open');
   menu.hidden=true;panel.hidden=false;
   frame.onload=()=>{sendToOpenMinigame({type:'BANDA_DE_LA_CALA_MINIGAME_INIT',game:'ESCACS_A_BANDA',muted:state.globalMuted});};
-  frame.src=`app/minigames/escacs-a-banda/index.html?v=19&ts=${Date.now()}`;
+  frame.src=`app/minigames/escacs-a-banda/index.html?v=20&ts=${Date.now()}`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 async function openQuinaNotaGame(){

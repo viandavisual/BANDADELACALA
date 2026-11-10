@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <meta name="theme-color" content="#071b49" />
-  <title>ESCACS A BANDA · v19</title>
+  <title>ESCACS A BANDA · v20</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -39,39 +39,45 @@
 
         <section id="rotateOverlay" class="modal rotateOverlay" aria-live="polite">
           <div class="panel compact rotatePanel">
-            <h2>GIRA EL DISPOSITIU</h2>
             <div class="rotateIcon" aria-hidden="true">↻</div>
-            <p class="subtitle">Per jugar a ESCACS A BANDA has de posar el dispositiu en horitzontal.</p>
-            <p class="hint">Quan el giris, el joc es mostrarà automàticament.</p>
+            <div class="rotateMessage">GIRAR PER JUGAR</div>
           </div>
         </section>
 
         <section id="menu" class="modal open">
           <div class="panel">
-            <img class="gameLogo" src="assets/ui/escacs_logo.png" alt="ESCACS A BANDA" draggable="false" />
-            <p class="subtitle">Tria com vols jugar</p>
-
-            <div class="choiceRow" aria-label="Partida i dificultat">
-              <div class="choiceGroup">
-                <div class="choiceTitle">PARTIDA</div>
-                <div class="segmented" id="playersChoice">
-                  <button type="button" data-value="cpu" class="selected iconChoice" aria-label="PLAYER vs CPU" aria-pressed="true"><img src="assets/ui/ICONS_1P.png" alt="PLAYER vs CPU" draggable="false" /></button>
-                  <button type="button" data-value="local" class="iconChoice" aria-label="PLAYER vs PLAYER" aria-pressed="false"><img src="assets/ui/ICONS_2P.png" alt="PLAYER vs PLAYER" draggable="false" /></button>
-                </div>
+            <div class="menuLayout">
+              <div class="menuHero">
+                <img class="gameLogo" src="assets/ui/escacs_logo.png" alt="ESCACS A BANDA" draggable="false" />
+                <p class="subtitle">Tria com vols jugar</p>
               </div>
-              <div class="choiceGroup">
-                <div class="choiceTitle">MODE</div>
-                <div class="segmented" id="difficultyChoice">
-                  <button type="button" data-value="easy" class="selected iconChoice" aria-label="FÀCIL" aria-pressed="true"><img src="assets/ui/ICONS_FACIL.png" alt="FÀCIL" draggable="false" /></button>
-                  <button type="button" data-value="normal" class="iconChoice" aria-label="NORMAL" aria-pressed="false"><img src="assets/ui/ICONS_NORMAL.png" alt="NORMAL" draggable="false" /></button>
+
+              <div class="menuOptions">
+                <div class="choiceRow" aria-label="Partida i dificultat">
+                  <div class="choiceGroup">
+                    <div class="choiceTitle">PARTIDA</div>
+                    <div class="segmented" id="playersChoice">
+                      <button type="button" data-value="cpu" class="selected iconChoice" aria-label="PLAYER vs CPU" aria-pressed="true"><img src="assets/ui/ICONS_1P.png" alt="PLAYER vs CPU" draggable="false" /></button>
+                      <button type="button" data-value="local" class="iconChoice" aria-label="PLAYER vs PLAYER" aria-pressed="false"><img src="assets/ui/ICONS_2P.png" alt="PLAYER vs PLAYER" draggable="false" /></button>
+                    </div>
+                  </div>
+                  <div class="choiceGroup">
+                    <div class="choiceTitle">MODE</div>
+                    <div class="segmented" id="difficultyChoice">
+                      <button type="button" data-value="easy" class="selected iconChoice" aria-label="FÀCIL" aria-pressed="true"><img src="assets/ui/ICONS_FACIL.png" alt="FÀCIL" draggable="false" /></button>
+                      <button type="button" data-value="normal" class="iconChoice" aria-label="NORMAL" aria-pressed="false"><img src="assets/ui/ICONS_NORMAL.png" alt="NORMAL" draggable="false" /></button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="menuActions">
+                  <button id="playBtn" class="primary">JUGAR</button>
+                  <button id="resumeBtn" class="secondary hidden">CONTINUAR</button>
+                  <button id="restartBtn" class="secondary hidden">NOVA PARTIDA</button>
+                  <button id="exitGameBtn" class="exitGameBtn" type="button">SURT DEL JOC</button>
                 </div>
               </div>
             </div>
-
-            <button id="playBtn" class="primary">JUGAR</button>
-            <button id="resumeBtn" class="secondary hidden">CONTINUAR</button>
-            <button id="restartBtn" class="secondary hidden">NOVA PARTIDA</button>
-            <button id="exitGameBtn" class="exitGameBtn" type="button">SURT DEL JOC</button>
           </div>
         </section>
 

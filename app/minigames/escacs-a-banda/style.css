@@ -49,7 +49,7 @@ h1,h2{font-family:var(--font-display);margin:.1em 0;color:#ffe08a;text-shadow:0 
 /* v0.146: HUD ancorat a la mateixa geometria proporcional que el fons 1672×941.
    Els valors dins del quadre també escalen amb el stage (variable --eab-scale). */
 body.desktop #statusBar{left:0.4785%;top:71.73%;width:41.2679%;height:22.848%;}
-body.desktop #hudButtons{left:calc(66px * var(--eab-scale,1));top:calc(25px * var(--eab-scale,1));bottom:auto;flex-direction:column;gap:calc(12px * var(--eab-scale,1))}
+body.desktop #hudButtons{left:calc(66px * var(--eab-scale,1));top:50%;bottom:auto;transform:translateY(-50%);flex-direction:column;gap:calc(12px * var(--eab-scale,1))}
 body.desktop #statusText{left:26.67%;right:2.6%;top:16%;bottom:6%;padding:calc(8px * var(--eab-scale,1)) calc(12px * var(--eab-scale,1));font-size:calc(34px * var(--eab-scale,1));}
 body.desktop .uiBtn.tiny{width:calc(72px * var(--eab-scale,1));height:calc(72px * var(--eab-scale,1));border-radius:calc(10px * var(--eab-scale,1));font-size:calc(33px * var(--eab-scale,1));}
 
@@ -59,8 +59,7 @@ body.desktop .uiBtn.tiny{width:calc(72px * var(--eab-scale,1));height:calc(72px 
 
 .rotateOverlay{z-index:120;display:none;place-items:center;padding:8%;background:radial-gradient(circle at 50% 25%,rgba(18,41,91,.82),rgba(1,6,20,.94) 72%);}
 .rotateOverlay.open{display:grid}
-.rotatePanel{max-width:520px;text-align:center}
-.rotateIcon{font-size:76px;line-height:1;margin:.2em 0 .15em;color:#ffe08a;text-shadow:0 2px 0 #4d2100;animation:rotateHint 1.4s ease-in-out infinite}
+.rotatePanel{max-width:420px;text-align:center;display:grid;justify-items:center;gap:12px;padding:8% 10%}.rotateMessage{font-family:var(--font-ui);font-size:clamp(22px,4.6vw,38px);font-weight:900;letter-spacing:.08em;color:#fff0bf;text-shadow:0 2px 0 #4d2100}.rotateIcon{font-size:88px;line-height:1;margin:0;color:#ffe08a;text-shadow:0 2px 0 #4d2100;animation:rotateHint 1.15s ease-in-out infinite}
 @keyframes rotateHint{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(90deg) scale(1.08)}}
 
 /* v0.8 · música y celebración de ESCAC I MAT */
@@ -167,4 +166,36 @@ body.desktop .gameLogo{width:min(560px,82%)}
   #menu .choiceRow{max-width:440px}
   #menu .choiceRow .segmented{max-width:190px}
   #menu .panel{padding:4px 12px}
+}
+
+
+/* v20 · ajustos finals HUD, overlay i menú horitzontal */
+#menu .panel{width:min(94%,980px);max-width:980px;max-height:calc(100% - 16px);padding:14px 24px 16px;overflow:auto}
+#menu .menuLayout{display:grid;grid-template-columns:minmax(230px,.82fr) minmax(430px,1.18fr);align-items:center;gap:24px}
+#menu .menuHero{text-align:center}
+#menu .menuHero .gameLogo,body.desktop #menu .menuHero .gameLogo{width:100%;max-width:430px;max-height:min(180px,27vh);margin:0 auto 6px}
+#menu .menuHero .subtitle{margin:0;color:#f8e7bb;font-size:15px}
+#menu .menuOptions{display:grid;gap:12px;align-content:center}
+#menu .choiceRow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:none;margin:0}
+#menu .choiceGroup{min-width:0;margin:0;padding:12px 12px 14px;border-radius:16px;background:rgba(3,15,43,.28);border:1px solid rgba(255,231,170,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+#menu .choiceTitle{margin:0 0 8px;font-size:15px;letter-spacing:.08em}
+#menu .choiceRow .segmented{max-width:none;gap:10px;margin:0}
+#menu .choiceRow .iconChoice{max-width:165px}
+#menu .menuActions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+#menu .menuActions > button{flex:1 1 180px;max-width:220px;margin:0}
+#menu .primary,#menu .secondary,#menu .exitGameBtn{padding:11px 10px}
+#menu .exitGameBtn{font-size:13px}
+@media (max-width:900px), (max-height:560px){
+  #menu .panel{padding:10px 16px 12px}
+  #menu .menuLayout{gap:14px;grid-template-columns:1fr}
+  #menu .menuHero .gameLogo,body.desktop #menu .menuHero .gameLogo{max-height:min(120px,22vh)}
+  #menu .choiceRow{gap:10px}
+}
+@media (max-height:460px){
+  #menu .panel{padding:6px 12px 8px}
+  #menu .menuHero .subtitle{font-size:12px}
+  #menu .choiceGroup{padding:8px 10px 10px}
+  #menu .choiceTitle{font-size:12px;margin-bottom:4px}
+  #menu .menuActions > button{flex-basis:150px;max-width:190px}
+  #menu .primary,#menu .secondary,#menu .exitGameBtn{padding:7px 8px;font-size:12px}
 }

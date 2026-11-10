@@ -1,0 +1,8 @@
+BANDA DE LA CALA v0.156
+
+- ESCACS A BANDA: overlay de gir simplificat a icona + text "GIRAR PER JUGAR".
+- ESCACS A BANDA: botons de menú i música rebaixats i centrats verticalment dins la caixa blava.
+- ESCACS A BANDA: menú principal redissenyat per aprofitar millor el format horitzontal.
+- ESCACS A BANDA: nova animació inicial de peces entrant des de fora de pantalla (roges des de dalt, blaves des de baix).
+- ESCACS A BANDA: ordre d’entrada ajustat a peons primer i figures després, amb seqüència completa en aproximadament 1,5 segons.
+- ESCACS A BANDA: sense sons de peces durant la formació inicial.

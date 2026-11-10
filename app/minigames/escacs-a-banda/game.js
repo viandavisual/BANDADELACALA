@@ -37,7 +37,7 @@ function closeBootSplash(){
 setTimeout(closeBootSplash,1760);
 bootSplash?.addEventListener('pointerup',closeBootSplash,{once:true});
 
-document.title = 'ESCACS A BANDA · v19';
+document.title = 'ESCACS A BANDA · v20';
 stage.setAttribute('data-layout', LAYOUT);
 stage.style.width = '100%';
 stage.style.height = '100%';
@@ -94,8 +94,9 @@ let cpuThinking = false;
 let toastTimer = null;
 let gameStarted = false;
 let introRunning = false;
-const INTRO_STAGGER_MS = 300;
-const INTRO_PIECE_MS = 640;
+const INTRO_PIECE_MS = 500;
+const INTRO_TOTAL_MS = 1500;
+const INTRO_STAGGER_MS = Math.max(20, Math.floor((INTRO_TOTAL_MS - INTRO_PIECE_MS) / 31));
 
 const PIECE_NAME = {k:'DIRECTOR',q:'TROMPETA',r:'TUBA',b:'SAXO TENOR',n:'TROMBÓ',p:'CLARINET'};
 const VALUE = {p:100,n:320,b:330,r:500,q:900,k:20000};
@@ -589,24 +590,20 @@ function runNewGameIntro(){
   introRunning=true;
   stage.classList.add('intro-running');
   const ordered=[];
-  // Red band enters first from the back of the stage, then blue band from the foreground.
-  for(const r of [0,1,6,7]){
+  // Ordre: peons rojos, peons blaus, figures roges, figures blaves.
+  for(const r of [1,6,0,7]){
     for(let c=0;c<8;c++){
       const p=game.board[r][c];
-      if(p) ordered.push({el:document.getElementById(`piece-${p.id}`),color:p.color,type:p.type});
+      if(p) ordered.push({el:document.getElementById(`piece-${p.id}`),color:p.color});
     }
   }
+  const introOffset=Math.ceil(H+140);
   ordered.forEach(({el,color})=>{
     if(!el) return;
     el.classList.remove('selected','moving','intro-enter');
     el.classList.add('intro-wait');
-    if(IS_DESKTOP){
-      el.style.setProperty('--intro-from-y', '0px');
-      el.style.setProperty('--intro-from-x', color==='b' ? '125px' : '-125px');
-    }else{
-      el.style.setProperty('--intro-from-x', '0px');
-      el.style.setProperty('--intro-from-y', color==='b' ? '-105px' : '105px');
-    }
+    el.style.setProperty('--intro-from-x','0px');
+    el.style.setProperty('--intro-from-y', color==='w' ? `${introOffset}px` : `-${introOffset}px`);
   });
 
   introFlash.classList.remove('active');
@@ -614,7 +611,7 @@ function runNewGameIntro(){
   void introFlash.offsetWidth;
   introFlash.classList.add('active');
 
-  ordered.forEach(({el,type},i)=>{
+  ordered.forEach(({el},i)=>{
     if(!el) return;
     setTimeout(()=>{
       el.classList.remove('intro-wait');
@@ -632,9 +629,9 @@ function runNewGameIntro(){
     introRunning=false;
     stage.classList.remove('intro-running');
     updateHighlights();updateStatus();
-  },finishAt+70);
-  setTimeout(()=>introFlash.classList.remove('active'),3050);
-  setTimeout(()=>introGlow.classList.remove('active'),finishAt+1350);
+  },finishAt+50);
+  setTimeout(()=>introFlash.classList.remove('active'),Math.max(900,finishAt+120));
+  setTimeout(()=>introGlow.classList.remove('active'),finishAt+780);
 }
 
 function flash(msg){
