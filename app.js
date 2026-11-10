@@ -15,6 +15,17 @@ let appInstallCompleted = false;
 let appInstallSuccessTimer = null;
 
 const CFG = window.BANDA_CONFIG || {};
+// v0.153 · En recuperar escala 1:1 després de pinch, impedir scroll horitzontal residual.
+// No interfereix amb zoom-in ni amb el desplaçament de la fotografia ampliada.
+if(window.visualViewport){
+  const ensureViewportWidth=()=>{
+    if(window.visualViewport.scale>1.01)return;
+    const scroller=document.scrollingElement;
+    if(scroller&&scroller.scrollLeft!==0)scroller.scrollLeft=0;
+  };
+  window.visualViewport.addEventListener('resize',ensureViewportWidth,{passive:true});
+}
+
 const initialGlobalMuted = (() => { try { return localStorage.getItem('banda-de-la-cala-muted') === '1'; } catch(error) { return false; } })();
 
 const state = {
@@ -928,7 +939,7 @@ function renderHistory(){
     const nextPeriod=displayPeriods[displayIndex+1];
     const nextButton=nextPeriod?`<button class="history-next-period" type="button" data-next-period="${esc(nextPeriod.id)}"><span>SEGÜENT PERÍODE</span><strong>↓</strong></button>`:'';
     const photoCount=historyPeriodPhotoCount(period.id);
-    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-portrait" aria-hidden="true"><img src="${esc(HISTORY_DIRECTOR_PORTRAITS[period.id]||'')}" alt="" loading="lazy" decoding="async"></span><div class="history-period-inline"><span class="history-period-year history-period-years history-period-years-desktop">${esc(yearsLabel)}</span><span class="history-period-year history-period-years history-period-years-mobile">${esc(mobileYearsLabel)}</span><span class="history-period-director">${esc(period.director)}</span>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-photo-total" aria-label="${photoCount} ${photoCount===1?'foto':'fotos'}">${photoCount}</span><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
+    return `<section class="history-period period-tone-${originalIndex+1} ${collapsed?'is-collapsed':''} ${isCurrent?'is-current':''}" data-period="${esc(period.id)}" style="--period-color:${esc(periodColor)};--period-text:${esc(periodText)}"><button class="history-period-head" type="button" data-toggle-period="${esc(period.id)}" aria-expanded="${collapsed?'false':'true'}"><span class="history-period-portrait" aria-hidden="true"><img src="${esc(HISTORY_DIRECTOR_PORTRAITS[period.id]||'')}" alt="" loading="lazy" decoding="async"></span><div class="history-period-inline"><span class="history-period-year history-period-years history-period-years-desktop">${esc(yearsLabel)}</span><span class="history-period-year history-period-years history-period-years-mobile">${esc(mobileYearsLabel)}</span><span class="history-period-director">${esc(String(period.director||'').replace(/\bAlex\s+Castells\b/gi,'Àlex Castells'))}</span>${isCurrent?'<span class="history-current-badge">ACTUAL</span>':''}</div><span class="history-period-photo-total" aria-label="${photoCount} ${photoCount===1?'foto':'fotos'}">${photoCount}</span><span class="history-period-chevron" aria-hidden="true">⌄</span></button><div class="history-period-items" data-loaded="${collapsed?'0':'1'}">${initialMedia}${nextButton}</div></section>`;
   }).join('');
   host.onclick=event=>{
     const toggle=event.target.closest('[data-toggle-period]');
@@ -1382,10 +1393,11 @@ try{ const saved=JSON.parse(localStorage.getItem(TRACK_DURATION_CACHE_KEY)||'{}'
 function persistTrackDurations(){ try{ localStorage.setItem(TRACK_DURATION_CACHE_KEY,JSON.stringify(Object.fromEntries(trackDurationCache))); }catch(_error){} }
 function trackDuration(track){ const direct=Number(track?.duration); if(Number.isFinite(direct)&&direct>0) return direct; return Number(trackDurationCache.get(String(track?.src||'')))||0; }
 function totalTrackDuration(tracks){ return (tracks||[]).reduce((sum,track)=>sum+trackDuration(track),0); }
+function formatTotalTrackDuration(value){if(!Number.isFinite(value)||value<0)return '00:00:00'; const seconds=Math.floor(value);return `${String(Math.floor(seconds/3600)).padStart(2,'0')}:${String(Math.floor(seconds%3600/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;}
 function paintTrackDurations(tracks){
   (tracks||[]).forEach((track,index)=>{ const el=document.querySelector(`#trackList [data-duration-index="${index}"]`); if(el){ const seconds=trackDuration(track); el.textContent=seconds>0?formatTime(seconds):'--:--'; } });
   const total=$('#playlistTotalDuration');
-  if(total){ const known=(tracks||[]).filter(track=>trackDuration(track)>0).length; const seconds=totalTrackDuration(tracks); total.textContent=`DURADA TOTAL · ${tracks.length&&known===tracks.length?formatTime(seconds):'--:--'}`; }
+  if(total){ const known=(tracks||[]).filter(track=>trackDuration(track)>0).length; const seconds=totalTrackDuration(tracks); total.textContent=`DURADA TOTAL · ${tracks.length&&known===tracks.length?formatTotalTrackDuration(seconds):'--:--:--'}`; }
 }
 function loadTrackDuration(track){
   const src=String(track?.src||'').trim(); if(!src) return Promise.resolve(0);

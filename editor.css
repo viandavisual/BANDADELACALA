@@ -1277,3 +1277,20 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 
 /* v0.145 · Segon minijoc a l'EDITOR */
 .escacs-editor-grid{margin-top:22px}
+
+/* v0.153 · Personalització del prefix dels recordatoris automàtics. */
+.push-prefix-editor{display:grid;gap:12px;margin-top:19px;padding:16px;
+  border:1px solid #d4daeb;border-radius:16px;background:#f8f9ff;color:#273465}
+.push-prefix-heading{display:grid;gap:4px}
+.push-prefix-heading strong{font-size:.85rem;letter-spacing:.035em}
+.push-prefix-heading span{font-size:.76rem;color:#6c7290}
+.push-prefix-editor label{display:grid;gap:6px;font-size:.76rem;font-weight:800;min-width:0}
+.push-prefix-editor input,.push-prefix-editor select{width:100%;min-width:0;box-sizing:border-box;
+  border:1px solid #b7c3e4;border-radius:10px;background:#fff;padding:10px 12px;
+  font:600 .9rem/1.3 Arial,sans-serif;color:#273465}
+.push-prefix-fields{display:grid;grid-template-columns:minmax(90px,.4fr) minmax(0,1.6fr);gap:12px}
+.push-prefix-fields[hidden]{display:none!important}
+.push-prefix-preview{font-size:.8rem;color:#68708d}.push-prefix-preview strong{color:#273465}
+.push-prefix-editor #pushReminderSave{justify-self:start}
+.push-prefix-editor #pushReminderStatus{font-size:.78rem;color:#525c86}
+@media(max-width:560px){.push-prefix-fields{grid-template-columns:1fr}.push-prefix-editor #pushReminderSave{width:100%}}

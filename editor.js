@@ -2967,7 +2967,39 @@ function bindUsers(){
   });
 }
 
-function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderDemos(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); }
+// v0.153 · Configuració compartida a Supabase per als recordatoris automàtics.
+function readPushReminderSettings(){
+ const value=content.settings?.pushReminderPrefix;
+ return value&&value.style==='custom'?{style:'custom',emoji:String(value.emoji||'').slice(0,12),label:String(value.label||'').slice(0,46)}:{style:'default',emoji:'🎼',label:'Recordatori:'};
+}
+function renderPushReminderSettings(){
+ const select=$('#pushReminderStyle');if(!select)return;
+ // Never interrupt a user editing the field before saving.
+ if(!select.matches(':focus')&&!$('#pushReminderEmoji')?.matches(':focus')&&!$('#pushReminderLabel')?.matches(':focus')){
+   const saved=readPushReminderSettings();select.value=saved.style;
+   $('#pushReminderEmoji').value=saved.emoji;$('#pushReminderLabel').value=saved.label;
+ }
+ const custom=select.value==='custom';$('#pushReminderCustom').hidden=!custom;
+ const emoji=custom?String($('#pushReminderEmoji').value||'').trim():'🎼';
+ const label=custom?String($('#pushReminderLabel').value||'').trim():'Recordatori:';
+ $('#pushReminderPreview').textContent=[emoji,label,'demà'].filter(Boolean).join(' ');
+}
+function bindPushReminderSettings(){
+ const select=$('#pushReminderStyle');if(!select)return;
+ for(const id of ['pushReminderStyle','pushReminderEmoji','pushReminderLabel'])$('#'+id)?.addEventListener(id==='pushReminderStyle'?'change':'input',renderPushReminderSettings);
+ $('#pushReminderSave')?.addEventListener('click',()=>{
+   const style=select.value==='custom'?'custom':'default';
+   const emoji=String($('#pushReminderEmoji').value||'').trim().slice(0,12);
+   const label=String($('#pushReminderLabel').value||'').trim().slice(0,46);
+   if(style==='custom'&&!emoji&&!label){$('#pushReminderStatus').textContent='Introdueix un emoji o un text.';return;}
+   content.settings=content.settings||{};
+   content.settings.pushReminderPrefix={style,emoji:style==='default'?'🎼':emoji,label:style==='default'?'Recordatori:':label};
+   if(save(content,'Prefix dels recordatoris actualitzat'))$('#pushReminderStatus').textContent='Configuració preparada. Comprova l’indicador DESAT A SUPABASE abans de sortir.';
+ });
+ renderPushReminderSettings();
+}
+
+function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderDemos(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); renderPushReminderSettings(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{ if(supabaseActive) return; content=BandaStore.normalize(event.detail);renderAll();}); }
 
 function setEditorAccess({session=null,profile=null}={}){
@@ -3255,5 +3287,5 @@ async function registerEditorSW(){
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();

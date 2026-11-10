@@ -1,0 +1,23 @@
+BANDA DE LA CALA — v0.153
+
+APP / PLAYER
+- DURADA TOTAL de la playlist en HH:MM:SS (per exemple, 01:46:47).
+- Les durades individuals continuen en M:SS, sense modificar l'àudio.
+
+APP / USUARI
+- Notificacions: botó X de descartar només en desktop; en mobile continua el gest swipe.
+- Recordatoris: les notificacions vinculades a un esdeveniment s'eliminen de la bústia local quan ha passat la data i hora de l'esdeveniment (Europe/Madrid). Les notificacions antigues recuperen l'hora de l'esdeveniment si està disponible i, si no, caduquen al final del dia. Les notificacions manuals sense data no caduquen automàticament.
+- Les capçaleres NOTIFICACIONS i DEMOS tenen la mateixa mida de lletra i es justifiquen a l'esquerra.
+- PUJAR FATO MULTIMÈDIA: redisseny del formulari al model blau marí/durat, amb any obligatori explícit i la resta opcional.
+- OPCIONS D'USUARI i BÚSTIA SUGGERIMENTS: estil unificat amb PUJAR FATO.
+- HISTÒRIC: Àlex Castells sempre amb accent en la visualització, incloent dades antigues.
+- MOBILE: viewport amb escala mínima 1 i retall d'overflow horitzontal per evitar que el contingut surti de l'amplada després de gestos pinch. Es conserva el zoom-in.
+
+EDITOR / NOTIFICACIONS
+- Nova petita caixa per escollir el preset de sèrie «🎼 Recordatori:» o emoji i text personalitzats; guardat en la configuració compartida de Supabase.
+- Previsualització de la capçalera abans de desar.
+
+SUPABASE (PAS NECESSARI DESPRÉS DE PUBLICAR EL PATCH)
+- Re-desplegar supabase/functions/send-push-notification/index.ts (Verify JWT OFF, com abans).
+- L'Edge Function del cron fa servir el prefix seleccionat a l'EDITOR i inclou expiresAt (instant de l'esdeveniment) al payload PUSH.
+- No cal canviar Cron, VAPID ni afegir taules.

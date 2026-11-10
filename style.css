@@ -3397,3 +3397,211 @@ body.demo-video-open{overflow:hidden}
 @media(max-width:440px){
  .history-period-head .history-period-portrait{flex-basis:43px!important;width:43px!important;height:43px!important;min-width:43px!important;}
 }
+
+/* ===========================================================
+   BANDA DE LA CALA v0.153 · menus homogenis + zoom mobile
+   =========================================================== */
+html,body{max-width:100%;overflow-x:clip}
+@supports not (overflow:clip){html,body{overflow-x:hidden}}
+.app-shell,.app-main,.view,.user-view-wrap,.user-profile-card,.user-expansion-box{min-width:0;max-width:100%;box-sizing:border-box}
+@media(max-width:780px){
+  html,body{width:100%;max-width:100vw;overscroll-behavior-x:none}
+  .app-shell,.app-main,.view{max-width:100vw}
+  img,video,canvas{max-width:100%}
+}
+/* Same font size and left alignment for both section launchers. */
+.user-profile-card .user-notifications-box,
+.user-profile-card .user-demos-box{max-width:100%;box-sizing:border-box}
+.user-profile-card .user-notifications-box>summary,
+.user-profile-card .user-demos-box>summary{
+  display:flex!important;justify-content:flex-start!important;align-items:center!important;
+  text-align:left!important;padding-left:24px!important;padding-right:50px!important;min-height:72px!important
+}
+.user-profile-card .user-notifications-summary-copy,
+.user-profile-card .user-demos-summary-copy{justify-content:flex-start!important;text-align:left!important;min-width:0}
+.user-profile-card .user-notifications-summary-copy strong,
+.user-profile-card .user-demos-summary-copy strong{
+  font-size:.88rem!important;line-height:1.15!important;letter-spacing:.018em!important;
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;
+  color:var(--blue-deep)!important;text-align:left!important
+}
+.user-profile-card #userNotificationsHeading,
+.user-profile-card #userDemosHeading{justify-content:flex-start!important;text-align:left!important}
+@media(max-width:620px){
+  .user-profile-card .user-notifications-box>summary,.user-profile-card .user-demos-box>summary{
+    min-height:68px!important;padding-left:14px!important;padding-right:43px!important
+  }
+  .user-profile-card .user-notifications-summary-copy strong,
+  .user-profile-card .user-demos-summary-copy strong{font-size:.78rem!important;gap:8px!important}
+}
+/* Descartar amb X, only on desktop; touch swipe remains unchanged. */
+.user-notification-item{min-width:0;box-sizing:border-box}
+.user-notification-dismiss{display:none!important}
+@media(min-width:781px){
+  .user-notification-item{padding-right:52px!important}
+  .user-notification-dismiss{display:grid!important;position:absolute;right:10px;top:10px;
+    width:30px;height:30px;place-items:center;border-radius:50%;cursor:pointer;
+    background:#eef0fb;color:#393a86;border:1px solid #d1d7ef;
+    font:700 22px/1 Arial,sans-serif;transition:background .15s,transform .15s}
+  .user-notification-dismiss:hover{background:#fbe9e6;color:#b84444;transform:scale(1.06)}
+}
+
+/* Homogeneous dark-navy modal surfaces: upload, profile and suggestions. */
+.user-profile-card .archive-upload-box,
+.user-profile-card .user-options-box,
+.user-profile-card .suggestion-box{
+  margin-top:16px!important;padding:26px!important;max-width:100%;
+  background:linear-gradient(145deg,#263b7a 0%,#1a285e 52%,#192252 100%)!important;
+  color:#fff!important;border:1px solid rgba(156,172,245,.3)!important;
+  border-radius:25px!important;box-shadow:0 18px 38px rgba(22,29,69,.22)!important;
+  overflow:hidden;scroll-margin-top:110px
+}
+.user-profile-card .archive-upload-head,
+.user-profile-card .user-options-head,
+.user-profile-card .suggestion-box-head{
+  align-items:flex-start!important;justify-content:center!important;position:relative;
+  gap:8px!important;margin-bottom:10px!important;padding-right:38px;
+  min-height:58px;text-align:center
+}
+.user-profile-card .user-mini-heading{margin-inline:auto;text-align:center}
+.user-profile-card .user-mini-heading .eyebrow{
+  display:block!important;color:#f4cb61!important;letter-spacing:.10em!important;
+  font:800 .79rem/1.2 Arial,sans-serif!important
+}
+.user-profile-card .user-mini-heading h3{
+  margin:7px 0 0!important;color:#fff!important;
+  font:700 clamp(1.7rem,3.3vw,2.6rem)/1.12 Georgia,serif!important;
+  letter-spacing:0!important;text-transform:none!important
+}
+.user-profile-card .archive-upload-close,
+.user-profile-card .user-options-close,
+.user-profile-card .suggestion-box-close{
+  position:absolute!important;top:-8px!important;right:-8px!important;display:grid!important;
+  width:39px!important;height:39px!important;min-width:39px!important;place-items:center!important;
+  border-radius:50%!important;color:#18275c!important;background:#fff!important;
+  font:600 26px/1 Arial,sans-serif!important;box-shadow:0 3px 12px rgba(0,0,0,.14)!important
+}
+.user-profile-card .archive-upload-intro-note,
+.user-profile-card .suggestion-box-intro{
+  margin:4px auto 20px!important;text-align:center!important;max-width:780px;
+  font:400 .94rem/1.5 Arial,sans-serif!important;color:#f1f4ff!important
+}
+.user-profile-card .archive-upload-form{gap:15px!important;display:grid}
+.user-profile-card .archive-upload-block{
+  display:block!important;background:rgba(255,255,255,.075)!important;
+  border:1px solid rgba(206,218,255,.22)!important;border-radius:20px!important;
+  padding:16px!important;margin:0!important;min-width:0
+}
+.user-profile-card .archive-upload-block-head{margin:0 0 13px!important}
+.user-profile-card .archive-upload-block-head h4{
+  font:700 clamp(1.25rem,2.3vw,1.75rem)/1.2 Georgia,serif!important;
+  color:#fff!important;letter-spacing:0!important;text-transform:none!important
+}
+.user-profile-card .archive-upload-block-head h4::before{
+  content:'—';display:inline-block;margin-right:12px;color:#f2cf76;font:700 1.25rem Arial,sans-serif
+}
+.user-profile-card .archive-upload-block-head h4 .archive-year-head-note{
+  display:inline-flex;vertical-align:middle;align-items:center;
+  margin-left:10px;padding:7px 12px;border:1px solid rgba(255,255,255,.2);
+  border-radius:999px;background:rgba(255,255,255,.12);
+  font:700 .74rem/1.2 Arial,sans-serif!important;color:#f5f5ff
+}
+.user-profile-card .archive-upload-block-head h4 .archive-optional-head{
+  font:500 .8rem Arial,sans-serif;color:#edf0ff
+}
+.user-profile-card .archive-upload-type-pills{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:13px!important}
+.user-profile-card .archive-upload-type-btn{
+  min-height:70px!important;border-radius:17px!important;background:rgba(255,255,255,.055)!important;
+  border:2px solid #aebde9!important;color:#fff!important;
+  font:700 1.15rem/1.3 Georgia,serif!important;text-align:left!important;
+  padding:12px 22px!important;letter-spacing:0!important;text-transform:none!important
+}
+.user-profile-card .archive-upload-type-btn.is-active{
+  background:linear-gradient(130deg,#fff7e7,#f2dfbd)!important;
+  border-color:#ffcb55!important;color:#1e326b!important;
+  box-shadow:inset 0 0 0 1px #f3be42,0 4px 12px rgba(0,0,0,.17)!important
+}
+.user-profile-card .archive-upload-file-card{
+  background:linear-gradient(145deg,#f4f5ff,#ffffff)!important;
+  border:2px dashed #9daee5!important;border-radius:15px!important;
+  padding:12px!important;display:flex!important;align-items:center;justify-content:center;
+  gap:16px!important;min-height:72px;min-width:0
+}
+.user-profile-card .archive-upload-file-cta{
+  min-height:43px!important;padding:10px 20px!important;
+  border-radius:999px!important;background:#2e427f!important;color:#fff!important;
+  font:700 .87rem/1.2 Arial,sans-serif!important;
+  text-transform:none!important;letter-spacing:0!important;width:auto!important;flex:0 0 auto
+}
+.user-profile-card .archive-upload-file-name{font-size:.85rem!important;font-weight:500!important;color:#283966!important;overflow-wrap:anywhere;min-width:0}
+.user-profile-card .archive-upload-form label{
+  color:#fff!important;font-size:.9rem!important;font-weight:700!important;letter-spacing:0!important;
+  min-width:0;line-height:1.35!important
+}
+.user-profile-card .archive-upload-date-row{grid-template-columns:1.12fr 1fr .9fr!important;gap:14px!important}
+.user-profile-card .archive-upload-meta-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:13px!important}
+.user-profile-card .archive-upload-form input:not([type=file]),
+.user-profile-card .archive-upload-form select,
+.user-profile-card .archive-upload-form textarea{
+  box-sizing:border-box!important;width:100%!important;min-width:0!important;
+  margin-top:5px!important;padding:12px 13px!important;border:1px solid #b6c5eb!important;
+  border-radius:12px!important;background:#f8f9ff!important;color:#233468!important;
+  font:500 1rem/1.3 Arial,sans-serif!important
+}
+.user-profile-card .archive-upload-form input:focus-visible,
+.user-profile-card .archive-upload-form select:focus-visible,
+.user-profile-card .archive-upload-form textarea:focus-visible{
+  outline:2px solid #e9b947!important;outline-offset:1px
+}
+.user-profile-card .archive-required-chip{
+  display:inline-flex!important;min-height:26px!important;margin-left:8px!important;
+  padding:5px 9px!important;background:linear-gradient(145deg,#ffe9b5,#edb947)!important;
+  color:#1c2a5a!important;border-radius:999px!important;font:900 .64rem Arial,sans-serif!important
+}
+.user-profile-card .archive-required-star{font-weight:900;color:#ff6158;font-size:1.25rem}
+.user-profile-card .archive-required-desc{display:block;color:#ffd268;font:700 .74rem/1.3 Arial,sans-serif}
+.user-profile-card .archive-upload-submit{
+  justify-self:stretch;width:100%!important;min-height:64px!important;
+  margin-top:6px!important;border-radius:999px!important;
+  background:linear-gradient(155deg,#ffe6a1,#e5b842)!important;
+  color:#1c2a5a!important;font:800 1.25rem/1.2 Arial,sans-serif!important;
+  text-transform:none!important;letter-spacing:0!important
+}
+.user-profile-card .archive-upload-submit::before{display:none!important}
+/* Same framing for both shorter miniscreens. */
+.user-profile-card .user-options-box .user-settings-grid{
+  gap:13px!important;padding:16px!important;
+  background:rgba(255,255,255,.075)!important;border:1px solid rgba(206,218,255,.22)!important;
+  border-radius:19px!important;min-width:0
+}
+.user-profile-card .suggestion-form{
+  padding:18px!important;background:rgba(255,255,255,.075)!important;
+  border:1px solid rgba(206,218,255,.22)!important;border-radius:19px!important;gap:14px!important
+}
+.user-profile-card .suggestion-form label{color:#fff!important;font-size:.95rem!important}
+.user-profile-card .suggestion-form input,
+.user-profile-card .suggestion-form textarea{
+  background:#f8f9ff!important;color:#283966!important;border:1px solid #b6c5eb!important;
+  border-radius:12px!important;min-width:0!important;box-sizing:border-box!important
+}
+.user-profile-card .suggestion-form .user-password-btn{
+  width:100%!important;min-height:55px!important;
+  background:linear-gradient(155deg,#ffe6a1,#e5b842)!important;
+  color:#1c2a5a!important;font-weight:800!important;border-radius:999px!important;
+  justify-self:stretch!important
+}
+@media(max-width:620px){
+  .user-profile-card .archive-upload-box,.user-profile-card .user-options-box,.user-profile-card .suggestion-box{padding:15px!important;border-radius:19px!important}
+  .user-profile-card .archive-upload-head,.user-profile-card .user-options-head,.user-profile-card .suggestion-box-head{padding:0 35px 0 16px!important}
+  .user-profile-card .user-mini-heading h3{font-size:1.85rem!important}
+  .user-profile-card .archive-upload-block{padding:13px!important}
+  .user-profile-card .archive-upload-type-pills{gap:9px!important}
+  .user-profile-card .archive-upload-type-btn{font-size:.95rem!important;min-height:62px!important;padding:9px!important}
+  .user-profile-card .archive-upload-file-card{display:grid!important;justify-items:center!important;text-align:center!important}
+  .user-profile-card .archive-upload-file-cta{width:min(100%,240px)!important}
+  .user-profile-card .archive-upload-date-row{grid-template-columns:1fr!important;gap:11px!important}
+  .user-profile-card .archive-upload-meta-grid{grid-template-columns:1fr!important}
+  .user-profile-card .archive-upload-block-head h4 .archive-year-head-note{margin:9px 0 0;display:flex;max-width:max-content}
+  .user-profile-card .archive-upload-submit{font-size:1.04rem!important}
+  .user-profile-card .user-options-box .user-settings-grid,.user-profile-card .suggestion-form{padding:12px!important}
+}

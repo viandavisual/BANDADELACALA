@@ -17,6 +17,9 @@
     base.version = 4;
     base.updatedAt = base.updatedAt || new Date().toISOString();
     base.settings = base.settings && typeof base.settings === 'object' ? base.settings : {};
+    // v0.153 · Reminder prefix is persistent in the content object.
+    const rp=base.settings.pushReminderPrefix;
+    base.settings.pushReminderPrefix=rp&&rp.style==='custom'?{style:'custom',emoji:String(rp.emoji||'').slice(0,12),label:String(rp.label||'').slice(0,46)}:{style:'default',emoji:'🎼',label:'Recordatori:'};
     base.settings.homeHeroImage = typeof base.settings.homeHeroImage === 'string' ? base.settings.homeHeroImage : '';
     const rawHomeHeroMode = typeof base.settings.homeHeroMode === 'string' ? base.settings.homeHeroMode : '';
     base.settings.homeHeroMode = ['random','logo','manual'].includes(rawHomeHeroMode)
