@@ -256,6 +256,18 @@ function getEscacsSettings(){
     titleImage: String(raw.titleImage||'').trim()
   };
 }
+
+const GAME_CARD_ART={
+  QUINA_NOTA_ES:{
+    bg:'assets/minigames/cards/quina-nota-es-bg.png',
+    icon:'assets/minigames/cards/quina-nota-es-icon.png'
+  },
+  ESCACS_A_BANDA:{
+    bg:'assets/minigames/cards/escacs-a-banda-bg.png',
+    icon:'assets/minigames/cards/escacs-a-banda-icon.png'
+  }
+};
+
 function quinaNotaIconSvg(){
   return `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M11 7.2v14.1" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linecap="round"/><path d="M20.8 5.1v13.1" fill="none" stroke="#8B6228" stroke-width="1.7" stroke-linecap="round"/><path d="M11 7.2l9.8-2.1v4.1L11 11.3V7.2Z" fill="none" stroke="#393A86" stroke-width="1.7" stroke-linejoin="round"/><ellipse cx="8.6" cy="22.2" rx="3.9" ry="2.8" transform="rotate(-18 8.6 22.2)" fill="#D4AC5F"/><ellipse cx="18.4" cy="19.2" rx="3.9" ry="2.8" transform="rotate(-18 18.4 19.2)" fill="#393A86"/></svg>`;
 }
@@ -268,32 +280,33 @@ function renderGames(){
   if(qne.active){
     const points=state.authenticated?Number(state.profile?.quina_nota_points_total||0):null;
     const marker=state.authenticated?`<span class="game-points-bubble">${esc(`TENS ${points} ${points===1?'PUNT':'PUNTS'}`)}</span>`:'';
-    const icon=qne.icon
-      ? `<span class="game-launch-icon game-launch-image"><img src="${esc(qne.icon)}" alt="" /></span>`
-      : `<span class="game-launch-icon">${quinaNotaIconSvg()}</span>`;
+    const qneIcon=qne.icon||GAME_CARD_ART.QUINA_NOTA_ES.icon;
+    const icon=`<span class="game-launch-icon game-launch-image"><img src="${esc(qneIcon)}" alt="" /></span>`;
     const title=qne.titleImage
       ? `<img class="game-launch-title-image" src="${esc(qne.titleImage)}" alt="${esc(qne.visibleName)}" />`
       : `<strong>${esc(qne.visibleName)}</strong>`;
-    cards.push(`<button class="game-launch-card" type="button" data-open-minigame="QUINA_NOTA_ES">${icon}<span class="game-launch-copy">${title}<small class="preserve-lines">${esc(qne.description)}</small>${marker}</span></button>`);
+    cards.push(`<button class="game-launch-card game-launch-card--bg" type="button" data-open-minigame="QUINA_NOTA_ES" style="--game-card-bg:url('${esc(GAME_CARD_ART.QUINA_NOTA_ES.bg)}')">${icon}<span class="game-launch-copy">${title}<span class="game-launch-textbox"><small class="game-launch-eyebrow">[ REPTE DIARI ]</small><small class="preserve-lines">${esc(qne.description)}</small></span>${marker}</span></button>`);
   }
   if(eab.active){
-    // Imatge per defecte inclosa amb el propi joc, editable des de l'EDITOR.
-    const eabIcon=eab.icon||'app/minigames/escacs-a-banda/assets/ui/game_icon.png';
+    const eabIcon=eab.icon||GAME_CARD_ART.ESCACS_A_BANDA.icon;
     const eabTitle=eab.titleImage
       ? `<img class="game-launch-title-image" src="${esc(eab.titleImage)}" alt="${esc(eab.visibleName)}" />`
       : `<strong>${esc(eab.visibleName)}</strong>`;
-    // Mateixa composició que QUINA NOTA ÉS?, sense REPTE DIARI ni cap indicador de punts.
-    cards.push(`<button class="game-launch-card" type="button" data-open-minigame="ESCACS_A_BANDA"><span class="game-launch-icon game-launch-image"><img src="${esc(eabIcon)}" alt="" /></span><span class="game-launch-copy">${eabTitle}<small class="preserve-lines">${esc(eab.description)}</small></span></button>`);
+    cards.push(`<button class="game-launch-card game-launch-card--bg" type="button" data-open-minigame="ESCACS_A_BANDA" style="--game-card-bg:url('${esc(GAME_CARD_ART.ESCACS_A_BANDA.bg)}')"><span class="game-launch-icon game-launch-image"><img src="${esc(eabIcon)}" alt="" /></span><span class="game-launch-copy">${eabTitle}<span class="game-launch-textbox"><small class="preserve-lines">${esc(eab.description)}</small></span></span></button>`);
   }
   grid.innerHTML=cards.join('')||'<div class="panel games-empty"><span class="eyebrow">MINIJOCS</span><p>Ara mateix no hi ha cap minijoc actiu.</p></div>';
   for(const [gameId,settings] of [['QUINA_NOTA_ES',qne],['ESCACS_A_BANDA',eab]]){
     const titleImage=grid.querySelector(`[data-open-minigame="${gameId}"] .game-launch-title-image`);
     titleImage?.addEventListener('error',()=>{const strong=document.createElement('strong');strong.textContent=settings.visibleName;titleImage.replaceWith(strong);},{once:true});
   }
-  const iconImage=grid.querySelector('[data-open-minigame="QUINA_NOTA_ES"] .game-launch-icon.game-launch-image img');
-  iconImage?.addEventListener('error',()=>{const host=iconImage.closest('.game-launch-icon');if(host){host.classList.remove('game-launch-image');host.innerHTML=quinaNotaIconSvg();}},{once:true});
-  grid.querySelector('[data-open-minigame="QUINA_NOTA_ES"]')?.addEventListener('click',openQuinaNotaGame);
-  grid.querySelector('[data-open-minigame="ESCACS_A_BANDA"]')?.addEventListener('click',openEscacsGame);
+  const qneCard=grid.querySelector('[data-open-minigame="QUINA_NOTA_ES"]');
+  const qneIconImage=qneCard?.querySelector('.game-launch-icon.game-launch-image img');
+  qneIconImage?.addEventListener('error',()=>{qneIconImage.src=GAME_CARD_ART.QUINA_NOTA_ES.icon;},{once:true});
+  const eabCard=grid.querySelector('[data-open-minigame="ESCACS_A_BANDA"]');
+  const eabIconImage=eabCard?.querySelector('.game-launch-icon.game-launch-image img');
+  eabIconImage?.addEventListener('error',()=>{eabIconImage.src=GAME_CARD_ART.ESCACS_A_BANDA.icon;},{once:true});
+  qneCard?.addEventListener('click',openQuinaNotaGame);
+  eabCard?.addEventListener('click',openEscacsGame);
 }
 
 function sendToOpenMinigame(payload){

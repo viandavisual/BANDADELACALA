@@ -1,0 +1,7 @@
+BANDA DE LA CALA — v0.149
+
+- MINIJOCS: les targetes de QUINA NOTA ÉS? i ESCACS A BANDA utilitzen ara els nous fons il·lustrats aprovats.
+- MINIJOCS: les icones dels dos jocs passen a usar PNG amb transparència real, sense el requadre blanc.
+- MINIJOCS: les icones dels dos jocs s'han ampliat aproximadament al 125% respecte a l'anterior ajust.
+- MINIJOCS: el text descriptiu continua dins una petita caixa negra ajustada per garantir llegibilitat sobre el fons.
+- APP/EDITOR: versions i Service Workers actualitzats a v0.149 per forçar refresc correcte dels assets.

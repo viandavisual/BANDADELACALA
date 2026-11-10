@@ -3261,3 +3261,91 @@ body.demo-video-open{overflow:hidden}
   .user-notifications-summary-copy .user-demos-headphones-image{width:42px;height:42px}
   .user-notifications-panel-inline{padding:0 12px 12px}
 }
+
+
+/* ============================================================
+   v0.149 · MINIJOCS · fons il·lustrats + icones transparents
+   ============================================================ */
+.game-launch-card--bg{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  border-color:rgba(159,173,217,.34)!important;
+  background:linear-gradient(145deg,#eaf0ff,#f5f7ff)!important;
+}
+.game-launch-card--bg::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:var(--game-card-bg);
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  z-index:0;
+}
+.game-launch-card--bg::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(12,17,38,.14));
+  z-index:0;
+}
+.game-launch-card--bg > *{position:relative;z-index:1}
+.game-launch-card--bg .game-launch-icon{
+  width:125px!important;
+  height:125px!important;
+  max-width:125px;
+  max-height:125px;
+}
+.game-launch-card--bg .game-launch-icon.game-launch-image,
+.game-launch-card--bg .game-launch-icon.game-launch-image img{
+  background:transparent!important;
+}
+.game-launch-card--bg .game-launch-icon.game-launch-image img{
+  object-fit:contain!important;
+  object-position:center!important;
+}
+.game-launch-card--bg .game-launch-copy{
+  gap:10px;
+}
+.game-launch-card--bg .game-launch-title-image{
+  max-height:88px;
+}
+.game-launch-card--bg .game-launch-textbox{
+  display:grid;
+  gap:7px;
+  width:fit-content;
+  max-width:min(100%, 360px);
+  padding:10px 12px;
+  border-radius:12px;
+  background:rgba(0,0,0,.82);
+  box-shadow:0 10px 24px rgba(0,0,0,.18);
+}
+.game-launch-card--bg .game-launch-eyebrow{
+  display:block;
+  font-size:.8rem;
+  line-height:1.1;
+  letter-spacing:.05em;
+  font-weight:900;
+  color:#fff;
+}
+.game-launch-card--bg .game-launch-copy strong,
+.game-launch-card--bg .game-launch-copy small{
+  color:#fff;
+}
+.game-launch-card--bg .game-launch-copy small{
+  max-width:26ch;
+}
+.game-launch-card--bg .game-points-bubble{
+  margin-top:2px;
+}
+@media(max-width:780px){
+  .game-launch-card--bg .game-launch-icon{width:94px!important;height:94px!important;max-width:94px;max-height:94px}
+  .game-launch-card--bg .game-launch-title-image{max-height:66px}
+  .game-launch-card--bg .game-launch-textbox{padding:8px 10px;gap:5px;max-width:92%}
+  .game-launch-card--bg .game-launch-eyebrow{font-size:.68rem}
+}
+@media(max-width:390px){
+  .game-launch-card--bg .game-launch-icon{width:88px!important;height:88px!important;max-width:88px;max-height:88px}
+  .game-launch-card--bg .game-launch-title-image{max-height:58px}
+}
