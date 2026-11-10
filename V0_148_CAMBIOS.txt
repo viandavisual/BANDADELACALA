@@ -1,0 +1,10 @@
+BANDA DE LA CALA v0.148 — PATCH visual sobre v0.147 (repositori publicat)
+
+- Fons musical pastel per a QUINA NOTA ÉS?.
+- Fons d’escacs i música per a ESCACS A BANDA.
+- Pastilles negres transparència 84% darrere títols en text i descripcions, ajustades al contingut.
+- Logos, botons, punts, funcionalitat dels jocs i altres seccions preservades.
+- Canvi visual inserit des de version.js per no sobreescriure el CSS actual de v0.147.
+
+INSTRUCCIONS: puja els 4 fitxers del ZIP a les mateixes rutes del repositori, substituint version.js.
+És un PATCH, no una FULL: per fer una FULL completa sense pèrdua de funcions, cal tenir tots els fitxers de la v0.147.
