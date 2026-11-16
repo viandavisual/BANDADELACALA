@@ -1,0 +1,11 @@
+BANDA DE LA CALA — v1.157
+Primera iteració de la branca 1.x després de la presentació pública.
+
+- Avatars nous disponibles: avatar10 (oboè), avatar11 (plats), avatar12 (saxo tenor).
+- Substituït avatar5.jpg per la nova imatge del saxo alt.
+- El selector d'avatars continua detectant automàticament els JPG disponibles.
+- Nova clau de descoberta d'avatars i versionat específic de l'avatar 5 per evitar imatges antigues en memòria cau.
+- Versió general i Service Workers actualitzats a v1.157, mantenint els IDs i scopes PWA.
+- No es modifica l'arquitectura d'usuaris ni els seus avatars escollits.
+
+Instal·lació: sobre v0.156, pujar les rutes del PATCH al repositori mantenint l'estructura de carpetes.

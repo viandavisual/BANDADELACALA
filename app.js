@@ -70,17 +70,17 @@ let AVAILABLE_AVATARS = [
   {key:'avatar1',label:'AVATAR 1',src:'assets/avatar/avatar1.jpg'}
 ];
 let avatarDiscoveryPromise = null;
-const AVATAR_CACHE_KEY = 'banda-avatar-list-v032';
+const AVATAR_CACHE_KEY = 'banda-avatar-list-v1.157';
 function avatarNumber(value){ const m=String(value||'').match(/avatar(\d+)/i); return m?Number(m[1]):Number.MAX_SAFE_INTEGER; }
 function avatarFromKey(key){
   const n=avatarNumber(key);
   if(!Number.isFinite(n)||n===Number.MAX_SAFE_INTEGER) return null;
   const base=String(CFG.avatars?.path||'assets/avatar').replace(/\/$/,'');
-  return {key:`avatar${n}`,label:`AVATAR ${n}`,src:`${base}/avatar${n}.jpg`};
+  return {key:`avatar${n}`,label:`AVATAR ${n}`,src:`${base}/avatar${n}.jpg${n===5?'?v=1.157':''}`};
 }
 function setAvailableAvatars(files){
   const base=String(CFG.avatars?.path||'assets/avatar').replace(/\/$/,'');
-  const list=(files||[]).map(name=>String(name||'')).filter(name=>/^avatar\d+\.(?:jpe?g|png|webp)$/i.test(name)).sort((a,b)=>avatarNumber(a)-avatarNumber(b)).map(name=>{const n=avatarNumber(name);return {key:`avatar${n}`,label:`AVATAR ${n}`,src:`${base}/${name}`};});
+  const list=(files||[]).map(name=>String(name||'')).filter(name=>/^avatar\d+\.(?:jpe?g|png|webp)$/i.test(name)).sort((a,b)=>avatarNumber(a)-avatarNumber(b)).map(name=>{const n=avatarNumber(name);return {key:`avatar${n}`,label:`AVATAR ${n}`,src:`${base}/${name}${n===5?'?v=1.157':''}`};});
   if(list.length) AVAILABLE_AVATARS=list;
   return AVAILABLE_AVATARS;
 }
