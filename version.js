@@ -1,1 +1,1 @@
-window.BANDA_VERSION = 'v1.159';
+window.BANDA_VERSION = 'v1.160';

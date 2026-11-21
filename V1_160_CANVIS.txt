@@ -1,0 +1,25 @@
+BANDA DE LA CALA v1.160 · PATCH des de la v1.159
+
+1. EDITOR / DEMOS / PASSACARRERS
+- Nova caixa PASSACARRERS amb textarea multilínia i botó DESAR PASSACARRERS.
+- Una peça per línia, editables, afegibles i eliminables.
+- Valor inicial compatible amb les sis peces existents si encara no hi ha configuració a Supabase.
+- Les edicions es desen a settings.passacarrers al mateix contingut sincronitzat habitualment per l'EDITOR (Supabase).
+- Una llista expressament buida no restaura les peces d'exemple.
+
+2. EDITOR / USUARIS / NOVES ALTES PENDENTS
+- Botó × a l'esquerra de PASSAR A NOU USUARI.
+- Confirmació prèvia, DELETE de la petició seleccionada amb RLS existent i refresc immediat.
+- No esborra comptes creats ni altres dades d'usuari.
+
+3. APP / USER / PASSACARRERS
+- Icona pròpia aportada, disposada com a NOTIFICACIONS i DEMOS.
+- Les peces es llegeixen de settings.passacarrers i es representen centrades; caixa plegada per defecte.
+- La llista es refresca amb el contingut de l'APP, sense tocar autenticació ni puntuacions.
+
+COMPATIBILITAT
+- PATCH construït sobre v1.159 (NO incorpora la v1.158 experimental).
+- No cal migració SQL nova: s'usa settings del contingut existent i els permisos RLS ja establerts sobre banda_pending_registrations.
+- Instal·lar el PATCH a l'arrel del repositori preservant carpetes. Obre l'EDITOR, edita i desa PASSACARRERS, i comprova l'estat DESAT A SUPABASE.
+- Versionat de les dues caches PWA actualitzat a 1.160; manifests, scopes i IDs inalterats.
+- Recomanat comprovar a staging abans de publicar.

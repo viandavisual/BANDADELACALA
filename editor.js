@@ -1180,6 +1180,26 @@ function moveDemo(id,delta){
   if(index<0||target<0||target>=list.length) return;
   [list[index],list[target]]=[list[target],list[index]]; save(content,'Ordre de demos actualitzat');
 }
+const PASSACARRERS_DEFAULT=['Amparito Roca','Patumaire','Xàbia','No lo olvido','El Bequetero','Pepe el fester'].join('\n');
+function renderPassacarrersEditor(){
+  const input=$('#passacarrersEditorText');if(!input)return;
+  const value=content.settings?.passacarrers;
+  // No sobrescriure canvis que s'estiguin editant quan renderAll() s'executa per una altra acció.
+  if(document.activeElement!==input) input.value=typeof value==='string'?value:PASSACARRERS_DEFAULT;
+}
+function bindPassacarrersEditor(){
+  $('#passacarrersEditorForm')?.addEventListener('submit',event=>{
+    event.preventDefault();
+    if(!editorCanWrite)return;
+    const input=$('#passacarrersEditorText');if(!input)return;
+    content.settings=content.settings||{};
+    content.settings.passacarrers=String(input.value).replace(/\r\n?/g,'\n').split('\n').map(line=>line.trim()).filter(Boolean).join('\n');
+    if(save(content,'PASSACARRERS desats')){
+      const status=$('#passacarrersEditorStatus');if(status)status.textContent='Llista desada. Els canvis apareixeran a l’APP quan se sincronitzi el contingut.';
+    }
+  });
+}
+
 function renderDemos(){
   const list=content.demos||[]; const count=$('#demoCountEditor'); if(count) count.textContent=list.length;
   const visible=$('#demoSectionVisible'); if(visible) visible.checked=content.settings?.demosVisible!==false;
@@ -2953,7 +2973,30 @@ function renderPendingRegistrations(){
       $('#createUserForm').scrollIntoView({behavior:'smooth',block:'start'});
       $('#newUserRole').focus({preventScroll:true});
     });
-    row.append(main,btn);list.append(row);
+    const del=document.createElement('button');del.type='button';
+    del.className='tiny-btn delete banda-pending-delete';
+    del.textContent='×';del.title='Eliminar alta pendent';
+    del.setAttribute('aria-label',`Eliminar alta pendent de ${item.name}`);
+    del.addEventListener('click',async()=>{
+      if(!editorCanWrite)return;
+      if(!confirm(`Vols eliminar definitivament la petició d'alta de ${item.name} (${item.email})?`))return;
+      del.disabled=true;
+      const client=window.BandaSupabase?.getClient?.();
+      if(!client){del.disabled=false;showToast('No hi ha connexió a Supabase');return;}
+      try{
+        const {error}=await client.from('banda_pending_registrations').delete().eq('id',item.id);
+        if(error)throw error;
+        if(pendingRegistrationSelectedId===item.id)pendingRegistrationSelectedId=null;
+        pendingRegistrationRows=pendingRegistrationRows.filter(row=>row.id!==item.id);
+        renderPendingRegistrations();
+        showToast('Petició d’alta eliminada');
+      }catch(error){
+        console.warn('BANDA_PENDING_DELETE',error);
+        del.disabled=false;
+        showToast('No s’ha pogut eliminar la petició');
+      }
+    });
+    row.append(main,del,btn);list.append(row);
   }
   requestAnimationFrame(fitPendingRegistrationsList);
 }
@@ -3062,7 +3105,7 @@ function bindPushReminderSettings(){
  renderPushReminderSettings();
 }
 
-function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderDemos(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); renderPushReminderSettings(); }
+function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderDemos(); renderPassacarrersEditor(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); renderPushReminderSettings(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{ if(supabaseActive) return; content=BandaStore.normalize(event.detail);renderAll();}); }
 
 function setEditorAccess({session=null,profile=null}={}){
@@ -3350,5 +3393,5 @@ async function registerEditorSW(){
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();if(document.querySelector('.editor-view.active[data-editor-view=\"users\"]'))loadPendingRegistrations();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindPassacarrersEditor(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();if(document.querySelector('.editor-view.active[data-editor-view=\"users\"]'))loadPendingRegistrations();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();

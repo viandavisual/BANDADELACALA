@@ -514,7 +514,7 @@ function publicConcertCardMarkup(){
     return `<article class="home-card home-concert-card is-empty"><span class="big-icon">${iconSvg('calendar')}</span><div><h4>PROPER CONCERT</h4><p>Encara no hi ha cap concert programat.</p></div></article>`;
   }
   const moment=publicConcertMoment(event);
-  const dateLabel=moment?new Intl.DateTimeFormat(window.BandaI18n?.locale?.()||'ca-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).format(moment):String(event.date||'');
+  const dateLabel=moment?new Intl.DateTimeFormat('ca-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).format(moment):String(event.date||'');
   const details=[dateLabel,event.time,event.place].filter(Boolean).join(' · ');
   const place=String(event.place||'').trim();
   return `<article class="home-card home-concert-card"><span class="big-icon">${iconSvg('calendar')}</span><div><h4 class="home-concert-heading">PROPER CONCERT</h4><p class="home-concert-title">${esc(String(event.title||'').toUpperCase())}</p><p class="home-concert-datetime">${esc([dateLabel,event.time].filter(Boolean).join(' · '))}</p><p class="home-concert-place">${esc(place)}</p></div></article>`;
@@ -695,7 +695,7 @@ function renderCalendar(){
   const events = getEvents();
   const year = state.calendarDate.getFullYear();
   const month = state.calendarDate.getMonth();
-  $('#calendarMonthLabel').textContent = new Intl.DateTimeFormat(window.BandaI18n?.locale?.()||'ca-ES',{month:'long',year:'numeric'}).format(new Date(year,month,1)).replace(/^./,char=>char.toUpperCase());
+  $('#calendarMonthLabel').textContent = new Intl.DateTimeFormat('ca-ES',{month:'long',year:'numeric'}).format(new Date(year,month,1)).replace(/^./,char=>char.toUpperCase());
   const first = new Date(year,month,1);
   const startIndex = (first.getDay()+6)%7;
   const daysInMonth = new Date(year,month+1,0).getDate();
@@ -746,7 +746,7 @@ function selectDate(date){
   state.selectedDate = date;
   renderCalendar();
   const parsed = new Date(date+'T12:00:00');
-  $('#selectedDateTitle').textContent = new Intl.DateTimeFormat(window.BandaI18n?.locale?.()||'ca-ES',{weekday:'long',day:'numeric',month:'long'}).format(parsed).replace(/^./,char=>char.toUpperCase());
+  $('#selectedDateTitle').textContent = new Intl.DateTimeFormat('ca-ES',{weekday:'long',day:'numeric',month:'long'}).format(parsed).replace(/^./,char=>char.toUpperCase());
   const list = getEvents().filter(event => event.date === date).sort((a,b)=>{
     const ta=/^\d{1,2}:\d{2}$/.test(String(a?.time||''))?String(a.time).padStart(5,'0'):'99:99';
     const tb=/^\d{1,2}:\d{2}$/.test(String(b?.time||''))?String(b.time).padStart(5,'0'):'99:99';
@@ -2002,6 +2002,7 @@ function refreshContent(next){
   renderHemeroteca();
   renderGames();
   if(state.authenticated) renderUserDemos();
+  if(state.authenticated) renderUserPassacarrers();
   syncPlayerVisualCarousel();
 }
 
@@ -2182,6 +2183,23 @@ async function closeDemoPlayer(){
   document.body.classList.remove('demo-video-open');
 }
 
+// v1.160: repertori de passacarrers gestionat des de l'EDITOR i publicat a Supabase.
+function renderUserPassacarrers(){
+  const host=$('#userPassacarrersList');
+  if(!host) return;
+  const fallback=['Amparito Roca','Patumaire','Xàbia','No lo olvido','El Bequetero','Pepe el fester'];
+  const configured=state.content?.settings?.passacarrers;
+  // La propietat absent indica una instal·lació anterior; la cadena buida és una llista buidada expressament.
+  const text=typeof configured==='string'?configured:fallback.join('\n');
+  const pieces=text.split(/\r?\n/).map(piece=>piece.trim()).filter(Boolean);
+  host.replaceChildren();
+  for(const piece of pieces){
+    const line=document.createElement('div');
+    line.textContent=piece;
+    host.append(line);
+  }
+}
+
 function renderUserDemos(){
   const host=$('#userDemosList'), box=$('#userDemosBox'); if(!host||!box) return;
   const visible=state.content?.settings?.demosVisible !== false;
@@ -2232,6 +2250,7 @@ function renderUserSection(){
   renderAvatarChoices();
   renderUserAvatar();
   renderUserDemos();
+  renderUserPassacarrers();
   const passwordCompletedKey='banda-password-completed:'+String(state.session?.user?.id||'');
   let passwordCompleted=false;try{passwordCompleted=localStorage.getItem(passwordCompletedKey)==='yes'}catch(_){}
   const needsPassword=!!state.profile?.must_change_password && !passwordCompleted && String(state.profile?.role||'').toLowerCase()!=='admin';

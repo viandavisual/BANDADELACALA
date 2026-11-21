@@ -1308,3 +1308,14 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .banda-pending-info small{color:var(--editor-gold-deep);font-size:.68rem}
 .banda-transfer-btn{font-size:.66rem;white-space:nowrap}
 @media(max-width:690px){.banda-pending-strip{grid-template-columns:minmax(0,1fr)}.banda-transfer-btn{justify-self:start}}
+
+
+/* v1.160 · editor de repertori i eliminació directa d'altes pendents */
+.passacarrers-editor-card{margin-top:20px;max-width:100%}
+.passacarrers-editor-card label{display:block;margin:0 0 8px;font-weight:800;color:var(--blue-deep,#173e71)}
+.passacarrers-editor-card textarea{display:block;width:100%;min-height:176px;resize:vertical;padding:14px 16px;border-radius:12px;border:1px solid #b7c3e4;background:#fff;color:#273465;font:600 .93rem/1.6 Arial,sans-serif}
+.passacarrers-editor-card .form-actions{margin-top:14px}
+.banda-pending-strip{grid-template-columns:minmax(0,1fr) auto auto;align-items:center}
+.banda-pending-delete{width:36px;min-width:36px;height:36px;display:grid;place-items:center;font-size:24px;line-height:1;border-color:#ba6773;color:#a51a2f;background:#fff4f5}
+.banda-pending-delete:disabled{opacity:.4;cursor:wait}
+@media(max-width:690px){.banda-pending-strip{grid-template-columns:minmax(0,1fr) auto}.banda-pending-info{grid-column:1/-1}.banda-pending-delete{grid-column:1;justify-self:start}.banda-transfer-btn{grid-column:2;justify-self:end}}
