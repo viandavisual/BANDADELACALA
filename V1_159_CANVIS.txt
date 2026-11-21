@@ -1,0 +1,25 @@
+BANDA DE LA CALA · v1.159
+Base: v1.157 (la v1.158 experimental queda expressament EXCLOSA)
+
+1. USER · PASSACARRERS
+- Nova caixa <details> col·lapsada per defecte, seguint l'estil DEMOS PROPER CONCERT.
+- Sis títols centrats en línies individuals: Amparito Roca, Patumaire, Xàbia, No lo olvido, El Bequetero i Pepe el fester.
+- No canvia ni les demos ni els altres mòduls.
+
+2. HOME · IDIOMES
+- Selector CATALÀ / ENGLISH / NORSK damunt INSTAL·LAR APP.
+- Català per defecte; l'elecció es desa localment al dispositiu.
+- Tria d'idioma sense reiniciar sessions, ni actualitzar la base de dades.
+- Diccionari local de més de 340 expressions de la interfície.
+- Les etiquetes re-renderitzades es tradueixen de nou, incloent HOME, USER i calendari.
+- Els mesos i les dates del calendari utilitzen la configuració regional escollida.
+- Les pantalles dels minijocs incrustats de mateix origen hereten traduccions quan els textos coincideixen amb el catàleg.
+- Els noms propis (incloses les peces del PASSACARRERS), dades personals i continguts lliures dels gestors continuen tal com s'han publicat.
+
+3. COMPATIBILITAT
+- Nova versió de caché PWA: v1.159.
+- No canvia els esquemes de Supabase, el login, els rols, les dades personals ni les puntuacions dels minijocs.
+- No s'ha incorporat cap canvi de la v1.158 experimental.
+
+NOTA SOBRE IDIOMES
+Les traduccions incloses cobreixen el conjunt principal de textos d'interfície i nombrosos missatges dinàmics. Els continguts redactats lliurement pels gestors, textos d'origen extern i frases particulars dels minijocs no incloses al catàleg no disposen encara de traducció específica. Per tenir una internacionalització 100% completa de cada text, caldrà ampliar el catàleg a mesura que es verifiquin totes les pantalles i els jocs.

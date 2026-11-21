@@ -3627,3 +3627,17 @@ html,body{max-width:100%;overflow-x:clip}
   .user-profile-card #avatarProfileDetails{order:4!important}
   .user-profile-card .archive-upload-intro-note span{margin-bottom:3px}
 }
+
+/* v1.159 · PASSACARRERS i selector d'idioma */
+.home-language-selector{display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 auto 14px;width:100%;}
+.home-language-title{font-size:11px;font-weight:850;letter-spacing:.12em;color:var(--blue-deep,#10386f);}
+.home-language-options{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;}
+.home-language-button{border:1px solid #b2c3da;border-radius:8px;padding:8px 12px;background:#fff;color:#184477;font-size:11px;font-weight:850;letter-spacing:.025em;cursor:pointer;min-height:38px;}
+.home-language-button.is-active{background:#173f80;border-color:#173f80;color:#fff;box-shadow:0 2px 5px rgba(8,40,85,.18)}
+.home-language-button:focus-visible{outline:3px solid #e6bd4e;outline-offset:2px}
+.user-passacarrers-box .user-passacarrers-list{padding:4px 20px 20px;display:flex;flex-direction:column;align-items:center;gap:0;text-align:center}
+.user-passacarrers-list>div{width:100%;padding:11px 8px;border-bottom:1px solid rgba(20,51,95,.12);font-size:.91rem;color:var(--blue-deep,#173e71);font-weight:750;line-height:1.35}
+.user-passacarrers-list>div:last-child{border-bottom:0}
+.user-passacarrers-box .user-demos-headphones{color:#1a427e;min-width:34px;display:inline-flex;align-items:center;justify-content:center}
+.user-profile-card .user-passacarrers-box{margin:0 0 16px!important;max-width:100%;}
+@media(max-width:780px){.user-profile-card .user-passacarrers-box{margin-bottom:12px!important}.home-language-button{padding:8px 10px}}
