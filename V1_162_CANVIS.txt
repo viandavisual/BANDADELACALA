@@ -1,0 +1,19 @@
+BANDA DE LA CALA · v1.162 (PATCH des de v1.161)
+
+EDITOR/CALENDARI
+- Arxiu d'esdeveniments passats plegat per defecte, desplegable amb clic.
+- Finestra de 6,5 files aproximades amb scroll interior; títols llegibles sense truncament.
+
+EDITOR/DEMOS
+- Eliminat el text final redundant de PASSACARRERS.
+- Nova caixa sota PROPER CONCERT per desar snapshots de les llistes de demos amb el nom del concert.
+- Les llistes desades es despleguen per mostrar els enllaços de tots els seus vídeos, i es poden eliminar amb confirmació.
+- Les llistes es guarden com settings.demoArchives amb el contingut de Supabase, sense alterar les demos del concert actual.
+
+EDITOR/USUARIS
+- INSCRIPCIONS REBUDES: aspecte homogeni amb USUARIS, scroll de 9,5 files; plegable a mòbil.
+
+EDITOR/SISTEMA
+- Totes les caixes passen a estar plegades per defecte; es poden obrir i tornar a plegar amb un clic.
+
+- Versió i SW APP/EDITOR actualitzats. No hi ha migracions SQL, canvis d'autenticació, perfils ni punts.

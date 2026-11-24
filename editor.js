@@ -317,8 +317,8 @@ function initManagedListViewports(){
     host.addEventListener('load',event=>{if(event.target?.tagName==='IMG')fitManagedListToFour(host);},true);
     fitManagedListToFour(host);
   });
-  window.addEventListener('resize',()=>{refreshManagedLists();fitTrackListFourAndHalf();fitEventListNineAndHalf('#eventEditorList');fitEventListNineAndHalf('#pastEventEditorList');},{passive:true});
-  document.fonts?.ready?.then(()=>{refreshManagedLists();fitTrackListFourAndHalf();fitEventListNineAndHalf('#eventEditorList');fitEventListNineAndHalf('#pastEventEditorList');}).catch?.(()=>{});
+  window.addEventListener('resize',()=>{refreshManagedLists();fitTrackListFourAndHalf();fitEventListNineAndHalf('#eventEditorList');fitEventListSixAndHalf('#pastEventEditorList');},{passive:true});
+  document.fonts?.ready?.then(()=>{refreshManagedLists();fitTrackListFourAndHalf();fitEventListNineAndHalf('#eventEditorList');fitEventListSixAndHalf('#pastEventEditorList');}).catch?.(()=>{});
 }
 
 function renderDashboard(){
@@ -816,6 +816,41 @@ function fitEventListNineAndHalf(hostOrSelector='#eventEditorList'){
   });
 }
 
+
+function fitEventListSixAndHalf(hostOrSelector='#pastEventEditorList'){
+  const host=typeof hostOrSelector==='string'?$(hostOrSelector):hostOrSelector;
+  if(!host)return;
+  if(host._eventFitFrame)cancelAnimationFrame(host._eventFitFrame);
+  host._eventFitFrame=requestAnimationFrame(()=>{
+    host._eventFitFrame=0;
+    const rows=[...host.children].filter(row=>row.matches?.('.event-strip'));
+    const old=eventListResizeObservers.get(host);
+    if(old){old.disconnect();eventListResizeObservers.delete(host);}
+    const previousScroll=host.scrollTop;
+    host.style.height='';host.style.maxHeight='';host.classList.remove('event-scroll-preview');
+    if(rows.length<7)return;
+    const summaryHeights=rows.slice(0,7).map(row=>{
+      const summary=row.querySelector('.event-strip-summary');
+      const actions=row.querySelector('.event-strip-actions');
+      return Math.max(50,summary?.getBoundingClientRect().height||0,actions?.getBoundingClientRect().height||0);
+    });
+    const gap=parseFloat(getComputedStyle(host).rowGap||getComputedStyle(host).gap)||0;
+    const visibleHeight=summaryHeights.slice(0,6).reduce((n,h)=>n+h,0)+(gap*6)+summaryHeights[6]*.5;
+    host.classList.add('event-scroll-preview');
+    host.style.height=host.style.maxHeight=Math.ceil(visibleHeight)+'px';
+    host.scrollTop=Math.min(previousScroll,Math.max(0,host.scrollHeight-host.clientHeight));
+  });
+}
+function bindPastEventsDisclosure(){
+  const card=$('#pastEventsCard'),toggle=$('#pastEventsToggle');
+  if(!card||!toggle)return;
+  toggle.addEventListener('click',()=>{
+    const open=card.classList.toggle('is-collapsed')===false;
+    toggle.setAttribute('aria-expanded',String(open));
+    if(open)fitEventListSixAndHalf('#pastEventEditorList');
+  });
+}
+
 function eventStripMarkup(event,{expired=false}={}){
   const type=String(event.type||'').toUpperCase();
   const eventClass=type==='ASSAIG'?'event-strip-rehearsal':(type==='ALTRES'?'event-strip-other':'event-strip-featured');
@@ -846,12 +881,13 @@ function renderEvents(){
     details.hidden=!open;
     article.classList.toggle('is-open',open);
     btn.setAttribute('aria-expanded',open?'true':'false');
-    fitEventListNineAndHalf(article.closest('.editor-list'));
+    if(article.closest('#pastEventEditorList'))fitEventListSixAndHalf(article.closest('.editor-list'));
+    else fitEventListNineAndHalf(article.closest('.editor-list'));
   });
   $$('[data-edit-event]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();editEvent(btn.dataset.editEvent);});
   $$('[data-delete-event]').forEach(btn=>btn.onclick=event=>{event.stopPropagation();deleteEvent(btn.dataset.deleteEvent);});
   fitEventListNineAndHalf(agendaHost);
-  fitEventListNineAndHalf(pastHost);
+  fitEventListSixAndHalf(pastHost);
   scheduleNextEventExpiry();
 }
 function bindEventForm(){
@@ -1200,7 +1236,47 @@ function bindPassacarrersEditor(){
   });
 }
 
+
+function renderDemoArchives(){
+  const host=$('#demoArchivesList');if(!host)return;
+  const archives=Array.isArray(content.settings?.demoArchives)?content.settings.demoArchives:[];
+  const count=$('#demoArchivesCount');if(count)count.textContent=String(archives.length);
+  host.innerHTML=archives.length?archives.map(archive=>{
+    const items=Array.isArray(archive.demos)?archive.demos:[];
+    const id=esc(archive.id);
+    const heading=esc(archive.name||'CONCERT SENSE NOM');
+    return `<details class="demo-archive-entry"><summary><strong>${heading}</strong><span class="demo-archive-controls"><span class="count-pill">${items.length} VÍDEOS</span><button class="tiny-btn delete" type="button" data-delete-demo-archive="${id}" title="Eliminar només aquesta llista">×</button></span></summary><div class="demo-archive-videos">${items.map((item,i)=>{
+      const videoId=item.videoId||youtubeVideoId(item.url);
+      const href=videoId?`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`:item.url;
+      return `<a class="demo-archive-video" href="${esc(href||'#')}" target="_blank" rel="noopener noreferrer"><span class="demo-archive-number">${i+1}.</span><span>${esc(item.title||'Vídeo de YouTube')}</span><span aria-hidden="true">↗</span></a>`;
+    }).join('')||'<p class="helper-copy">Llista sense vídeos.</p>'}</div></details>`;
+  }).join(''):'<div class="empty-state">Encara no hi ha llistes de concerts guardades.</div>';
+  host.querySelectorAll('[data-delete-demo-archive]').forEach(btn=>btn.addEventListener('click',event=>{
+    event.preventDefault();event.stopPropagation();
+    const archive=archives.find(item=>String(item.id)===btn.dataset.deleteDemoArchive);
+    if(!archive||!confirm(`Vols eliminar la llista desada «${archive.name}»? Les demos del concert actual no es modificaran.`))return;
+    content.settings.demoArchives=archives.filter(item=>item!==archive);
+    save(content,'Llista de concert eliminada');
+  }));
+}
+function bindDemoArchives(){
+  $('#saveDemoArchiveBtn')?.addEventListener('click',()=>{
+    if(!editorCanWrite)return;
+    const name=String($('#demoConcertName')?.value||content.settings?.demosConcertName||'').trim();
+    const demos=Array.isArray(content.demos)?content.demos:[];
+    if(!name){showToast('Escriu primer el nom del concert');$('#demoConcertName')?.focus();return;}
+    if(!demos.length){showToast('Afegeix alguna demo abans de desar la llista');return;}
+    if(!confirm(`Guardar una còpia de ${demos.length} demos del concert «${name}»?`))return;
+    content.settings=content.settings||{};
+    content.settings.demoArchives=Array.isArray(content.settings.demoArchives)?content.settings.demoArchives:[];
+    content.settings.demosConcertName=name;
+    content.settings.demoArchives.unshift({id:BandaStore.uid('concert'),name,createdAt:new Date().toISOString(),demos:demos.map(item=>({title:String(item.title||''),url:String(item.url||''),videoId:String(item.videoId||youtubeVideoId(item.url)||'')}))});
+    save(content,'Llista del concert guardada');
+  });
+}
+
 function renderDemos(){
+  renderDemoArchives();
   const list=content.demos||[]; const count=$('#demoCountEditor'); if(count) count.textContent=list.length;
   const visible=$('#demoSectionVisible'); if(visible) visible.checked=content.settings?.demosVisible!==false;
   const concertName=$('#demoConcertName'); if(concertName) concertName.value=content.settings?.demosConcertName||'';
@@ -2957,8 +3033,8 @@ function renderPendingRegistrations(){
   list.replaceChildren();
   if(!pendingRegistrationRows.length){const empty=document.createElement('div');empty.className='empty-state';empty.textContent='Encara no hi ha noves altes pendents.';list.append(empty);return;}
   for(const item of pendingRegistrationRows){
-    const row=document.createElement('article');row.className='list-item banda-pending-strip';
-    const main=document.createElement('div');main.className='banda-pending-info';
+    const row=document.createElement('article');row.className='list-item user-list-item user-strip banda-pending-strip';
+    const main=document.createElement('div');main.className='user-strip-main banda-pending-info';
     const name=document.createElement('strong');name.textContent=item.name;
     const email=document.createElement('span');email.textContent=item.email;
     const date=document.createElement('small');date.textContent='Rebut: '+pendingDateFormatter.format(new Date(item.created_at));
@@ -3019,6 +3095,47 @@ async function finalizePendingRegistration(email){
   if(error)throw error;
   pendingRegistrationSelectedId=null;
   await loadPendingRegistrations();
+}
+
+
+function bindPendingDisclosure(){
+  const card=$('#pendingRegistrationsCard'),toggle=$('#pendingRegistrationsToggle');
+  const query=window.matchMedia?.('(max-width:780px)');
+  if(!card||!toggle)return;
+  const sync=()=>toggle.setAttribute('aria-expanded',String(!query?.matches||!card.classList.contains('is-collapsed-mobile')));
+  const onToggle=()=>{
+    if(!query?.matches)return;
+    card.classList.toggle('is-collapsed-mobile');sync();
+    if(!card.classList.contains('is-collapsed-mobile'))requestAnimationFrame(fitPendingRegistrationsList);
+  };
+  toggle.addEventListener('click',event=>{if(event.target.closest('button'))return;onToggle();});
+  toggle.addEventListener('keydown',event=>{if(event.target!==toggle)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();onToggle();}});
+  query?.addEventListener?.('change',sync);sync();
+}
+function bindSystemDisclosures(){
+  document.querySelectorAll('.editor-view[data-editor-view="system"] .system-card').forEach((card,index)=>{
+    if(card.dataset.disclosureReady)return;
+    card.dataset.disclosureReady='1';
+    const heading=card.querySelector(':scope > h2');
+    const eyebrow=card.querySelector(':scope > .eyebrow');
+    if(!heading)return;
+    const wrapper=document.createElement('div');wrapper.className='system-disclosure-body';
+    const headingBtn=document.createElement('button');headingBtn.type='button';headingBtn.className='system-disclosure-heading';
+    const headingText=document.createElement('span');headingText.className='system-disclosure-title';
+    if(eyebrow)headingText.append(eyebrow);
+    headingText.append(heading);
+    const chevron=document.createElement('span');chevron.className='disclosure-chevron';chevron.textContent='⌄';chevron.setAttribute('aria-hidden','true');
+    headingBtn.append(headingText,chevron);
+    headingBtn.setAttribute('aria-expanded','false');
+    wrapper.id=`system-disclosure-${index}`;
+    headingBtn.setAttribute('aria-controls',wrapper.id);
+    while(card.firstChild)wrapper.append(card.firstChild);
+    card.append(headingBtn,wrapper);card.classList.add('is-collapsed');
+    headingBtn.addEventListener('click',()=>{
+      const opened=card.classList.toggle('is-collapsed')===false;
+      headingBtn.setAttribute('aria-expanded',String(opened));
+    });
+  });
 }
 
 function bindUsers(){
@@ -3393,5 +3510,5 @@ async function registerEditorSW(){
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindPassacarrersEditor(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();if(document.querySelector('.editor-view.active[data-editor-view=\"users\"]'))loadPendingRegistrations();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindPastEventsDisclosure(); bindSystemDisclosures(); bindPendingDisclosure(); bindDemoArchives(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindPassacarrersEditor(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();if(document.querySelector('.editor-view.active[data-editor-view=\"users\"]'))loadPendingRegistrations();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();
