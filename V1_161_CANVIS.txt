@@ -1,0 +1,11 @@
+BANDA DE LA CALA · v1.161 · PATCH des de v1.160
+
+1. HOME: NORSK substituït per NEDERLANDS (idioma neerlandès).
+2. Les 349 cadenes de la traducció noruega se substitueixen per una traducció neerlandesa (nl-NL).
+3. Les dates i salutacions dinàmiques usen el neerlandès.
+4. La preferència prèvia «no» es migra automàticament a «nl» en aquell dispositiu.
+5. Versió PWA i caixes de memòria cau actualitzades.
+
+No hi ha cap modificació de comptes, Supabase, perfils, punts, notificacions ni EDITOR.
+
+Aplicació: extreu el ZIP i copia'n els fitxers damunt dels existents al repositori, respectant les rutes. Després publica els canvis i recarrega l'APP.
