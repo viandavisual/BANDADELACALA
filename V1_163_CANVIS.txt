@@ -1,0 +1,13 @@
+BANDA DE LA CALA · v1.163 (PATCH des de v1.162)
+
+EDITOR / CALENDARI
+- L'arxiu d'esdeveniments caducats conserva el desplegable plegat inicialment.
+- Correcció de les tires aixafades: cada esdeveniment té alçada natural llegible (mínim 66 px), títol, data i accions visibles.
+- Graella amb files de mida max-content i scroll interior a aproximadament 6,5 entrades; la resta es consulta desplaçant-se dins la llista.
+- Les tires continuen permetent desplegar els detalls i editar/eliminar els esdeveniments.
+
+EDITOR / NOTIFICACIONS
+- Eliminat el posicionament sticky heretat de les caixes de formulari en aquesta secció.
+- PROPERS AVISOS AUTOMÀTICS, NOTIFICACIÓ PERSONALITZADA i PROVA DE NOTIFICACIONS es desplacen juntes amb l'scroll normal de la pàgina.
+
+Sense canvis de dades, Supabase, comptes, usuaris, punts, contingut ni altres seccions.
