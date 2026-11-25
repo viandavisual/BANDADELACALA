@@ -1,0 +1,11 @@
+BANDA DE LA CALA v1.169 · Recupere la FONT des dels noms de les aportacions
+
+- HISTÒRIC (APP): si un esdeveniment té authorSource, es conserva exactament.
+- Si authorSource és buit, la FONT visual es recupera de imageSubmitters[].name per fotografia; si no existeix, de submittedByName.
+- El visor ampliat mostra la FONT corresponent a cada fotografia, fins i tot en àlbums amb diversos remitents.
+- Les targetes del timeline mostren els remitents únics si no existeix FONT manual.
+- EDITOR/HISTÒRIC: mostra la FONT recuperable a la llista i com a suggeriment del camp Font sense sobreescriure'l en editar.
+- NO s'han modificat automàticament dades a Supabase. La recuperació és compatible i no destructiva; si s'introdueix una FONT manual, té prioritat.
+- HEMEROTECA, comptes, notificacions i punts dels minijocs: sense canvis.
+
+Aplicar damunt de v1.168. No cal SQL.

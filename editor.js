@@ -1567,6 +1567,15 @@ function historicImageSubmitters(item){
   });
 }
 
+// v1.169 · FONT de lectura alternativa, mai sobreescriu authorSource.
+function historicSourceFallback(item){
+  const manual=String(item?.authorSource||'').trim();
+  if(manual) return manual;
+  const names=historicImageSubmitters(item).map(x=>String(x.name||'').trim()).filter(Boolean);
+  const unique=[...new Set(names)];
+  return unique.join(' · ')||String(item?.submittedByName||'').trim();
+}
+
 function renderHistoricFormPreview(){
   const wrap=$('#historicImagePreviewWrap'), grid=$('#historicImagePreviewGrid');
   if(!wrap||!grid) return;
@@ -1721,6 +1730,7 @@ function editHistoric(id){
   renderHistoricPeriodOptions(item.periodId||'');
   $('#historicTitle').value=item.title||'';
   $('#historicAuthorSource').value=item.authorSource||'';
+  $('#historicAuthorSource').placeholder=historicSourceFallback(item)||'Opcional';
   $('#historicDescription').value=item.description||'';
   $('#historicFormTitle').textContent='Editar entrada';
   $('#historicImageFile').required=false;
@@ -1855,7 +1865,7 @@ function historicEditorItemMarkup(item){
   return `<article class="historic-editor-item">
     <label class="historic-merge-check" title="Seleccionar per agrupar"><input type="checkbox" data-select-historic-merge="${esc(item.id)}" ${checked}/><span>AGRUPAR</span></label>
     <div class="historic-thumb-wrap">${thumbs}</div>
-    <div class="list-main"><div class="list-kicker"><span>${esc(item.year)}</span><span>·</span><span>${esc(period?.director||'Sense període')}</span><span>·</span><span>${images.length} ${images.length===1?'foto':'fotos'}</span></div>${item.title?`<h3>${esc(item.title)}</h3>`:'<h3>Sense títol</h3>'}${item.authorSource?`<p><strong>Font:</strong> ${esc(item.authorSource)}</p>`:''}${item.description?`<p>${esc(item.description)}</p>`:''}</div>
+    <div class="list-main"><div class="list-kicker"><span>${esc(item.year)}</span><span>·</span><span>${esc(period?.director||'Sense període')}</span><span>·</span><span>${images.length} ${images.length===1?'foto':'fotos'}</span></div>${item.title?`<h3>${esc(item.title)}</h3>`:'<h3>Sense títol</h3>'}${historicSourceFallback(item)?`<p><strong>Font:</strong> ${esc(historicSourceFallback(item))}</p>`:''}${item.description?`<p>${esc(item.description)}</p>`:''}</div>
     <div class="list-actions"><button class="tiny-btn" data-edit-historic="${esc(item.id)}" title="Editar">✎</button><button class="tiny-btn delete" data-delete-historic="${esc(item.id)}" title="Eliminar">×</button></div>
   </article>`;
 }

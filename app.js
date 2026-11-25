@@ -806,6 +806,24 @@ function historyPeriodItems(periodId){
 function historyPeriodPhotoCount(periodId){
   return historyPeriodItems(periodId).reduce((total,item)=>total+getHistoricImages(item).length,0);
 }
+// v1.169 · Compatibilitat FONT: respecta la font introduïda manualment.
+// En absència de FONT, recupera el remitent de cada fotografia (imageSubmitters)
+// o el camp antic submittedByName, sense modificar el contingut a Supabase.
+function historicPhotoSource(item, src=null){
+  const manual=String(item?.authorSource||'').trim();
+  if(manual) return manual;
+  const photos=getHistoricImages(item);
+  const submitters=Array.isArray(item?.imageSubmitters)?item.imageSubmitters:[];
+  const defaultName=String(item?.submittedByName||'').trim();
+  if(src!==null){
+    const index=photos.indexOf(src);
+    const photoName=index>=0?String(submitters[index]?.name||'').trim():'';
+    return photoName||defaultName;
+  }
+  const names=[...new Set(photos.map((_,index)=>String(submitters[index]?.name||defaultName).trim()).filter(Boolean))];
+  return names.join(' · ')||defaultName;
+}
+
 function historyMediaMarkup(periodId){
   const items=getHistoricItems();
   const periodItems=items.filter(item=>item.periodId===periodId);
@@ -820,6 +838,7 @@ function historyMediaMarkup(periodId){
     const title=item.title ? `<h4>${esc(item.title)}</h4>` : '';
     const desc=item.description ? `<p class="preserve-lines">${esc(item.description)}</p>` : '';
     const images=getHistoricImages(item);
+    const source=historicPhotoSource(item);
     const featured=item.featuredImageSrc||images[0]||'';
     const viewerSources=featured?[featured,...images.filter(src=>src!==featured)]:images;
     let gallery='';
@@ -830,7 +849,7 @@ function historyMediaMarkup(periodId){
       const strip=rest.length?`<div class="history-media-strip" aria-label="Més fotografies">${rest.map((src,index)=>mediaMarkup(item,src,index+1,'history-image-thumb',`Ampliar fotografia ${index+2} de ${item.year}`)).join('')}</div>`:'';
       gallery=`<div class="history-media-showcase ${rest.length?'':'single'}">${hero}${strip}</div>`;
     }
-    return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><div class="history-moment-meta"><span class="history-year">${esc(item.year)}</span>${images.length?`<span class="history-entry-photo-count">${images.length} ${images.length===1?'FOTO':'FOTOS'}</span>`:''}</div>${title}${desc}${item.authorSource?`<p class="history-photo-source">FONT: ${esc(item.authorSource)}</p>`:""}</div></div></article>`;
+    return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><div class="history-moment-meta"><span class="history-year">${esc(item.year)}</span>${images.length?`<span class="history-entry-photo-count">${images.length} ${images.length===1?'FOTO':'FOTOS'}</span>`:''}</div>${title}${desc}${source?`<p class="history-photo-source">FONT: ${esc(source)}</p>`:""}</div></div></article>`;
   }).join('');
 }
 function compactHistoryTimeline(root=document){
@@ -1077,11 +1096,12 @@ function historicViewerItemsForEntry(id){
   return ordered.map((src,viewerIndex)=>{
     const originalIndex=images.indexOf(src);
     const contributor=originalIndex>=0?(submitters[originalIndex]?.name||item.submittedByName||''):'';
+    const source=historicPhotoSource(item,src);
     return {
       id:String(item.id||item.imageSrc), periodId:item.periodId, imageIndex:viewerIndex, src,
-      historyMeta:{title:item.title||'',year:String(item.year||''),description:item.description||'',source:item.authorSource||''},
+      historyMeta:{title:item.title||'',year:String(item.year||''),description:item.description||'',source},
       title:item.title||String(item.year||''),
-      caption:[String(item.year||''),item.authorSource?`Autor / procedència: ${item.authorSource}`:'',item.description,contributor?`Enviada per: ${String(contributor).toLocaleUpperCase('ca-ES')}`:''].filter(Boolean).join(' · '),
+      caption:[String(item.year||''),source?`FONT: ${source}`:'',item.description,contributor&&source!==contributor?`Enviada per: ${String(contributor).toLocaleUpperCase('ca-ES')}`:''].filter(Boolean).join(' · '),
       alt:item.title||`Fotografia de ${item.year||''}`
     };
   });
