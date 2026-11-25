@@ -608,9 +608,21 @@ function switchView(id, remember = true){
   if(id==='history'){
     const historyMain=$('#historyMainContent');
     const hemerotecaPanel=$('#hemerotecaPanel');
+    const musicPanel=$('#musicArchivePanel');
     if(historyMain) historyMain.hidden=false;
     if(hemerotecaPanel) hemerotecaPanel.hidden=true;
+    if(musicPanel) musicPanel.hidden=true;
     state.hemerotecaType='cartells';
+    // Cada entrada a HISTÒRIC comença amb tots els períodes plegats,
+    // excepte el de la fotografia que estigui actualment ampliada.
+    const periods=getHistoricPeriods();
+    state.collapsedPeriods=new Set(periods.map(period=>period.id));
+    const viewer=$('#historyImageModal');
+    if(viewer && !viewer.hidden && viewer.classList.contains('history-only')){
+      const current=state.historyViewer.items?.[state.historyViewer.index];
+      if(current?.periodId) state.collapsedPeriods.delete(current.periodId);
+    }
+    renderHistory();
   }
   if(id === state.currentView){ updateHeader(id); window.scrollTo({top:0,behavior:'smooth'}); requestAnimationFrame(()=>animateViewEntrance(id)); syncPlayerVisualCarousel(); return; }
   if(remember && state.currentView) state.viewHistory.push(state.currentView);
@@ -800,8 +812,7 @@ function historyMediaMarkup(periodId){
   if(!periodItems.length) return `<div class="history-period-empty">Encara no hi ha fotografies en aquest període.</div>`;
   const mobile=!!window.matchMedia?.('(max-width: 780px)').matches;
   const mediaMarkup=(item,src,viewerIndex,extraClass,label,extra='')=>{
-    const author=item.authorSource?`<span class="history-author">FONT: ${esc(item.authorSource)}</span>`:'';
-    const img=`<img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${author}${extra}`;
+    const img=`<img loading="lazy" decoding="async" src="${esc(src)}" alt="${esc(item.title || `Fotografia de ${item.year}`)}" />${extra}`;
     return `<button class="history-image-button ${extraClass}" type="button" data-history-image-id="${esc(item.id)}" data-history-image-index="${viewerIndex}" aria-label="${esc(label)}">${img}</button>`;
   };
   return periodItems.map(item=>{
@@ -953,16 +964,7 @@ function renderHistory(){
 window.addEventListener('resize',()=>requestAnimationFrame(()=>compactHistoryTimeline($('#historyTimeline')||document)),{passive:true});
 
 function restoreHistoryCollapsed(){
-  const periods=getHistoricPeriods();
-  const current=periods.find(period=>period.end==null || /actualitat/i.test(period.years||'')) || periods[periods.length-1];
-  try{
-    const raw=localStorage.getItem('banda-history-collapsed-v021');
-    if(raw!==null){
-      const saved=JSON.parse(raw);
-      if(Array.isArray(saved)){ state.collapsedPeriods=new Set(saved); return; }
-    }
-  }catch(_error){}
-  state.collapsedPeriods=new Set(periods.filter(period=>!current || period.id!==current.id).map(period=>period.id));
+  state.collapsedPeriods=new Set(getHistoricPeriods().map(period=>period.id));
 }
 
 function historyViewerApply(){
@@ -1051,7 +1053,7 @@ function historicViewerItemsForEntry(id){
     const originalIndex=images.indexOf(src);
     const contributor=originalIndex>=0?(submitters[originalIndex]?.name||item.submittedByName||''):'';
     return {
-      id:String(item.id||item.imageSrc), imageIndex:viewerIndex, src,
+      id:String(item.id||item.imageSrc), periodId:item.periodId, imageIndex:viewerIndex, src,
       historyMeta:{title:item.title||'',year:String(item.year||''),description:item.description||'',source:item.authorSource||''},
       title:item.title||String(item.year||''),
       caption:[String(item.year||''),item.authorSource?`Autor / procedència: ${item.authorSource}`:'',item.description,contributor?`Enviada per: ${String(contributor).toLocaleUpperCase('ca-ES')}`:''].filter(Boolean).join(' · '),
@@ -1075,50 +1077,70 @@ function closeHistoryImage(){
   resetHistoryMobileTransform();
   state.historyViewer.items=[];state.historyViewer.index=0;
 }
-// v1.164 · Gestos exclusius del visor HISTÒRIC en mobile; no afecten HEMEROTECA.
-const historyMobileGestures={scale:1,rotation:0,x:0,y:0,pointers:new Map(),start:null};
+// v1.165 · Gestos a HISTÒRIC mobile: zoom ancorat al punt mig del pinch i desplaçament,
+// sense rotació. No afecta el visor d'HEMEROTECA.
+const historyMobileGestures={scale:1,x:0,y:0,pointers:new Map(),start:null};
 function historyMobileEnabled(){return !!($('#historyImageModal')?.classList.contains('history-only') && matchMedia('(max-width:780px)').matches);}
 function applyHistoryMobileTransform(){
   const img=$('#historyImageLarge');if(!img)return;
-  img.style.transform=`translate(${historyMobileGestures.x}px,${historyMobileGestures.y}px) rotate(${historyMobileGestures.rotation}deg) scale(${historyMobileGestures.scale})`;
+  const g=historyMobileGestures;
+  img.style.transform=`translate3d(${g.x}px,${g.y}px,0) scale(${g.scale})`;
 }
 function resetHistoryMobileTransform(){
-  const g=historyMobileGestures;g.scale=1;g.rotation=0;g.x=0;g.y=0;g.pointers.clear();g.start=null;
+  const g=historyMobileGestures;g.scale=1;g.x=0;g.y=0;g.pointers.clear();g.start=null;
   const img=$('#historyImageLarge');if(img)img.style.transform='';
 }
 function bindHistoricMobileGestures(){
   const viewport=$('#historyImageViewport');if(!viewport)return;
   const g=historyMobileGestures;
-  const metrics=()=>{
+  function metrics(){
     const points=[...g.pointers.values()];
     if(points.length<2)return null;
     const [a,b]=points;
-    return {cx:(a.x+b.x)/2,cy:(a.y+b.y)/2,dist:Math.hypot(b.x-a.x,b.y-a.y),angle:Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI};
-  };
-  const snapshot=()=>{const m=metrics();g.start={scale:g.scale,rotation:g.rotation,x:g.x,y:g.y,metrics:m,point:[...g.pointers.values()][0]};};
+    return {cx:(a.x+b.x)/2,cy:(a.y+b.y)/2,dist:Math.max(1,Math.hypot(b.x-a.x,b.y-a.y))};
+  }
+  function snapshot(){
+    const m=metrics();
+    g.start={scale:g.scale,x:g.x,y:g.y,metrics:m,point:[...g.pointers.values()][0]||null};
+  }
   viewport.addEventListener('pointerdown',e=>{
     if(!historyMobileEnabled())return;
-    e.preventDefault();viewport.setPointerCapture(e.pointerId);g.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});snapshot();
+    e.preventDefault();viewport.setPointerCapture(e.pointerId);
+    g.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});snapshot();
   });
   viewport.addEventListener('pointermove',e=>{
     if(!historyMobileEnabled()||!g.pointers.has(e.pointerId))return;
     e.preventDefault();g.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
     const current=metrics(),start=g.start;if(!start)return;
     if(current&&start.metrics){
-      g.scale=Math.max(.5,Math.min(8,start.scale*current.dist/Math.max(1,start.metrics.dist)));
-      g.rotation=start.rotation+(current.angle-start.metrics.angle);
-      g.x=start.x+current.cx-start.metrics.cx;g.y=start.y+current.cy-start.metrics.cy;
+      const scale=Math.max(1,Math.min(8,start.scale*current.dist/start.metrics.dist));
+      const ratio=scale/Math.max(.001,start.scale);
+      const rect=viewport.getBoundingClientRect();
+      const viewportX=rect.left+rect.width/2, viewportY=rect.top+rect.height/2;
+      // Mantenim fix el punt de la foto sota els dits en escalar.
+      g.x=start.x+(current.cx-start.metrics.cx)+(1-ratio)*(start.metrics.cx-viewportX-start.x);
+      g.y=start.y+(current.cy-start.metrics.cy)+(1-ratio)*(start.metrics.cy-viewportY-start.y);
+      g.scale=scale;
     }else if(g.pointers.size===1&&start.point){
-      const point=[...g.pointers.values()][0];g.x=start.x+point.x-start.point.x;g.y=start.y+point.y-start.point.y;
+      const point=[...g.pointers.values()][0];
+      g.x=start.x+point.x-start.point.x;
+      g.y=start.y+point.y-start.point.y;
     }
     applyHistoryMobileTransform();
   });
-  const finish=e=>{if(!g.pointers.has(e.pointerId))return;g.pointers.delete(e.pointerId);snapshot();};
-  viewport.addEventListener('pointerup',finish);viewport.addEventListener('pointercancel',finish);
+  const finish=e=>{
+    if(!g.pointers.has(e.pointerId))return;
+    g.pointers.delete(e.pointerId);snapshot();
+  };
+  viewport.addEventListener('pointerup',finish);
+  viewport.addEventListener('pointercancel',finish);
+  viewport.addEventListener('lostpointercapture',finish);
 }
 function bindHistoryImageModal(){
   bindHistoricMobileGestures();
   $('#historyMobilePrev')?.addEventListener('click',()=>stepHistoryViewer(-1));
+  $('#historyMobileReset')?.addEventListener('click',resetHistoryMobileTransform);
+  $$('.history-mobile-controls button').forEach(btn=>btn.addEventListener('click',()=>{btn.classList.remove('control-tap');void btn.offsetWidth;btn.classList.add('control-tap');}));
   $('#historyMobileNext')?.addEventListener('click',()=>stepHistoryViewer(1));
   $('#historyMobileClose')?.addEventListener('click',closeHistoryImage);
   $$('[data-close-history-image]').forEach(el=>el.addEventListener('click',closeHistoryImage));
@@ -1299,6 +1321,61 @@ let homeHeroTimer=null;
 let homeHeroCurrentSrc='';
 let homeHeroActiveLayer=0;
 let homeHeroTransitionToken=0;
+// v1.165 · Arxiu de mostres publicades: referències a playlists existents de DEMOS.
+function visibleMusicArchives(){
+  const settings=state.content?.settings||{};
+  const ids=new Set(Array.isArray(settings.historicMusicArchiveIds)?settings.historicMusicArchiveIds.map(String):[]);
+  const archives=Array.isArray(settings.demoArchives)?settings.demoArchives:[];
+  return archives.filter(item=>ids.has(String(item.id)));
+}
+function renderMusicArchive(){
+  const host=$('#musicArchiveList');if(!host)return;
+  const archives=visibleMusicArchives();
+  const total=archives.reduce((sum,item)=>sum+(Array.isArray(item.demos)?item.demos.length:0),0);
+  const badge=$('#musicArchiveTotal');if(badge)badge.textContent=`${total} ${total===1?'MOSTRA':'MOSTRES'}`;
+  host.innerHTML=archives.length?archives.map(archive=>{
+    const demos=Array.isArray(archive.demos)?archive.demos:[];
+    return `<details class="music-archive-entry"><summary><strong>${esc(archive.name||'CONCERT')}</strong><span>${demos.length} ${demos.length===1?'MOSTRA':'MOSTRES'}</span></summary><div class="music-archive-videos">${demos.map((demo,index)=>{
+      const candidate=String(demo.videoId||'').trim()||youtubeVideoId(demo.url||'');
+      const videoId=/^[a-zA-Z0-9_-]{11}$/.test(candidate)?candidate:'';
+      const url=videoId?`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`:safeExternalUrl(demo.url||'');
+      const label=esc(demo.title||`Mostra ${index+1}`);
+      if(videoId)return `<div class="music-archive-video"><button type="button" data-music-video="${esc(videoId)}" aria-label="Reproduir ${label}"><img loading="lazy" src="https://img.youtube.com/vi/${esc(videoId)}/mqdefault.jpg" alt="" /><span class="music-archive-video-label">${index+1}. ${label}</span><b aria-hidden="true">▶</b></button><div class="music-archive-video-player" hidden></div></div>`;
+      return url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer"><span>${index+1}. ${label}</span><span>↗</span></a>`:`<div class="music-archive-inactive">${index+1}. ${label}</div>`;
+    }).join('')||'<p>Sense vídeos disponibles.</p>'}</div></details>`;
+  }).join(''):'<div class="hemeroteca-empty panel">Encara no hi ha mostres publicades.</div>';
+}
+function openMusicArchive(){
+  const main=$('#historyMainContent'), hemeroteca=$('#hemerotecaPanel'), panel=$('#musicArchivePanel');
+  if(!main||!panel)return;
+  main.hidden=true;if(hemeroteca)hemeroteca.hidden=true;panel.hidden=false;
+  renderMusicArchive();window.scrollTo({top:0,behavior:'smooth'});
+}
+function closeMusicArchive(){
+  const main=$('#historyMainContent'),panel=$('#musicArchivePanel');
+  if(!main||!panel)return;
+  panel.hidden=true;main.hidden=false;window.scrollTo({top:0,behavior:'smooth'});
+}
+function bindMusicArchive(){
+  $('#openMusicArchiveBtn')?.addEventListener('click',openMusicArchive);
+  $('#closeMusicArchiveBtn')?.addEventListener('click',closeMusicArchive);
+  $('#musicArchiveList')?.addEventListener('click',event=>{
+    const btn=event.target.closest('[data-music-video]');if(!btn)return;
+    const id=btn.dataset.musicVideo;
+    if(!/^[a-zA-Z0-9_-]{11}$/.test(id))return;
+    // Només es crea l'iframe en clicar, per no carregar totes les playlists d'entrada.
+    const holder=btn.nextElementSibling;
+    if(!holder)return;
+    document.querySelectorAll('#musicArchiveList .music-archive-video-player').forEach(el=>{if(el!==holder){el.replaceChildren();el.hidden=true;}});
+    if(!holder.hidden){holder.replaceChildren();holder.hidden=true;return;}
+    const frame=document.createElement('iframe');
+    frame.src=`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+    frame.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';
+    frame.allowFullscreen=true;frame.title=btn.textContent.trim();frame.loading='lazy';
+    holder.appendChild(frame);holder.hidden=false;
+  });
+}
+
 function homeHistoricHeroImages(){
   const out=[];
   const excluded=new Set((Array.isArray(state.content.settings?.homeHeroExcludedImages)?state.content.settings.homeHeroExcludedImages:[]).map(src=>String(src||'').trim()).filter(Boolean));
@@ -2057,6 +2134,7 @@ function refreshContent(next){
   renderTracks();
   renderHistory();
   renderHemeroteca();
+  renderMusicArchive();
   renderGames();
   if(state.authenticated) renderUserDemos();
   if(state.authenticated) renderUserPassacarrers();
@@ -2958,9 +3036,11 @@ async function init(){
   renderCalendar();
   renderHistory();
   renderHemeroteca();
+  renderMusicArchive();
   renderGames();
   bindMinigameBridge();
   bindHemeroteca();
+  bindMusicArchive();
   bindCalendar();
   bindDresscodeModal();
   bindDemoPlayer();

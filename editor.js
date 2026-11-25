@@ -3222,7 +3222,29 @@ function bindPushReminderSettings(){
  renderPushReminderSettings();
 }
 
-function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderDemos(); renderPassacarrersEditor(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); renderPushReminderSettings(); }
+// v1.165 · Selecció de playlists de DEMOS que apareixeran a HISTÒRIC/MÚSICA INTERPRETADA.
+function renderMusicArchiveEditor(){
+  const host=$('#musicArchiveEditorList');if(!host)return;
+  const archives=Array.isArray(content.settings?.demoArchives)?content.settings.demoArchives:[];
+  const selected=new Set(Array.isArray(content.settings?.historicMusicArchiveIds)?content.settings.historicMusicArchiveIds.map(String):[]);
+  const count=$('#musicArchiveEditorCount');if(count)count.textContent=String(archives.length);
+  host.innerHTML=archives.length?archives.map(archive=>{
+    const id=esc(archive.id);const total=Array.isArray(archive.demos)?archive.demos.length:0;
+    return `<label class="music-archive-select-row"><input type="checkbox" data-publish-music-archive="${id}" ${selected.has(String(archive.id))?'checked':''}/><span><strong>${esc(archive.name||'CONCERT')}</strong><small>${total} ${total===1?'MOSTRA':'MOSTRES'}</small></span></label>`;
+  }).join(''):'<div class="empty-state">Encara no hi ha llistes desades a DEMOS.</div>';
+}
+function bindMusicArchiveEditor(){
+  $('#saveMusicArchiveSelection')?.addEventListener('click',()=>{
+    if(!editorCanWrite)return;
+    content.settings=content.settings||{};
+    content.settings.historicMusicArchiveIds=[...document.querySelectorAll('[data-publish-music-archive]:checked')].map(el=>el.dataset.publishMusicArchive);
+    if(save(content,'Llistes de MÚSICA INTERPRETADA actualitzades')){
+      const el=$('#musicArchiveEditorStatus');if(el)el.textContent='Selecció preparada. Comprova que es mostri DESAT A SUPABASE.';
+    }
+  });
+}
+
+function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderDemos(); renderPassacarrersEditor(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderMusicArchiveEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); renderPushReminderSettings(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{ if(supabaseActive) return; content=BandaStore.normalize(event.detail);renderAll();}); }
 
 function setEditorAccess({session=null,profile=null}={}){
@@ -3510,5 +3532,5 @@ async function registerEditorSW(){
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindPastEventsDisclosure(); bindSystemDisclosures(); bindPendingDisclosure(); bindDemoArchives(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindPassacarrersEditor(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();if(document.querySelector('.editor-view.active[data-editor-view=\"users\"]'))loadPendingRegistrations();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindPastEventsDisclosure(); bindSystemDisclosures(); bindPendingDisclosure(); bindDemoArchives(); bindMusicArchiveEditor(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindPassacarrersEditor(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();if(document.querySelector('.editor-view.active[data-editor-view=\"users\"]'))loadPendingRegistrations();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();

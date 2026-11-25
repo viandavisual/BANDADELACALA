@@ -3685,3 +3685,44 @@ html,body{max-width:100%;overflow-x:clip}
   .history-image-modal.history-only .history-mobile-controls button{display:grid;place-items:center;min-height:clamp(56px,9dvh,72px);border:1px solid #e4cf9f;border-radius:14px;background:#20232f;color:#fff;font-size:38px;line-height:1;font-weight:800;touch-action:manipulation;cursor:pointer}
   .history-image-modal.history-only .history-mobile-controls button:active{background:#3d4358}
 }
+
+/* v1.165 · Històric visor desktop: només controls i any, centrats. Hemeroteca intacta */
+@media(min-width:781px){
+ .history-image-modal.history-only .history-image-meta{display:grid!important;grid-template-columns:minmax(85px,1fr)!important;max-width:210px!important;flex:1 1 auto!important;padding-left:4px!important}
+ .history-image-modal.history-only .history-image-meta [data-history-meta="title"],
+ .history-image-modal.history-only .history-image-meta [data-history-meta="description"],
+ .history-image-modal.history-only .history-image-meta [data-history-meta="source"]{display:none!important}
+ .history-image-modal.history-only .history-image-meta [data-history-meta="year"]{text-align:center!important}
+ .history-image-modal.history-only .history-image-toolbar>span,
+ .history-image-modal.history-only .history-image-toolbar>button{display:grid;place-items:center;text-align:center!important}
+}
+/* v1.165 · quatre controls permanents i feedback al visor mobile */
+@media(max-width:780px){
+ .history-image-modal.history-only .history-mobile-controls{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+ .history-image-modal.history-only .history-mobile-controls button{min-width:0!important;transition:background .16s,transform .16s,box-shadow .16s}
+ .history-image-modal.history-only .history-mobile-controls button:active{transform:scale(.92);background:#52678b!important;box-shadow:inset 0 0 16px rgba(255,255,255,.22)}
+ .history-image-modal.history-only .history-mobile-controls button.control-tap{animation:historyControlTap .32s ease-out}
+ @keyframes historyControlTap{0%{transform:scale(1);filter:brightness(1)}42%{transform:scale(.89);filter:brightness(1.8)}100%{transform:scale(1);filter:brightness(1)}}
+}
+/* v1.165 · subpàgina de playlists de mostra */
+.music-archive-list{display:grid;gap:14px;margin-top:18px}
+.music-archive-entry{border:1px solid var(--line,rgba(0,0,0,.12));border-radius:15px;background:#fff;overflow:hidden;color:var(--ink,#212121)}
+.music-archive-entry summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 20px;list-style:none}
+.music-archive-entry summary::-webkit-details-marker{display:none}
+.music-archive-entry summary strong{font-weight:850}
+.music-archive-entry summary span{white-space:nowrap;font-size:.76rem;color:var(--muted,#777);font-weight:850}
+.music-archive-entry[open] summary{border-bottom:1px solid var(--line,rgba(0,0,0,.12))}
+.music-archive-videos{display:grid;gap:5px;padding:12px}
+.music-archive-videos a,.music-archive-inactive{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:9px;background:var(--blue-soft,#eef3fa);color:var(--blue-deep,#173e70);text-decoration:none;font-size:.91rem}
+.music-archive-videos a:hover{filter:brightness(.95)}
+.music-archive-videos a span:last-child{margin-left:16px}
+
+/* v1.165 · Mostres amb miniatures i reproducció en línia */
+.music-archive-video{display:grid;gap:0;border-radius:10px;overflow:hidden;background:var(--blue-soft,#eef3fa)}
+.music-archive-video>button{width:100%;border:0;background:transparent;color:var(--blue-deep,#173e70);display:flex;align-items:center;gap:13px;cursor:pointer;text-align:left;padding:6px 12px}
+.music-archive-video>button img{width:112px;max-width:25%;aspect-ratio:16/9;object-fit:cover;border-radius:6px}
+.music-archive-video-label{flex:1;font-weight:750;font-size:.9rem}
+.music-archive-video>button b{font-size:1.4rem;padding:0 8px}
+.music-archive-video-player{width:100%;aspect-ratio:16/9;max-height:70dvh;background:#000}
+.music-archive-video-player[hidden]{display:none!important}
+.music-archive-video-player iframe{width:100%;height:100%;border:0;display:block}

@@ -189,6 +189,9 @@
           <div class="hemeroteca-launch-wrap">
             <button id="openHemerotecaBtn" class="hemeroteca-launch" type="button"><span>ARXIU DOCUMENTAL</span><strong>HEMEROTECA</strong><small>Cartells · Notícies · Entrevistes</small></button>
           </div>
+          <div class="hemeroteca-launch-wrap">
+            <button id="openMusicArchiveBtn" class="hemeroteca-launch" type="button"><span>ARXIU DE MOSTRES</span><strong>MÚSICA INTERPRETADA</strong><small>Llistat d'obres que hem anat tocant</small></button>
+          </div>
         </div>
         <section id="hemerotecaPanel" class="hemeroteca-panel" hidden aria-label="Hemeroteca">
           <div class="hemeroteca-back-row">
@@ -206,6 +209,14 @@
             <button class="hemeroteca-tab" type="button" data-hemeroteca-type="entrevistes" role="tab" aria-selected="false">ENTREVISTES</button>
           </div>
           <div id="hemerotecaGrid" class="hemeroteca-grid" aria-live="polite"></div>
+        </section>
+        <section id="musicArchivePanel" class="hemeroteca-panel" hidden aria-label="Música interpretada">
+          <div class="hemeroteca-back-row"><button id="closeMusicArchiveBtn" class="hemeroteca-back" type="button">← HISTÒRIC</button></div>
+          <div class="hemeroteca-head panel"><div class="archive-title-row">
+            <div><span class="eyebrow">ARXIU DE MOSTRES</span><h3>MÚSICA INTERPRETADA</h3><p>Llistat de mostres d'obres que hem anat tocant. (Contingut només informatiu. Crèdits als respectius autors.)</p></div>
+            <div id="musicArchiveTotal" class="archive-total-badge" aria-label="Total de mostres disponibles">0 MOSTRES</div>
+          </div></div>
+          <div id="musicArchiveList" class="music-archive-list"></div>
         </section>
       </section>
 
@@ -641,11 +652,11 @@
         <div id="historyImageMeta" class="history-image-meta"><span data-history-meta="title"></span><span data-history-meta="year"></span><span data-history-meta="description"></span><span data-history-meta="source"></span></div>
       </div>
       <div class="history-image-caption"><strong id="historyImageTitle"></strong><span id="historyImageCaption"></span></div>
-      <div class="history-mobile-controls"><button type="button" id="historyMobilePrev" aria-label="Fotografia anterior">‹</button><button type="button" id="historyMobileClose" aria-label="Tancar fotografia">×</button><button type="button" id="historyMobileNext" aria-label="Fotografia següent">›</button></div>
+      <div class="history-mobile-controls"><button type="button" id="historyMobilePrev" aria-label="Fotografia anterior">‹</button><button type="button" id="historyMobileReset" aria-label="Centrar i ajustar fotografia">⤢</button><button type="button" id="historyMobileClose" aria-label="Tancar fotografia">×</button><button type="button" id="historyMobileNext" aria-label="Fotografia següent">›</button></div>
     </section>
   </div>
 
-  <script src="version.js?v=1.164"></script>
+  <script src="version.js?v=1.165"></script>
   <script src="config.js?v=0.111"></script>
   <script src="data/content-published.js?v=0.111"></script>
   <script src="content-store.js?v=0.111"></script>
@@ -653,8 +664,8 @@
   <script src="supabase-client.js?v=0.117"></script>
   <script src="metronome.js?v=0.111"></script>
   <script src="tuner.js?v=0.111"></script>
-  <script src="app.js?v=1.164"></script>
-  <script src="i18n.js?v=1.161"></script>
+  <script src="app.js?v=1.165"></script>
+  <script src="i18n.js?v=1.165"></script>
   <script src="push-client.js?v=0.144"></script>
 <script src="../notifications-inbox.js?v=0.154"></script>
 </body>

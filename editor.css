@@ -1419,3 +1419,12 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
   inset:auto!important;
   transform:none;
 }
+
+/* v1.165 · publicació d'arxius de mostres, independent de les DEMOS actives */
+.music-archive-editor-card{margin-top:18px}
+.music-archive-editor-list{display:grid;gap:9px;margin:16px 0}
+.music-archive-select-row{display:flex;align-items:center;gap:14px;padding:13px 15px;border-radius:12px;border:1px solid rgba(100,85,60,.19);background:#fff;cursor:pointer}
+.music-archive-select-row input{width:20px;height:20px;flex-shrink:0;accent-color:#b88628}
+.music-archive-select-row span{display:flex;flex-direction:column;gap:3px}
+.music-archive-select-row strong{font-size:14px}
+.music-archive-select-row small{opacity:.7;font-size:12px}

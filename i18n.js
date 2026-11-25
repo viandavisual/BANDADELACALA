@@ -5,6 +5,15 @@
 'use strict';
 const DICT={
   "en": {
+    "ARXIU DE MOSTRES": "SAMPLE ARCHIVE",
+    "MÚSICA INTERPRETADA": "PERFORMED MUSIC",
+    "Llistat d'obres que hem anat tocant": "List of pieces we have performed",
+    "Llistat de mostres d'obres que hem anat tocant. (Contingut només informatiu. Crèdits als respectius autors.)": "Samples of pieces we have performed. (For information only. Credits belong to their respective authors.)",
+    "MOSTRA": "SAMPLE",
+    "MOSTRES": "SAMPLES",
+    "Sense vídeos disponibles.": "No videos available.",
+    "Encara no hi ha mostres publicades.": "No samples have been published yet.",
+
     "INICI": "START",
     "CALENDARI": "CALENDAR",
     "HISTÒRIC": "HISTORY",
@@ -356,6 +365,15 @@ const DICT={
     "Has accedit des de l’enllaç de recuperació.": "You used the password recovery link."
   },
   "nl": {
+    "ARXIU DE MOSTRES": "ARCHIEF VAN FRAGMENTEN",
+    "MÚSICA INTERPRETADA": "UITGEVOERDE MUZIEK",
+    "Llistat d'obres que hem anat tocant": "Lijst van werken die we hebben gespeeld",
+    "Llistat de mostres d'obres que hem anat tocant. (Contingut només informatiu. Crèdits als respectius autors.)": "Fragmenten van werken die we hebben gespeeld. (Uitsluitend ter informatie. Alle rechten bij de respectievelijke auteurs.)",
+    "MOSTRA": "FRAGMENT",
+    "MOSTRES": "FRAGMENTEN",
+    "Sense vídeos disponibles.": "Geen video’s beschikbaar.",
+    "Encara no hi ha mostres publicades.": "Er zijn nog geen fragmenten gepubliceerd.",
+
     "INICI": "START",
     "CALENDARI": "KALENDER",
     "HISTÒRIC": "GESCHIEDENIS",
@@ -746,6 +764,7 @@ function translate(text){
       result=result.replace(/\b(\d+)\s+Fotos\b/g,(_,n)=>n+' '+dict.Fotos)
         .replace(/\b(\d+)\s+pistes\b/g,(_,n)=>n+' '+dict.pistes)
         .replace(/\b(\d+)\s+Cartells\b/g,(_,n)=>n+' '+dict.Cartells)
+        .replace(/\b(\d+)\s+MOSTRES?\b/g,(_,n)=>n+' '+dict[n==='1'?'MOSTRA':'MOSTRES'])
         .replace(/\b(\d+)\s+foto(s)?\b/gi,(_,n,s)=>n+' '+dict[s?'fotos':'foto']);
       // Cap substitució genèrica de noms lliures ni títols de peces.
       value=result;

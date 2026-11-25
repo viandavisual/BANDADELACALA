@@ -1,0 +1,12 @@
+BANDA DE LA CALA · v1.165 (PATCH des de v1.164)
+
+- HISTÒRIC desktop: controls i any centrats; ocultats títol, descripció i font del visor inferior.
+- HISTÒRIC timeline: eliminada la bombolla FONT sobre les fotografies.
+- HISTÒRIC mobile: quart control CENTRAR; feedback dels quatre botons; pinch centrat i desplaçament sense rotació.
+- HISTÒRIC: nova subpàgina MÚSICA INTERPRETADA sota HEMEROTECA.
+- EDITOR/HISTÒRIC: selecció de llistes de DEMOS desades, amb publicació per referència a les llistes originals.
+- HISTÒRIC: tots els períodes plegats cada vegada que s'hi entra, excepte el període amb foto ampliada.
+- HEMEROTECA: es manté el visor actual, sense canvis en la seva lògica.
+- Versió i caches a v1.165. No requereix migració SQL.
+
+Després de publicar, entra a EDITOR > HISTÒRIC > MÚSICA INTERPRETADA, marca les llistes i prem DESAR SELECCIÓ. Espera el missatge DESAT A SUPABASE.
