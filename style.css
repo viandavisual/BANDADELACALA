@@ -3839,3 +3839,19 @@ html,body{max-width:100%;overflow-x:clip}
    padding:3px 1px!important;
  }
 }
+
+
+/* v1.168 · FONT més discreta a les targetes dels esdeveniments HISTÒRIC. */
+@media(min-width:781px){
+  .history-card-copy .history-photo-source{font-size:.67rem!important;line-height:1.35!important;}
+  .history-image-modal.history-only .history-image-meta [data-history-meta="source"]{font-size:.83em!important;}
+}
+@media(max-width:780px){
+  .history-card-copy .history-photo-source{font-size:.64rem!important;line-height:1.35!important;}
+  /* El zoom 100% és la foto COMPLETA (object-fit:contain / escala inicial).
+     Les dimensions inicials són calculades amb l'amplada I l'altura del visor. */
+  .history-image-modal.history-only .history-image-viewport img{
+    flex:0 0 auto!important;
+    object-fit:contain!important;
+  }
+}

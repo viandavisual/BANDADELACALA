@@ -980,21 +980,28 @@ function historyViewerApply(){
 function historyViewerReset(){
   const img=$('#historyImageLarge'), viewport=$('#historyImageViewport');
   if(!img||!viewport) return;
-  // v1.167 · A HISTÒRIC mobile la imatge inicial sempre ocupa tota l'amplada
-  // del visor; el mateix ample és el límit inferior del gest pinch.
+  // v1.168 · HISTÒRIC mobile: enquadrament inicial CONTAIN (foto sencera).
+  // Aquest enquadrament, que s'adapta a la proporció de cada fotografia,
+  // és el zoom mínim (100%). No forcem mai l'amplada del visor.
   if(historyMobileEnabled()){
-    const width=Math.max(1,viewport.clientWidth);
-    img.style.width=`${width}px`;
-    img.style.height='auto';
-    img.style.maxWidth='none';
-    img.style.maxHeight='none';
+    const availableWidth=Math.max(1,viewport.clientWidth);
+    const availableHeight=Math.max(1,viewport.clientHeight);
+    const naturalWidth=img.naturalWidth||availableWidth;
+    const naturalHeight=img.naturalHeight||availableHeight;
+    const fit=Math.min(availableWidth/naturalWidth,availableHeight/naturalHeight);
+    const width=Math.max(1,naturalWidth*fit);
+    const height=Math.max(1,naturalHeight*fit);
+    img.style.setProperty('width',`${width}px`,'important');
+    img.style.setProperty('height',`${height}px`,'important');
+    img.style.setProperty('max-width','none','important');
+    img.style.setProperty('max-height','none','important');
     state.historyViewer.baseWidth=width;
     state.historyViewer.scale=1;
     resetHistoryMobileTransform();
     viewport.scrollTo({left:0,top:0,behavior:'instant'});
     return;
   }
-  img.style.width='auto'; img.style.height='auto'; img.style.maxWidth='100%'; img.style.maxHeight='100%';
+  img.style.setProperty('width','auto'); img.style.setProperty('height','auto'); img.style.setProperty('max-width','100%'); img.style.setProperty('max-height','100%');
   requestAnimationFrame(()=>{
     const rect=img.getBoundingClientRect();
     state.historyViewer.baseWidth=Math.max(1,rect.width);
@@ -1091,7 +1098,7 @@ function openHistoryImage(id,index=0){
 function closeHistoryImage(){
   const modal=$('#historyImageModal'); if(!modal) return;
   modal.hidden=true; modal.classList.remove('history-only'); document.body.classList.remove('modal-open');
-  const img=$('#historyImageLarge'); if(img){img.removeAttribute('src');img.style.width='';}
+  const img=$('#historyImageLarge'); if(img){img.removeAttribute('src');for(const prop of ['width','height','max-width','max-height']) img.style.removeProperty(prop);}
   resetHistoryMobileTransform();
   state.historyViewer.items=[];state.historyViewer.index=0;
 }

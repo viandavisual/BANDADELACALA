@@ -1,0 +1,11 @@
+BANDA DE LA CALA v1.168 — CANVIS
+Base: v1.167. Cap canvi a Supabase, comptes o puntuacions.
+
+- HISTÒRIC MOBILE: restaurem l'enquadrament inicial de la foto COMPLETA (contain),
+  mantenint proporcions, tant per a imatges verticals com horitzontals.
+- El zoom mínim del gest és aquest enquadrament inicial: el pinch no pot
+  reduir la imatge per sota de l'estat al 100% i en arribar al mínim
+  recupera escala i posició centrades.
+- HISTÒRIC DESKTOP: text FONT més petit en esdeveniments i visor.
+- HISTÒRIC MOBILE: text FONT més petit a les targetes del timeline.
+- HEMEROTECA no es modifica.
