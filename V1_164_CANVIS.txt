@@ -1,0 +1,7 @@
+BANDA DE LA CALA v1.164 — PATCH des de v1.163
+- HISTÒRIC: connectors entre node i targeta en desktop i mobile.
+- HISTÒRIC desktop: controls i metadades en una sola fila (Títol, Any, Descripció, FONT).
+- HISTÒRIC mobile: miniatures compactes en files i visor a pantalla completa, amb pan/zoom/rotació tàctils i controls fixos per navegar/tancar.
+- EDITOR HISTÒRIC: etiqueta Font (mateix camp i dades).
+- HEMEROTECA: el seu comportament de visor queda separat i sense modificacions intencionades.
+- Sense modificacions de dades, comptes ni punts.
