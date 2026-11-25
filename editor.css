@@ -1434,3 +1434,16 @@ body:not(.editor-admin) [data-admin-only]{display:none!important}
 .demo-archive-edit-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto;margin-right:8px}
 .demo-archive-entry>summary{flex-wrap:wrap}
 .demo-archive-entry>summary .demo-archive-controls{margin-left:auto}
+
+
+/* v1.170 · Nova playlist manual a l'arxiu de MÚSICA INTERPRETADA */
+.music-archive-create-card{margin-top:18px}
+.music-archive-create-card form{display:grid;gap:12px;margin-top:14px}
+.music-archive-create-card form>label{display:grid;gap:7px;font-weight:750}
+.music-archive-create-card input,.music-archive-create-card textarea{
+  display:block;width:100%;max-width:100%;box-sizing:border-box;
+  padding:11px 13px;border:1px solid #c8c9d0;border-radius:11px;
+  font:inherit;font-weight:450;line-height:1.5;background:#fff;color:#202838;
+}
+.music-archive-create-card textarea{resize:vertical;min-height:170px;white-space:pre-wrap}
+.music-archive-create-card .form-actions{margin-top:3px}

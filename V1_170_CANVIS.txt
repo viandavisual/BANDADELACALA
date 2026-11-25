@@ -1,0 +1,12 @@
+BANDA DE LA CALA — v1.170 (PATCH des de v1.169)
+
+1) APP/HISTÒRIC desktop: títol, descripció i FONT del visor ampliat sense negreta.
+2) APP/HISTÒRIC desktop: navegació de miniatures amb scroll horitzontal natiu,
+   roda del ratolí, trackpad, arrossegament amb ratolí i tecles de cursor.
+3) EDITOR/HISTÒRIC/MÚSICA INTERPRETADA: nou formulari a la part inferior per
+   crear manualment playlists de concerts antics, amb les obres en l'ordre desitjat.
+   Cada línia admet "Títol" o "Títol | URL" (enllaç opcional).
+   Les llistes es guarden a settings.demoArchives i apareixen a la selecció
+   de llistes visibles, sense tocar el repertori del pròxim concert.
+
+Sense noves migracions SQL. No modifica dades existents ni HEMEROTECA.

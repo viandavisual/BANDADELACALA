@@ -3855,3 +3855,34 @@ html,body{max-width:100%;overflow-x:clip}
     object-fit:contain!important;
   }
 }
+
+
+/* v1.170 · HISTÒRIC desktop, metadades en pes normal. HEMEROTECA intacta. */
+@media(min-width:781px){
+  .history-image-modal.history-only .history-image-meta [data-history-meta="title"],
+  .history-image-modal.history-only .history-image-meta [data-history-meta="description"],
+  .history-image-modal.history-only .history-image-meta [data-history-meta="source"]{
+    font-weight:400!important;font-synthesis:none!important;
+  }
+  .history-media-showcase .history-media-strip{
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    scroll-behavior:auto!important;
+    scroll-snap-type:none!important;
+    overscroll-behavior-x:contain;
+    scrollbar-width:auto!important;
+    touch-action:pan-x!important;
+    cursor:grab;
+    padding-bottom:9px!important;
+  }
+  .history-media-showcase .history-media-strip:active{cursor:grabbing}
+  .history-media-showcase .history-media-strip::-webkit-scrollbar{height:11px!important;display:block!important}
+  .history-media-showcase .history-media-strip::-webkit-scrollbar-thumb{background:#9b9db8;border:2px solid #f6f4ef;border-radius:10px}
+  .history-media-showcase .history-image-thumb{flex-shrink:0!important;scroll-snap-align:none!important}
+}

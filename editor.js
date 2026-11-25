@@ -3295,6 +3295,41 @@ function bindMusicArchiveEditor(){
   });
 }
 
+// v1.170 · Creació de repertoris històrics manuals, sense tocar DEMOS actuals.
+function bindMusicArchiveManual(){
+  const form=$('#musicArchiveManualForm');if(!form)return;
+  form.addEventListener('submit',event=>{
+    event.preventDefault();
+    if(!editorCanWrite){showToast('Només ADMIN i GESTOR poden crear playlists');return;}
+    const name=String($('#musicArchiveManualName')?.value||'').trim();
+    const raw=String($('#musicArchiveManualItems')?.value||'').replace(/\r\n?/g,'\n');
+    if(!name){showToast('Indica el nom del concert');return;}
+    const demos=[];
+    for(const [i,line] of raw.split('\n').entries()){
+      const clean=line.trim();if(!clean)continue;
+      // El separador | permet títols amb espais, signes i URLs opcionals.
+      const bar=clean.indexOf('|');
+      const title=(bar>=0?clean.slice(0,bar):clean).trim();
+      const url=(bar>=0?clean.slice(bar+1):'').trim();
+      if(!title){showToast(`Falta el títol de l'obra a la línia ${i+1}`);return;}
+      if(url && !safeWebUrl(url)){showToast(`URL no vàlida a la línia ${i+1}`);return;}
+      demos.push({title,url,videoId:url?(youtubeVideoId(url)||''):''});
+    }
+    if(!demos.length){showToast('Introdueix almenys una obra');return;}
+    if(!confirm(`Vols guardar «${name}» amb ${demos.length} ${demos.length===1?'obra':'obres'}? La llista quedarà disponible per seleccionar-la a MÚSICA INTERPRETADA.`))return;
+    content.settings=content.settings||{};
+    const prev=Array.isArray(content.settings.demoArchives)?content.settings.demoArchives:[];
+    content.settings.demoArchives=[{
+      id:BandaStore.uid('concert'),name,createdAt:new Date().toISOString(),
+      manual:true,demos
+    },...prev];
+    if(save(content,'Playlist manual desada')){
+      form.reset();
+      const msg=$('#musicArchiveManualStatus');if(msg)msg.textContent='Playlist guardada. Marca-la a la llista superior i prem DESAR SELECCIÓ per publicar-la a l’APP.';
+    }
+  });
+}
+
 function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderDemos(); renderPassacarrersEditor(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderMusicArchiveEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); renderPushReminderSettings(); }
 function bindExternalUpdates(){ window.addEventListener('banda-content-changed',event=>{ if(supabaseActive) return; content=BandaStore.normalize(event.detail);renderAll();}); }
 
@@ -3583,5 +3618,5 @@ async function registerEditorSW(){
   }catch(error){ console.warn('EDITOR SW',error); }
 }
 
-function init(){ bootIdentity(); bindNavigation(); bindPastEventsDisclosure(); bindSystemDisclosures(); bindPendingDisclosure(); bindDemoArchives(); bindMusicArchiveEditor(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindPassacarrersEditor(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();if(document.querySelector('.editor-view.active[data-editor-view=\"users\"]'))loadPendingRegistrations();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
+function init(){ bootIdentity(); bindNavigation(); bindPastEventsDisclosure(); bindSystemDisclosures(); bindPendingDisclosure(); bindDemoArchives(); bindMusicArchiveEditor(); bindMusicArchiveManual(); bindHomeEditor(); bindEventForm(); bindDresscodes(); bindTrackForm(); bindDemos(); bindPassacarrersEditor(); bindAudioLibrary(); bindHistoric(); bindHemerotecaEditor(); bindArchiveReview(); bindMinigames(); bindSystem(); bindUsers(); bindPushReminderSettings(); bindExternalUpdates(); bindEditorAuth(); bindEditorPwaInstall(); registerEditorSW(); initManagedListViewports(); document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderEvents();renderDashboard();refreshArchivePendingBadge();if(document.querySelector('.editor-view.active[data-editor-view=\"users\"]'))loadPendingRegistrations();}}); renderAll(); resetEventForm(); resetTrackForm(); resetDemoForm(); resetDresscodeForm(); resetHistoricForm(); resetHemerotecaForm(); initEditorBackend(); }
 init();

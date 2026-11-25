@@ -877,6 +877,60 @@ function bindHistoryImagesWithin(root=document){
     btn.addEventListener('click',()=>openHistoryImage(btn.dataset.historyImageId,Number(btn.dataset.historyImageIndex||0)));
   });
 }
+// v1.170 · Desplaçament fiable de miniatures en desktop: ratolí, roda,
+// trackpad, barra de scroll nativa i teclat; no modifica la galeria mobile.
+function bindHistoryThumbnailStrips(root=document){
+  root.querySelectorAll?.('.history-media-strip').forEach(strip=>{
+    if(strip.dataset.scrollBound==='1')return;
+    strip.dataset.scrollBound='1';
+    strip.tabIndex=0;
+    strip.setAttribute('role','region');
+    strip.setAttribute('aria-label','Miniatures. Desplaça horitzontalment per veure totes les fotografies');
+    let drag=null,suppressClick=false;
+    strip.addEventListener('wheel',event=>{
+      if(window.matchMedia('(max-width:780px)').matches || event.ctrlKey || event.metaKey)return;
+      if(strip.scrollWidth<=strip.clientWidth+2)return;
+      // Una roda vertical sobre la tira avança les fotos; el trackpad també conserva deltaX.
+      const delta=Math.abs(event.deltaX)>=Math.abs(event.deltaY)?event.deltaX:event.deltaY;
+      if(!delta)return;
+      const before=strip.scrollLeft;
+      strip.scrollLeft+=delta;
+      if(Math.abs(strip.scrollLeft-before)>.1)event.preventDefault();
+    },{passive:false});
+    strip.addEventListener('pointerdown',event=>{
+      if(window.matchMedia('(max-width:780px)').matches||event.pointerType==='touch'||event.button!==0)return;
+      drag={x:event.clientX,scrollLeft:strip.scrollLeft,moved:false};
+      suppressClick=false;
+    });
+    strip.addEventListener('pointermove',event=>{
+      if(!drag||event.buttons!==1)return;
+      const dx=event.clientX-drag.x;
+      if(Math.abs(dx)>5){
+        drag.moved=true;
+        strip.scrollLeft=drag.scrollLeft-dx;
+        event.preventDefault();
+      }
+    });
+    const end=()=>{
+      if(!drag)return;
+      if(drag.moved){suppressClick=true;setTimeout(()=>{suppressClick=false;},0);}
+      drag=null;
+    };
+    strip.addEventListener('pointerup',end);
+    strip.addEventListener('pointercancel',end);
+    strip.addEventListener('pointerleave',end);
+    strip.addEventListener('click',event=>{
+      if(!suppressClick)return;
+      event.preventDefault();event.stopPropagation();suppressClick=false;
+    },true);
+    strip.addEventListener('keydown',event=>{
+      if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return;
+      strip.scrollBy({left:event.key==='ArrowRight'?140:-140,behavior:'smooth'});
+      event.preventDefault();
+    });
+  });
+}
+
 function loadHistoryPeriod(periodId){
   const section=$$('.history-period').find(el=>el.dataset.period===periodId);
   const itemsHost=section?.querySelector('.history-period-items');
@@ -884,6 +938,7 @@ function loadHistoryPeriod(periodId){
   itemsHost.insertAdjacentHTML('afterbegin',historyMediaMarkup(periodId));
   itemsHost.dataset.loaded='1';
   bindHistoryImagesWithin(itemsHost);
+  bindHistoryThumbnailStrips(itemsHost);
   requestAnimationFrame(()=>compactHistoryTimeline(section));
   itemsHost.querySelectorAll('img').forEach(img=>{if(!img.complete)img.addEventListener('load',()=>compactHistoryTimeline(section),{once:true});});
 }
