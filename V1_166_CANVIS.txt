@@ -1,0 +1,8 @@
+BANDA DE LA CALA v1.166 — PATCH des de v1.165
+
+1. APP / HISTÒRIC / DESKTOP: restaurats TÍTOL, DESCRIPCIÓ i FONT en les caselles originals del peu del visor, mantenint ANY i els controls existents.
+2. APP / HISTÒRIC / MOBILE: botons AJUSTAR i TANCAR centrats amb wrappers de glif.
+3. APP / HISTÒRIC: connector vertical entre HEMEROTECA i MÚSICA INTERPRETADA.
+4. EDITOR / DEMOS: editar en línia el nom d'una llista de demos desada; no modifica id ni vídeos.
+
+Sense canvis a Supabase, als usuaris ni als minijocs. No inclou fitxers d'HEMEROTECA ni canvi del seu visor.

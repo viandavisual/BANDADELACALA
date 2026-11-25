@@ -3726,3 +3726,44 @@ html,body{max-width:100%;overflow-x:clip}
 .music-archive-video-player{width:100%;aspect-ratio:16/9;max-height:70dvh;background:#000}
 .music-archive-video-player[hidden]{display:none!important}
 .music-archive-video-player iframe{width:100%;height:100%;border:0;display:block}
+
+/* v1.166 · HISTÒRIC desktop: restaurar les quatre caselles de metadades a la mateixa fila.
+   No afecta les modalitats del visor d'HEMEROTECA. */
+@media(min-width:781px){
+ .history-image-modal.history-only .history-image-meta{
+   display:grid!important;
+   grid-template-columns:minmax(125px,1.05fr) minmax(54px,.4fr) minmax(150px,1.6fr) minmax(125px,1fr)!important;
+   max-width:none!important;flex:1 1 0!important;gap:clamp(7px,1vw,16px)!important;
+   padding-left:clamp(8px,1vw,16px)!important;
+   align-items:center!important;
+ }
+ .history-image-modal.history-only .history-image-meta [data-history-meta="title"],
+ .history-image-modal.history-only .history-image-meta [data-history-meta="description"],
+ .history-image-modal.history-only .history-image-meta [data-history-meta="source"]{
+   display:flex!important;align-items:center!important;justify-content:center!important;
+   text-align:center!important;min-width:0!important;
+ }
+ .history-image-modal.history-only .history-image-meta [data-history-meta="year"]{
+   text-align:center!important;display:flex!important;align-items:center;justify-content:center;
+ }
+}
+/* v1.166 · Controls mobile alineats al centre geomètric de cadascuna de les caselles */
+@media(max-width:780px){
+ .history-image-modal.history-only #historyMobileReset,
+ .history-image-modal.history-only #historyMobileClose{
+   display:flex!important;align-items:center!important;justify-content:center!important;
+   text-align:center!important;padding:0!important;text-indent:0!important;
+   line-height:1!important;font-family:Arial,sans-serif!important;
+ }
+ .history-image-modal.history-only #historyMobileReset .history-control-glyph,
+ .history-image-modal.history-only #historyMobileClose .history-control-glyph{
+   display:block;position:relative;line-height:1!important;margin:0!important;
+   transform:none!important;font-variant-numeric:normal;
+ }
+}
+/* v1.166 · Eix visual HEMEROTECA → MÚSICA INTERPRETADA */
+#historyMainContent .hemeroteca-launch-wrap + .hemeroteca-launch-wrap:before{
+ content:"";position:absolute;left:50%;top:-28px;height:36px;width:3px;
+ transform:translateX(-50%);background:var(--blue,#343b83);opacity:.55;
+ border-radius:3px;pointer-events:none;z-index:-1;
+}

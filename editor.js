@@ -1245,12 +1245,53 @@ function renderDemoArchives(){
     const items=Array.isArray(archive.demos)?archive.demos:[];
     const id=esc(archive.id);
     const heading=esc(archive.name||'CONCERT SENSE NOM');
-    return `<details class="demo-archive-entry"><summary><strong>${heading}</strong><span class="demo-archive-controls"><span class="count-pill">${items.length} VÍDEOS</span><button class="tiny-btn delete" type="button" data-delete-demo-archive="${id}" title="Eliminar només aquesta llista">×</button></span></summary><div class="demo-archive-videos">${items.map((item,i)=>{
+    return `<details class="demo-archive-entry"><summary><strong>${heading}</strong><span class="demo-archive-controls"><span class="count-pill">${items.length} VÍDEOS</span><button class="tiny-btn" type="button" data-rename-demo-archive="${id}" title="Editar nom de la llista" aria-label="Editar nom de la llista">✎</button><button class="tiny-btn delete" type="button" data-delete-demo-archive="${id}" title="Eliminar només aquesta llista">×</button></span></summary><div class="demo-archive-videos">${items.map((item,i)=>{
       const videoId=item.videoId||youtubeVideoId(item.url);
       const href=videoId?`https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`:item.url;
       return `<a class="demo-archive-video" href="${esc(href||'#')}" target="_blank" rel="noopener noreferrer"><span class="demo-archive-number">${i+1}.</span><span>${esc(item.title||'Vídeo de YouTube')}</span><span aria-hidden="true">↗</span></a>`;
     }).join('')||'<p class="helper-copy">Llista sense vídeos.</p>'}</div></details>`;
   }).join(''):'<div class="empty-state">Encara no hi ha llistes de concerts guardades.</div>';
+  host.querySelectorAll('[data-rename-demo-archive]').forEach(btn=>btn.addEventListener('click',event=>{
+    event.preventDefault();event.stopPropagation();
+    if(!editorCanWrite){showToast('Mode consulta · no pots editar llistes');return;}
+    const archive=archives.find(item=>String(item.id)===btn.dataset.renameDemoArchive);
+    if(!archive)return;
+    const summary=btn.closest('summary');
+    const heading=summary?.querySelector('strong');
+    if(!summary||!heading||summary.querySelector('.demo-archive-name-input'))return;
+    const previous=String(archive.name||'');
+    const input=document.createElement('input');
+    input.type='text';input.className='demo-archive-name-input';
+    input.value=previous;input.maxLength=160;
+    input.setAttribute('aria-label','Nom de la llista desada');
+    const editActions=document.createElement('span');
+    editActions.className='demo-archive-edit-actions';
+    const confirmBtn=document.createElement('button');
+    confirmBtn.type='button';confirmBtn.className='tiny-btn';confirmBtn.textContent='✓';confirmBtn.title='Desar nom';
+    const cancelBtn=document.createElement('button');
+    cancelBtn.type='button';cancelBtn.className='tiny-btn';cancelBtn.textContent='↶';cancelBtn.title='Cancel·lar edició';
+    editActions.append(confirmBtn,cancelBtn);
+    heading.replaceWith(input);summary.insertBefore(editActions,summary.querySelector('.demo-archive-controls'));
+    const stop=e=>e.stopPropagation();
+    input.addEventListener('click',stop);
+    editActions.addEventListener('click',stop);
+    const cancel=()=>{input.replaceWith(heading);editActions.remove();};
+    const submit=()=>{
+      const next=String(input.value||'').trim();
+      if(!next){showToast('El nom de la llista no pot estar buit');input.focus();return;}
+      if(next===previous){cancel();return;}
+      // Conservem id i vídeos: la selecció pública a HISTÒRIC es basa en l'id.
+      archive.name=next;
+      save(content,'Nom de la llista actualitzat');
+    };
+    confirmBtn.addEventListener('click',submit);
+    cancelBtn.addEventListener('click',cancel);
+    input.addEventListener('keydown',event=>{
+      if(event.key==='Enter'){event.preventDefault();submit();}
+      if(event.key==='Escape'){event.preventDefault();cancel();}
+    });
+    input.focus();input.select();
+  }));
   host.querySelectorAll('[data-delete-demo-archive]').forEach(btn=>btn.addEventListener('click',event=>{
     event.preventDefault();event.stopPropagation();
     const archive=archives.find(item=>String(item.id)===btn.dataset.deleteDemoArchive);
