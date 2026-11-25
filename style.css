@@ -3767,3 +3767,75 @@ html,body{max-width:100%;overflow-x:clip}
  transform:translateX(-50%);background:var(--blue,#343b83);opacity:.55;
  border-radius:3px;pointer-events:none;z-index:-1;
 }
+
+
+/* v1.167 · HISTÒRIC mobile: 5 miniatures per fila ocupant tota l'amplada */
+@media(max-width:780px){
+  .history-media-showcase .history-media-strip{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:5px!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+    padding:5px!important;
+    overflow:visible!important;
+  }
+  .history-media-showcase .history-image-thumb{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    height:auto!important;
+    aspect-ratio:1 / 1!important;
+    flex:none!important;
+    overflow:hidden!important;
+  }
+  .history-media-showcase .history-image-thumb img{
+    width:100%!important;height:100%!important;
+    max-width:none!important;max-height:none!important;
+    object-fit:cover!important;
+  }
+  /* Visor exclusiu HISTÒRIC: a escala 100%, imatge encaixada a l'amplada.
+     Només el contingut de la foto es mou; controls sempre independents. */
+  .history-image-modal.history-only .history-image-viewport img{
+    flex:0 0 auto!important;
+    max-width:none!important;
+    max-height:none!important;
+    transform-origin:center center!important;
+  }
+  .history-image-modal.history-only .history-mobile-controls button:disabled{
+    background:#434650!important;
+    color:#898d98!important;
+    border-color:#696b70!important;
+    opacity:.52!important;
+    cursor:default!important;
+    box-shadow:none!important;
+    transform:none!important;
+    animation:none!important;
+    pointer-events:none!important;
+  }
+}
+/* Una fila independent per a FONT, sense cursiva, després de la descripció. */
+.history-card-copy .history-photo-source{
+  display:block;margin:9px 0 0!important;
+  color:var(--muted,#736e69);font-size:.76rem;
+  font-style:normal!important;font-weight:600;
+  white-space:normal;overflow-wrap:anywhere;line-height:1.4;
+}
+/* HISTÒRIC desktop: descripcions completes en múltiples línies.
+   Cada casella conserva el seu ample; només augmenta l'altura de la fila. */
+@media(min-width:781px){
+ .history-image-modal.history-only .history-image-toolbar{align-items:center!important;height:auto!important;min-height:38px!important;}
+ .history-image-modal.history-only .history-image-meta{align-items:center!important;height:auto!important;min-height:30px!important;}
+ .history-image-modal.history-only .history-image-meta span{
+   white-space:normal!important;
+   overflow:visible!important;
+   text-overflow:clip!important;
+   overflow-wrap:anywhere!important;
+   word-break:normal!important;
+   line-height:1.25!important;
+   height:auto!important;
+   max-height:none!important;
+   padding:3px 1px!important;
+ }
+}

@@ -830,7 +830,7 @@ function historyMediaMarkup(periodId){
       const strip=rest.length?`<div class="history-media-strip" aria-label="Més fotografies">${rest.map((src,index)=>mediaMarkup(item,src,index+1,'history-image-thumb',`Ampliar fotografia ${index+2} de ${item.year}`)).join('')}</div>`:'';
       gallery=`<div class="history-media-showcase ${rest.length?'':'single'}">${hero}${strip}</div>`;
     }
-    return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><div class="history-moment-meta"><span class="history-year">${esc(item.year)}</span>${images.length?`<span class="history-entry-photo-count">${images.length} ${images.length===1?'FOTO':'FOTOS'}</span>`:''}</div>${title}${desc}</div></div></article>`;
+    return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><div class="history-moment-meta"><span class="history-year">${esc(item.year)}</span>${images.length?`<span class="history-entry-photo-count">${images.length} ${images.length===1?'FOTO':'FOTOS'}</span>`:''}</div>${title}${desc}${item.authorSource?`<p class="history-photo-source">FONT: ${esc(item.authorSource)}</p>`:""}</div></div></article>`;
   }).join('');
 }
 function compactHistoryTimeline(root=document){
@@ -980,6 +980,20 @@ function historyViewerApply(){
 function historyViewerReset(){
   const img=$('#historyImageLarge'), viewport=$('#historyImageViewport');
   if(!img||!viewport) return;
+  // v1.167 · A HISTÒRIC mobile la imatge inicial sempre ocupa tota l'amplada
+  // del visor; el mateix ample és el límit inferior del gest pinch.
+  if(historyMobileEnabled()){
+    const width=Math.max(1,viewport.clientWidth);
+    img.style.width=`${width}px`;
+    img.style.height='auto';
+    img.style.maxWidth='none';
+    img.style.maxHeight='none';
+    state.historyViewer.baseWidth=width;
+    state.historyViewer.scale=1;
+    resetHistoryMobileTransform();
+    viewport.scrollTo({left:0,top:0,behavior:'instant'});
+    return;
+  }
   img.style.width='auto'; img.style.height='auto'; img.style.maxWidth='100%'; img.style.maxHeight='100%';
   requestAnimationFrame(()=>{
     const rect=img.getBoundingClientRect();
@@ -1001,6 +1015,10 @@ function updateViewerNav(){
   const stage=$('.history-image-stage'); if(stage) stage.classList.toggle('single-image',!show);
   if(prev){prev.hidden=!show;prev.disabled=!show;}
   if(next){next.hidden=!show;next.disabled=!show;}
+  for(const id of ['#historyMobilePrev','#historyMobileNext']){
+    const button=$(id);
+    if(button){button.disabled=!show;button.setAttribute('aria-disabled',String(!show));}
+  }
 }
 function renderViewerItem(index){
   const items=state.historyViewer.items||[];
@@ -1084,6 +1102,8 @@ function historyMobileEnabled(){return !!($('#historyImageModal')?.classList.con
 function applyHistoryMobileTransform(){
   const img=$('#historyImageLarge');if(!img)return;
   const g=historyMobileGestures;
+  g.scale=Math.max(1,Math.min(8,g.scale));
+  if(g.scale<=1.001){g.scale=1;g.x=0;g.y=0;}
   img.style.transform=`translate3d(${g.x}px,${g.y}px,0) scale(${g.scale})`;
 }
 function resetHistoryMobileTransform(){

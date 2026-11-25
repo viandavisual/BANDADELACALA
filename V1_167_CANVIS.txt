@@ -1,0 +1,8 @@
+BANDA DE LA CALA v1.167 — CANVIS
+Base: v1.166. Sense modificacions a HEMEROTECA, comptes ni dades de Supabase.
+- HISTÒRIC mobile: el visor arrenca amb la fotografia ocupant l'amplada disponible, i el pinch no permet reduir-la per sota del 100%; en arribar al mínim recupera l'enquadrament centrat.
+- HISTÒRIC mobile: fletxes desactivades i en gris si l'esdeveniment té una sola imatge.
+- HISTÒRIC mobile: miniatures en 5 columnes a l'amplada completa de la targeta.
+- HISTÒRIC timeline: nova fila FONT sota la descripció, sense cursiva, només quan hi ha dades.
+- HISTÒRIC desktop: metadades del visor, especialment la descripció, amb retorn de línia automàtic i alçada adaptable.
+- Versió i cache APP actualitzades a v1.167.
