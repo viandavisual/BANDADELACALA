@@ -3917,3 +3917,23 @@ html,body{max-width:100%;overflow-x:clip}
   .history-media-scroll-area{overflow:visible}
   .history-strip-actions{display:none!important}
 }
+
+/* v1.173 · HISTÒRIC: botó RECORREGUT sobre els dos controls alineats. */
+#view-history .archive-title-actions{display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:0;width:max-content;max-width:100%}
+#view-history .archive-actions-inline{display:flex;gap:9px;align-items:stretch;width:100%}
+#view-history .archive-actions-inline .history-toggle-all,
+#view-history .archive-actions-inline .archive-total-badge{min-height:54px;flex:1 1 0;display:grid;place-items:center}
+#view-history .archive-actions-inline .history-toggle-all{height:auto}
+#view-history .history-tour-btn{width:100%;min-height:34px;padding:7px 9px;background:#393a86;color:#fff;border:1px solid #242760;border-radius:11px;font-size:.59rem;font-weight:800;letter-spacing:.02em;line-height:1.2;cursor:pointer;white-space:normal}
+#view-history .history-tour-btn:hover{filter:brightness(1.14)}
+#view-history .history-tour-btn.is-running{background:#92543a;border-color:#81412a}
+@media(max-width:780px){
+ #view-history .archive-title-actions{width:100%;max-width:220px}
+ #view-history .archive-actions-inline{gap:6px}
+ #view-history .archive-actions-inline .history-toggle-all,#view-history .archive-actions-inline .archive-total-badge{min-height:46px;min-width:0;padding:5px 7px}
+ #view-history .history-tour-btn{font-size:.51rem;min-height:34px}
+}
+@media(max-width:480px){
+ #view-history .archive-title-actions{grid-column:2;max-width:200px}
+ #view-history .archive-actions-inline .history-toggle-all,#view-history .archive-actions-inline .archive-total-badge{min-height:38px}
+}

@@ -3273,24 +3273,66 @@ function bindPushReminderSettings(){
  renderPushReminderSettings();
 }
 
-// v1.165 · Selecció de playlists de DEMOS que apareixeran a HISTÒRIC/MÚSICA INTERPRETADA.
+// v1.173 · Ordre descendent per any YYYY del nom, amb preferència manual opcional.
+function editorArchiveYear(archive){
+  const match=String(archive?.name||'').trim().match(/^(\d{4})(?=\s*[-–—]|\s|$)/);
+  return match?Number(match[1]):-Infinity;
+}
+function editorSortedMusicArchives(archives,settings){
+  const list=[...archives];
+  if(settings?.historicMusicArchiveSortMode==='manual'){
+    const order=Array.isArray(settings.historicMusicArchiveOrder)?settings.historicMusicArchiveOrder.map(String):[];
+    const pos=new Map(order.map((id,i)=>[id,i]));
+    return list.sort((a,b)=>(pos.get(String(a.id))??Infinity)-(pos.get(String(b.id))??Infinity)||editorArchiveYear(b)-editorArchiveYear(a)||String(a.name||'').localeCompare(String(b.name||''),'ca'));
+  }
+  return list.sort((a,b)=>editorArchiveYear(b)-editorArchiveYear(a)||String(a.name||'').localeCompare(String(b.name||''),'ca'));
+}
+let musicArchiveEditorManualDraft=false;
 function renderMusicArchiveEditor(){
   const host=$('#musicArchiveEditorList');if(!host)return;
   const archives=Array.isArray(content.settings?.demoArchives)?content.settings.demoArchives:[];
-  const selected=new Set(Array.isArray(content.settings?.historicMusicArchiveIds)?content.settings.historicMusicArchiveIds.map(String):[]);
+  const settings=content.settings||{};
+  const selected=new Set(Array.isArray(settings.historicMusicArchiveIds)?settings.historicMusicArchiveIds.map(String):[]);
+  const sorted=editorSortedMusicArchives(archives,settings);
   const count=$('#musicArchiveEditorCount');if(count)count.textContent=String(archives.length);
-  host.innerHTML=archives.length?archives.map(archive=>{
+  musicArchiveEditorManualDraft=settings.historicMusicArchiveSortMode==='manual';
+  host.innerHTML=sorted.length?sorted.map((archive,i)=>{
     const id=esc(archive.id);const total=Array.isArray(archive.demos)?archive.demos.length:0;
-    return `<label class="music-archive-select-row"><input type="checkbox" data-publish-music-archive="${id}" ${selected.has(String(archive.id))?'checked':''}/><span><strong>${esc(archive.name||'CONCERT')}</strong><small>${total} ${total===1?'MOSTRA':'MOSTRES'}</small></span></label>`;
+    return `<div class="music-archive-select-row" data-music-archive-row="${id}"><label><input type="checkbox" data-publish-music-archive="${id}" ${selected.has(String(archive.id))?'checked':''}/><span><strong>${esc(archive.name||'CONCERT')}</strong><small>${total} ${total===1?'MOSTRA':'MOSTRES'}</small></span></label><div class="music-archive-move"><button type="button" data-music-archive-move="up" aria-label="Pujar ${esc(archive.name)}" ${i===0?'disabled':''}>↑</button><button type="button" data-music-archive-move="down" aria-label="Baixar ${esc(archive.name)}" ${i===sorted.length-1?'disabled':''}>↓</button></div></div>`;
   }).join(''):'<div class="empty-state">Encara no hi ha llistes desades a DEMOS.</div>';
 }
 function bindMusicArchiveEditor(){
+  const host=$('#musicArchiveEditorList');
+  const refreshMoves=()=>{
+    const rows=[...host?.querySelectorAll('[data-music-archive-row]')||[]];
+    rows.forEach((row,i)=>{const up=row.querySelector('[data-music-archive-move="up"]'),down=row.querySelector('[data-music-archive-move="down"]');if(up)up.disabled=i===0;if(down)down.disabled=i===rows.length-1;});
+  };
+  host?.addEventListener('click',event=>{
+    const btn=event.target.closest('[data-music-archive-move]');if(!btn||!editorCanWrite)return;
+    const row=btn.closest('[data-music-archive-row]');if(!row)return;
+    if(btn.dataset.musicArchiveMove==='up'&&row.previousElementSibling)host.insertBefore(row,row.previousElementSibling);
+    if(btn.dataset.musicArchiveMove==='down'&&row.nextElementSibling)host.insertBefore(row.nextElementSibling,row);
+    musicArchiveEditorManualDraft=true;refreshMoves();
+  });
+  $('#musicArchiveSortYear')?.addEventListener('click',()=>{
+    if(!editorCanWrite)return;
+    // Manté els checkboxes actuals encara que hi hagi canvis sense desar.
+    const selected=new Set([...host.querySelectorAll('[data-publish-music-archive]:checked')].map(el=>el.dataset.publishMusicArchive));
+    const archives=Array.isArray(content.settings?.demoArchives)?content.settings.demoArchives:[];
+    const sorted=editorSortedMusicArchives(archives,{historicMusicArchiveSortMode:'year'});
+    const rows=new Map([...host.querySelectorAll('[data-music-archive-row]')].map(el=>[el.dataset.musicArchiveRow,el]));
+    sorted.forEach(a=>{const row=rows.get(String(a.id));if(row)host.appendChild(row);});
+    host.querySelectorAll('[data-publish-music-archive]').forEach(el=>{el.checked=selected.has(el.dataset.publishMusicArchive);});
+    musicArchiveEditorManualDraft=false;refreshMoves();
+  });
   $('#saveMusicArchiveSelection')?.addEventListener('click',()=>{
     if(!editorCanWrite)return;
     content.settings=content.settings||{};
     content.settings.historicMusicArchiveIds=[...document.querySelectorAll('[data-publish-music-archive]:checked')].map(el=>el.dataset.publishMusicArchive);
-    if(save(content,'Llistes de MÚSICA INTERPRETADA actualitzades')){
-      const el=$('#musicArchiveEditorStatus');if(el)el.textContent='Selecció preparada. Comprova que es mostri DESAT A SUPABASE.';
+    content.settings.historicMusicArchiveSortMode=musicArchiveEditorManualDraft?'manual':'year';
+    content.settings.historicMusicArchiveOrder=[...host.querySelectorAll('[data-music-archive-row]')].map(el=>el.dataset.musicArchiveRow);
+    if(save(content,'Llistes i ordre de MÚSICA INTERPRETADA actualitzats')){
+      const el=$('#musicArchiveEditorStatus');if(el)el.textContent='';
     }
   });
 }

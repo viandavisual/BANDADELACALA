@@ -1,0 +1,16 @@
+BANDA DE LA CALA · v1.173 · PATCH sobre v1.172
+
+1) HISTÒRIC / MÚSICA INTERPRETADA
+- Ordenació automàtica descendent per les quatre primeres xifres (AAAA) del nom de concert.
+- EDITOR: mateixa ordenació; fletxes ↑ ↓ per ordenar manualment i opció de recuperar ordre per any.
+- L'ordre només es publica quan es prem DESAR SELECCIÓ I ORDRE.
+- Eliminat el missatge «Selecció preparada. Comprova que es mostri DESAT A SUPABASE.».
+
+2) HISTÒRIC / MODE RECORREGUT
+- Botó damunt de DESPLEGAR TOT + TOTAL FOTOS, igualant les amplades.
+- Els dos controls inferiors tenen la mateixa altura.
+- Engega desplegant els períodes, baixa en 20 frames, inicia una pista aleatòria del PLAYER i puja en 180 segons amb frenada final progressiva.
+- El botó permet aturar el recorregut; navegar a altres seccions també l'atura.
+- AVÍS: si el navegador bloqueja la reproducció automàtica, es podrà reproduir des del miniplayer.
+
+Sense migracions SQL ni canvis als perfils, comptes, punts o HE​MEROTECA.

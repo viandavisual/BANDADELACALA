@@ -595,6 +595,7 @@ function animateViewEntrance(id){
 }
 
 function switchView(id, remember = true){
+  if(id!=='history')stopHistoryTour();
   if(window.BandaTuner?.isOpen?.()) window.BandaTuner.close();
   if(window.BandaMetronome?.isOpen?.()) window.BandaMetronome.close();
   if(id!=='playlist' && isPlayerFullscreenActive()) closePlayerFullscreen();
@@ -606,6 +607,7 @@ function switchView(id, remember = true){
   // Això evita quedar-se dins HEMEROTECA quan el USER torna a prémer HISTÒRIC.
   if(id==='games'){ warmQuinaNotaAudio(); prefetchQuinaNotaDaily(); }
   if(id==='history'){
+    if(historyTour)stopHistoryTour();
     const historyMain=$('#historyMainContent');
     const hemerotecaPanel=$('#hemerotecaPanel');
     const musicPanel=$('#musicArchivePanel');
@@ -980,6 +982,65 @@ function toggleHistoryPeriod(periodId){
   const opening=section.classList.contains('is-collapsed');
   const mobile=!!window.matchMedia?.('(max-width: 780px)').matches;
   setHistoryPeriodOpen(periodId,opening,{closeOthers:opening&&mobile});
+}
+// v1.173 · RECORREGUT HISTÒRIC: botó amb aturada voluntària, 20 frames de baixada
+// i retorn pausat en tres minuts. No afecta les dades ni els períodes desats.
+const HISTORY_TOUR_DURATION=180000;
+let historyTour=null;
+function stopHistoryTour(){
+  if(!historyTour)return;
+  historyTour.cancelled=true;
+  if(historyTour.frame)cancelAnimationFrame(historyTour.frame);
+  historyTour=null;
+  const btn=$('#historyTourBtn');
+  if(btn){btn.textContent='ACTIVAR EL MODE RECORREGUT';btn.setAttribute('aria-pressed','false');btn.classList.remove('is-running');}
+}
+function historyTourBottom(){
+  const doc=document.documentElement;
+  return Math.max(0,Math.max(doc.scrollHeight,document.body?.scrollHeight||0)-window.innerHeight);
+}
+function beginHistoryTour(){
+  if(historyTour){stopHistoryTour();return;}
+  const host=$('#historyTimeline');if(!host)return;
+  const periods=getHistoricPeriods();
+  state.collapsedPeriods=new Set();
+  // Expandir per carregar totes les fotografies i l'alçada del recorregut.
+  renderHistory();
+  const btn=$('#historyTourBtn');
+  if(btn){btn.textContent='ATURAR EL RECORREGUT';btn.setAttribute('aria-pressed','true');btn.classList.add('is-running');}
+  const tour={cancelled:false,frame:0,step:0,startScroll:window.scrollY,startTime:0};
+  historyTour=tour;
+  const down=()=>{
+    if(historyTour!==tour||tour.cancelled)return;
+    tour.step++;
+    // Exactament 20 fotogrames per baixar fins al final.
+    const t=tour.step/20;
+    window.scrollTo({top:tour.startScroll+(historyTourBottom()-tour.startScroll)*t,behavior:'instant'});
+    if(tour.step<20){tour.frame=requestAnimationFrame(down);return;}
+    // Arrencada de pista aleatòria del PLAYER; si el navegador bloqueja autoplay,
+    // l'usuari pot utilitzar el miniplayer existent.
+    const tracks=getTracks();
+    if(tracks.length)loadTrack(Math.floor(Math.random()*tracks.length),true);
+    tour.startTime=performance.now();
+    const up=now=>{
+      if(historyTour!==tour||tour.cancelled)return;
+      const elapsed=Math.min(1,(now-tour.startTime)/HISTORY_TOUR_DURATION);
+      // Lineal al llarg del recorregut i desacceleració suau al tram final.
+      const u=(elapsed-.90)/.10;
+      const progress=elapsed<.90 ? elapsed : .90+.10*(u+u*u-u*u*u);
+      const view=$('#view-history');
+      if(!view?.classList.contains('active')){stopHistoryTour();return;}
+      const top=view.getBoundingClientRect().top+window.scrollY;
+      const end=Math.max(0,top-((document.querySelector('.topbar')?.offsetHeight||0)+8));
+      const bottom=historyTourBottom();
+      window.scrollTo({top:Math.max(end,bottom*(1-progress)),behavior:'instant'});
+      if(elapsed<1){tour.frame=requestAnimationFrame(up);return;}
+      window.scrollTo({top:end,behavior:'instant'});
+      stopHistoryTour();
+    };
+    tour.frame=requestAnimationFrame(up);
+  };
+  tour.frame=requestAnimationFrame(down);
 }
 function renderHistory(){
   const host=$('#historyTimeline');
@@ -1399,6 +1460,7 @@ function renderHemeroteca(){
   };
 }
 function openHemeroteca(){
+  stopHistoryTour();
   const main=$('#historyMainContent'), panel=$('#hemerotecaPanel'); if(!main||!panel)return;
   main.hidden=true; panel.hidden=false; state.hemerotecaType='cartells'; renderHemeroteca(); window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1416,12 +1478,31 @@ let homeHeroTimer=null;
 let homeHeroCurrentSrc='';
 let homeHeroActiveLayer=0;
 let homeHeroTransitionToken=0;
+// v1.173 · Els quatre dígits inicials del nom determinen l'any del concert.
+function musicArchiveYear(archive){
+  const match=String(archive?.name||'').trim().match(/^(\d{4})(?=\s*[-–—]|\s|$)/);
+  return match?Number(match[1]):-Infinity;
+}
+function sortHistoricMusicArchives(items,settings){
+  const list=[...items];
+  if(settings?.historicMusicArchiveSortMode==='manual'){
+    const order=Array.isArray(settings.historicMusicArchiveOrder)?settings.historicMusicArchiveOrder.map(String):[];
+    const positions=new Map(order.map((id,index)=>[id,index]));
+    return list.sort((a,b)=>{
+      const ia=positions.has(String(a.id))?positions.get(String(a.id)):Infinity;
+      const ib=positions.has(String(b.id))?positions.get(String(b.id)):Infinity;
+      return ia-ib || musicArchiveYear(b)-musicArchiveYear(a) || String(a.name||'').localeCompare(String(b.name||''),'ca');
+    });
+  }
+  return list.sort((a,b)=>musicArchiveYear(b)-musicArchiveYear(a)||String(a.name||'').localeCompare(String(b.name||''),'ca'));
+}
+
 // v1.165 · Arxiu de mostres publicades: referències a playlists existents de DEMOS.
 function visibleMusicArchives(){
   const settings=state.content?.settings||{};
   const ids=new Set(Array.isArray(settings.historicMusicArchiveIds)?settings.historicMusicArchiveIds.map(String):[]);
   const archives=Array.isArray(settings.demoArchives)?settings.demoArchives:[];
-  return archives.filter(item=>ids.has(String(item.id)));
+  return sortHistoricMusicArchives(archives.filter(item=>ids.has(String(item.id))),settings);
 }
 function renderMusicArchive(){
   const host=$('#musicArchiveList');if(!host)return;
@@ -1441,6 +1522,7 @@ function renderMusicArchive(){
   }).join(''):'<div class="hemeroteca-empty panel">Encara no hi ha mostres publicades.</div>';
 }
 function openMusicArchive(){
+  stopHistoryTour();
   const main=$('#historyMainContent'), hemeroteca=$('#hemerotecaPanel'), panel=$('#musicArchivePanel');
   if(!main||!panel)return;
   main.hidden=true;if(hemeroteca)hemeroteca.hidden=true;panel.hidden=false;
@@ -3130,6 +3212,7 @@ async function init(){
   updateHeader('home');
   renderCalendar();
   renderHistory();
+  $('#historyTourBtn')?.addEventListener('click',beginHistoryTour);
   renderHemeroteca();
   renderMusicArchive();
   renderGames();
