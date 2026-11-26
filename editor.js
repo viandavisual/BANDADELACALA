@@ -3296,38 +3296,101 @@ function bindMusicArchiveEditor(){
 }
 
 // v1.170 · Creació de repertoris històrics manuals, sense tocar DEMOS actuals.
+// v1.171 · Editor de playlist manual amb files individuals i ordre explícit.
 function bindMusicArchiveManual(){
-  const form=$('#musicArchiveManualForm');if(!form)return;
+  const form=$('#musicArchiveManualForm');
+  const rows=$('#musicArchiveManualRows');
+  const add=$('#musicArchiveAddRow');
+  if(!form||!rows||!add)return;
+  const rowMarkup=()=>`<div class="music-manual-row" draggable="true">
+    <span class="music-manual-drag" title="Arrossegar per ordenar" aria-label="Arrossegar per ordenar">⠿</span>
+    <label class="music-manual-title">CANÇÓ <input class="music-manual-song" type="text" maxlength="240" placeholder="Nom de l'obra" /></label>
+    <label class="music-manual-url">YOUTUBE <input class="music-manual-link" type="url" placeholder="https://www.youtube.com/watch?v=..." /></label>
+    <div class="music-manual-controls">
+      <button type="button" data-manual-move="up" title="Pujar cançó" aria-label="Pujar cançó">↑</button>
+      <button type="button" data-manual-move="down" title="Baixar cançó" aria-label="Baixar cançó">↓</button>
+      <button type="button" data-manual-remove title="Eliminar cançó" aria-label="Eliminar cançó">×</button>
+    </div>
+  </div>`;
+  function refreshRowLabels(){
+    [...rows.children].forEach((row,i)=>{
+      row.querySelector('.music-manual-title').firstChild.textContent=`CANÇÓ ${i+1} `;
+      row.querySelector('[data-manual-move="up"]').disabled=i===0;
+      row.querySelector('[data-manual-move="down"]').disabled=i===rows.children.length-1;
+    });
+  }
+  function addRow(title='',url=''){
+    rows.insertAdjacentHTML('beforeend',rowMarkup());
+    const row=rows.lastElementChild;
+    row.querySelector('.music-manual-song').value=title;
+    row.querySelector('.music-manual-link').value=url;
+    refreshRowLabels();
+    return row;
+  }
+  add.addEventListener('click',()=>{const row=addRow();row.querySelector('.music-manual-song').focus();});
+  rows.addEventListener('click',event=>{
+    const btn=event.target.closest('button');if(!btn)return;
+    const row=btn.closest('.music-manual-row');if(!row)return;
+    if(btn.hasAttribute('data-manual-remove')){
+      if(rows.children.length>1)row.remove();
+      else {row.querySelector('.music-manual-song').value='';row.querySelector('.music-manual-link').value='';}
+    }else{
+      const direction=btn.dataset.manualMove;
+      if(direction==='up'&&row.previousElementSibling)rows.insertBefore(row,row.previousElementSibling);
+      if(direction==='down'&&row.nextElementSibling)rows.insertBefore(row.nextElementSibling,row);
+    }
+    refreshRowLabels();
+  });
+  let dragRow=null;
+  rows.addEventListener('dragstart',event=>{
+    const handle=event.target.closest('.music-manual-drag');
+    const row=event.target.closest('.music-manual-row');
+    // Inputs remain selectable; dragging is enabled only when grab handle was pressed.
+    if(!row||!row.dataset.allowDrag){event.preventDefault();return;}
+    dragRow=row;row.classList.add('dragging');
+    if(event.dataTransfer){event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','music-manual-row');}
+  });
+  rows.addEventListener('pointerdown',event=>{
+    const row=event.target.closest('.music-manual-row');if(row&&event.target.closest('.music-manual-drag'))row.dataset.allowDrag='1';
+  });
+  rows.addEventListener('pointerup',()=>rows.querySelectorAll('.music-manual-row').forEach(row=>delete row.dataset.allowDrag));
+  rows.addEventListener('dragover',event=>{
+    if(!dragRow)return;
+    event.preventDefault();
+    const target=event.target.closest('.music-manual-row');
+    if(!target||target===dragRow)return;
+    const below=event.clientY>target.getBoundingClientRect().top+target.getBoundingClientRect().height/2;
+    rows.insertBefore(dragRow,below?target.nextSibling:target);
+  });
+  function stopDrag(){if(dragRow)dragRow.classList.remove('dragging');dragRow=null;rows.querySelectorAll('.music-manual-row').forEach(row=>delete row.dataset.allowDrag);refreshRowLabels();}
+  rows.addEventListener('drop',event=>{event.preventDefault();stopDrag();});
+  rows.addEventListener('dragend',stopDrag);
+  form.addEventListener('reset',()=>setTimeout(()=>{rows.replaceChildren();addRow();$('#musicArchiveManualStatus').textContent='';},0));
   form.addEventListener('submit',event=>{
     event.preventDefault();
     if(!editorCanWrite){showToast('Només ADMIN i GESTOR poden crear playlists');return;}
     const name=String($('#musicArchiveManualName')?.value||'').trim();
-    const raw=String($('#musicArchiveManualItems')?.value||'').replace(/\r\n?/g,'\n');
     if(!name){showToast('Indica el nom del concert');return;}
     const demos=[];
-    for(const [i,line] of raw.split('\n').entries()){
-      const clean=line.trim();if(!clean)continue;
-      // El separador | permet títols amb espais, signes i URLs opcionals.
-      const bar=clean.indexOf('|');
-      const title=(bar>=0?clean.slice(0,bar):clean).trim();
-      const url=(bar>=0?clean.slice(bar+1):'').trim();
-      if(!title){showToast(`Falta el títol de l'obra a la línia ${i+1}`);return;}
-      if(url && !safeWebUrl(url)){showToast(`URL no vàlida a la línia ${i+1}`);return;}
+    for(const [i,row] of [...rows.children].entries()){
+      const title=row.querySelector('.music-manual-song').value.trim();
+      const url=row.querySelector('.music-manual-link').value.trim();
+      if(!title && !url)continue;
+      if(!title){showToast(`Falta el títol de la cançó ${i+1}`);row.querySelector('.music-manual-song').focus();return;}
+      if(url && !safeWebUrl(url)){showToast(`URL no vàlida a la cançó ${i+1}`);row.querySelector('.music-manual-link').focus();return;}
       demos.push({title,url,videoId:url?(youtubeVideoId(url)||''):''});
     }
-    if(!demos.length){showToast('Introdueix almenys una obra');return;}
+    if(!demos.length){showToast('Introdueix almenys una cançó');return;}
     if(!confirm(`Vols guardar «${name}» amb ${demos.length} ${demos.length===1?'obra':'obres'}? La llista quedarà disponible per seleccionar-la a MÚSICA INTERPRETADA.`))return;
     content.settings=content.settings||{};
     const prev=Array.isArray(content.settings.demoArchives)?content.settings.demoArchives:[];
-    content.settings.demoArchives=[{
-      id:BandaStore.uid('concert'),name,createdAt:new Date().toISOString(),
-      manual:true,demos
-    },...prev];
+    content.settings.demoArchives=[{id:BandaStore.uid('concert'),name,createdAt:new Date().toISOString(),manual:true,demos},...prev];
     if(save(content,'Playlist manual desada')){
       form.reset();
       const msg=$('#musicArchiveManualStatus');if(msg)msg.textContent='Playlist guardada. Marca-la a la llista superior i prem DESAR SELECCIÓ per publicar-la a l’APP.';
     }
   });
+  addRow();
 }
 
 function renderAll(){ renderDashboard(); renderHomeEditor(); renderEvents(); renderEventDresscodeOptions($('#eventDresscode')?.value||''); renderDresscodes(); renderTracks(); renderDemos(); renderPassacarrersEditor(); renderAudioLibrary(); renderHistoric(); renderHemerotecaEditor(); renderMusicArchiveEditor(); renderArchiveReview(); renderMinigames(); renderSystem(); renderUsers(); renderPushReminderSettings(); }

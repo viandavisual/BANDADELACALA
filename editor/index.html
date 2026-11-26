@@ -364,10 +364,10 @@
           <p class="helper-copy">Per a concerts antics amb programa de mà. Introdueix les obres en l'ordre original. Els enllaços de YouTube són opcionals; les obres sense vídeo també apareixeran a l'APP com a informació.</p>
           <form id="musicArchiveManualForm">
             <label>Nom del concert / llista <input type="text" id="musicArchiveManualName" maxlength="160" required placeholder="Ex.: Concert de Santa Cecília 1998" /></label>
-            <label>Repertori (una obra per línia)
-              <textarea id="musicArchiveManualItems" rows="9" required spellcheck="false" placeholder="Amparito Roca&#10;El Bequetero | https://www.youtube.com/watch?v=XXXXXXXXXXX&#10;Pepe el fester"></textarea>
-            </label>
-            <p class="helper-copy">Format: <strong>Nom de l'obra</strong> o <strong>Nom de l'obra | URL de YouTube</strong>. Pots desar obres sense vídeo.</p>
+            <div class="music-manual-head"><strong>CANÇONS DEL CONCERT</strong><span class="helper-copy">Nom i enllaç de YouTube (opcional) per cada cançó</span></div>
+            <div id="musicArchiveManualRows" class="music-manual-rows" aria-label="Cançons de la playlist"></div>
+            <button type="button" id="musicArchiveAddRow" class="secondary-btn music-manual-add">＋ AFEGIR CANÇÓ</button>
+            <p class="helper-copy">Ordena les cançons amb les fletxes ↑ ↓ o arrossegant la tira pel control ⠿. Les obres sense vídeo també es poden guardar.</p>
             <div class="form-actions"><button class="primary-btn" type="submit">DESAR PLAYLIST MANUAL</button><button class="secondary-btn" type="reset">NETEJAR</button></div>
             <p id="musicArchiveManualStatus" class="helper-copy" aria-live="polite"></p>
           </form>

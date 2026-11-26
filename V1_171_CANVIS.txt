@@ -1,0 +1,12 @@
+BANDA DE LA CALA v1.171 — PATCH des de v1.170
+
+1. HISTÒRIC desktop: tira de miniatures amb scroll natiu sense interceptar el ratolí;
+   scrollbar 22 px d'altura, amb thumb de contrast alt; controls ‹ › addicionals
+   per navegar quan hi ha miniatures ocultes; compatible amb roda i teclat.
+2. EDITOR / HISTÒRIC / MÚSICA INTERPRETADA: la creació manual de playlists
+   substitueix el textarea per files de cançons independents, cadascuna amb
+   nom de l'obra i URL opcional de YouTube. Files il·limitades, ordenables
+   amb fletxes o arrossegament, i eliminables. L'ordre es desa dins de demos.
+
+No es modifica cap playlist existent, compte, dades personals, HEMEROTECA ni minijocs.
+No cal migració SQL.

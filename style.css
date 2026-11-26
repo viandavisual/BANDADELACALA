@@ -3886,3 +3886,34 @@ html,body{max-width:100%;overflow-x:clip}
   .history-media-showcase .history-media-strip::-webkit-scrollbar-thumb{background:#9b9db8;border:2px solid #f6f4ef;border-radius:10px}
   .history-media-showcase .history-image-thumb{flex-shrink:0!important;scroll-snap-align:none!important}
 }
+
+
+/* v1.171 · HISTÒRIC desktop: scroll natiu real, scrollbar gran i fletxes auxiliars.
+   Sense interceptar pointerdown/pointermove: deixa arrossegar el thumb del navegador. */
+.history-media-scroll-area{min-width:0;max-width:100%;width:100%;overflow:hidden}
+.history-strip-actions{display:none}
+@media(min-width:781px){
+  .history-media-showcase .history-media-scroll-area>.history-media-strip{
+    display:flex!important;flex-wrap:nowrap!important;align-items:flex-start!important;
+    gap:7px!important;width:100%!important;max-width:100%!important;min-width:0!important;
+    overflow-x:scroll!important;overflow-y:hidden!important;
+    scroll-snap-type:none!important;scroll-behavior:auto!important;
+    scrollbar-width:auto!important;scrollbar-color:#545a90 #d5d8e9!important;
+    touch-action:auto!important;cursor:auto!important;
+    padding:7px 7px 8px!important;box-sizing:border-box!important;
+  }
+  .history-media-showcase .history-media-scroll-area>.history-media-strip::-webkit-scrollbar{height:22px!important;display:block!important;background:#d5d8e9}
+  .history-media-showcase .history-media-scroll-area>.history-media-strip::-webkit-scrollbar-track{background:#d5d8e9;border-radius:15px}
+  .history-media-showcase .history-media-scroll-area>.history-media-strip::-webkit-scrollbar-thumb{min-width:45px;background:#565d99;border:4px solid #d5d8e9;border-radius:15px}
+  .history-media-showcase .history-media-scroll-area>.history-media-strip::-webkit-scrollbar-thumb:hover{background:#323b7c}
+  .history-media-showcase .history-media-scroll-area>.history-media-strip>.history-image-thumb{flex:none!important;flex-shrink:0!important;scroll-snap-align:none!important}
+  .history-strip-actions{display:none;gap:9px;justify-content:flex-end;padding:5px 9px 7px;background:#f6f4ef}
+  .history-media-scroll-area.has-horizontal-overflow .history-strip-actions{display:flex}
+  .history-strip-actions button{width:42px;height:32px;border-radius:8px;border:1px solid #b8bfdc;background:#fff;color:#343b83;font-size:25px;font-weight:800;line-height:1;cursor:pointer}
+  .history-strip-actions button:hover:not(:disabled){background:#e7e9f8}
+  .history-strip-actions button:disabled{opacity:.35;cursor:default}
+}
+@media(max-width:780px){
+  .history-media-scroll-area{overflow:visible}
+  .history-strip-actions{display:none!important}
+}

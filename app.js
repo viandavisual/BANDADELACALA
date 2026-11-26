@@ -846,7 +846,7 @@ function historyMediaMarkup(periodId){
       const count=images.length>1?`<span class="history-photo-count">${images.length} FOTOS</span>`:'';
       const hero=mediaMarkup(item,featured,0,'history-image-hero',`Ampliar imatge destacada de ${item.year}`,count);
       const rest=viewerSources.slice(1);
-      const strip=rest.length?`<div class="history-media-strip" aria-label="Més fotografies">${rest.map((src,index)=>mediaMarkup(item,src,index+1,'history-image-thumb',`Ampliar fotografia ${index+2} de ${item.year}`)).join('')}</div>`:'';
+      const strip=rest.length?`<div class="history-media-scroll-area"><div class="history-media-strip" aria-label="Més fotografies">${rest.map((src,index)=>mediaMarkup(item,src,index+1,'history-image-thumb',`Ampliar fotografia ${index+2} de ${item.year}`)).join('')}</div><div class="history-strip-actions" aria-label="Desplaçar miniatures"><button type="button" data-strip-scroll="previous" aria-label="Miniatures anteriors">‹</button><button type="button" data-strip-scroll="next" aria-label="Miniatures següents">›</button></div></div>`:'';
       gallery=`<div class="history-media-showcase ${rest.length?'':'single'}">${hero}${strip}</div>`;
     }
     return `<article class="history-item ${side}"><div class="history-node" aria-hidden="true"></div><div class="history-card">${gallery}<div class="history-card-copy"><div class="history-moment-meta"><span class="history-year">${esc(item.year)}</span>${images.length?`<span class="history-entry-photo-count">${images.length} ${images.length===1?'FOTO':'FOTOS'}</span>`:''}</div>${title}${desc}${source?`<p class="history-photo-source">FONT: ${esc(source)}</p>`:""}</div></div></article>`;
@@ -880,54 +880,47 @@ function bindHistoryImagesWithin(root=document){
 // v1.170 · Desplaçament fiable de miniatures en desktop: ratolí, roda,
 // trackpad, barra de scroll nativa i teclat; no modifica la galeria mobile.
 function bindHistoryThumbnailStrips(root=document){
-  root.querySelectorAll?.('.history-media-strip').forEach(strip=>{
-    if(strip.dataset.scrollBound==='1')return;
+  root.querySelectorAll?.('.history-media-scroll-area').forEach(area=>{
+    const strip=area.querySelector('.history-media-strip');
+    if(!strip || strip.dataset.scrollBound==='1')return;
     strip.dataset.scrollBound='1';
     strip.tabIndex=0;
     strip.setAttribute('role','region');
-    strip.setAttribute('aria-label','Miniatures. Desplaça horitzontalment per veure totes les fotografies');
-    let drag=null,suppressClick=false;
+    strip.setAttribute('aria-label','Miniatures: desplaçament horitzontal');
+    const previous=area.querySelector('[data-strip-scroll="previous"]');
+    const next=area.querySelector('[data-strip-scroll="next"]');
+    function update(){
+      const mobile=window.matchMedia('(max-width:780px)').matches;
+      const max=Math.max(0,strip.scrollWidth-strip.clientWidth);
+      const visible=!mobile && max>2;
+      if(previous)previous.disabled=!visible || strip.scrollLeft<2;
+      if(next)next.disabled=!visible || strip.scrollLeft>=max-2;
+      area.classList.toggle('has-horizontal-overflow',visible);
+    }
+    previous?.addEventListener('click',()=>strip.scrollBy({left:-Math.max(160,strip.clientWidth*.75),behavior:'smooth'}));
+    next?.addEventListener('click',()=>strip.scrollBy({left:Math.max(160,strip.clientWidth*.75),behavior:'smooth'}));
     strip.addEventListener('wheel',event=>{
-      if(window.matchMedia('(max-width:780px)').matches || event.ctrlKey || event.metaKey)return;
-      if(strip.scrollWidth<=strip.clientWidth+2)return;
-      // Una roda vertical sobre la tira avança les fotos; el trackpad també conserva deltaX.
-      const delta=Math.abs(event.deltaX)>=Math.abs(event.deltaY)?event.deltaX:event.deltaY;
-      if(!delta)return;
-      const before=strip.scrollLeft;
-      strip.scrollLeft+=delta;
-      if(Math.abs(strip.scrollLeft-before)>.1)event.preventDefault();
-    },{passive:false});
-    strip.addEventListener('pointerdown',event=>{
-      if(window.matchMedia('(max-width:780px)').matches||event.pointerType==='touch'||event.button!==0)return;
-      drag={x:event.clientX,scrollLeft:strip.scrollLeft,moved:false};
-      suppressClick=false;
-    });
-    strip.addEventListener('pointermove',event=>{
-      if(!drag||event.buttons!==1)return;
-      const dx=event.clientX-drag.x;
-      if(Math.abs(dx)>5){
-        drag.moved=true;
-        strip.scrollLeft=drag.scrollLeft-dx;
+      if(window.matchMedia('(max-width:780px)').matches||event.ctrlKey||event.metaKey)return;
+      const max=Math.max(0,strip.scrollWidth-strip.clientWidth);
+      if(max<2)return;
+      // Roda vertical i trackpad: scroll a la mateixa tira, sense tocar el scrollbar natiu.
+      const delta=Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY;
+      const target=Math.min(max,Math.max(0,strip.scrollLeft+delta));
+      if(Math.abs(target-strip.scrollLeft)>.5){
+        strip.scrollLeft=target;
         event.preventDefault();
       }
-    });
-    const end=()=>{
-      if(!drag)return;
-      if(drag.moved){suppressClick=true;setTimeout(()=>{suppressClick=false;},0);}
-      drag=null;
-    };
-    strip.addEventListener('pointerup',end);
-    strip.addEventListener('pointercancel',end);
-    strip.addEventListener('pointerleave',end);
-    strip.addEventListener('click',event=>{
-      if(!suppressClick)return;
-      event.preventDefault();event.stopPropagation();suppressClick=false;
-    },true);
+    },{passive:false});
     strip.addEventListener('keydown',event=>{
       if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return;
-      strip.scrollBy({left:event.key==='ArrowRight'?140:-140,behavior:'smooth'});
+      strip.scrollBy({left:event.key==='ArrowRight'?160:-160,behavior:'smooth'});
       event.preventDefault();
     });
+    strip.addEventListener('scroll',update,{passive:true});
+    const observer=typeof ResizeObserver!=='undefined'?new ResizeObserver(update):null;
+    if(observer){observer.observe(strip);area.querySelectorAll('img').forEach(img=>observer.observe(img));}
+    area.querySelectorAll('img').forEach(img=>img.addEventListener('load',update,{once:true}));
+    requestAnimationFrame(update);
   });
 }
 
