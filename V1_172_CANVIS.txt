@@ -1,0 +1,7 @@
+BANDA DE LA CALA · v1.172 (PATCH des de v1.171)
+
+1. APP / HISTÒRIC: la capçalera del període actual mostra ARA tant a desktop com a mobile.
+2. Pere Bono: període actualitzat de 2000 a 2000 - 2001.
+3. EDITOR / HISTÒRIC: el 2001 admet l’assignació al període Pere Bono o Àlex Castells (II); es manté la selecció manual quan hi ha coincidència de dates.
+
+No s’han modificat fotografies existents ni els seus identificadors de període. Sense canvis a Supabase ni als comptes ni als punts dels minijocs.

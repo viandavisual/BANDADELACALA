@@ -1008,10 +1008,10 @@ function renderHistory(){
     const initialMedia=collapsed?'':historyMediaMarkup(period.id);
     const isCurrent=period.end==null || /actualitat/i.test(period.years||'');
     const startLabel=period.start ?? String(period.years||'').split(/\s*[-–]\s*/)[0] ?? '';
-    const endLabel=period.end ?? 'ACTUALITAT';
+    const endLabel=period.end ?? 'ARA';
     const sameYear=period.end!=null && String(period.start)===String(period.end);
     const yearsLabel=sameYear ? String(startLabel) : `${startLabel}-${endLabel}`;
-    const mobileYearsLabel=sameYear ? String(startLabel) : `${startLabel}-${isCurrent?'ACT.':endLabel}`;
+    const mobileYearsLabel=sameYear ? String(startLabel) : `${startLabel}-${isCurrent?'ARA':endLabel}`;
     const nextPeriod=displayPeriods[displayIndex+1];
     const nextButton=nextPeriod?`<button class="history-next-period" type="button" data-next-period="${esc(nextPeriod.id)}"><span>SEGÜENT PERÍODE</span><strong>↓</strong></button>`:'';
     const photoCount=historyPeriodPhotoCount(period.id);

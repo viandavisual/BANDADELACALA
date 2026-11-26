@@ -5,7 +5,7 @@ window.BANDA_CONFIG = {
   subtitle: "L’Ametlla de Mar",
   logo: 'assets/brand/logo-banda-de-la-cala.png',
   appIcon: 'assets/brand/app-icon.png',
-  push: { vapidPublicKey: 'BN_TEgFRESxVvKnE4HOk1G84D9rtmJVvtsiMPtu1a1RzyMuTIQqZPTZz4twQlU_okwddnBjGjLMZ1SNl3wiiK6g' }, // v0.133: introduir només la clau VAPID PÚBLICA; mai la privada
+  push: { vapidPublicKey: '' }, // v0.133: introduir només la clau VAPID PÚBLICA; mai la privada
   introVideo: 'assets/intro.webm',
   introAudio: 'assets/AUDIO/introhimne.mp3',
   introFallbackMs: 6000,
@@ -26,7 +26,7 @@ window.BANDA_CONFIG = {
     { id:'1982-1986-cloquell', start:1982, end:1986, years:'1982 - 1986', director:'Adolfo Cloquell', color:'#2f6f78', textColor:'#ffffff' },
     { id:'1986-1990-ramis', start:1986, end:1990, years:'1986 - 1990', director:'José Ramis', color:'#8a5c36', textColor:'#ffffff' },
     { id:'1990-1999-castells-1', start:1990, end:1999, years:'1990 - 1999', director:'Àlex Castells (I)', color:'#393a86', textColor:'#ffffff' },
-    { id:'2000-bono', start:2000, end:2000, years:'2000', director:'Pere Bono', color:'#d4ac5f', textColor:'#24211f' },
+    { id:'2000-bono', start:2000, end:2001, years:'2000 - 2001', director:'Pere Bono', color:'#d4ac5f', textColor:'#24211f' },
     { id:'2001-2004-castells-2', start:2001, end:2004, years:'2001 - 2004', director:'Àlex Castells (II)', color:'#9b4f62', textColor:'#ffffff' },
     { id:'2005-2011-chorda', start:2005, end:2011, years:'2005 - 2011', director:'Rubén Chordá', color:'#55734f', textColor:'#ffffff' },
     { id:'2012-current-cabello', start:2012, end:null, years:'2012 - Actualitat', director:'Emilio Cabello', color:'#2e5f9a', textColor:'#ffffff' }
