@@ -983,14 +983,50 @@ function toggleHistoryPeriod(periodId){
   const mobile=!!window.matchMedia?.('(max-width: 780px)').matches;
   setHistoryPeriodOpen(periodId,opening,{closeOthers:opening&&mobile});
 }
-// v1.173 · RECORREGUT HISTÒRIC: botó amb aturada voluntària, 20 frames de baixada
-// i retorn pausat en tres minuts. No afecta les dades ni els períodes desats.
+// v1.176 · RECORREGUT HISTÒRIC: cortina blanca de compte enrere (3 s + 1 s fade).
+// La baixada de 20 frames succeeix sota la cortina, i la pujada de 3 minuts
+// comença exclusivament després que la cortina desaparegui del tot.
 const HISTORY_TOUR_DURATION=180000;
+const HISTORY_TOUR_INTRO_MS=3000;
+const HISTORY_TOUR_FADE_MS=1000;
 let historyTour=null;
+function makeHistoryTourIntro(){
+  document.getElementById('historyTourIntro')?.remove();
+  const overlay=document.createElement('div');
+  overlay.id='historyTourIntro';
+  overlay.className='history-tour-intro';
+  overlay.setAttribute('role','status');
+  overlay.setAttribute('aria-live','off');
+  const content=document.createElement('div');
+  content.className='history-tour-intro-content';
+  overlay.append(content);
+  const messages=[
+    ['history-tour-countdown','3'],
+    ['history-tour-heading','INICIANT MODE RECORREGUT'],
+    ['history-tour-lead','No toquis res i gaudeix del viatge!'],
+    ['history-tour-note','Per sortir del Mode Recorregut simplement clica a qualsevol altra secció.'],
+    ['history-tour-note','NOTA: La música seguirà en marxa al Player.']
+  ];
+  messages.forEach(([cls,value],index)=>{
+    const el=document.createElement('div');
+    el.className='history-tour-typewriter '+cls;
+    if(index===0)el.id='historyTourCountdown';
+    const span=document.createElement('span');
+    span.textContent=value;
+    span.style.setProperty('--tour-type-delay',`${index*1000/12}ms`); // 5 frames a 60 fps
+    el.append(span);
+    content.append(el);
+  });
+  document.body.append(overlay);
+  return overlay;
+}
 function stopHistoryTour(){
   if(!historyTour)return;
-  historyTour.cancelled=true;
-  if(historyTour.frame)cancelAnimationFrame(historyTour.frame);
+  const tour=historyTour;
+  tour.cancelled=true;
+  if(tour.frame)cancelAnimationFrame(tour.frame);
+  (tour.timers||[]).forEach(clearTimeout);
+  tour.overlay?.remove();
   historyTour=null;
   const btn=$('#historyTourBtn');
   if(btn){btn.textContent='ACTIVAR EL MODE RECORREGUT';btn.setAttribute('aria-pressed','false');btn.classList.remove('is-running');}
@@ -1002,30 +1038,46 @@ function historyTourBottom(){
 function beginHistoryTour(){
   if(historyTour){stopHistoryTour();return;}
   const host=$('#historyTimeline');if(!host)return;
-  const periods=getHistoricPeriods();
+  const overlay=makeHistoryTourIntro(); // Blanc immediat abans de desplegar períodes.
+  const tour={cancelled:false,frame:0,step:0,startScroll:window.scrollY,startTime:0,overlay,timers:[]};
+  historyTour=tour;
+  const schedule=(callback,delay)=>tour.timers.push(setTimeout(()=>{
+    if(historyTour===tour&&!tour.cancelled)callback();
+  },delay));
+  const countdown=overlay.querySelector('#historyTourCountdown span');
+  // 3 → 2 → 1 → 0 en 3 segons. Els textos s'escriuen en 15 frames.
+  [2,1,0].forEach((n,i)=>schedule(()=>{
+    countdown.textContent=String(n);
+    countdown.classList.remove('history-tour-tick');
+    void countdown.offsetWidth;
+    countdown.classList.add('history-tour-tick');
+  },(i+1)*750));
+
   state.collapsedPeriods=new Set();
-  // Expandir per carregar totes les fotografies i l'alçada del recorregut.
   renderHistory();
   const btn=$('#historyTourBtn');
   if(btn){btn.textContent='ATURAR EL RECORREGUT';btn.setAttribute('aria-pressed','true');btn.classList.add('is-running');}
-  const tour={cancelled:false,frame:0,step:0,startScroll:window.scrollY,startTime:0};
-  historyTour=tour;
   const down=()=>{
     if(historyTour!==tour||tour.cancelled)return;
     tour.step++;
-    // Exactament 20 fotogrames per baixar fins al final.
     const t=tour.step/20;
     window.scrollTo({top:tour.startScroll+(historyTourBottom()-tour.startScroll)*t,behavior:'instant'});
     if(tour.step<20){tour.frame=requestAnimationFrame(down);return;}
-    // Arrencada de pista aleatòria del PLAYER; si el navegador bloqueja autoplay,
-    // l'usuari pot utilitzar el miniplayer existent.
+    // La música s'inicia en arribar a baix, mentre la cortina continua visible.
     const tracks=getTracks();
     if(tracks.length)loadTrack(Math.floor(Math.random()*tracks.length),true);
+  };
+  tour.frame=requestAnimationFrame(down);
+
+  // Després de 3 segons, blanc → transparent durant 1 segon.
+  schedule(()=>overlay.classList.add('is-fading'),HISTORY_TOUR_INTRO_MS);
+  schedule(()=>{
+    overlay.remove();
+    tour.overlay=null;
     tour.startTime=performance.now();
     const up=now=>{
       if(historyTour!==tour||tour.cancelled)return;
       const elapsed=Math.min(1,(now-tour.startTime)/HISTORY_TOUR_DURATION);
-      // Lineal al llarg del recorregut i desacceleració suau al tram final.
       const u=(elapsed-.90)/.10;
       const progress=elapsed<.90 ? elapsed : .90+.10*(u+u*u-u*u*u);
       const view=$('#view-history');
@@ -1039,8 +1091,7 @@ function beginHistoryTour(){
       stopHistoryTour();
     };
     tour.frame=requestAnimationFrame(up);
-  };
-  tour.frame=requestAnimationFrame(down);
+  },HISTORY_TOUR_INTRO_MS+HISTORY_TOUR_FADE_MS);
 }
 function renderHistory(){
   const host=$('#historyTimeline');

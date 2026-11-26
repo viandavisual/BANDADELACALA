@@ -3949,3 +3949,32 @@ html,body{max-width:100%;overflow-x:clip}
 .guest-media-copy-btn{min-height:38px;font-size:12px;padding:8px 14px;white-space:nowrap}
 .guest-media-contribution-card .user-auth-status{display:block;margin-top:6px}
 @media(max-width:780px){.guest-media-contribution-card{padding:20px}.guest-media-contribution-card > p{font-size:14px}.guest-media-contact-row{align-items:flex-start;flex-direction:column;gap:12px}}
+
+
+/* v1.176 · Cortina blanca inicial del MODE RECORREGUT */
+.history-tour-intro{
+  position:fixed;inset:0;inset:0 0 0 0;width:100vw;height:100dvh;
+  z-index:2147483600;background:#fff;color:#252a54;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:clamp(22px,6vw,72px);overflow:hidden;
+  opacity:1;pointer-events:none;
+}
+.history-tour-intro.is-fading{opacity:0;transition:opacity 1000ms ease-in-out}
+.history-tour-intro-content{width:min(980px,100%);display:flex;flex-direction:column;align-items:center;gap:clamp(13px,3vh,30px)}
+.history-tour-typewriter{max-width:100%;width:100%;font-family:inherit;text-wrap:balance;line-height:1.28}
+.history-tour-typewriter>span{display:inline-block;max-width:100%;overflow:hidden;
+  animation:historyTourType 250ms steps(15,end) var(--tour-type-delay,0ms) both;
+  vertical-align:middle}
+.history-tour-countdown{font-size:clamp(94px,21vw,220px);font-weight:900;line-height:1;min-height:1em;font-variant-numeric:tabular-nums}
+.history-tour-heading{font-size:clamp(22px,4.4vw,47px);font-weight:900;letter-spacing:.045em}
+.history-tour-lead{font-size:clamp(17px,2.4vw,26px);font-weight:500}
+.history-tour-note{font-size:clamp(12px,1.35vw,15px);font-weight:400;color:#5e6580}
+.history-tour-countdown span.history-tour-tick{animation:historyTourNumber 330ms cubic-bezier(.15,.7,.2,1) both}
+@keyframes historyTourType{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes historyTourNumber{from{opacity:.4;transform:scale(1.25)}to{opacity:1;transform:scale(1)}}
+@media(max-width:780px){
+ .history-tour-intro-content{gap:clamp(13px,2.4vh,24px)}
+ .history-tour-heading{font-size:clamp(20px,5vw,30px)}
+ .history-tour-lead{font-size:clamp(16px,4vw,21px)}
+ .history-tour-note{font-size:clamp(12px,3vw,15px)}
+}

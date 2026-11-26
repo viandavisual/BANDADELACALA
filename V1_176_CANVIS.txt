@@ -1,0 +1,14 @@
+BANDA DE LA CALA v1.176 — PATCH des de v1.175
+
+APP / HISTÒRIC / MODE RECORREGUT:
+- Cortina blanca completa, immediata en prémer el botó.
+- Compte enrere gran 3, 2, 1, 0 durant 3 segons.
+- 4 línies explicatives sota el compte enrere, amb revelat tipus typewriter de 15 frames a 60 fps (~250 ms) cadascuna i decalatge de 5 frames (~83 ms).
+- La baixada al final del timeline en 20 frames queda oculta sota la cortina; la pista aleatòria arrenca al final de la baixada.
+- La cortina roman 3 segons i desapareix amb un fade-out d'1 segon.
+- El desplaçament cap amunt de 3 minuts comença quan el fade-out acaba.
+- Interrompre el recorregut també elimina la cortina i cancel·la els temporitzadors.
+- L'àudio està sotmès a les polítiques d'autoplay del navegador.
+
+No es canvia Supabase, HEMEROTECA, comptes ni punts dels minijocs.
+No cal SQL. Aplicar sobre v1.175.
