@@ -362,7 +362,16 @@ const DICT={
     "No s’ha pogut activar el Service Worker": "Could not activate the Service Worker",
     "Mode local · la instal·lació PWA necessita HTTPS": "Local mode · PWA installation requires HTTPS",
     "Escriu una contrasenya nova. En desar-la continuaràs utilitzant el mateix compte i conservaràs el teu progrés.": "Enter a new password. Your account and progress will be preserved.",
-    "Has accedit des de l’enllaç de recuperació.": "You used the password recovery link."
+    "Has accedit des de l’enllaç de recuperació.": "You used the password recovery link.",
+    "APORTACIONS A L'HISTÒRIC": "CONTRIBUTIONS TO THE ARCHIVE",
+    "TENS MATERIAL DE LA BANDA?": "DO YOU HAVE BAND MATERIAL?",
+    "Si tens material de la banda, pots enviar-lo a aquest mail. Un cop ho validem, apareixerà a l'HISTÒRIC de l'aplicació. Moltes gràcies!": "If you have any material about the band, you can send it to this email address. Once we have reviewed and approved it, it will appear in the app's HISTORY section. Thank you very much!",
+    "COPIAR EMAIL": "COPY EMAIL",
+    "EMAIL COPIAT!": "EMAIL COPIED!",
+    "Selecciona i copia el correu que apareix a la caixa.": "Select and copy the email address shown in the box.",
+    "Toca l'adreça per obrir el correu, o copia-la si el dispositiu no obre cap aplicació.": "Tap the address to open your email app, or copy it if nothing opens.",
+    "Enviar un correu a viandavisual@gmail.com": "Send an email to viandavisual@gmail.com",
+    "Copiar el correu electrònic": "Copy the email address"
   },
   "nl": {
     "ARXIU DE MOSTRES": "ARCHIEF VAN FRAGMENTEN",
@@ -722,7 +731,16 @@ const DICT={
     "No s’ha pogut activar el Service Worker": "Service Worker activeren mislukt",
     "Mode local · la instal·lació PWA necessita HTTPS": "Lokale modus · PWA-installatie vereist HTTPS",
     "Escriu una contrasenya nova. En desar-la continuaràs utilitzant el mateix compte i conservaràs el teu progrés.": "Voer een nieuw wachtwoord in. Je behoudt je account en je voortgang wanneer je dit opslaat.",
-    "Has accedit des de l’enllaç de recuperació.": "Je hebt de herstelkoppeling geopend."
+    "Has accedit des de l’enllaç de recuperació.": "Je hebt de herstelkoppeling geopend.",
+    "APORTACIONS A L'HISTÒRIC": "BIJDRAGEN AAN HET ARCHIEF",
+    "TENS MATERIAL DE LA BANDA?": "HEB JE MATERIAAL VAN DE BAND?",
+    "Si tens material de la banda, pots enviar-lo a aquest mail. Un cop ho validem, apareixerà a l'HISTÒRIC de l'aplicació. Moltes gràcies!": "Heb je materiaal van de band? Stuur het dan naar dit e-mailadres. Zodra we het hebben gecontroleerd en goedgekeurd, verschijnt het in het HISTORISCH ARCHIEF van de app. Hartelijk dank!",
+    "COPIAR EMAIL": "E-MAIL KOPIËREN",
+    "EMAIL COPIAT!": "E-MAIL GEKOPIEERD!",
+    "Selecciona i copia el correu que apareix a la caixa.": "Selecteer en kopieer het e-mailadres in het vak.",
+    "Toca l'adreça per obrir el correu, o copia-la si el dispositiu no obre cap aplicació.": "Tik op het adres om je e-mailapp te openen, of kopieer het als er niets opent.",
+    "Enviar un correu a viandavisual@gmail.com": "Een e-mail sturen naar viandavisual@gmail.com",
+    "Copiar el correu electrònic": "Het e-mailadres kopiëren"
   }
 };
 const STORAGE='banda-app-language-v1';

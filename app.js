@@ -2546,10 +2546,38 @@ function bindDemoPlayer(){
   });
 }
 
+// v1.175 · Correu públic d'aportacions. Sense registre ni dades escrites a Supabase.
+const guestMediaCopyEmailBtn=$('#guestMediaCopyEmailBtn');
+guestMediaCopyEmailBtn?.addEventListener('click',async ()=>{
+  const email='viandavisual@gmail.com';
+  const status=$('#guestMediaCopyStatus');
+  let copied=false;
+  try{
+    if(navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(email);
+      copied=true;
+    }
+  }catch(_error){}
+  if(!copied){
+    const field=document.createElement('textarea');
+    field.value=email;
+    field.setAttribute('readonly','');
+    field.style.cssText='position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(field);
+    field.focus();field.select();
+    try{copied=document.execCommand('copy')}catch(_error){}
+    field.remove();
+  }
+  if(status)status.textContent=copied?'EMAIL COPIAT!':'Selecciona i copia el correu que apareix a la caixa.';
+  if(!copied)document.querySelector('.guest-media-email')?.focus();
+});
+
 function renderUserSection(){
   const login=$('#userLoginCard'), profile=$('#userProfileCard');
   if(!login||!profile) return;
   login.hidden=state.authenticated;
+  const guestMedia=$('#guestMediaContributionCard');
+  if(guestMedia) guestMedia.hidden=state.authenticated;
   profile.hidden=!state.authenticated;
   if(!state.authenticated) return;
   $('#userProfileName').textContent=currentUserDisplayName();

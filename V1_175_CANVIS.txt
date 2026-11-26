@@ -1,0 +1,19 @@
+BANDA DE LA CALA · v1.175
+Base: v1.174.
+
+APP > USER (sense sessió):
+- Nova caixa pública sota INICIA SESSIÓ, per convidar a enviar material històric.
+- Correu visible i clicable: viandavisual@gmail.com (mailto).
+- Botó COPIAR EMAIL amb alternativa per a navegadors que no admeten Clipboard API.
+- El bloc s'amaga automàticament en iniciar sessió i reapareix en tancar-la.
+- Textos traduïts a català, anglès i neerlandès.
+
+Seguretat / compatibilitat:
+- No modifica l'autenticació, els rols, els comptes ni les subscripcions PUSH.
+- No modifica l'EDITOR, Supabase ni les dades dels minijocs.
+- Caché de l'APP i l'EDITOR versionada com a v1.175.
+- El contingut rebut per email NO s'incorpora automàticament a HISTÒRIC:
+  continuarà requerint la validació manual indicada en el text.
+
+Instal·lació: aplicar el ZIP sobre el repositori v1.174 respectant les rutes.
+No cal SQL.
