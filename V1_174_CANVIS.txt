@@ -1,0 +1,19 @@
+BANDA DE LA CALA — v1.174
+
+OBJECTIU
+HISTÒRIC > ARXIU DE MOSTRES > MÚSICA INTERPRETADA ha de ser públic, també per a persones no registrades.
+
+CAUSA
+La vista pública app_public_content no incorporava settings.demoArchives ni historicMusicArchiveIds, encara que l’APP ja estava preparada per llegir-los. Els usuaris registrats carregaven app_content i els visitants una còpia pública incompleta.
+
+SOLUCIÓ
+SUPABASE_UPDATE_v1.174_PUBLIC_MUSIC_ARCHIVE.sql crea un filtre sobre la còpia pública que afegeix EXCLUSIVAMENT les playlists seleccionades a l’EDITOR/HISTÒRIC/MÚSICA INTERPRETADA. Inclou nom, ordre i títols/enllaços dels elements. No exposa les playlists privades no seleccionades ni els altres camps de DEMOS.
+
+PASSOS
+1. Copia i executa el SQL amb Supabase > SQL Editor.
+2. Aplica aquest PATCH sobre la v1.173 a GitHub, amb els fitxers a les seves rutes.
+3. Obre l’APP en una finestra d’incògnit, sense iniciar sessió, i entra a HISTÒRIC > MÚSICA INTERPRETADA.
+4. Comprova que s’obren les llistes, que les seves obres apareixen i que DEMOS dins USUARI continua reservat als músics.
+
+NOTES
+No cal canviar els continguts ni tornar a desar les playlists; l’SQL refresca la còpia pública actual. No modifica app_content, usuaris, configuracions personals ni punts.
